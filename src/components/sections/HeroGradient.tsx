@@ -169,7 +169,6 @@ export default function HeroGradient() {
               className="w-full max-w-md aspect-square rounded-3xl opacity-90"
               style={{
                 background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.12) 0%, transparent 70%)',
-                boxShadow: '0 0 120px rgba(255,255,255,0.08)',
               }}
             />
           </div>
