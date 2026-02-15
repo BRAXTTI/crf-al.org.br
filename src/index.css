@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+    --primary: 207 100% 25%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 100% 95%;
+    --secondary-foreground: 207 100% 25%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 200 100% 95%;
+    --accent-foreground: 207 100% 25%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 87%;
+    --input: 0 0% 87%;
+    --ring: 207 100% 25%;
+    --radius: 0.625rem;
+    
+    --crfal-blue: #004a80;
+    --crfal-blue-dark: #003b66;
+    --crfal-blue-light: #0077cc;
+    --crfal-blue-lighter: #e6f7ff;
+    --crfal-white: #ffffff;
+    --crfal-gray: #f5f5f5;
+    --crfal-gray-medium: #e0e0e0;
+    --crfal-gray-dark: #333333;
+    --crfal-text-gray: #666666;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  body {
+    @apply bg-white text-crfal-gray-dark antialiased;
+    font-family: 'Geist', sans-serif;
+    letter-spacing: -0.06em;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Geist', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.06em;
+    line-height: 1.15;
+  }
+}
+
+@layer components {
+  .container-crfal {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .btn-primary {
+    @apply bg-crfal-blue text-white px-6 py-3 rounded-lg font-medium 
+           transition-all duration-300 hover:bg-crfal-blue-dark 
+           hover:shadow-lg hover:-translate-y-0.5;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-crfal-blue text-crfal-blue px-6 py-3 rounded-lg font-medium 
+           transition-all duration-300 hover:bg-crfal-blue hover:text-white;
+  }
+  
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-crfal-blue mb-4;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-3 hover:shadow-card-hover;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-crfal-blue to-crfal-blue-light bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #004a80;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #003b66;
+}
+
+/* Hide scrollbar for horizontal scroll sections */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
