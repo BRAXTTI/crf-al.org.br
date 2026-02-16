@@ -135,6 +135,36 @@
 }
 
 @layer utilities {
+  @keyframes card-gradient-shift {
+    0% {
+      background-position: 0% 50%;
+      filter: saturate(1) brightness(1);
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: saturate(1.08) brightness(1.06);
+    }
+    100% {
+      background-position: 0% 50%;
+      filter: saturate(1) brightness(1);
+    }
+  }
+
+  @keyframes card-gradient-shift-dark {
+    0% {
+      background-position: 0% 42%;
+      filter: saturate(1.02) brightness(1);
+    }
+    50% {
+      background-position: 100% 58%;
+      filter: saturate(1.14) brightness(1.12);
+    }
+    100% {
+      background-position: 0% 42%;
+      filter: saturate(1.02) brightness(1);
+    }
+  }
+
   .animation-delay-100 {
     animation-delay: 100ms;
   }

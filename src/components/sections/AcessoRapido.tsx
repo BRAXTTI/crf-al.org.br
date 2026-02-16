@@ -24,7 +24,7 @@ const quickAccessItems: QuickAccessItem[] = [
     visualLight:
       'radial-gradient(140px 90px at 18% 86%, rgba(255,188,136,0.78), rgba(255,188,136,0) 65%), radial-gradient(180px 90px at 68% 42%, rgba(112,187,255,0.78), rgba(112,187,255,0) 70%), radial-gradient(120px 70px at 84% 18%, rgba(255,230,196,0.72), rgba(255,230,196,0) 70%), linear-gradient(135deg,#08193f 0%,#132f78 45%,#0a1440 100%)',
     visualDark:
-      'radial-gradient(150px 90px at 20% 84%, rgba(255,173,122,0.38), rgba(255,173,122,0) 70%), radial-gradient(180px 95px at 70% 40%, rgba(91,161,255,0.45), rgba(91,161,255,0) 72%), radial-gradient(120px 70px at 84% 18%, rgba(255,242,225,0.32), rgba(255,242,225,0) 70%), linear-gradient(135deg,#020617 0%,#0b1f52 46%,#030712 100%)',
+      'radial-gradient(150px 90px at 20% 84%, rgba(255,173,122,0.56), rgba(255,173,122,0) 70%), radial-gradient(180px 95px at 70% 40%, rgba(91,161,255,0.62), rgba(91,161,255,0) 72%), radial-gradient(120px 70px at 84% 18%, rgba(255,242,225,0.42), rgba(255,242,225,0) 70%), linear-gradient(135deg,#020617 0%,#0b1f52 46%,#030712 100%)',
     iconShell: 'bg-white/18 text-white ring-1 ring-white/55 shadow-sm dark:bg-slate-900/72 dark:text-sky-100 dark:ring-white/20',
   },
   {
@@ -37,7 +37,7 @@ const quickAccessItems: QuickAccessItem[] = [
     visualLight:
       'radial-gradient(145px 95px at 16% 82%, rgba(255,177,126,0.78), rgba(255,177,126,0) 67%), radial-gradient(185px 90px at 66% 44%, rgba(102,221,255,0.72), rgba(102,221,255,0) 72%), radial-gradient(120px 70px at 82% 20%, rgba(255,210,235,0.72), rgba(255,210,235,0) 72%), linear-gradient(135deg,#071b3f 0%,#17327b 44%,#11123f 100%)',
     visualDark:
-      'radial-gradient(150px 95px at 18% 84%, rgba(255,165,109,0.38), rgba(255,165,109,0) 70%), radial-gradient(190px 95px at 68% 42%, rgba(89,209,255,0.46), rgba(89,209,255,0) 72%), radial-gradient(120px 70px at 82% 20%, rgba(255,188,224,0.28), rgba(255,188,224,0) 72%), linear-gradient(135deg,#020617 0%,#0a255a 44%,#111133 100%)',
+      'radial-gradient(150px 95px at 18% 84%, rgba(255,165,109,0.56), rgba(255,165,109,0) 70%), radial-gradient(190px 95px at 68% 42%, rgba(89,209,255,0.62), rgba(89,209,255,0) 72%), radial-gradient(120px 70px at 82% 20%, rgba(255,188,224,0.38), rgba(255,188,224,0) 72%), linear-gradient(135deg,#020617 0%,#0a255a 44%,#111133 100%)',
     iconShell: 'bg-white/18 text-white ring-1 ring-white/55 shadow-sm dark:bg-slate-900/72 dark:text-cyan-100 dark:ring-white/20',
   },
   {
@@ -49,7 +49,7 @@ const quickAccessItems: QuickAccessItem[] = [
     visualLight:
       'radial-gradient(145px 95px at 18% 84%, rgba(255,178,132,0.78), rgba(255,178,132,0) 66%), radial-gradient(185px 90px at 69% 42%, rgba(123,180,255,0.76), rgba(123,180,255,0) 72%), radial-gradient(115px 66px at 84% 18%, rgba(255,208,238,0.72), rgba(255,208,238,0) 72%), linear-gradient(135deg,#081a43 0%,#14307c 44%,#121547 100%)',
     visualDark:
-      'radial-gradient(150px 95px at 20% 84%, rgba(255,168,115,0.38), rgba(255,168,115,0) 70%), radial-gradient(190px 95px at 70% 42%, rgba(106,168,255,0.46), rgba(106,168,255,0) 72%), radial-gradient(118px 66px at 84% 18%, rgba(255,184,226,0.28), rgba(255,184,226,0) 72%), linear-gradient(135deg,#030712 0%,#0b245d 44%,#15133b 100%)',
+      'radial-gradient(150px 95px at 20% 84%, rgba(255,168,115,0.56), rgba(255,168,115,0) 70%), radial-gradient(190px 95px at 70% 42%, rgba(106,168,255,0.62), rgba(106,168,255,0) 72%), radial-gradient(118px 66px at 84% 18%, rgba(255,184,226,0.38), rgba(255,184,226,0) 72%), linear-gradient(135deg,#030712 0%,#0b245d 44%,#15133b 100%)',
     iconShell: 'bg-white/18 text-white ring-1 ring-white/55 shadow-sm dark:bg-slate-900/72 dark:text-blue-100 dark:ring-white/20',
   },
   {
@@ -62,7 +62,7 @@ const quickAccessItems: QuickAccessItem[] = [
     visualLight:
       'radial-gradient(140px 90px at 18% 84%, rgba(255,176,132,0.78), rgba(255,176,132,0) 66%), radial-gradient(180px 90px at 67% 44%, rgba(121,168,255,0.76), rgba(121,168,255,0) 70%), radial-gradient(112px 66px at 84% 18%, rgba(255,223,198,0.72), rgba(255,223,198,0) 72%), linear-gradient(135deg,#081943 0%,#15307a 46%,#10153f 100%)',
     visualDark:
-      'radial-gradient(145px 90px at 19% 84%, rgba(255,164,112,0.36), rgba(255,164,112,0) 70%), radial-gradient(185px 92px at 69% 43%, rgba(110,163,255,0.45), rgba(110,163,255,0) 72%), radial-gradient(112px 66px at 84% 18%, rgba(255,226,196,0.28), rgba(255,226,196,0) 72%), linear-gradient(135deg,#020617 0%,#0b2459 46%,#0f142f 100%)',
+      'radial-gradient(145px 90px at 19% 84%, rgba(255,164,112,0.54), rgba(255,164,112,0) 70%), radial-gradient(185px 92px at 69% 43%, rgba(110,163,255,0.6), rgba(110,163,255,0) 72%), radial-gradient(112px 66px at 84% 18%, rgba(255,226,196,0.4), rgba(255,226,196,0) 72%), linear-gradient(135deg,#020617 0%,#0b2459 46%,#0f142f 100%)',
     iconShell: 'bg-white/18 text-white ring-1 ring-white/55 shadow-sm dark:bg-slate-900/72 dark:text-indigo-100 dark:ring-white/20',
   },
 ];
@@ -90,7 +90,7 @@ function QuickAccessCard({
       href={item.href}
       target={item.target}
       rel={isExternal ? 'noopener noreferrer' : undefined}
-      className={`group relative flex h-full flex-col rounded-xl border p-3.5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition-all duration-300 ${
+      className={`group relative flex h-full flex-col rounded-xl border p-4 sm:p-5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition-all duration-300 ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       } ${
         isActive
@@ -100,21 +100,29 @@ function QuickAccessCard({
       style={{
         transitionDelay: isVisible ? `${100 + index * 70}ms` : '0ms',
         background: isDark ? item.visualDark : item.visualLight,
+        backgroundSize: isDark ? '220% 220%' : '170% 170%',
+        animationName: isDark ? 'card-gradient-shift-dark' : 'card-gradient-shift',
+        animationDuration: isDark ? '13s' : '16s',
+        animationTimingFunction: 'ease-in-out',
+        animationIterationCount: 'infinite',
+        animationFillMode: 'both',
+        animationDelay: `-${index * 2.4}s`,
+        willChange: 'background-position, filter',
       }}
     >
-      <div className={`relative mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110 ${item.iconShell}`}>
-        <Icon className="h-5 w-5" />
+      <div className={`relative mb-3 inline-flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110 ${item.iconShell}`}>
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>
 
-      <h3 className="relative mb-1.5 text-[15px] font-bold leading-tight text-white transition-colors duration-300 sm:text-base">
+      <h3 className="relative mb-2 text-base font-bold leading-tight text-white transition-colors duration-300 sm:text-lg">
         {item.title}
       </h3>
-      <p className="relative mb-3.5 line-clamp-2 min-h-[40px] text-xs leading-relaxed text-white/85 sm:text-sm">
+      <p className="relative mb-4 line-clamp-3 min-h-[56px] text-sm leading-relaxed text-white/85 sm:text-[15px]">
         {item.description}
       </p>
 
       <div className="relative mt-auto flex justify-end">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-300 sm:text-sm ${
+        <span className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-all duration-300 ${
           isActive
             ? 'bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-900'
             : 'bg-slate-950 text-white group-hover:bg-slate-900 dark:bg-slate-100 dark:text-slate-900 dark:group-hover:bg-slate-50'
@@ -232,7 +240,7 @@ export default function AcessoRapido() {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {quickAccessItems.map((item, index) => (
-              <div key={item.id} className="w-[248px] flex-shrink-0 snap-center">
+              <div key={item.id} className="w-[286px] flex-shrink-0 snap-center">
                 <QuickAccessCard
                   item={item}
                   index={index}
