@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx skills add https://github.com/anthropics/skills --skill frontend-design)"
+      "Bash(npx skills add https://github.com/anthropics/skills --skill frontend-design)",
+      "Bash(npx tsc:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }
