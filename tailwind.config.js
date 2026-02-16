@@ -104,6 +104,10 @@ module.exports = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "pulse-border": {
+          "0%, 100%": { borderColor: "transparent" },
+          "50%": { borderColor: "rgba(0, 74, 128, 0.3)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -114,6 +118,7 @@ module.exports = {
         "fade-in": "fade-in 0.5s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "float": "float 3s ease-in-out infinite",
+        "pulse-border": "pulse-border 1.5s ease-in-out 2",
       },
     },
   },

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Home, GraduationCap, PlayCircle, UserCircle, ArrowRight, ExternalLink } from 'lucide-react';
 
 interface QuickAccessItem {
@@ -54,9 +54,14 @@ const quickAccessItems: QuickAccessItem[] = [
   },
 ];
 
+const CARD_WIDTH = 296; // 280px card + 16px gap
+
 export default function AcessoRapido() {
   const sectionRef = useRef<HTMLElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [showPulse, setShowPulse] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -74,6 +79,29 @@ export default function AcessoRapido() {
     }
 
     return () => observer.disconnect();
+  }, []);
+
+  // Trigger pulse-border animation after entry animation completes
+  useEffect(() => {
+    if (isVisible) {
+      const delay = 200 + quickAccessItems.length * 80 + 400;
+      const timer = setTimeout(() => setShowPulse(true), delay);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]);
+
+  // Stop pulse after animation completes (2 iterations × 1.5s = 3s)
+  useEffect(() => {
+    if (showPulse) {
+      const timer = setTimeout(() => setShowPulse(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showPulse]);
+
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const index = Math.round(scrollRef.current.scrollLeft / CARD_WIDTH);
+    setActiveIndex(Math.min(index, quickAccessItems.length - 1));
   }, []);
 
   return (
@@ -104,7 +132,12 @@ export default function AcessoRapido() {
 
         {/* Mobile: horizontal scroll / Desktop: grid */}
         <div className="sm:hidden -mx-4 px-4">
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {quickAccessItems.map((item, index) => {
               const Icon = item.icon;
               const isExternal = item.target === '_blank';
@@ -114,11 +147,11 @@ export default function AcessoRapido() {
                   href={item.href}
                   target={item.target}
                   rel={isExternal ? 'noopener noreferrer' : undefined}
-                className={`group flex-shrink-0 w-[280px] snap-start bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-neutral-200 dark:border-slate-700/70 hover:border-crfal-blue/30 shadow-sm active:scale-[0.98] transition-all duration-300 ${
+                  className={`group flex-shrink-0 w-[280px] snap-start bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-neutral-200 dark:border-slate-700/70 hover:border-crfal-blue/30 shadow-sm active:scale-[0.98] transition-all duration-300 ${
                     isVisible
                       ? 'opacity-100 translate-y-0'
                       : 'opacity-0 translate-y-8'
-                  }`}
+                  } ${showPulse ? 'animate-pulse-border' : ''}`}
                   style={{
                     transitionDelay: isVisible ? `${200 + index * 80}ms` : '0ms',
                   }}
@@ -148,10 +181,17 @@ export default function AcessoRapido() {
               );
             })}
           </div>
-          {/* Scroll hint dots */}
+          {/* Scroll indicator dots */}
           <div className="flex justify-center gap-1.5 mt-2">
-            {quickAccessItems.map((item) => (
-              <div key={item.id} className="w-1.5 h-1.5 rounded-full bg-neutral-300" />
+            {quickAccessItems.map((item, index) => (
+              <div
+                key={item.id}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  index === activeIndex
+                    ? 'w-3 bg-crfal-blue'
+                    : 'w-1.5 bg-neutral-300'
+                }`}
+              />
             ))}
           </div>
         </div>
@@ -171,7 +211,7 @@ export default function AcessoRapido() {
                   isVisible
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-8'
-                }`}
+                } ${showPulse ? 'animate-pulse-border' : ''}`}
                 style={{
                   transitionDelay: isVisible ? `${200 + index * 80}ms` : '0ms',
                 }}
