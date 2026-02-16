@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "npm run build && npm run verify:menu-migration",
+    "verify:menu-migration": "node scripts/verify-menu-migration.mjs",
+    "deploy:surge": "npm run build:prod && surge ./dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
