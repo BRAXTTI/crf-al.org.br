@@ -151,9 +151,14 @@ export default function Header() {
                   onMouseEnter={() => setActiveDropdown(item.label)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  {item.href.startsWith('/') ? (
-                    <Link
-                      to={item.href}
+                  {item.submenu ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveDropdown(
+                          activeDropdown === item.label ? null : item.label
+                        )
+                      }
                       className={`${navLinkBase} ${
                         isOverHero
                           ? activeDropdown === item.label
@@ -165,35 +170,33 @@ export default function Header() {
                       }`}
                     >
                       {item.label}
-                      {item.submenu && (
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform duration-200 ${
-                            activeDropdown === item.label ? 'rotate-180' : ''
-                          }`}
-                        />
-                      )}
+                      <ChevronDown
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          activeDropdown === item.label ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                  ) : item.href.startsWith('/') ? (
+                    <Link
+                      to={item.href}
+                      className={`${navLinkBase} ${
+                        isOverHero
+                          ? navLinkInactiveLight
+                          : navLinkInactiveSolid
+                      }`}
+                    >
+                      {item.label}
                     </Link>
                   ) : (
                     <a
                       href={item.href}
                       className={`${navLinkBase} ${
                         isOverHero
-                          ? activeDropdown === item.label
-                            ? navLinkActiveLight
-                            : navLinkInactiveLight
-                          : activeDropdown === item.label
-                            ? navLinkActiveSolid
-                            : navLinkInactiveSolid
+                          ? navLinkInactiveLight
+                          : navLinkInactiveSolid
                       }`}
                     >
                       {item.label}
-                      {item.submenu && (
-                        <ChevronDown
-                          className={`w-4 h-4 transition-transform duration-200 ${
-                            activeDropdown === item.label ? 'rotate-180' : ''
-                          }`}
-                        />
-                      )}
                     </a>
                   )}
 
