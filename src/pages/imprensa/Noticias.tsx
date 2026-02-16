@@ -182,7 +182,7 @@ export default function Noticias() {
   const restantes = filtered.slice(1);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
@@ -209,14 +209,14 @@ export default function Noticias() {
       <div className="container-crfal py-10 md:py-16">
         <div className="grid lg:grid-cols-12 gap-8">
           <main className="lg:col-span-8 order-1">
-            <div className="bg-white rounded-2xl border border-neutral-200 p-4 sm:p-5 mb-6">
+            <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-4 sm:p-5 mb-6">
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Buscar por título ou conteúdo da notícia"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-sm"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-neutral-200 dark:border-slate-700/70 bg-white dark:bg-slate-900/80 focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-sm"
                 />
               </div>
               <div className="flex gap-2 overflow-x-auto scrollbar-hide">
@@ -227,7 +227,7 @@ export default function Noticias() {
                     className={`px-3.5 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
                       activeTag === tag
                         ? 'bg-crfal-blue text-white'
-                        : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                        : 'bg-neutral-100 dark:bg-slate-800 text-neutral-700 dark:text-slate-300 hover:bg-neutral-200 dark:hover:bg-slate-700'
                     }`}
                   >
                     {tag}
@@ -237,13 +237,13 @@ export default function Noticias() {
             </div>
 
             {loading && (
-              <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-neutral-500">
+              <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-8 text-center text-neutral-500">
                 Carregando notícias...
               </div>
             )}
 
             {error && (
-              <div className="bg-white rounded-2xl border border-red-200 p-6 mb-6">
+              <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-red-200 dark:border-red-800/60 p-6 mb-6">
                 <p className="text-red-600 text-sm mb-4">{error}</p>
                 <button
                   onClick={() => fetchNews(1)}
@@ -255,13 +255,13 @@ export default function Noticias() {
             )}
 
             {!loading && !error && filtered.length === 0 && (
-              <div className="bg-white rounded-2xl border border-neutral-200 p-8 text-center text-neutral-500">
+              <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-8 text-center text-neutral-500">
                 Nenhuma notícia encontrada para os filtros atuais.
               </div>
             )}
 
             {!loading && !error && destaque && (
-              <article className="bg-white rounded-2xl border border-neutral-200 overflow-hidden mb-6">
+              <article className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden mb-6">
                 <Link to={`/imprensa/noticias/${destaque.id}`} className="block">
                   <div className="relative h-56 sm:h-72">
                     <img
@@ -300,7 +300,7 @@ export default function Noticias() {
                 {restantes.map((item) => (
                   <article
                     key={item.id}
-                    className="bg-white rounded-2xl border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow"
+                    className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden hover:shadow-md transition-shadow"
                   >
                     <Link to={`/imprensa/noticias/${item.id}`} className="block">
                       <div className="h-40">
@@ -349,7 +349,7 @@ export default function Noticias() {
 
           <aside className="lg:col-span-4 order-2">
             <div className="lg:sticky lg:top-24 space-y-4">
-              <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+              <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-5">
                 <span className="inline-flex px-3 py-1 rounded-full bg-crfal-blue-lighter text-crfal-blue text-xs font-semibold mb-3">
                   Serviços em Destaque
                 </span>
@@ -372,7 +372,7 @@ export default function Noticias() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block bg-white rounded-2xl border border-neutral-200 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
+                      className="block bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-xl bg-crfal-blue-lighter text-crfal-blue flex items-center justify-center shrink-0">
@@ -399,7 +399,7 @@ export default function Noticias() {
                   <Link
                     key={item.id}
                     to={item.href}
-                    className="block bg-white rounded-2xl border border-neutral-200 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
+                    className="block bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-crfal-blue-lighter text-crfal-blue flex items-center justify-center shrink-0">

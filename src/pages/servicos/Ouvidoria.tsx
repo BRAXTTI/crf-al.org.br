@@ -55,63 +55,63 @@ const tiposManifestacao = [
     label: 'Denúncia',
     description: 'Reporte de irregularidades ou condutas inadequadas',
     icon: AlertTriangle,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200',
+    color: 'text-red-600 dark:text-red-300',
+    bgColor: 'bg-red-50 dark:bg-red-950/40',
+    borderColor: 'border-red-200 dark:border-red-800/60',
   },
   {
     id: 'elogio',
     label: 'Elogio',
     description: 'Reconhecimento de atendimento ou serviço de qualidade',
     icon: ThumbsUp,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
+    color: 'text-green-600 dark:text-green-300',
+    bgColor: 'bg-green-50 dark:bg-green-950/40',
+    borderColor: 'border-green-200 dark:border-green-800/60',
   },
   {
     id: 'critica',
     label: 'Crítica',
     description: 'Apontamento de falhas ou pontos a melhorar',
     icon: AlertCircle,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200',
+    color: 'text-orange-600 dark:text-orange-300',
+    bgColor: 'bg-orange-50 dark:bg-orange-950/40',
+    borderColor: 'border-orange-200 dark:border-orange-800/60',
   },
   {
     id: 'sugestao',
     label: 'Sugestão',
     description: 'Ideias para melhoria dos serviços',
     icon: Lightbulb,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-200',
+    color: 'text-yellow-600 dark:text-yellow-300',
+    bgColor: 'bg-yellow-50 dark:bg-yellow-950/40',
+    borderColor: 'border-yellow-200 dark:border-yellow-800/60',
   },
   {
     id: 'reclamacao',
     label: 'Reclamação',
     description: 'Insatisfação com produto ou serviço',
     icon: MessageSquare,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
+    color: 'text-purple-600 dark:text-purple-300',
+    bgColor: 'bg-purple-50 dark:bg-purple-950/40',
+    borderColor: 'border-purple-200 dark:border-purple-800/60',
   },
   {
     id: 'solicitacao',
     label: 'Solicitação',
     description: 'Pedido de informação ou serviço',
     icon: FileText,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
+    color: 'text-blue-600 dark:text-blue-300',
+    bgColor: 'bg-blue-50 dark:bg-blue-950/40',
+    borderColor: 'border-blue-200 dark:border-blue-800/60',
   },
   {
     id: 'outros',
     label: 'Outros',
     description: 'Demais tipos de manifestação',
     icon: HelpCircle,
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-50',
-    borderColor: 'border-gray-200',
+    color: 'text-gray-600 dark:text-slate-300',
+    bgColor: 'bg-gray-50 dark:bg-slate-800/70',
+    borderColor: 'border-gray-200 dark:border-slate-700',
   },
 ] as const;
 
@@ -220,7 +220,7 @@ export default function Ouvidoria() {
   const tipoInfo = tiposManifestacao.find((t) => t.id === tipoSelecionado);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -258,7 +258,7 @@ export default function Ouvidoria() {
             <div className="space-y-6 lg:sticky lg:top-24">
               {/* Info Card */}
               <div
-                className={`bg-white rounded-2xl border border-neutral-200 p-6 transition-all duration-700 ${
+                className={`bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-6 transition-all duration-700 ${
                   isVisible
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-4'
@@ -292,7 +292,7 @@ export default function Ouvidoria() {
 
               {/* Tipos de Manifestação */}
               <div
-                className={`bg-white rounded-2xl border border-neutral-200 p-6 transition-all duration-700 ${
+                className={`bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-6 transition-all duration-700 ${
                   isVisible
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-4'
@@ -311,7 +311,7 @@ export default function Ouvidoria() {
                         className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
                           tipoSelecionado === tipo.id
                             ? `${tipo.bgColor} ${tipo.borderColor} border`
-                            : 'hover:bg-neutral-50'
+                            : 'hover:bg-neutral-50 dark:hover:bg-slate-800/70'
                         }`}
                       >
                         <div
@@ -335,7 +335,7 @@ export default function Ouvidoria() {
 
               {/* LGPD Card */}
               <div
-                className={`bg-gradient-to-br from-crfal-blue-lighter to-white rounded-2xl border border-crfal-blue/10 p-6 transition-all duration-700 ${
+                className={`bg-gradient-to-br from-crfal-blue-lighter to-white dark:from-slate-900 dark:to-slate-900/70 rounded-2xl border border-crfal-blue/10 p-6 transition-all duration-700 ${
                   isVisible
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-4'
@@ -365,7 +365,7 @@ export default function Ouvidoria() {
           {/* Right Content - Form */}
           <div className="lg:col-span-8">
             <div
-              className={`bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all duration-700 ${
+              className={`bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden transition-all duration-700 ${
                 isVisible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-4'

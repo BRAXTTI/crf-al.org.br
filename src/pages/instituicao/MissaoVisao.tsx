@@ -52,7 +52,7 @@ export default function MissaoVisao() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -88,7 +88,7 @@ export default function MissaoVisao() {
             return (
               <div
                 key={secao.id}
-                className={`group bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-crfal-blue/20 hover:-translate-y-1 ${
+                className={`group bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-crfal-blue/20 hover:-translate-y-1 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{

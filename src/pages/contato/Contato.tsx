@@ -95,7 +95,7 @@ export default function Contato() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -128,7 +128,7 @@ export default function Contato() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-neutral-200 dark:border-slate-700/70">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <Building2 className="w-5 h-5 text-crfal-blue" />
             </div>
@@ -137,7 +137,7 @@ export default function Contato() {
             Rua Oldemburgo da Silva Paranhos (antiga Rua Goiás) N° 290, Farol – CEP 57055-320 – Maceió-AL
             </p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-neutral-200 dark:border-slate-700/70">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <Phone className="w-5 h-5 text-crfal-blue" />
             </div>
@@ -145,7 +145,7 @@ export default function Contato() {
             <p className="text-sm text-neutral-600">82 9 9971-0247</p>
             <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 8h às 17h</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-neutral-200 dark:border-slate-700/70">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <Mail className="w-5 h-5 text-crfal-blue" />
             </div>
@@ -153,7 +153,7 @@ export default function Contato() {
             <p className="text-sm text-neutral-600 break-all">atendimento@crf-al.org.br</p>
             <p className="text-xs text-neutral-500 mt-1">Atendimento 24h* (Inteligencia Artificial)</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-neutral-200 dark:border-slate-700/70">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <MessageCircle className="w-5 h-5 text-crfal-blue" />
             </div>
@@ -183,7 +183,7 @@ export default function Contato() {
           {contatos.map((contato, index) => (
             <div
               key={contato.id}
-              className={`group bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-crfal-blue/20 hover:-translate-y-1 ${
+              className={`group bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-crfal-blue/20 hover:-translate-y-1 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
               style={{

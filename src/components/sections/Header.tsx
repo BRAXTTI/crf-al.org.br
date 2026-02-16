@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Search, Menu, X, User } from 'lucide-react';
+import ThemeToggle from '../ThemeToggle';
 
 interface NavItem {
   label: string;
@@ -21,16 +22,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: 'Legislação',
-    href: '#legislacao',
-    submenu: [
-      { label: 'Leis Federais', href: '#leis' },
-      { label: 'Resoluções', href: '#resolucoes' },
-      { label: 'Normativas', href: '#normativas' },
-      { label: 'Pareceres', href: '#pareceres' },
-    ],
-  },
-  {
     label: 'Serviços',
     href: '#servicos',
     submenu: [
@@ -47,6 +38,10 @@ const navItems: NavItem[] = [
       { label: 'Normas de Fiscalização', href: '#normas' },
       { label: 'Denúncias', href: '#denuncias' },
       { label: 'Orientações', href: '#orientacoes' },
+      { label: 'Leis Federais', href: '#leis' },
+      { label: 'Resoluções', href: '#resolucoes' },
+      { label: 'Normativas', href: '#normativas' },
+      { label: 'Pareceres', href: '#pareceres' },
     ],
   },
   {
@@ -122,14 +117,14 @@ export default function Header() {
     'text-white/90 hover:text-white hover:bg-white/10';
   const navLinkActiveLight = 'text-white bg-white/15';
   const navLinkInactiveSolid =
-    'text-neutral-700 hover:text-crfal-blue hover:bg-neutral-100';
-  const navLinkActiveSolid = 'text-crfal-blue bg-neutral-100';
+    'text-neutral-700 hover:text-crfal-blue hover:bg-neutral-100 dark:text-slate-200 dark:hover:text-blue-300 dark:hover:bg-slate-800';
+  const navLinkActiveSolid = 'text-crfal-blue bg-neutral-100 dark:text-blue-300 dark:bg-slate-800';
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 overflow-visible transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.05)] py-2 min-h-[56px] lg:min-h-0'
+          ? 'bg-white/95 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:bg-slate-950/90 py-2 min-h-[56px] lg:min-h-0'
           : 'bg-transparent py-3 sm:py-4 min-h-[56px] lg:min-h-0'
       }`}
     >
@@ -142,7 +137,7 @@ export default function Header() {
               alt="CRFAL - Conselho Regional de Farmácia de Alagoas"
               className={`h-8 sm:h-10 md:h-11 w-auto max-w-[150px] sm:max-w-[210px] object-contain transition-all duration-300 group-hover:scale-105 ${
                 isOverHero ? 'brightness-0 invert' : ''
-              }`}
+              } dark:brightness-0 dark:invert`}
             />
           </Link>
 
@@ -212,8 +207,8 @@ export default function Header() {
                     <div
                       className={`absolute top-full left-0 z-50 mt-1 w-56 overflow-hidden rounded-xl border shadow-xl animate-scale-in origin-top ${
                         isOverHero
-                          ? 'bg-white/95 backdrop-blur-md border-white/20'
-                          : 'bg-white border-neutral-200'
+                          ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-white/20 dark:border-slate-700'
+                          : 'bg-white border-neutral-200 dark:bg-slate-900 dark:border-slate-700'
                       }`}
                     >
                       <div className="py-2">
@@ -222,7 +217,7 @@ export default function Header() {
                             <Link
                               key={subItem.label}
                               to={subItem.href}
-                              className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-crfal-blue transition-colors"
+                              className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-crfal-blue dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-300 transition-colors"
                               style={{ animationDelay: `${index * 50}ms` }}
                             >
                               {subItem.label}
@@ -231,7 +226,7 @@ export default function Header() {
                             <a
                               key={subItem.label}
                               href={subItem.href}
-                              className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-crfal-blue transition-colors"
+                              className="block px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-crfal-blue dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-blue-300 transition-colors"
                               style={{ animationDelay: `${index * 50}ms` }}
                             >
                               {subItem.label}
@@ -245,9 +240,10 @@ export default function Header() {
               ))}
             </nav>
 
+            <ThemeToggle isOverHero={isOverHero} />
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`p-2.5 rounded-lg transition-all ${isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-neutral-600 hover:bg-neutral-100'}`}
+              className={`p-2.5 rounded-lg transition-all ${isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-neutral-600 hover:bg-neutral-100 dark:text-slate-300 dark:hover:bg-slate-800'}`}
               aria-label="Buscar"
             >
               <Search className="w-4 h-4" />
@@ -259,7 +255,7 @@ export default function Header() {
               rel="noopener noreferrer"
               className={`ml-2 flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-full transition-all shrink-0 ${
                 isOverHero
-                  ? 'bg-white text-crfal-blue hover:bg-white/95'
+                  ? 'bg-white text-crfal-blue hover:bg-white/95 dark:bg-blue-100 dark:text-slate-900 dark:hover:bg-white'
                   : 'bg-crfal-blue text-white hover:bg-crfal-blue-dark'
               }`}
             >
@@ -275,19 +271,20 @@ export default function Header() {
               className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border transition-all ${
                 isOverHero
                   ? 'text-white/90 border-white/20 bg-white/10 hover:bg-white/15'
-                  : 'text-neutral-700 border-neutral-200 bg-white hover:bg-neutral-100'
+                  : 'text-neutral-700 border-neutral-200 bg-white hover:bg-neutral-100 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800'
               }`}
               aria-label="Buscar"
             >
               <Search className="w-5 h-5" />
             </button>
+            <ThemeToggle isOverHero={isOverHero} mobile />
             <a
               href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
               target="_blank"
               rel="noopener noreferrer"
               className={`hidden md:flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                 isOverHero
-                  ? 'bg-white text-crfal-blue'
+                  ? 'bg-white text-crfal-blue dark:bg-blue-100 dark:text-slate-900'
                   : 'bg-crfal-blue text-white'
               }`}
             >
@@ -299,7 +296,7 @@ export default function Header() {
               className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border transition-all ${
                 isOverHero
                   ? 'text-white border-white/20 bg-white/10 hover:bg-white/15'
-                  : 'text-neutral-700 border-neutral-200 bg-white hover:bg-neutral-100'
+                  : 'text-neutral-700 border-neutral-200 bg-white hover:bg-neutral-100 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800'
               }`}
               aria-label="Menu"
               aria-expanded={isMobileMenuOpen}
@@ -321,9 +318,9 @@ export default function Header() {
                 type="text"
                 placeholder="Buscar no site..."
                 autoFocus
-                className="w-full px-4 py-3 pr-12 bg-white border border-neutral-200 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 text-sm sm:text-base"
+                className="w-full px-4 py-3 pr-12 bg-white border border-neutral-200 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 text-sm sm:text-base"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-crfal-blue rounded-lg transition-colors">
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-crfal-blue dark:text-slate-400 dark:hover:text-blue-300 rounded-lg transition-colors">
                 <Search className="w-5 h-5" />
               </button>
             </div>
@@ -336,7 +333,7 @@ export default function Header() {
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="lg:hidden fixed left-0 right-0 bottom-0 top-[56px] sm:top-[72px] z-[9999] bg-white/98 backdrop-blur-sm overflow-y-auto"
+            className="lg:hidden fixed left-0 right-0 bottom-0 top-[56px] sm:top-[72px] z-[9999] bg-white/98 dark:bg-slate-950/95 backdrop-blur-sm overflow-y-auto"
             style={{ WebkitOverflowScrolling: 'touch' }}
             aria-modal
             role="dialog"
@@ -350,23 +347,23 @@ export default function Header() {
                     <input
                       type="text"
                       placeholder="O que você procura?"
-                      className="w-full px-4 py-3 pl-11 bg-neutral-100 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 text-sm"
+                      className="w-full px-4 py-3 pl-11 bg-neutral-100 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 text-sm"
                     />
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-neutral-400" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-neutral-400 dark:text-slate-500" />
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-neutral-200 dark:border-slate-700 overflow-hidden shadow-sm">
                   {navItems.map((item) => (
-                    <div key={item.label} className="border-b border-neutral-100 last:border-0">
+                    <div key={item.label} className="border-b border-neutral-100 dark:border-slate-800 last:border-0">
                       {item.submenu ? (
                         <button
                           onClick={() => toggleMobileItem(item.label)}
-                          className="w-full flex items-center justify-between py-3.5 px-4 text-neutral-800 hover:bg-neutral-50 font-medium text-left transition-colors min-h-[48px] text-[15px]"
+                          className="w-full flex items-center justify-between py-3.5 px-4 text-neutral-800 dark:text-slate-100 hover:bg-neutral-50 dark:hover:bg-slate-800 font-medium text-left transition-colors min-h-[48px] text-[15px]"
                         >
                           <span>{item.label}</span>
                           <ChevronDown
-                            className={`w-5 h-5 text-neutral-400 transition-transform duration-300 ${
+                            className={`w-5 h-5 text-neutral-400 dark:text-slate-500 transition-transform duration-300 ${
                               isMobileItemExpanded(item.label) ? 'rotate-180' : ''
                             }`}
                           />
@@ -374,7 +371,7 @@ export default function Header() {
                       ) : item.href.startsWith('/') ? (
                         <Link
                           to={item.href}
-                          className="block py-3.5 px-4 text-neutral-800 hover:bg-neutral-50 font-medium transition-colors min-h-[48px] text-[15px]"
+                          className="block py-3.5 px-4 text-neutral-800 dark:text-slate-100 hover:bg-neutral-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[48px] text-[15px]"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           {item.label}
@@ -382,7 +379,7 @@ export default function Header() {
                       ) : (
                         <a
                           href={item.href}
-                          className="block py-3.5 px-4 text-neutral-800 hover:bg-neutral-50 font-medium transition-colors min-h-[48px] text-[15px]"
+                          className="block py-3.5 px-4 text-neutral-800 dark:text-slate-100 hover:bg-neutral-50 dark:hover:bg-slate-800 font-medium transition-colors min-h-[48px] text-[15px]"
                           onClick={() => setIsMobileMenuOpen(false)}
                           rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                           target={item.href.startsWith('http') ? '_blank' : undefined}
@@ -405,7 +402,7 @@ export default function Header() {
                                 <Link
                                   key={subItem.label}
                                   to={subItem.href}
-                                  className="block py-2.5 pl-4 text-sm text-neutral-600 hover:text-crfal-blue rounded-lg transition-colors border-l-2 border-neutral-200 hover:border-crfal-blue"
+                                  className="block py-2.5 pl-4 text-sm text-neutral-600 dark:text-slate-300 hover:text-crfal-blue dark:hover:text-blue-300 rounded-lg transition-colors border-l-2 border-neutral-200 dark:border-slate-700 hover:border-crfal-blue"
                                   onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                   {subItem.label}
@@ -414,7 +411,7 @@ export default function Header() {
                                 <a
                                   key={subItem.label}
                                   href={subItem.href}
-                                  className="block py-2.5 pl-4 text-sm text-neutral-600 hover:text-crfal-blue rounded-lg transition-colors border-l-2 border-neutral-200 hover:border-crfal-blue"
+                                  className="block py-2.5 pl-4 text-sm text-neutral-600 dark:text-slate-300 hover:text-crfal-blue dark:hover:text-blue-300 rounded-lg transition-colors border-l-2 border-neutral-200 dark:border-slate-700 hover:border-crfal-blue"
                                   onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                   {subItem.label}

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -37,6 +37,36 @@
     --crfal-gray-dark: #333333;
     --crfal-text-gray: #666666;
   }
+
+  .dark {
+    --background: 218 46% 9%;
+    --foreground: 210 40% 96%;
+    --card: 217 36% 13%;
+    --card-foreground: 210 40% 96%;
+    --popover: 217 36% 13%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 207 92% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 216 34% 17%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 28% 18%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 214 34% 16%;
+    --accent-foreground: 210 40% 96%;
+    --border: 216 27% 26%;
+    --input: 216 27% 26%;
+    --ring: 207 92% 56%;
+
+    --crfal-blue: #3b8ed9;
+    --crfal-blue-dark: #2a6ca7;
+    --crfal-blue-light: #77b7f0;
+    --crfal-blue-lighter: #123254;
+    --crfal-white: #0b1220;
+    --crfal-gray: #0b1220;
+    --crfal-gray-medium: #334155;
+    --crfal-gray-dark: #e2e8f0;
+    --crfal-text-gray: #94a3b8;
+  }
 }
 
 @layer base {
@@ -51,9 +81,9 @@
   }
   
   body {
-    @apply bg-white text-crfal-gray-dark antialiased;
-    font-family: 'Geist', sans-serif;
-    letter-spacing: -0.06em;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.015em;
     line-height: 1.55;
     overflow-x: hidden;
   }
@@ -64,9 +94,9 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Geist', sans-serif;
+    font-family: 'Fraunces', serif;
     font-weight: 700;
-    letter-spacing: -0.06em;
+    letter-spacing: -0.02em;
     line-height: 1.15;
   }
 }
@@ -85,6 +115,10 @@
   .btn-outline {
     @apply border-2 border-crfal-blue text-crfal-blue px-6 py-3 rounded-lg font-medium 
            transition-all duration-300 hover:bg-crfal-blue hover:text-white;
+  }
+
+  .dark .btn-outline {
+    @apply border-crfal-blue-light text-crfal-blue-light hover:bg-crfal-blue-light hover:text-slate-950;
   }
   
   .section-title {
@@ -115,6 +149,111 @@
   }
   .animation-delay-500 {
     animation-delay: 500ms;
+  }
+
+  .dark .bg-white {
+    background-color: rgb(15 23 42 / 0.92);
+  }
+
+  .dark .bg-neutral-50 {
+    background-color: rgb(11 18 32 / 0.9);
+  }
+
+  .dark .bg-neutral-100 {
+    background-color: rgb(30 41 59 / 0.9);
+  }
+
+  .dark .bg-neutral-200 {
+    background-color: rgb(51 65 85 / 0.9);
+  }
+
+  .dark .border-neutral-100 {
+    border-color: rgb(39 52 73 / 1);
+  }
+
+  .dark .border-neutral-200 {
+    border-color: rgb(51 65 85 / 1);
+  }
+
+  .dark .text-neutral-800 {
+    color: rgb(241 245 249 / 1);
+  }
+
+  .dark .text-neutral-700 {
+    color: rgb(226 232 240 / 1);
+  }
+
+  .dark .text-neutral-600 {
+    color: rgb(203 213 225 / 1);
+  }
+
+  .dark .text-neutral-500 {
+    color: rgb(148 163 184 / 1);
+  }
+
+  .dark .text-neutral-400 {
+    color: rgb(100 116 139 / 1);
+  }
+
+  .dark .text-crfal-gray-dark {
+    color: rgb(226 232 240 / 1);
+  }
+
+  .dark .text-crfal-text-gray {
+    color: rgb(148 163 184 / 1);
+  }
+
+  .dark .bg-crfal-blue-lighter {
+    background-color: rgb(18 44 73 / 0.78);
+  }
+
+  .dark .bg-crfal-blue\/10 {
+    background-color: rgb(59 142 217 / 0.14);
+  }
+
+  .dark .border-crfal-blue\/10 {
+    border-color: rgb(59 142 217 / 0.28);
+  }
+
+  .dark .text-crfal-blue {
+    color: rgb(125 197 255 / 1);
+  }
+
+  .dark .hover\:bg-crfal-blue-lighter:hover {
+    background-color: rgb(24 56 92 / 0.88);
+  }
+
+  .dark .bg-neutral-50\/50 {
+    background-color: rgb(15 23 42 / 0.62);
+  }
+
+  .dark .hover\:border-crfal-blue\/20:hover {
+    border-color: rgb(125 197 255 / 0.4);
+  }
+
+  .dark .hover\:border-crfal-blue\/30:hover,
+  .dark .hover\:border-crfal-blue\/40:hover {
+    border-color: rgb(125 197 255 / 0.52);
+  }
+
+  .dark .shadow-card {
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .dark .hover\:shadow-card-hover:hover {
+    box-shadow: 0 24px 45px rgba(5, 10, 22, 0.45);
+  }
+
+  .dark .hover\:bg-neutral-50:hover {
+    background-color: rgb(30 41 59 / 0.65);
+  }
+
+  .dark .hover\:bg-neutral-100:hover {
+    background-color: rgb(51 65 85 / 0.8);
+  }
+
+  .dark .hover\:text-crfal-blue:hover {
+    color: rgb(125 197 255 / 1);
   }
 }
 

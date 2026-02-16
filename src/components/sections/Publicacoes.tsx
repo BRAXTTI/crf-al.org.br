@@ -130,7 +130,7 @@ export default function Publicacoes() {
   }, [activeTag, publications]);
 
   return (
-    <section ref={sectionRef} id="publicacoes" className="py-16 sm:py-20 md:py-28 bg-white">
+    <section ref={sectionRef} id="publicacoes" className="py-16 sm:py-20 md:py-28 bg-white dark:bg-slate-950">
       <div className="container-crfal">
         <div
           className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6 mb-8 sm:mb-12 transition-all duration-700 ${
@@ -193,7 +193,7 @@ export default function Publicacoes() {
               {filteredPublications.map((pub, index) => (
                 <article
                   key={pub.id}
-                  className={`group bg-white rounded-2xl overflow-hidden border border-neutral-200 active:scale-[0.99] transition-all duration-300 ${
+                  className={`group bg-white dark:bg-slate-900/90 rounded-2xl overflow-hidden border border-neutral-200 dark:border-slate-700/70 active:scale-[0.99] transition-all duration-300 ${
                     isVisible
                       ? 'opacity-100 translate-y-0'
                       : 'opacity-0 translate-y-8'
@@ -271,7 +271,7 @@ export default function Publicacoes() {
               {filteredPublications.map((pub, index) => (
                 <article
                   key={pub.id}
-                  className={`group bg-neutral-50 rounded-2xl overflow-hidden border border-neutral-200 hover:border-crfal-blue/30 hover:shadow-lg transition-all duration-300 ${
+                  className={`group bg-neutral-50 dark:bg-slate-900/90 rounded-2xl overflow-hidden border border-neutral-200 dark:border-slate-700/70 hover:border-crfal-blue/30 hover:shadow-lg transition-all duration-300 ${
                     isVisible
                       ? 'opacity-100 translate-y-0'
                       : 'opacity-0 translate-y-8'

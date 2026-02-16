@@ -14,7 +14,6 @@ import {
 const quickLinks = [
   { label: 'Institucional', href: '#instituicao' },
   { label: 'Serviços', href: '#servicos' },
-  { label: 'Legislação', href: '#legislacao' },
   { label: 'Transparência', href: '#transparencia' },
 ];
 

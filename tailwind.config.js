@@ -66,6 +66,8 @@ module.exports = {
         header: "0 4px 20px rgba(0, 58, 102, 0.1)",
       },
       fontFamily: {
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        display: ['Fraunces', 'serif'],
         montserrat: ['Montserrat', 'sans-serif'],
         roboto: ['Roboto', 'sans-serif'],
       },

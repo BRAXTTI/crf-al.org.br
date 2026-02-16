@@ -383,7 +383,7 @@ export default function Requerimentos() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -416,7 +416,7 @@ export default function Requerimentos() {
             className={`flex-1 flex items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
               tipoAtivo === 'fisica'
                 ? 'border-crfal-blue bg-crfal-blue text-white shadow-lg shadow-crfal-blue/20'
-                : 'border-neutral-200 bg-white text-neutral-700 hover:border-crfal-blue/30 hover:shadow-md'
+                : 'border-neutral-200 dark:border-slate-700/70 bg-white dark:bg-slate-900/90 text-neutral-700 dark:text-slate-200 hover:border-crfal-blue/30 hover:shadow-md'
             }`}
           >
             <div
@@ -441,7 +441,7 @@ export default function Requerimentos() {
             className={`flex-1 flex items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
               tipoAtivo === 'juridica'
                 ? 'border-crfal-blue bg-crfal-blue text-white shadow-lg shadow-crfal-blue/20'
-                : 'border-neutral-200 bg-white text-neutral-700 hover:border-crfal-blue/30 hover:shadow-md'
+                : 'border-neutral-200 dark:border-slate-700/70 bg-white dark:bg-slate-900/90 text-neutral-700 dark:text-slate-200 hover:border-crfal-blue/30 hover:shadow-md'
             }`}
           >
             <div
@@ -466,7 +466,7 @@ export default function Requerimentos() {
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Left Sidebar - Menu */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden lg:sticky lg:top-24">
+            <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden lg:sticky lg:top-24">
               <div className="p-4 bg-gradient-to-r from-crfal-blue to-crfal-blue-dark">
                 <h2 className="text-white font-bold flex items-center gap-2">
                   {tipoAtivo === 'fisica' ? (
@@ -486,7 +486,7 @@ export default function Requerimentos() {
                       className={`w-full flex items-center justify-between px-4 py-3.5 text-left transition-all duration-200 ${
                         categoriaExpandida === categoria.id
                           ? 'bg-crfal-blue-lighter text-crfal-blue'
-                          : 'hover:bg-neutral-50 text-neutral-700'
+                          : 'hover:bg-neutral-50 dark:hover:bg-slate-800/70 text-neutral-700'
                       }`}
                     >
                       <span className="font-semibold text-sm">{categoria.title}</span>
@@ -515,7 +515,7 @@ export default function Requerimentos() {
                               className={`w-full flex items-center gap-3 px-6 py-2.5 text-left text-sm transition-all duration-200 ${
                                 itemSelecionado?.id === item.id
                                   ? 'bg-crfal-blue text-white'
-                                  : 'text-neutral-600 hover:bg-neutral-100 hover:text-crfal-blue'
+                                  : 'text-neutral-600 dark:text-slate-300 hover:bg-neutral-100 dark:hover:bg-slate-800 hover:text-crfal-blue'
                               }`}
                             >
                               <Icon className="w-4 h-4 flex-shrink-0" />
@@ -536,7 +536,7 @@ export default function Requerimentos() {
             {itemSelecionado ? (
               <div className="animate-fade-in">
                 {/* Detail Header */}
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden">
                   <div className="bg-gradient-to-r from-crfal-blue to-crfal-blue-dark p-6">
                     <button
                       onClick={() => setItemSelecionado(null)}
@@ -641,7 +641,7 @@ export default function Requerimentos() {
               </div>
             ) : (
               /* Empty State */
-              <div className="bg-white rounded-2xl border border-neutral-200 p-8 sm:p-12 md:p-16 text-center">
+              <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-8 sm:p-12 md:p-16 text-center">
                 <div className="w-20 h-20 bg-crfal-blue-lighter rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <ClipboardList className="w-10 h-10 text-crfal-blue" />
                 </div>

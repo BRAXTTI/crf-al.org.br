@@ -38,7 +38,7 @@ const quickAccessItems: QuickAccessItem[] = [
     icon: PlayCircle,
     title: 'Tutoriais',
     description: 'Guias passo a passo para realizar os serviços oferecidos pelo CRFAL.',
-    href: '#tutoriais',
+    href: '/servicos/tutoriais',
     color: 'from-teal-500 to-teal-600',
     iconBg: 'bg-teal-500/10 text-teal-600 group-hover:bg-teal-500 group-hover:text-white',
   },
@@ -79,7 +79,7 @@ export default function AcessoRapido() {
   return (
     <section
       ref={sectionRef}
-      className="py-16 sm:py-20 md:py-28 bg-white relative overflow-hidden"
+      className="py-16 sm:py-20 md:py-28 bg-white dark:bg-slate-950 relative overflow-hidden"
     >
       {/* Subtle background decoration */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-crfal-blue/[0.02] rounded-full translate-x-1/2 -translate-y-1/2" aria-hidden />
@@ -114,7 +114,7 @@ export default function AcessoRapido() {
                   href={item.href}
                   target={item.target}
                   rel={isExternal ? 'noopener noreferrer' : undefined}
-                  className={`group flex-shrink-0 w-[280px] snap-start bg-white rounded-2xl p-5 border border-neutral-200 hover:border-crfal-blue/30 shadow-sm active:scale-[0.98] transition-all duration-300 ${
+                className={`group flex-shrink-0 w-[280px] snap-start bg-white dark:bg-slate-900/90 rounded-2xl p-5 border border-neutral-200 dark:border-slate-700/70 hover:border-crfal-blue/30 shadow-sm active:scale-[0.98] transition-all duration-300 ${
                     isVisible
                       ? 'opacity-100 translate-y-0'
                       : 'opacity-0 translate-y-8'
@@ -167,7 +167,7 @@ export default function AcessoRapido() {
                 href={item.href}
                 target={item.target}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
-                className={`group relative bg-white rounded-2xl p-6 border border-neutral-200 hover:border-crfal-blue/30 hover:shadow-lg active:scale-[0.98] transition-all duration-300 overflow-hidden ${
+                className={`group relative bg-white dark:bg-slate-900/90 rounded-2xl p-6 border border-neutral-200 dark:border-slate-700/70 hover:border-crfal-blue/30 hover:shadow-lg active:scale-[0.98] transition-all duration-300 overflow-hidden ${
                   isVisible
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-8'

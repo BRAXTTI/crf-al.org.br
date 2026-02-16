@@ -163,7 +163,7 @@ export default function NoticiaDetalhe() {
   const categoria = post?._embedded?.['wp:term']?.[0]?.[0]?.name || 'Notícia';
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-14 md:pt-32 md:pb-16 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
@@ -191,13 +191,13 @@ export default function NoticiaDetalhe() {
 
       <div className="container-crfal py-8 md:py-12">
         {loading && (
-          <div className="bg-white rounded-2xl border border-neutral-200 p-10 text-center text-neutral-500">
+          <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-10 text-center text-neutral-500">
             Carregando matéria...
           </div>
         )}
 
         {error && (
-          <div className="bg-white rounded-2xl border border-red-200 p-8">
+          <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-red-200 dark:border-red-800/60 p-8">
             <p className="text-red-600 mb-4">{error}</p>
             <Link to="/imprensa/noticias" className="btn-outline text-sm">
               Voltar para notícias
@@ -208,7 +208,7 @@ export default function NoticiaDetalhe() {
         {!loading && !error && post && (
           <div className="grid lg:grid-cols-12 gap-8">
             <main className="lg:col-span-8">
-              <article className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+              <article className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden">
                 <div className="relative h-56 sm:h-72 md:h-80">
                   <img
                     src={featuredImage}
@@ -252,7 +252,7 @@ export default function NoticiaDetalhe() {
 
             <aside className="lg:col-span-4">
               <div className="lg:sticky lg:top-24 space-y-4">
-                <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+                <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-5">
                   <h3 className="text-lg font-bold text-neutral-800 mb-3">
                     Outras Notícias
                   </h3>
@@ -278,7 +278,7 @@ export default function NoticiaDetalhe() {
                   )}
                 </div>
 
-                <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+                <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-5">
                   <span className="inline-flex px-3 py-1 rounded-full bg-crfal-blue-lighter text-crfal-blue text-xs font-semibold mb-3">
                     Serviços em Destaque
                   </span>
@@ -301,7 +301,7 @@ export default function NoticiaDetalhe() {
                         href={item.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block bg-white rounded-2xl border border-neutral-200 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
+                        className="block bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
                       >
                         <div className="flex items-start gap-3">
                           <div className="w-10 h-10 rounded-xl bg-crfal-blue-lighter text-crfal-blue flex items-center justify-center shrink-0">
@@ -328,7 +328,7 @@ export default function NoticiaDetalhe() {
                     <Link
                       key={item.id}
                       to={item.href}
-                      className="block bg-white rounded-2xl border border-neutral-200 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
+                      className="block bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all"
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-xl bg-crfal-blue-lighter text-crfal-blue flex items-center justify-center shrink-0">

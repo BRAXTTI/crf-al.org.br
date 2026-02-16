@@ -135,7 +135,7 @@ export default function HeroSlider() {
                     </p>
                     <a
                       href={slide.href}
-                      className={`inline-flex items-center gap-2 px-8 py-4 bg-white text-crfal-blue font-semibold rounded-lg hover:bg-crfal-blue-lighter transition-all duration-500 hover:-translate-y-1 hover:shadow-lg ${
+                      className={`inline-flex items-center gap-2 px-8 py-4 bg-white text-crfal-blue font-semibold rounded-lg hover:bg-crfal-blue-lighter dark:bg-blue-100 dark:text-slate-900 dark:hover:bg-white transition-all duration-500 hover:-translate-y-1 hover:shadow-lg ${
                         isActive
                           ? 'opacity-100 translate-y-0'
                           : 'opacity-0 translate-y-8'
@@ -157,7 +157,7 @@ export default function HeroSlider() {
       <button
         onClick={prevSlide}
         disabled={isAnimating}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-crfal-blue shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 hover:bg-white dark:bg-slate-100/95 dark:hover:bg-white rounded-full flex items-center justify-center text-crfal-blue dark:text-slate-900 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
         aria-label="Slide anterior"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -165,7 +165,7 @@ export default function HeroSlider() {
       <button
         onClick={nextSlide}
         disabled={isAnimating}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-crfal-blue shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 hover:bg-white dark:bg-slate-100/95 dark:hover:bg-white rounded-full flex items-center justify-center text-crfal-blue dark:text-slate-900 shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
         aria-label="Próximo slide"
       >
         <ChevronRight className="w-6 h-6" />
