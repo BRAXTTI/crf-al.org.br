@@ -22,7 +22,7 @@ const contatos: Contato[] = [
     id: 2,
     setor: 'Vice-Presidência',
     responsavel: 'Lyvia Quintela Cavalcante Trajano',
-    email: 'vicepresidente@crfal.org.br',
+    email: 'vicepresidente@crf-al.org.br',
     telefone: '(82) 2121-0002',
   },
   {
@@ -36,13 +36,13 @@ const contatos: Contato[] = [
     id: 4,
     setor: 'Tesouraria',
     responsavel: 'Isadora Lyra Cavalcanti',
-    email: 'tesoureira@crf-al.org.br',
+    email: 'tesouraria@crf-al.org.br',
     telefone: '(82) 2121-0004',
   },
   {
     id: 5,
     setor: 'Fiscalização',
-    responsavel: 'Departamento de Fiscalização',
+    responsavel: 'Écio',
     email: 'fiscalizacao@crf-al.org.br',
     telefone: '(82) 2121-0005',
     whatsapp: '(82) 99999-0005',
@@ -50,32 +50,29 @@ const contatos: Contato[] = [
   {
     id: 6,
     setor: 'Secretaria',
-    responsavel: 'Departamento de Secretaria',
+    responsavel: 'Claudia Katia',
     email: 'secretaria@crf-al.org.br',
     telefone: '(82) 2121-0006',
+    whatsapp: '(82) 99999-0006',
   },
   {
     id: 7,
     setor: 'Tecnologia da Informação',
-    responsavel: 'Departamento de TI',
+    responsavel: 'Thailanderson Rocha',
     email: 'tecnologia@crf-al.org.br',
-    telefone: '(82) 2121-0007',
+    whatsapp: '(82) 99355-8888',
   },
   {
     id: 8,
     setor: 'Comunicação',
     responsavel: 'Departamento de Comunicação',
     email: 'ascom@crf-al.org.br',
-    telefone: '(82) 2121-0008',
-    whatsapp: '(82) 99999-0008',
   },
   {
     id: 9,
     setor: 'Ouvidoria',
     responsavel: 'Atendimento ao Cidadão',
     email: 'ouvidoria@crfal.org.br',
-    telefone: '(82) 2121-0009',
-    whatsapp: '(82) 99999-0009',
   },
 ];
 
@@ -145,7 +142,7 @@ export default function Contato() {
               <Phone className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">Telefone</h3>
-            <p className="text-sm text-neutral-600">(82) 2121-0000</p>
+            <p className="text-sm text-neutral-600">82 9 9971-0247</p>
             <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 8h às 17h</p>
           </div>
           <div className="bg-white rounded-2xl p-5 border border-neutral-200">
@@ -161,7 +158,7 @@ export default function Contato() {
               <MessageCircle className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">WhatsApp</h3>
-            <p className="text-sm text-neutral-600">(82) 99999-0000</p>
+            <p className="text-sm text-neutral-600">82 9 9971-0247</p>
             <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 8h às 17h</p>
           </div>
         </div>
