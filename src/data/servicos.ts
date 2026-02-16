@@ -45,7 +45,6 @@ export const servicesData: ServiceItem[] = [
         'Aguarde a análise da sua documentação',
         'Após a análise e aprovação em plenária, você receberá um email avisando a aprovação da sua inscrição',
       ],
-      videoUrl: 'https://www.youtube.com/watch?v=DgM-SnAUsJ0',
     },
   },
   {

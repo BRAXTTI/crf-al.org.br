@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink, GraduationCap, Home, PlayCircle, UserCircle } from 'lucide-react';
 
 interface QuickAccessItem {
@@ -85,31 +86,29 @@ function QuickAccessCard({
   const Icon = item.icon;
   const isExternal = item.target === '_blank';
 
-  return (
-    <a
-      href={item.href}
-      target={item.target}
-      rel={isExternal ? 'noopener noreferrer' : undefined}
-      className={`group relative flex h-full flex-col rounded-xl border p-4 sm:p-5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition-all duration-300 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-      } ${
-        isActive
-          ? 'border-sky-300/70 ring-1 ring-sky-300/60 shadow-[0_14px_30px_rgba(14,165,233,0.24)] dark:border-sky-300/40 dark:ring-sky-300/40'
-          : 'border-slate-200/80 dark:border-slate-700/70 hover:-translate-y-1 hover:scale-[1.01] hover:border-sky-300/75 hover:shadow-[0_18px_34px_rgba(14,165,233,0.22)] dark:hover:border-sky-300/45 dark:hover:shadow-[0_16px_32px_rgba(56,189,248,0.2)]'
-      } ${isMobile && !isActive ? 'scale-[0.975] opacity-75 saturate-75' : ''}`}
-      style={{
-        transitionDelay: isVisible ? `${100 + index * 70}ms` : '0ms',
-        background: isDark ? item.visualDark : item.visualLight,
-        backgroundSize: isDark ? '220% 220%' : '170% 170%',
-        animationName: isDark ? 'card-gradient-shift-dark' : 'card-gradient-shift',
-        animationDuration: isDark ? '13s' : '16s',
-        animationTimingFunction: 'ease-in-out',
-        animationIterationCount: 'infinite',
-        animationFillMode: 'both',
-        animationDelay: `-${index * 2.4}s`,
-        willChange: 'background-position, filter',
-      }}
-    >
+  const className = `group relative flex h-full flex-col rounded-xl border p-4 sm:p-5 shadow-[0_8px_22px_rgba(15,23,42,0.08)] transition-all duration-300 ${
+    isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+  } ${
+    isActive
+      ? 'border-sky-300/70 ring-1 ring-sky-300/60 shadow-[0_14px_30px_rgba(14,165,233,0.24)] dark:border-sky-300/40 dark:ring-sky-300/40'
+      : 'border-slate-200/80 dark:border-slate-700/70 hover:-translate-y-1 hover:scale-[1.01] hover:border-sky-300/75 hover:shadow-[0_18px_34px_rgba(14,165,233,0.22)] dark:hover:border-sky-300/45 dark:hover:shadow-[0_16px_32px_rgba(56,189,248,0.2)]'
+  } ${isMobile && !isActive ? 'scale-[0.975] opacity-75 saturate-75' : ''}`;
+
+  const style = {
+    transitionDelay: isVisible ? `${100 + index * 70}ms` : '0ms',
+    background: isDark ? item.visualDark : item.visualLight,
+    backgroundSize: isDark ? '220% 220%' : '170% 170%',
+    animationName: isDark ? 'card-gradient-shift-dark' : 'card-gradient-shift',
+    animationDuration: isDark ? '13s' : '16s',
+    animationTimingFunction: 'ease-in-out',
+    animationIterationCount: 'infinite',
+    animationFillMode: 'both',
+    animationDelay: `-${index * 2.4}s`,
+    willChange: 'background-position, filter',
+  };
+
+  const content = (
+    <>
       <div className={`relative mb-3 inline-flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-lg transition-transform duration-300 group-hover:scale-110 ${item.iconShell}`}>
         <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>
@@ -135,7 +134,31 @@ function QuickAccessCard({
           )}
         </span>
       </div>
-    </a>
+    </>
+  );
+
+  if (isExternal) {
+    return (
+      <a
+        href={item.href}
+        target={item.target}
+        rel="noopener noreferrer"
+        className={className}
+        style={style}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link
+      to={item.href}
+      className={className}
+      style={style}
+    >
+      {content}
+    </Link>
   );
 }
 
