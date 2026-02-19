@@ -84,7 +84,7 @@ export default function Header() {
         setIsMobileMenuOpen(false);
       }
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -200,13 +200,13 @@ export default function Header() {
                     </a>
                   )}
 
-                  {item.submenu && activeDropdown === item.label && (
+                  {item.submenu && activeDropdown === item.label ? (
                     <div
                       className="absolute top-full left-0 z-40 h-56 w-56"
                       aria-hidden
                     />
-                  )}
-                  {item.submenu && activeDropdown === item.label && (
+                  ) : null}
+                  {item.submenu && activeDropdown === item.label ? (
                     <div
                       className={`absolute top-full left-0 z-50 mt-1 w-56 overflow-hidden rounded-xl border shadow-xl animate-scale-in origin-top ${
                         isOverHero
@@ -238,7 +238,7 @@ export default function Header() {
                         )}
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ))}
             </nav>
@@ -314,7 +314,7 @@ export default function Header() {
         </div>
 
         {/* Search Bar */}
-        {isSearchOpen && (
+        {isSearchOpen ? (
           <div className="mt-3 sm:mt-4 animate-slide-down">
             <div className="relative">
               <input
@@ -328,12 +328,12 @@ export default function Header() {
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Mobile Menu - Portal */}
       {isMobileMenuOpen &&
-        typeof document !== 'undefined' &&
+        typeof document !== 'undefined' ?
         createPortal(
           <div
             className="lg:hidden fixed left-0 right-0 bottom-0 top-[56px] sm:top-[72px] z-[9999] bg-white/98 dark:bg-slate-950/95 backdrop-blur-sm overflow-y-auto"
@@ -442,7 +442,7 @@ export default function Header() {
             </nav>
           </div>,
           document.body
-        )}
+        ) : null}
     </header>
   );
 }

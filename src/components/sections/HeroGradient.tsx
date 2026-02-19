@@ -68,7 +68,7 @@ export default function HeroGradient() {
     };
 
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
     draw();
     return () => {
       window.removeEventListener('resize', resize);

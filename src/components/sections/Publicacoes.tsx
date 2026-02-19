@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, Newspaper } from 'lucide-react';
 
@@ -35,6 +35,9 @@ interface Publication {
 
 const WP_API_URL = "https://wordpress.crf-al.org.br/wp-json/wp/v2/posts?_embed&per_page=6";
 
+// Hoisted regex outside render loop (js-hoist-regexp)
+const HTML_TAG_RE = /<[^>]*>?/gm;
+
 const formatarData = (dataISO: string) => {
   return new Date(dataISO).toLocaleDateString('pt-BR', {
     day: 'numeric',
@@ -65,9 +68,14 @@ export default function Publicacoes() {
   const [activeTag, setActiveTag] = useState('all');
   const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filteredPublications, setFilteredPublications] = useState<Publication[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  // Derived state: compute during render instead of useEffect (rerender-derived-state-no-effect)
+  const filteredPublications = useMemo(
+    () => activeTag === 'all' ? publications : publications.filter((pub) => pub.tag === activeTag),
+    [activeTag, publications]
+  );
 
   useEffect(() => {
     async function fetchNews() {
@@ -81,7 +89,7 @@ export default function Publicacoes() {
           return {
             id: post.id,
             title: post.title.rendered,
-            excerpt: post.excerpt.rendered.replace(/<[^>]*>?/gm, '').slice(0, 100) + '...',
+            excerpt: post.excerpt.rendered.replace(HTML_TAG_RE, '').slice(0, 100) + '...',
             image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || '/images/placeholder.jpg',
             date: formatarData(post.date),
             tag: categoryName,
@@ -90,7 +98,6 @@ export default function Publicacoes() {
         });
 
         setPublications(mappedNews);
-        setFilteredPublications(mappedNews);
       } catch (error) {
         console.error("Erro ao buscar notícias:", error);
       } finally {
@@ -119,15 +126,6 @@ export default function Publicacoes() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (activeTag === 'all') {
-      setFilteredPublications(publications);
-    } else {
-      setFilteredPublications(
-        publications.filter((pub) => pub.tag === activeTag)
-      );
-    }
-  }, [activeTag, publications]);
 
   return (
     <section ref={sectionRef} id="publicacoes" className="py-16 sm:py-20 md:py-28 bg-white dark:bg-slate-950">

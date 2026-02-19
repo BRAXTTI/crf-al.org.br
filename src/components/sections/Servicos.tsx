@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   ChevronRight,
   ChevronDown,
@@ -40,8 +40,9 @@ export default function Servicos() {
     setExpandedService(expandedService === service.id ? null : service.id);
   };
 
-  const selectedVideoEmbedUrl = getYouTubeEmbedUrl(
-    selectedService?.tutorial.videoUrl
+  const selectedVideoEmbedUrl = useMemo(
+    () => getYouTubeEmbedUrl(selectedService?.tutorial.videoUrl),
+    [selectedService?.tutorial.videoUrl]
   );
 
   return (

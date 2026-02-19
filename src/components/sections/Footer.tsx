@@ -24,6 +24,9 @@ const serviceLinks = [
   { label: 'Validar Documentos', href: '#validar' },
 ];
 
+// Hoisted outside component to avoid creating Date on every render (rendering-hoist-jsx)
+const CURRENT_YEAR = new Date().getFullYear();
+
 const socialLinks = [
   { icon: Facebook, href: '#facebook', label: 'Facebook' },
   { icon: Instagram, href: '#instagram', label: 'Instagram' },
@@ -194,7 +197,7 @@ export default function Footer() {
           <div className="container-crfal py-5 sm:py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
               <p className="text-xs sm:text-sm text-white/60 text-center sm:text-left">
-                © {new Date().getFullYear()} CRFAL - Conselho Regional de Farmácia
+                © {CURRENT_YEAR} CRFAL - Conselho Regional de Farmácia
                 do Estado de Alagoas. Todos os direitos reservados.
               </p>
               <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-white/60">

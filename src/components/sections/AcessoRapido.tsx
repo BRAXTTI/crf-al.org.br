@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink, GraduationCap, Home, PlayCircle, UserCircle } from 'lucide-react';
 
@@ -68,7 +68,8 @@ const quickAccessItems: QuickAccessItem[] = [
   },
 ];
 
-function QuickAccessCard({
+// Memoized to prevent re-renders when sibling cards change (rerender-memo)
+const QuickAccessCard = memo(function QuickAccessCard({
   item,
   index,
   isVisible,
@@ -104,7 +105,7 @@ function QuickAccessCard({
     animationIterationCount: 'infinite',
     animationFillMode: 'both',
     animationDelay: `-${index * 2.4}s`,
-    willChange: 'background-position, filter',
+    // Removed willChange - permanent willChange hurts performance by consuming GPU memory
   };
 
   const content = (
@@ -160,7 +161,7 @@ function QuickAccessCard({
       {content}
     </Link>
   );
-}
+});
 
 export default function AcessoRapido() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -221,7 +222,7 @@ export default function AcessoRapido() {
 
   useEffect(() => {
     updateActiveByViewport();
-    window.addEventListener('resize', updateActiveByViewport);
+    window.addEventListener('resize', updateActiveByViewport, { passive: true });
     return () => window.removeEventListener('resize', updateActiveByViewport);
   }, [updateActiveByViewport]);
 
