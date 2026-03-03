@@ -258,7 +258,7 @@ export default function Header() {
               rel="noopener noreferrer"
               className={`ml-2 flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-full transition-all shrink-0 ${
                 isOverHero
-                  ? 'bg-white text-crfal-blue hover:bg-white/95 dark:bg-blue-100 dark:text-slate-900 dark:hover:bg-white'
+                  ? 'bg-white text-crfal-blue hover:bg-white/95 dark:!bg-blue-100 dark:!text-slate-900 dark:hover:!bg-blue-50'
                   : 'bg-crfal-blue text-white hover:bg-crfal-blue-dark'
               }`}
             >
@@ -287,7 +287,7 @@ export default function Header() {
               rel="noopener noreferrer"
               className={`hidden md:flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-full text-sm font-medium transition-all ${
                 isOverHero
-                  ? 'bg-white text-crfal-blue dark:bg-blue-100 dark:text-slate-900'
+                  ? 'bg-white text-crfal-blue dark:!bg-blue-100 dark:!text-slate-900'
                   : 'bg-crfal-blue text-white'
               }`}
             >

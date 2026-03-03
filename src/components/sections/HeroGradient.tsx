@@ -131,7 +131,7 @@ export default function HeroGradient() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <a
                 href="#servicos"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-crfal-blue font-semibold rounded-full hover:bg-white/95 dark:bg-blue-100 dark:text-slate-900 dark:hover:bg-white hover:shadow-xl active:scale-[0.98] transition-all duration-300 text-sm sm:text-base"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-crfal-blue font-semibold rounded-full hover:bg-white/95 dark:!bg-blue-100 dark:!text-slate-900 dark:hover:!bg-blue-50 hover:shadow-xl active:scale-[0.98] transition-all duration-300 text-sm sm:text-base"
               >
                 Conheça nossos serviços
                 <ArrowRight className="w-5 h-5" />

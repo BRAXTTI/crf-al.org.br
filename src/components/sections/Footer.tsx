@@ -183,7 +183,7 @@ export default function Footer() {
                     placeholder="Seu e-mail"
                     className="flex-1 min-w-0 px-3 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm placeholder:text-white/50 focus:outline-none focus:border-crfal-blue-light transition-colors"
                   />
-                  <button className="px-3 py-2.5 bg-crfal-blue-light hover:bg-crfal-blue-lighter text-crfal-blue rounded-lg transition-colors flex-shrink-0 active:scale-95">
+                  <button className="px-3 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors flex-shrink-0 active:scale-95">
                     <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>
