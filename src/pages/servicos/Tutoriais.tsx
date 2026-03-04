@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronRight,
+  ChevronDown,
   Search,
   Filter,
   Play,
@@ -10,6 +11,7 @@ import {
   BadgeDollarSign,
   BookOpen,
   Sparkles,
+  FileText,
 } from 'lucide-react';
 import { servicesData, type ServiceItem } from '../../data/servicos';
 import { getYouTubeEmbedUrl } from '../../lib/youtube';
@@ -223,8 +225,10 @@ export default function Tutoriais() {
                 return (
                   <div
                     key={service.id}
-                    className={`bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden transition-all duration-300 ${
-                      isExpanded ? 'shadow-card' : ''
+                    className={`bg-white dark:bg-slate-900/90 rounded-2xl border overflow-hidden transition-all duration-300 ${
+                      isExpanded
+                        ? 'border-crfal-blue/30 shadow-card'
+                        : 'border-neutral-200 dark:border-slate-700/70'
                     } ${
                       isVisible
                         ? 'opacity-100 translate-x-0'
@@ -234,105 +238,118 @@ export default function Tutoriais() {
                       transitionDelay: isVisible ? `${index * 80}ms` : '0ms',
                     }}
                   >
-                    <button
-                      onClick={() => handleExpand(service)}
-                      className={`w-full flex items-start sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left transition-all duration-300 ${
-                        isExpanded ? 'bg-crfal-blue-lighter' : 'hover:bg-neutral-50'
-                      }`}
-                    >
+                    {/* ── Header: gradiente quando expandido, limpo quando colapsado ── */}
+                    {isExpanded ? (
                       <div
-                        className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                          isExpanded
-                            ? 'bg-crfal-blue text-white'
-                            : 'bg-crfal-blue-lighter text-crfal-blue'
-                        }`}
+                        className="bg-gradient-to-r from-crfal-blue to-crfal-blue-dark p-5 sm:p-6 cursor-pointer select-none"
+                        onClick={() => handleExpand(service)}
                       >
-                        <Icon className="w-5 h-5" />
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          <span className="text-xs px-2 py-0.5 bg-crfal-blue-lighter text-crfal-blue rounded-full font-medium">
-                            {service.category}
-                          </span>
+                        <div className="flex justify-end mb-3">
+                          <ChevronDown className="w-5 h-5 text-white/50 rotate-180" />
                         </div>
-                        <h3 className="font-bold text-sm sm:text-base text-neutral-800 leading-snug line-clamp-2 sm:line-clamp-none">
-                          {service.title}
-                        </h3>
-                        <p className="text-sm text-neutral-600 line-clamp-1 hidden sm:block">
-                          {service.description}
-                        </p>
-                      </div>
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[11px] font-bold tracking-widest uppercase text-white/60 mb-1 block">
+                              {service.category}
+                            </span>
+                            <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">
+                              {service.title}
+                            </h3>
+                            <p className="text-white/80 text-sm mt-1">
+                              {service.description}
+                            </p>
+                          </div>
+                        </div>
 
-                      <ChevronRight
-                        className={`w-5 h-5 text-crfal-blue transition-transform duration-300 flex-shrink-0 ${
-                          isExpanded ? 'rotate-90' : ''
-                        }`}
-                      />
-                    </button>
-
-                    <div
-                      className={`overflow-hidden transition-all duration-500 ${
-                        isExpanded ? 'max-h-[1400px]' : 'max-h-0'
-                      }`}
-                    >
-                      <div className="p-5 pt-0 border-t border-neutral-200">
-                        <div className="mt-4 grid sm:grid-cols-2 gap-3 mb-4">
-                          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/35 border border-emerald-100 dark:border-emerald-800/60 px-3 py-2">
-                            <BadgeDollarSign className="w-4 h-4 text-emerald-700" />
-                            <p className="text-sm text-emerald-900 dark:text-emerald-200">
+                        <div className="flex flex-wrap gap-3 mt-5">
+                          <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                            <BadgeDollarSign className="w-4 h-4 text-white/70" />
+                            <span className="text-sm text-white">
                               Valor: <strong>{service.valor}</strong>
-                            </p>
+                            </span>
                           </div>
-                          <div className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/35 border border-amber-100 dark:border-amber-800/60 px-3 py-2">
-                            <Clock3 className="w-4 h-4 text-amber-700" />
-                            <p className="text-sm text-amber-900 dark:text-amber-200">
+                          <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                            <Clock3 className="w-4 h-4 text-white/70" />
+                            <span className="text-sm text-white">
                               Prazo: <strong>{service.prazo}</strong>
-                            </p>
+                            </span>
                           </div>
-                        </div>
-
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-semibold text-crfal-blue flex items-center gap-2">
-                            <Play className="w-4 h-4" />
-                            Tutorial passo a passo
-                          </h4>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedService(service);
                               setShowVideoModal(true);
                             }}
-                            className="text-sm text-crfal-blue-light hover:underline flex items-center gap-1"
+                            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 transition-colors"
                           >
-                            <Play className="w-4 h-4" />
-                            Assistir vídeo
+                            <Play className="w-4 h-4 text-white/70" />
+                            <span className="text-sm text-white">Assistir vídeo</span>
                           </button>
                         </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleExpand(service)}
+                        className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-neutral-50 dark:hover:bg-slate-800/50 transition-colors duration-200"
+                      >
+                        <div className="w-11 h-11 bg-crfal-blue-lighter text-crfal-blue rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="text-xs px-2 py-0.5 bg-crfal-blue-lighter text-crfal-blue rounded-full font-medium">
+                              {service.category}
+                            </span>
+                          </div>
+                          <h3 className="font-bold text-sm sm:text-base text-neutral-800 dark:text-slate-100 leading-snug">
+                            {service.title}
+                          </h3>
+                          <p className="text-sm text-neutral-500 dark:text-slate-400 line-clamp-1 hidden sm:block">
+                            {service.description}
+                          </p>
+                        </div>
+                        <ChevronDown className="w-5 h-5 text-crfal-blue flex-shrink-0" />
+                      </button>
+                    )}
 
+                    {/* ── Conteúdo expandido ── */}
+                    <div
+                      className={`overflow-hidden transition-all duration-500 ${
+                        isExpanded ? 'max-h-[1600px]' : 'max-h-0'
+                      }`}
+                    >
+                      <div className="p-5 sm:p-6 border-b border-neutral-100 dark:border-slate-700/50">
+                        <h4 className="font-bold text-neutral-800 dark:text-slate-100 flex items-center gap-2 mb-4">
+                          <Play className="w-5 h-5 text-crfal-blue" />
+                          Tutorial passo a passo
+                        </h4>
                         <ol className="space-y-3">
                           {service.tutorial.steps.map((step, stepIndex) => (
                             <li key={stepIndex} className="flex items-start gap-3">
-                              <span className="flex-shrink-0 w-6 h-6 bg-crfal-blue text-white text-xs font-bold rounded-full flex items-center justify-center">
+                              <span className="flex-shrink-0 w-7 h-7 bg-crfal-blue text-white text-xs font-bold rounded-full flex items-center justify-center">
                                 {stepIndex + 1}
                               </span>
-                              <span className="text-sm text-neutral-700 pt-0.5">
+                              <span className="text-sm text-neutral-700 dark:text-slate-300 pt-1">
                                 {step}
                               </span>
                             </li>
                           ))}
                         </ol>
+                      </div>
 
-                        <div className="mt-5">
-                          <a
-                            href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn-primary text-sm"
-                          >
-                            Acessar serviço no portal
-                          </a>
-                        </div>
+                      <div className="p-5 sm:p-6 bg-neutral-50 dark:bg-slate-800/50 flex flex-wrap gap-3">
+                        <a
+                          href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary text-sm flex items-center gap-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Acessar serviço no portal
+                        </a>
                       </div>
                     </div>
                   </div>
