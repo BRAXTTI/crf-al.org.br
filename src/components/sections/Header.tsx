@@ -15,10 +15,8 @@ const navItems: NavItem[] = [
     label: 'Instituição',
     href: '/instituicao',
     submenu: [
-      { label: 'História', href: '/instituicao/historia' },
-      { label: 'Missão e Visão', href: '/instituicao/missao-visao' },
+      { label: 'Sobre o Conselho', href: '/instituicao/sobre-conselho' },
       { label: 'Diretoria', href: '/instituicao/diretoria' },
-      { label: 'Estatuto', href: '/instituicao/estatuto' },
     ],
   },
   {

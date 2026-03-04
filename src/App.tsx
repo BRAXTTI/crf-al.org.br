@@ -8,6 +8,7 @@ const Instituicao = lazy(() => import('./pages/instituicao/Instituicao'));
 const Historia = lazy(() => import('./pages/instituicao/Historia'));
 const MissaoVisao = lazy(() => import('./pages/instituicao/MissaoVisao'));
 const Diretoria = lazy(() => import('./pages/instituicao/Diretoria'));
+const SobreConselho = lazy(() => import('./pages/instituicao/SobreConselho'));
 const Estatuto = lazy(() => import('./pages/instituicao/Estatuto'));
 const Contato = lazy(() => import('./pages/contato/Contato'));
 const Requerimentos = lazy(() => import('./pages/servicos/Requerimentos'));
@@ -32,6 +33,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="instituicao" element={<Instituicao />} />
+            <Route path="instituicao/sobre-conselho" element={<SobreConselho />} />
             <Route path="instituicao/historia" element={<Historia />} />
             <Route path="instituicao/missao-visao" element={<MissaoVisao />} />
             <Route path="instituicao/diretoria" element={<Diretoria />} />
