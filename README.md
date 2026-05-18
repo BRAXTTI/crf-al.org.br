@@ -71,19 +71,3 @@ export default defineConfig([
   },
 ])
 ```
-
-## Deploy no Surge
-
-Para evitar publicar artefato antigo no Surge, use sempre:
-
-```bash
-npm run deploy:surge
-```
-
-Esse comando executa, em sequência:
-
-1. `npm run build`
-2. `npm run verify:menu-migration`
-3. `surge ./dist`
-
-Se o bundle ainda contiver `Legislação` (ou faltar os itens migrados em `Fiscalização`), o deploy é interrompido com erro.

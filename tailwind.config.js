@@ -66,8 +66,6 @@ module.exports = {
         header: "0 4px 20px rgba(0, 58, 102, 0.1)",
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'sans-serif'],
-        display: ['Fraunces', 'serif'],
         montserrat: ['Montserrat', 'sans-serif'],
         roboto: ['Roboto', 'sans-serif'],
       },
@@ -104,18 +102,6 @@ module.exports = {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
-        "shimmer": {
-          "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(100%)" },
-        },
-        "card-glow": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(0, 74, 128, 0)" },
-          "50%": { boxShadow: "0 0 20px 2px rgba(0, 74, 128, 0.15)" },
-        },
-        "card-glow-dark": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(147, 130, 220, 0)" },
-          "50%": { boxShadow: "0 0 20px 2px rgba(147, 130, 220, 0.2)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -126,9 +112,6 @@ module.exports = {
         "fade-in": "fade-in 0.5s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "float": "float 3s ease-in-out infinite",
-        "shimmer": "shimmer 1s ease-in-out 1 both",
-        "card-glow": "card-glow 1s ease-in-out 3 both",
-        "card-glow-dark": "card-glow-dark 1s ease-in-out 3 both",
       },
     },
   },
