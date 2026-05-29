@@ -12,6 +12,7 @@ import TutorialsPage from '@/features/services/pages/TutorialsPage';
 import OmbudsmanPage from '@/features/services/pages/OmbudsmanPage';
 import NewsPage from '@/features/press/pages/NewsPage';
 import PublicationDetailPage from '@/features/publications/pages/PublicationDetailPage';
+import SobreConselhoPage from '@/features/institutional/pages/SobreConselhoPage';
 import FiscalizacaoPage from '@/features/fiscalizacao/pages/FiscalizacaoPage';
 import PapelFiscalizacaoPage from '@/features/fiscalizacao/pages/PapelFiscalizacaoPage';
 import InstrumentosFiscalizacaoPage from '@/features/fiscalizacao/pages/InstrumentosFiscalizacaoPage';
@@ -28,6 +29,7 @@ export default function AppRouter() {
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="instituicao" element={<InstitutionalPage />} />
+          <Route path="instituicao/sobre-conselho" element={<SobreConselhoPage />} />
           <Route path="instituicao/historia" element={<HistoryPage />} />
           <Route path="instituicao/missao-visao" element={<MissionVisionPage />} />
           <Route path="instituicao/diretoria" element={<BoardPage />} />

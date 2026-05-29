@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Target, Eye, Heart } from 'lucide-react';
 
-interface MVVSection {
+interface SecaoMVV {
   id: string;
   titulo: string;
   subtitulo: string;
@@ -9,7 +9,7 @@ interface MVVSection {
   descricao: string;
 }
 
-const sections: MVVSection[] = [
+const secoes: SecaoMVV[] = [
   {
     id: 'missao',
     titulo: 'Missão',
@@ -40,10 +40,7 @@ export default function MissionVisionPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
+        if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); }
       },
       { threshold: 0.05 }
     );
@@ -52,14 +49,15 @@ export default function MissionVisionPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+      {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
           <div className="absolute bottom-0 right-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
         </div>
         <div className="container-crfal relative z-10">
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-4">
+          <div className="flex flex-wrap items-center gap-2 text-white/60 text-xs sm:text-sm mb-4">
             <a href="/" className="hover:text-white transition-colors">Início</a>
             <ChevronRight className="w-4 h-4" />
             <span>Instituição</span>
@@ -67,25 +65,25 @@ export default function MissionVisionPage() {
             <span className="text-white">Missão, Visão e Valores</span>
           </div>
           <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
               Missão, Visão e Valores
             </h1>
-            <p className="text-white/80 text-lg">
-              Conheça os princípios fundamentais que guiam o Conselho Regional
-              de Farmácia de Alagoas em sua atuação.
+            <p className="text-white/80 text-base sm:text-lg">
+              Conheça os princípios fundamentais que guiam o Conselho Regional de Farmácia de Alagoas em sua atuação.
             </p>
           </div>
         </div>
       </div>
 
+      {/* Content */}
       <div className="container-crfal py-10 md:py-16" ref={sectionRef}>
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {sections.map((section, index) => {
-            const Icon = section.icon;
+          {secoes.map((secao, index) => {
+            const Icon = secao.icon;
             return (
               <div
-                key={section.id}
-                className={`group bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-crfal-blue/20 hover:-translate-y-1 ${
+                key={secao.id}
+                className={`group bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden transition-all duration-500 hover:shadow-lg hover:border-crfal-blue/20 hover:-translate-y-1 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ transitionDelay: isVisible ? `${index * 150}ms` : '0ms' }}
@@ -94,12 +92,11 @@ export default function MissionVisionPage() {
                   <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                     <Icon className="w-7 h-7 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white">{section.titulo}</h2>
-                  <p className="text-white/70 text-sm mt-1">{section.subtitulo}</p>
+                  <h2 className="text-2xl font-bold text-white">{secao.titulo}</h2>
+                  <p className="text-white/70 text-sm mt-1">{secao.subtitulo}</p>
                 </div>
-
                 <div className="p-6">
-                  <p className="text-neutral-600 leading-relaxed">{section.descricao}</p>
+                  <p className="text-neutral-600 dark:text-slate-400 leading-relaxed">{secao.descricao}</p>
                 </div>
               </div>
             );
@@ -107,7 +104,7 @@ export default function MissionVisionPage() {
         </div>
 
         <div
-          className={`mt-12 bg-crfal-blue-lighter rounded-2xl border border-crfal-blue/10 p-6 md:p-8 transition-all duration-700 ${
+          className={`mt-12 bg-crfal-blue-lighter dark:bg-crfal-blue/10 rounded-2xl border border-crfal-blue/10 dark:border-crfal-blue/20 p-6 md:p-8 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '500ms' }}
@@ -117,14 +114,11 @@ export default function MissionVisionPage() {
               <Target className="w-6 h-6 text-crfal-blue" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-neutral-800 mb-2">
+              <h3 className="text-xl font-bold text-neutral-800 dark:text-slate-100 mb-2">
                 Compromisso com a Profissão Farmacêutica
               </h3>
-              <p className="text-neutral-600">
-                O CRFAL atua com base em princípios éticos e profissionais,
-                buscando sempre a excelência no exercício da farmácia e a
-                valorização do farmacêutico em Alagoas. Nossa missão, visão e
-                valores refletem o compromisso com a sociedade e com a classe.
+              <p className="text-neutral-600 dark:text-slate-400">
+                O CRFAL atua com base em princípios éticos e profissionais, buscando sempre a excelência no exercício da farmácia e a valorização do farmacêutico em Alagoas. Nossa missão, visão e valores refletem o compromisso com a sociedade e com a classe.
               </p>
             </div>
           </div>
