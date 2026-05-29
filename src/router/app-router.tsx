@@ -3,7 +3,6 @@ import Layout from '@/components/layout/Layout';
 import HomePage from '@/features/home/pages/HomePage';
 import InstitutionalPage from '@/features/institutional/pages/InstitutionalPage';
 import SobreConselhoPage from '@/features/institutional/pages/SobreConselhoPage';
-import HistoryPage from '@/features/institutional/pages/HistoryPage';
 import MissionVisionPage from '@/features/institutional/pages/MissionVisionPage';
 import BoardPage from '@/features/institutional/pages/BoardPage';
 import StatutePage from '@/features/institutional/pages/StatutePage';
@@ -14,6 +13,7 @@ import RequirementsPage from '@/features/services/pages/RequirementsPage';
 import TutorialsPage from '@/features/services/pages/TutorialsPage';
 import OmbudsmanPage from '@/features/services/pages/OmbudsmanPage';
 import NewsPage from '@/features/press/pages/NewsPage';
+import NewsDetailPage from '@/features/press/pages/NewsDetailPage';
 import PublicationDetailPage from '@/features/publications/pages/PublicationDetailPage';
 import FiscalizacaoPage from '@/features/fiscalizacao/pages/FiscalizacaoPage';
 import PapelFiscalizacaoPage from '@/features/fiscalizacao/pages/PapelFiscalizacaoPage';
@@ -32,7 +32,6 @@ export default function AppRouter() {
           <Route index element={<HomePage />} />
           <Route path="instituicao" element={<InstitutionalPage />} />
           <Route path="instituicao/sobre-conselho" element={<SobreConselhoPage />} />
-          <Route path="instituicao/historia" element={<HistoryPage />} />
           <Route path="instituicao/missao-visao" element={<MissionVisionPage />} />
           <Route path="instituicao/diretoria" element={<BoardPage />} />
           <Route path="instituicao/estatuto" element={<StatutePage />} />
@@ -42,6 +41,7 @@ export default function AppRouter() {
           <Route path="servicos/tutoriais" element={<TutorialsPage />} />
           <Route path="servicos/ouvidoria" element={<OmbudsmanPage />} />
           <Route path="imprensa/noticias" element={<NewsPage />} />
+          <Route path="imprensa/noticias/:id" element={<NewsDetailPage />} />
           <Route path="contato" element={<ContactPage />} />
           <Route path="publicacao/:slug" element={<PublicationDetailPage />} />
           <Route path="fiscalizacao" element={<FiscalizacaoPage />} />
