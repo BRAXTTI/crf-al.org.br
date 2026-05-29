@@ -28,6 +28,7 @@ interface RequirementItem {
   description: string;
   documentos: string[];
   instrucoes: string[];
+  observacoesImportantes?: string | string[];
   taxaAplicavel?: string;
   prazo?: string;
   downloadUrl?: string;
@@ -38,6 +39,9 @@ interface MenuCategory {
   title: string;
   items: RequirementItem[];
 }
+
+const DEFAULT_IMPORTANT_OBSERVATION =
+  'Caso tenha duvidas quanto ao processo de envio ou manuseio do nosso sistema online CRF AL em Casa envie um email para tecnologia@crf-al.org.br e responderemos em ate 01 (um) dia Útil.';
 
 const individualMenu: MenuCategory[] = [
   {
@@ -70,6 +74,9 @@ const individualMenu: MenuCategory[] = [
         'Aguarde a análise da sua documentação pelo CRFAL',
         'Após a análise e aprovação em plenária, você receberá um email avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição',
         'Efetue o pagamento, aguarde a compensação do pagamento para receber a confirmação da sua inscrição',
+        ],
+        observacoesImportantes: [
+          'Leve os documentos originais na sede/seccional para conferência após o protocolo online.',
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf',
@@ -245,6 +252,12 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe eventuais exigências.',
           'Se a contratação for 12x36, use o requerimento específico de plantonista.',
         ],
+        observacoesImportantes: [ 'Somente serão aceitas declarações de farmacêuticos que: possuam inscrição definitiva há pelo menos 02 anos, Estejam com sua anuidade em dia, não estão respondendo ou tenham respondido a processo ético-disciplinar nos ultimos 05 anos, possuam perfil de Assistência tipo 01 (presença em pelo menos 70% das inspeções realizadas no seu horário de assistência farmacêutica Resolução 579/13 do CFF)', 
+        ' Os interessados no registro de Posto de Medicamentos deverão apresentar: I) certificado ou declaração de conclusão do ensino médio com fotocópia autenticada, ll) II comprovação de experiência mínima de 05 (cinco) anos em farmácias ou drogarias, com registro na Carteira de Trabalho e Previdência Social (CTPS).',
+        'Na documentação deverá constar exclusivamente como Atividade Econômica o comércio varejista de produtos farmacêuticos, sem manipulação de fórmulas.',
+        ' Somente será permitido o uso da designação “Posto de Medicamentos”, seguido do nome de fantasia.',
+        'Não será permitido o registro de mais de 01 (um) Posto de Medicamentos por localidade.',
+        ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/08/Contratacao-de-RT-plantonista-12x36-DOA.docx',
       },
@@ -294,7 +307,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe a análise.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2025/02/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx',
       },
       {
         id: 'contratacao-rt-servico-publico',
@@ -312,7 +325,7 @@ const corporateMenu: MenuCategory[] = [
           'Se for jornada 12x36, use o formulário específico de plantonista.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/08/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx',
       },
       {
         id: 'contratacao-rt-plantonista',
@@ -331,7 +344,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL para homologação.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/08/Contratacao-de-RT-plantonista-12x36-DOA.docx',
       },
     ],
   },
@@ -352,10 +365,10 @@ const corporateMenu: MenuCategory[] = [
           'Preencha o requerimento completo e sem rasuras.',
           'Traceje os campos não utilizados.',
           'Anexe o documento de vínculo atualizado.',
-          'Protocole no CRF-AL e acompanhe retorno técnico.',
+          'Protocole no CRF-AL em casa e acompanhe em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2026/04/Contratacao-de-RT-e-Declaracao-de-outras-atividades_ATUALIZADO.docx',
       },
     ],
   },
@@ -375,10 +388,10 @@ const corporateMenu: MenuCategory[] = [
         instrucoes: [
           'Preencha o requerimento com os dados da matriz e filial.',
           'Anexe vínculo profissional atualizado.',
-          'Protocole no CRF-AL e acompanhe a atualização cadastral.',
+          'Protocole no CRF-AL em casa e acompanhe a atualização cadastral em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/02/Requerimento-para-Transferencia-de-RT-entre-MATRIZ_FILIAL.docx',
       },
       {
         id: 'alteracao-contratual-firma',
@@ -396,7 +409,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe deferimento.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/02/Requerimento-de-Alteracao-Contratual-de-Firma.docx',
       },
       {
         id: 'dap',
@@ -410,10 +423,10 @@ const corporateMenu: MenuCategory[] = [
         instrucoes: [
           'Preencha o formulário DAP com os dados atualizados.',
           'Anexe os comprovantes exigidos.',
-          'Protocole no CRF-AL e acompanhe a análise.',
+          'Protocole no CRF-AL em casa e acompanhe em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/09/Declaracao-de-Atividade-Profissional-DAP.docx',
       },
     ],
   },
@@ -437,7 +450,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole dentro do prazo indicado na notificação.',
         ],
         prazo: 'Conforme prazo processual',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/02/Defesa-ao-Auto-de-Infracao.docx',
       },
       {
         id: 'recurso-multa-fiscal',
@@ -454,7 +467,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no prazo regulamentar.',
         ],
         prazo: 'Conforme prazo processual',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/02/Recurso-de-multa-fiscal-Homologada-pelo-CRF.docx',
       },
       {
         id: 'reconsideracao-indeferimento',
@@ -468,10 +481,10 @@ const corporateMenu: MenuCategory[] = [
         instrucoes: [
           'Preencha o pedido com justificativa clara.',
           'Anexe documentação nova ou corrigida.',
-          'Protocole no CRF-AL e acompanhe a nova análise.',
+          'Protocole no CRF-AL e acompanhe a nova análise em Protocolos Web.',
         ],
         prazo: 'Conforme prazo processual',
-        downloadUrl: 'https://www.crf-al.org.br/requerimentos/',
+        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/02/Reconsideracao-de-Indeferimento.docx',
       },
     ],
   },
@@ -481,18 +494,35 @@ export default function RequirementsPage() {
   const [activeType, setActiveType] = useState<'individual' | 'corporate'>('individual');
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<RequirementItem | null>(null);
+  const [showObservationsModal, setShowObservationsModal] = useState(false);
 
   const currentMenu = activeType === 'individual' ? individualMenu : corporateMenu;
+  const selectedItemObservations = selectedItem?.observacoesImportantes;
+  const normalizedSelectedItemObservations = selectedItem
+    ? Array.isArray(selectedItemObservations)
+      ? selectedItemObservations.filter((obs) => obs.trim().length > 0)
+      : selectedItemObservations?.trim()
+        ? [selectedItemObservations.trim()]
+        : []
+    : [];
+  const allSelectedItemObservations = selectedItem
+    ? normalizedSelectedItemObservations.length > 0
+      ? normalizedSelectedItemObservations
+      : [DEFAULT_IMPORTANT_OBSERVATION]
+    : [];
+  const hasSelectedItemObservations = allSelectedItemObservations.length > 0;
 
   const handleCategoryClick = (catId: string) => {
     setExpandedCategory(expandedCategory === catId ? null : catId);
     setSelectedItem(null);
+    setShowObservationsModal(false);
   };
 
   const handleTypeChange = (type: 'individual' | 'corporate') => {
     setActiveType(type);
     setExpandedCategory(null);
     setSelectedItem(null);
+    setShowObservationsModal(false);
   };
 
   return (
@@ -672,6 +702,15 @@ export default function RequirementsPage() {
                           </span>
                         </div>
                       )}
+                      {hasSelectedItemObservations && (
+                        <button
+                          onClick={() => setShowObservationsModal(true)}
+                          className="flex items-center gap-2 bg-white/15 hover:bg-white/25 rounded-lg px-3 py-2 transition-colors"
+                        >
+                          <Info className="w-4 h-4 text-white/80" />
+                          <span className="text-sm text-white">Observações Importantes</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -764,6 +803,38 @@ export default function RequirementsPage() {
           </div>
         </div>
       </div>
+
+      {showObservationsModal && selectedItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+          onClick={() => setShowObservationsModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-xl w-full overflow-hidden animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-neutral-200">
+              <h3 className="font-bold text-crfal-blue text-lg">Observações Importantes</h3>
+              <p className="text-sm text-neutral-500 mt-1">{selectedItem.title}</p>
+            </div>
+            <div className="p-5">
+              {allSelectedItemObservations.map((observacao, index) => (
+                <p key={index} className="text-sm text-neutral-700 whitespace-pre-line">
+                  {observacao}
+                </p>
+              ))}
+            </div>
+            <div className="p-5 bg-neutral-50 border-t border-neutral-200 flex justify-end">
+              <button
+                onClick={() => setShowObservationsModal(false)}
+                className="btn-primary text-sm"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
