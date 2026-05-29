@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { WP_POSTS_URL } from '@/services/wordpress/client';
 
 const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'/%3E%3C/svg%3E";
@@ -61,7 +62,7 @@ function mapWPPost(post: WPPost): Publication {
   const categoryName = post._embedded?.['wp:term']?.[0]?.[0]?.name || 'Geral';
   return {
     id: post.id,
-    title: post.title.rendered,
+    title: DOMPurify.sanitize(post.title.rendered),
     excerpt: post.excerpt.rendered.replace(/<[^>]*>?/gm, '').slice(0, 100) + '...',
     image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || IMG_FALLBACK,
     date: formatDate(post.date),

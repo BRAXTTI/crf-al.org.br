@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Tag, ArrowLeft } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { WP_BASE_URL } from '@/services/wordpress/client';
 
 interface WPPostDetail {
@@ -126,7 +127,7 @@ export default function PublicationDetailPage() {
 
         <h1
           className="text-3xl md:text-4xl font-bold text-neutral-800 mb-8 leading-tight"
-          dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.title.rendered) }}
         />
 
         {image && (
@@ -141,7 +142,7 @@ export default function PublicationDetailPage() {
 
         <div
           className="wp-content prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content.rendered) }}
         />
 
         <div className="mt-12 pt-8 border-t border-neutral-200">

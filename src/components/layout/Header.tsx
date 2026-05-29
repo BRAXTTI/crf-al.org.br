@@ -109,7 +109,17 @@ export default function Header() {
 
   const { pathname } = useLocation();
   // Páginas que têm hero escuro no topo (logo deve ficar branca antes de rolar)
-  const darkHeroPages = ['/', '/imprensa/noticias', '/instituicao/sobre-conselho', '/instituicao/missao-visao', '/instituicao/diretoria'];
+  const darkHeroPages = [
+    '/',
+    '/imprensa/noticias',
+    '/instituicao/sobre-conselho',
+    '/instituicao/missao-visao',
+    '/instituicao/diretoria',
+    '/servicos/requerimentos',
+    '/servicos/ouvidoria',
+    '/servicos/tutoriais',
+    '/contato',
+  ];
   const hasDarkHero = darkHeroPages.includes(pathname) || pathname.startsWith('/imprensa/noticias/');
   const isOverHero = hasDarkHero && !isScrolled;
   const navLinkBase =

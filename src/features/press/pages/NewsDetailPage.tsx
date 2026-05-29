@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import {
   ArrowLeft,
   ArrowRight,
@@ -209,7 +210,7 @@ export default function NewsDetailPage() {
 
                   <h1
                     className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-slate-100 leading-tight mb-4"
-                    dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.title.rendered) }}
                   />
 
                   <p className="text-neutral-600 dark:text-slate-400 leading-relaxed mb-6 text-sm sm:text-base">
@@ -226,7 +227,7 @@ export default function NewsDetailPage() {
                       [&_li]:mb-2
                       [&_a]:text-crfal-blue [&_a]:underline
                       [&_img]:rounded-xl [&_img]:my-4 [&_img]:w-full"
-                    dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content.rendered) }}
                   />
                 </div>
               </article>

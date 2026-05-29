@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, Newspaper } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'/%3E%3C/svg%3E";
 const IMG_FALLBACK_THUMB = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23e5e7eb'/%3E%3C/svg%3E";
@@ -73,7 +74,7 @@ export default function Publications() {
           const categoryName = post._embedded?.['wp:term']?.[0]?.[0]?.name || 'Geral';
           return {
             id: post.id,
-            title: post.title.rendered,
+            title: DOMPurify.sanitize(post.title.rendered),
             excerpt: post.excerpt.rendered.replace(HTML_TAG_RE, '').slice(0, 100) + '...',
             image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || IMG_FALLBACK,
             date: formatarData(post.date),
