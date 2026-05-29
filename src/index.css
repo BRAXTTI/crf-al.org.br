@@ -193,8 +193,16 @@
     border-color: rgb(51 65 85 / 1);
   }
 
-  .dark .text-neutral-800 {
+  .dark .text-neutral-950 {
+    color: rgb(248 250 252 / 1);
+  }
+
+  .dark .text-neutral-900 {
     color: rgb(241 245 249 / 1);
+  }
+
+  .dark .text-neutral-800 {
+    color: rgb(226 232 240 / 1);
   }
 
   .dark .text-neutral-700 {

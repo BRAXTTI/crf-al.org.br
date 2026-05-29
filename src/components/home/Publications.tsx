@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, Newspaper } from 'lucide-react';
 
+const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'/%3E%3C/svg%3E";
+const IMG_FALLBACK_THUMB = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23e5e7eb'/%3E%3C/svg%3E";
+
 interface WPPost {
   id: number;
   date: string;
@@ -72,7 +75,7 @@ export default function Publications() {
             id: post.id,
             title: post.title.rendered,
             excerpt: post.excerpt.rendered.replace(HTML_TAG_RE, '').slice(0, 100) + '...',
-            image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || '/images/placeholder.jpg',
+            image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || IMG_FALLBACK,
             date: formatarData(post.date),
             tag: categoryName,
             tagColor: getTagColor(categoryName),
@@ -154,7 +157,7 @@ export default function Publications() {
                     <Link to={`/imprensa/noticias/${pub.id}`} className="block">
                       <div className="relative h-44 overflow-hidden">
                         <img src={pub.image} alt={pub.title} className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=Sem+Imagem'; }} />
+                          onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }} />
                         <div className="absolute top-3 left-3">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 ${pub.tagColor} text-white text-xs font-semibold rounded-full`}>
                             <Tag className="w-3 h-3" />{pub.tag}
@@ -173,7 +176,7 @@ export default function Publications() {
                     <Link to={`/imprensa/noticias/${pub.id}`} className="flex items-center gap-3 p-3">
                       <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-100">
                         <img src={pub.image} alt={pub.title} className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80x80?text=Img'; }} />
+                          onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK_THUMB; }} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -198,7 +201,7 @@ export default function Publications() {
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img src={pub.image} alt={pub.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x200?text=Sem+Imagem'; }} />
+                      onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="absolute top-4 left-4">
                       <span className={`inline-flex items-center gap-1 px-3 py-1 ${pub.tagColor} text-white text-xs font-semibold rounded-full`}>

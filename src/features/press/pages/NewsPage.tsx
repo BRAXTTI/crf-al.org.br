@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper } from 'lucide-react';
 import { WP_POSTS_URL } from '@/services/wordpress/client';
 
+const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'/%3E%3C/svg%3E";
+
 interface WPPost {
   id: number;
   date: string;
@@ -61,7 +63,7 @@ function mapWPPost(post: WPPost): Publication {
     id: post.id,
     title: post.title.rendered,
     excerpt: post.excerpt.rendered.replace(/<[^>]*>?/gm, '').slice(0, 100) + '...',
-    image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || '/images/placeholder.jpg',
+    image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || IMG_FALLBACK,
     date: formatDate(post.date),
     tag: categoryName,
     tagColor: getTagColor(categoryName),
@@ -245,10 +247,7 @@ export default function NewsPage() {
                         src={pub.image}
                         alt={pub.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'https://via.placeholder.com/400x200?text=Sem+Imagem';
-                        }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="absolute top-4 left-4">
