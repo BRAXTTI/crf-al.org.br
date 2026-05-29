@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Search, Menu, X, User } from 'lucide-react';
+import ThemeToggle from '../ThemeToggle';
 
 interface NavItem {
   label: string;
@@ -236,6 +237,8 @@ export default function Header() {
               <Search className="w-4 h-4" />
             </button>
 
+            <ThemeToggle isOverHero={isOverHero} />
+
             <a
               href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
               target="_blank"
@@ -260,6 +263,7 @@ export default function Header() {
             >
               <Search className="w-5 h-5" />
             </button>
+            <ThemeToggle isOverHero={isOverHero} mobile />
             <a
               href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
               target="_blank"

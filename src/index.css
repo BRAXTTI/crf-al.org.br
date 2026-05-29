@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:wght@100;300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -26,7 +26,7 @@
     --input: 0 0% 87%;
     --ring: 207 100% 25%;
     --radius: 0.625rem;
-    
+
     --crfal-blue: #004a80;
     --crfal-blue-dark: #003b66;
     --crfal-blue-light: #0077cc;
@@ -37,25 +37,67 @@
     --crfal-gray-dark: #333333;
     --crfal-text-gray: #666666;
   }
+
+  .dark {
+    --background: 218 46% 9%;
+    --foreground: 210 40% 96%;
+    --card: 217 36% 13%;
+    --card-foreground: 210 40% 96%;
+    --popover: 217 36% 13%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 207 92% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 216 34% 17%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 28% 18%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 214 34% 16%;
+    --accent-foreground: 210 40% 96%;
+    --border: 216 27% 26%;
+    --input: 216 27% 26%;
+    --ring: 207 92% 56%;
+
+    --crfal-blue: #3b8ed9;
+    --crfal-blue-dark: #2a6ca7;
+    --crfal-blue-light: #77b7f0;
+    --crfal-blue-lighter: #123254;
+    --crfal-white: #0b1220;
+    --crfal-gray: #0b1220;
+    --crfal-gray-medium: #334155;
+    --crfal-gray-dark: #e2e8f0;
+    --crfal-text-gray: #94a3b8;
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-  
+
   html {
     scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
   }
-  
+
   body {
-    @apply bg-white text-crfal-gray-dark font-roboto antialiased;
-    font-family: 'Roboto', sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.015em;
+    line-height: 1.55;
+    overflow-x: hidden;
   }
-  
+
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Fraunces', serif;
     font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
   }
 }
 
@@ -63,46 +105,175 @@
   .container-crfal {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  
+
   .btn-primary {
-    @apply bg-crfal-blue text-white px-6 py-3 rounded-lg font-medium 
-           transition-all duration-300 hover:bg-crfal-blue-dark 
+    @apply bg-crfal-blue text-white px-6 py-3 rounded-lg font-medium
+           transition-all duration-300 hover:bg-crfal-blue-dark
            hover:shadow-lg hover:-translate-y-0.5;
   }
-  
+
   .btn-outline {
-    @apply border-2 border-crfal-blue text-crfal-blue px-6 py-3 rounded-lg font-medium 
+    @apply border-2 border-crfal-blue text-crfal-blue px-6 py-3 rounded-lg font-medium
            transition-all duration-300 hover:bg-crfal-blue hover:text-white;
   }
-  
+
+  .dark .btn-outline {
+    @apply border-crfal-blue-light text-crfal-blue-light hover:bg-crfal-blue-light hover:text-slate-950;
+  }
+
   .section-title {
     @apply text-3xl md:text-4xl font-bold text-crfal-blue mb-4;
   }
-  
+
   .card-hover {
     @apply transition-all duration-300 hover:-translate-y-3 hover:shadow-card-hover;
   }
-  
+
   .text-gradient {
     @apply bg-gradient-to-r from-crfal-blue to-crfal-blue-light bg-clip-text text-transparent;
   }
 }
 
 @layer utilities {
-  .animation-delay-100 {
-    animation-delay: 100ms;
+  @keyframes card-gradient-shift {
+    0% {
+      background-position: 0% 50%;
+      filter: saturate(1) brightness(1);
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: saturate(1.08) brightness(1.06);
+    }
+    100% {
+      background-position: 0% 50%;
+      filter: saturate(1) brightness(1);
+    }
   }
-  .animation-delay-200 {
-    animation-delay: 200ms;
+
+  @keyframes card-gradient-shift-dark {
+    0% {
+      background-position: 0% 42%;
+      filter: saturate(1.02) brightness(1);
+    }
+    50% {
+      background-position: 100% 58%;
+      filter: saturate(1.14) brightness(1.12);
+    }
+    100% {
+      background-position: 0% 42%;
+      filter: saturate(1.02) brightness(1);
+    }
   }
-  .animation-delay-300 {
-    animation-delay: 300ms;
+
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+
+  .dark .bg-white {
+    background-color: rgb(15 23 42 / 0.92);
   }
-  .animation-delay-400 {
-    animation-delay: 400ms;
+
+  .dark .bg-neutral-50 {
+    background-color: rgb(11 18 32 / 0.9);
   }
-  .animation-delay-500 {
-    animation-delay: 500ms;
+
+  .dark .bg-neutral-100 {
+    background-color: rgb(30 41 59 / 0.9);
+  }
+
+  .dark .bg-neutral-200 {
+    background-color: rgb(51 65 85 / 0.9);
+  }
+
+  .dark .border-neutral-100 {
+    border-color: rgb(39 52 73 / 1);
+  }
+
+  .dark .border-neutral-200 {
+    border-color: rgb(51 65 85 / 1);
+  }
+
+  .dark .text-neutral-800 {
+    color: rgb(241 245 249 / 1);
+  }
+
+  .dark .text-neutral-700 {
+    color: rgb(226 232 240 / 1);
+  }
+
+  .dark .text-neutral-600 {
+    color: rgb(203 213 225 / 1);
+  }
+
+  .dark .text-neutral-500 {
+    color: rgb(148 163 184 / 1);
+  }
+
+  .dark .text-neutral-400 {
+    color: rgb(100 116 139 / 1);
+  }
+
+  .dark .text-crfal-gray-dark {
+    color: rgb(226 232 240 / 1);
+  }
+
+  .dark .text-crfal-text-gray {
+    color: rgb(148 163 184 / 1);
+  }
+
+  .dark .bg-crfal-blue-lighter {
+    background-color: rgb(18 44 73 / 0.78);
+  }
+
+  .dark .bg-crfal-blue\/10 {
+    background-color: rgb(59 142 217 / 0.14);
+  }
+
+  .dark .border-crfal-blue\/10 {
+    border-color: rgb(59 142 217 / 0.28);
+  }
+
+  .dark .text-crfal-blue {
+    color: rgb(125 197 255 / 1);
+  }
+
+  .dark .hover\:bg-crfal-blue-lighter:hover {
+    background-color: rgb(24 56 92 / 0.88);
+  }
+
+  .dark .bg-neutral-50\/50 {
+    background-color: rgb(15 23 42 / 0.62);
+  }
+
+  .dark .hover\:border-crfal-blue\/20:hover {
+    border-color: rgb(125 197 255 / 0.4);
+  }
+
+  .dark .hover\:border-crfal-blue\/30:hover,
+  .dark .hover\:border-crfal-blue\/40:hover {
+    border-color: rgb(125 197 255 / 0.52);
+  }
+
+  .dark .shadow-card {
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .dark .hover\:shadow-card-hover:hover {
+    box-shadow: 0 24px 45px rgba(5, 10, 22, 0.45);
+  }
+
+  .dark .hover\:bg-neutral-50:hover {
+    background-color: rgb(30 41 59 / 0.65);
+  }
+
+  .dark .hover\:bg-neutral-100:hover {
+    background-color: rgb(51 65 85 / 0.8);
+  }
+
+  .dark .hover\:text-crfal-blue:hover {
+    color: rgb(125 197 255 / 1);
   }
 }
 
@@ -124,103 +295,13 @@
   background: #003b66;
 }
 
-/* WordPress content styles */
-.wp-content h1,
-.wp-content h2,
-.wp-content h3,
-.wp-content h4,
-.wp-content h5,
-.wp-content h6 {
-  color: #1a1a1a;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  line-height: 1.3;
+/* Hide scrollbar for horizontal scroll sections */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
-
-.wp-content h2 {
-  font-size: 1.75rem;
-}
-
-.wp-content h3 {
-  font-size: 1.5rem;
-}
-
-.wp-content p {
-  margin-bottom: 1.25em;
-  line-height: 1.8;
-  color: #333;
-}
-
-.wp-content img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.75rem;
-  margin: 1.5em 0;
-}
-
-.wp-content ul,
-.wp-content ol {
-  margin-bottom: 1.25em;
-  padding-left: 1.5em;
-}
-
-.wp-content ul {
-  list-style-type: disc;
-}
-
-.wp-content ol {
-  list-style-type: decimal;
-}
-
-.wp-content li {
-  margin-bottom: 0.5em;
-  line-height: 1.7;
-}
-
-.wp-content a {
-  color: #004a80;
-  text-decoration: underline;
-}
-
-.wp-content a:hover {
-  color: #003b66;
-}
-
-.wp-content blockquote {
-  border-left: 4px solid #004a80;
-  padding-left: 1em;
-  margin: 1.5em 0;
-  color: #555;
-  font-style: italic;
-}
-
-.wp-content figure {
-  margin: 1.5em 0;
-}
-
-.wp-content figcaption {
-  font-size: 0.875rem;
-  color: #666;
-  text-align: center;
-  margin-top: 0.5em;
-}
-
-.wp-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5em 0;
-}
-
-.wp-content th,
-.wp-content td {
-  border: 1px solid #e0e0e0;
-  padding: 0.75em;
-  text-align: left;
-}
-
-.wp-content th {
-  background-color: #f5f5f5;
-  font-weight: 600;
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Reduced motion */
