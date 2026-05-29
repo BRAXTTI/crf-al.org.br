@@ -12,6 +12,14 @@ import TutorialsPage from '@/features/services/pages/TutorialsPage';
 import OmbudsmanPage from '@/features/services/pages/OmbudsmanPage';
 import NewsPage from '@/features/press/pages/NewsPage';
 import PublicationDetailPage from '@/features/publications/pages/PublicationDetailPage';
+import FiscalizacaoPage from '@/features/fiscalizacao/pages/FiscalizacaoPage';
+import PapelFiscalizacaoPage from '@/features/fiscalizacao/pages/PapelFiscalizacaoPage';
+import InstrumentosFiscalizacaoPage from '@/features/fiscalizacao/pages/InstrumentosFiscalizacaoPage';
+import PlanoFiscalizacaoAnualPage from '@/features/fiscalizacao/pages/PlanoFiscalizacaoAnualPage';
+import RelatoriosFiscalizacaoPage from '@/features/fiscalizacao/pages/RelatoriosFiscalizacaoPage';
+import ProcessoAdministrativoFiscalPage from '@/features/fiscalizacao/pages/ProcessoAdministrativoFiscalPage';
+import AfastamentoProvisorioPage from '@/features/fiscalizacao/pages/AfastamentoProvisorioPage';
+import LegislacaoPage from '@/features/fiscalizacao/pages/LegislacaoPage';
 
 export default function AppRouter() {
   return (
@@ -30,6 +38,14 @@ export default function AppRouter() {
           <Route path="imprensa/noticias" element={<NewsPage />} />
           <Route path="contato" element={<ContactPage />} />
           <Route path="publicacao/:slug" element={<PublicationDetailPage />} />
+          <Route path="fiscalizacao" element={<FiscalizacaoPage />} />
+          <Route path="fiscalizacao/papel-da-fiscalizacao" element={<PapelFiscalizacaoPage />} />
+          <Route path="fiscalizacao/instrumentos-da-fiscalizacao" element={<InstrumentosFiscalizacaoPage />} />
+          <Route path="fiscalizacao/plano-de-fiscalizacao-anual" element={<PlanoFiscalizacaoAnualPage />} />
+          <Route path="fiscalizacao/relatorios" element={<RelatoriosFiscalizacaoPage />} />
+          <Route path="fiscalizacao/processo-administrativo-fiscal" element={<ProcessoAdministrativoFiscalPage />} />
+          <Route path="fiscalizacao/afastamento-provisorio" element={<AfastamentoProvisorioPage />} />
+          <Route path="legislacao" element={<LegislacaoPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
