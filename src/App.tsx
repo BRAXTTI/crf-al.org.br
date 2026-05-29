@@ -16,6 +16,14 @@ const Tutoriais = lazy(() => import('./pages/servicos/Tutoriais'));
 const Ouvidoria = lazy(() => import('./pages/servicos/Ouvidoria'));
 const Noticias = lazy(() => import('./pages/imprensa/Noticias'));
 const NoticiaDetalhe = lazy(() => import('./pages/imprensa/NoticiaDetalhe'));
+const Fiscalizacao = lazy(() => import('./pages/fiscalizacao/Fiscalizacao'));
+const PapelFiscalizacao = lazy(() => import('./pages/fiscalizacao/PapelFiscalizacao'));
+const InstrumentosFiscalizacao = lazy(() => import('./pages/fiscalizacao/InstrumentosFiscalizacao'));
+const PlanoFiscalizacaoAnual = lazy(() => import('./pages/fiscalizacao/PlanoFiscalizacaoAnual'));
+const RelatoriosFiscalizacao = lazy(() => import('./pages/fiscalizacao/RelatoriosFiscalizacao'));
+const ProcessoAdministrativoFiscal = lazy(() => import('./pages/fiscalizacao/ProcessoAdministrativoFiscal'));
+const AfastamentoProvisorio = lazy(() => import('./pages/fiscalizacao/AfastamentoProvisorio'));
+const Legislacao = lazy(() => import('./pages/fiscalizacao/Legislacao'));
 
 function RouteLoadingFallback() {
   return (
@@ -43,6 +51,14 @@ function App() {
             <Route path="servicos/ouvidoria" element={<Ouvidoria />} />
             <Route path="imprensa/noticias" element={<Noticias />} />
             <Route path="imprensa/noticias/:id" element={<NoticiaDetalhe />} />
+            <Route path="fiscalizacao" element={<Fiscalizacao />} />
+            <Route path="fiscalizacao/papel-da-fiscalizacao" element={<PapelFiscalizacao />} />
+            <Route path="fiscalizacao/instrumentos-da-fiscalizacao" element={<InstrumentosFiscalizacao />} />
+            <Route path="fiscalizacao/plano-de-fiscalizacao-anual" element={<PlanoFiscalizacaoAnual />} />
+            <Route path="fiscalizacao/relatorios" element={<RelatoriosFiscalizacao />} />
+            <Route path="fiscalizacao/processo-administrativo-fiscal" element={<ProcessoAdministrativoFiscal />} />
+            <Route path="fiscalizacao/afastamento-provisorio" element={<AfastamentoProvisorio />} />
+            <Route path="legislacao" element={<Legislacao />} />
             <Route path="todas-noticias" element={<Noticias />} />
             <Route path="contato" element={<Contato />} />
           </Route>
