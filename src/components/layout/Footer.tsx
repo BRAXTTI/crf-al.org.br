@@ -1,7 +1,6 @@
 import {
   MapPin,
   Phone,
-  Mail,
   Clock,
   Facebook,
   Instagram,
@@ -53,40 +52,44 @@ export default function Footer() {
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-white/80">
-                    Rua Dr. Jorge de Lima, 113
-                    <br />
-                    Trapiche da Barra, Maceió - AL
-                    <br />
-                    CEP: 57010-300
-                  </p>
+                  <div className="text-sm text-white/80">
+                    <p className="font-medium text-white">Sede</p>
+                    <p>Rua Oldemburgo da Silva Paranhos, 290 - Farol, Maceió - AL, 57055-320</p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-crfal-blue-light flex-shrink-0" />
-                  <a
-                    href="tel:+558233333333"
-                    className="text-sm text-white/80 hover:text-white transition-colors"
-                  >
-                    (82) 3333-3333
-                  </a>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-crfal-blue-light flex-shrink-0" />
-                  <a
-                    href="mailto:crfal@crfal.org.br"
-                    className="text-sm text-white/80 hover:text-white transition-colors"
-                  >
-                    crfal@crfal.org.br
-                  </a>
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-white/80">
+                    <p className="font-medium text-white">Seccional</p>
+                    <p>Rua Delmiro Gouveia, 1382 - sala 01 - 1°andar - Sen. Teotônio Vilela, Arapiraca - AL, 57312-415</p>
+                  </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Clock className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Horário de Funcionamento</p>
-                    <p>Segunda a Sexta: 8h às 17h</p>
+                    <p>Segunda a Sexta: 09h às 17h (sem pausa para o almoço)</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Phone className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-white/80">
+                    <p className="font-medium text-white">Canais de Atendimento</p>
+                    <a
+                      href="tel:+5582999710247"
+                      className="block hover:text-white transition-colors"
+                    >
+                      82 9 9971-0247
+                    </a>
+                    <a
+                      href="mailto:atendimento@crf-al.org.br"
+                      className="block hover:text-white transition-colors"
+                    >
+                      atendimento@crf-al.org.br
+                    </a>
                   </div>
                 </div>
               </div>
@@ -186,11 +189,11 @@ export default function Footer() {
                 do Estado de Alagoas. Todos os direitos reservados.
               </p>
               <div className="flex items-center gap-4 text-sm text-white/60">
-                <a href="#privacidade" className="hover:text-white transition-colors">
+                <a href="/politica-de-privacidade" className="hover:text-white transition-colors">
                   Política de Privacidade
                 </a>
                 <span className="text-white/30">|</span>
-                <a href="#termos" className="hover:text-white transition-colors">
+                <a href="/termos-de-uso" className="hover:text-white transition-colors">
                   Termos de Uso
                 </a>
                 <span className="text-white/30">|</span>
