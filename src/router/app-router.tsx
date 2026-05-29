@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import HomePage from '@/features/home/pages/HomePage';
 import InstitutionalPage from '@/features/institutional/pages/InstitutionalPage';
+import SobreConselhoPage from '@/features/institutional/pages/SobreConselhoPage';
 import HistoryPage from '@/features/institutional/pages/HistoryPage';
 import MissionVisionPage from '@/features/institutional/pages/MissionVisionPage';
 import BoardPage from '@/features/institutional/pages/BoardPage';
@@ -30,6 +31,7 @@ export default function AppRouter() {
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="instituicao" element={<InstitutionalPage />} />
+          <Route path="instituicao/sobre-conselho" element={<SobreConselhoPage />} />
           <Route path="instituicao/historia" element={<HistoryPage />} />
           <Route path="instituicao/missao-visao" element={<MissionVisionPage />} />
           <Route path="instituicao/diretoria" element={<BoardPage />} />
