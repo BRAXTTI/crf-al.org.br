@@ -1,13 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  FileText,
-  Edit3,
-  Copy,
-  FileCheck,
   Search,
-  Building2,
-  UserCheck,
-  Stamp,
   ChevronRight,
   Play,
   X,
@@ -16,151 +9,17 @@ import {
   Filter,
   Download,
 } from 'lucide-react';
+import { servicesData, type ServiceItem } from '@/data/servicos';
+import { getYouTubeEmbedUrl } from '@/lib/youtube';
 
-interface Tutorial {
-  id: number;
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  category: string;
-  duration: string;
-  steps: string[];
-  videoUrl?: string;
-}
-
-const categories = ['Todos', 'Inscrição', 'Certidões', 'Consultas', 'Estabelecimentos'];
-
-const tutorials: Tutorial[] = [
-  {
-    id: 1,
-    icon: FileText,
-    title: 'Como fazer sua Inscrição no CRFAL',
-    description: 'Aprenda passo a passo como realizar sua primeira inscrição no Conselho Regional de Farmácia de Alagoas.',
-    category: 'Inscrição',
-    duration: '5 min',
-    steps: [
-      'Acesse o portal CRF em Casa pelo site oficial do CRFAL',
-      'Clique em "Nova Inscrição" no menu principal',
-      'Preencha o formulário com seus dados pessoais completos',
-      'Informe os dados profissionais e acadêmicos',
-      'Anexe os documentos solicitados (diploma, RG, CPF, etc.)',
-      'Revise todas as informações e confirme o envio',
-      'Gere o boleto da taxa de inscrição',
-      'Efetue o pagamento e acompanhe pelo portal',
-    ],
-  },
-  {
-    id: 2,
-    icon: Edit3,
-    title: 'Como Alterar seus Dados Cadastrais',
-    description: 'Saiba como atualizar suas informações pessoais e profissionais de forma rápida e segura.',
-    category: 'Inscrição',
-    duration: '3 min',
-    steps: [
-      'Faça login no portal CRF em Casa',
-      'Acesse o menu "Meus Dados"',
-      'Clique em "Editar Dados"',
-      'Altere as informações desejadas',
-      'Anexe documentos comprobatórios, se necessário',
-      'Confirme as alterações clicando em "Salvar"',
-    ],
-  },
-  {
-    id: 3,
-    icon: Copy,
-    title: 'Como Solicitar 2ª Via de Certidões',
-    description: 'Tutorial completo para solicitar a segunda via de certidões e documentos emitidos pelo CRFAL.',
-    category: 'Certidões',
-    duration: '4 min',
-    steps: [
-      'Acesse o portal CRF em Casa',
-      'Navegue até a seção "Certidões"',
-      'Selecione o tipo de documento desejado',
-      'Informe o número da sua inscrição',
-      'Pague a taxa de emissão, se aplicável',
-      'Baixe o documento em formato PDF',
-    ],
-  },
-  {
-    id: 4,
-    icon: FileCheck,
-    title: 'Como Emitir Certidão de Regularidade',
-    description: 'Aprenda a emitir sua certidão de regularidade de forma online e instantânea.',
-    category: 'Certidões',
-    duration: '2 min',
-    steps: [
-      'Acesse o portal CRF em Casa',
-      'Vá em "Certidões" > "Certidão de Regularidade"',
-      'Verifique se não há pendências financeiras',
-      'Clique em "Emitir Certidão"',
-      'O documento será gerado automaticamente em PDF',
-      'Imprima ou salve o arquivo',
-    ],
-  },
-  {
-    id: 5,
-    icon: Search,
-    title: 'Como Consultar Inscrição de Farmacêutico',
-    description: 'Veja como verificar a situação cadastral de qualquer farmacêutico registrado.',
-    category: 'Consultas',
-    duration: '2 min',
-    steps: [
-      'Acesse a página de consulta pública no site do CRFAL',
-      'Digite o CPF ou o número de inscrição do profissional',
-      'Clique em "Consultar"',
-      'Visualize os dados e a situação cadastral',
-      'Verifique se a inscrição está ativa e regular',
-    ],
-  },
-  {
-    id: 6,
-    icon: Building2,
-    title: 'Como Consultar Autorização de Funcionamento',
-    description: 'Verifique a regularidade de estabelecimentos farmacêuticos junto ao CRFAL.',
-    category: 'Estabelecimentos',
-    duration: '3 min',
-    steps: [
-      'Acesse a consulta de estabelecimentos no site',
-      'Informe o CNPJ ou nome da farmácia',
-      'Selecione o estado (Alagoas) e a cidade',
-      'Clique em "Consultar"',
-      'Visualize os dados do estabelecimento',
-      'Confirme a autorização de funcionamento',
-    ],
-  },
-  {
-    id: 7,
-    icon: UserCheck,
-    title: 'Como Consultar Responsabilidade Técnica',
-    description: 'Consulte os vínculos de responsabilidade técnica ativos no CRFAL.',
-    category: 'Estabelecimentos',
-    duration: '3 min',
-    steps: [
-      'Acesse a consulta de Responsabilidade Técnica',
-      'Digite o CPF do farmacêutico',
-      'Ou informe o CNPJ do estabelecimento',
-      'Clique em "Consultar"',
-      'Visualize os vínculos ativos e o histórico',
-    ],
-  },
-  {
-    id: 8,
-    icon: Stamp,
-    title: 'Como Validar Documentos do CRFAL',
-    description: 'Aprenda a verificar a autenticidade de documentos emitidos pelo Conselho.',
-    category: 'Consultas',
-    duration: '2 min',
-    steps: [
-      'Acesse o validador de documentos no site do CRFAL',
-      'Digite o código de validação presente no documento',
-      'Ou faça upload do QR Code',
-      'Clique em "Validar"',
-      'Visualize o resultado e confirme a autenticidade',
-    ],
-  },
-];
+type Tutorial = ServiceItem;
 
 export default function TutorialsPage() {
+  const tutorials: Tutorial[] = servicesData;
+  const categories = useMemo(
+    () => ['Todos', ...Array.from(new Set(tutorials.map((tutorial) => tutorial.category)))],
+    [tutorials]
+  );
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [expandedTutorial, setExpandedTutorial] = useState<number | null>(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
@@ -186,6 +45,10 @@ export default function TutorialsPage() {
     activeCategory === 'Todos'
       ? tutorials
       : tutorials.filter((t) => t.category === activeCategory);
+  const selectedVideoEmbedUrl = useMemo(
+    () => getYouTubeEmbedUrl(selectedTutorial?.tutorial.videoUrl),
+    [selectedTutorial?.tutorial.videoUrl]
+  );
 
   const handleTutorialClick = (tutorial: Tutorial) => {
     setSelectedTutorial(tutorial);
@@ -345,7 +208,7 @@ export default function TutorialsPage() {
                           </span>
                           <span className="text-xs text-neutral-400 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {tutorial.duration}
+                            2-5 min
                           </span>
                         </div>
                         <h3 className="font-bold text-neutral-800">{tutorial.title}</h3>
@@ -384,7 +247,7 @@ export default function TutorialsPage() {
                           </div>
 
                           <ol className="space-y-3">
-                            {tutorial.steps.map((step, stepIndex) => (
+                            {tutorial.tutorial.steps.map((step, stepIndex) => (
                               <li key={stepIndex} className="flex items-start gap-3">
                                 <span className="flex-shrink-0 w-6 h-6 bg-crfal-blue text-white text-xs font-bold rounded-full flex items-center justify-center">
                                   {stepIndex + 1}
@@ -442,12 +305,24 @@ export default function TutorialsPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="aspect-video bg-neutral-100 flex items-center justify-center">
-              <div className="text-center">
-                <Play className="w-16 h-16 text-crfal-blue mx-auto mb-4" />
-                <p className="text-neutral-500">Vídeo tutorial em breve</p>
+            {selectedVideoEmbedUrl ? (
+              <div className="aspect-video bg-black">
+                <iframe
+                  src={selectedVideoEmbedUrl}
+                  title={`Vídeo tutorial: ${selectedTutorial.title}`}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
               </div>
-            </div>
+            ) : (
+              <div className="aspect-video bg-neutral-100 flex items-center justify-center">
+                <div className="text-center">
+                  <Play className="w-16 h-16 text-crfal-blue mx-auto mb-4" />
+                  <p className="text-neutral-500">Vídeo tutorial em breve</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
