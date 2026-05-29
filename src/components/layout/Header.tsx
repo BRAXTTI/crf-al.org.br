@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Search, Menu, X, User } from 'lucide-react';
+import ThemeToggle from '../ThemeToggle';
 
 interface NavItem {
   label: string;
@@ -21,16 +22,6 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: 'Legislação',
-    href: '#legislacao',
-    submenu: [
-      { label: 'Leis Federais', href: '#leis' },
-      { label: 'Resoluções', href: '#resolucoes' },
-      { label: 'Normativas', href: '#normativas' },
-      { label: 'Pareceres', href: '#pareceres' },
-    ],
-  },
-  {
     label: 'Serviços',
     href: '#servicos',
     submenu: [
@@ -42,11 +33,16 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Fiscalização',
-    href: '#fiscalizacao',
+    href: '/fiscalizacao',
     submenu: [
-      { label: 'Normas de Fiscalização', href: '#normas' },
-      { label: 'Denúncias', href: '#denuncias' },
-      { label: 'Orientações', href: '#orientacoes' },
+      { label: 'Custos da fiscalização', href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio' },
+      { label: 'Papel da Fiscalização', href: '/fiscalizacao/papel-da-fiscalizacao' },
+      { label: 'Instrumentos de fiscalização', href: '/fiscalizacao/instrumentos-da-fiscalizacao' },
+      { label: 'Plano de fiscalização anual', href: '/fiscalizacao/plano-de-fiscalizacao-anual' },
+      { label: 'Relatórios', href: '/fiscalizacao/relatorios' },
+      { label: 'Processo Administrativo Fiscal', href: '/fiscalizacao/processo-administrativo-fiscal' },
+      { label: 'Afastamento Provisório', href: '/fiscalizacao/afastamento-provisorio' },
+      { label: 'Legislação', href: '/legislacao' },
     ],
   },
   {
@@ -241,6 +237,8 @@ export default function Header() {
               <Search className="w-4 h-4" />
             </button>
 
+            <ThemeToggle isOverHero={isOverHero} />
+
             <a
               href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
               target="_blank"
@@ -265,6 +263,7 @@ export default function Header() {
             >
               <Search className="w-5 h-5" />
             </button>
+            <ThemeToggle isOverHero={isOverHero} mobile />
             <a
               href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
               target="_blank"

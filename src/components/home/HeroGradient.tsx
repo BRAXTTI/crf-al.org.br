@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 
 export default function HeroGradient() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -66,7 +66,7 @@ export default function HeroGradient() {
     };
 
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
     draw();
     return () => {
       window.removeEventListener('resize', resize);
@@ -75,7 +75,7 @@ export default function HeroGradient() {
   }, []);
 
   return (
-    <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[100svh] md:min-h-[90vh] flex items-center overflow-hidden">
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full object-cover"
@@ -83,11 +83,27 @@ export default function HeroGradient() {
         aria-hidden
       />
 
-      <div className="container-crfal relative z-10 w-full pt-28 pb-20 md:pt-32 md:pb-24">
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
+        }}
+        aria-hidden
+      />
+
+      <div className="container-crfal relative z-10 w-full pt-24 pb-24 sm:pt-28 sm:pb-20 md:pt-32 md:pb-24">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-6 animate-fade-in">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-white/90 text-sm font-medium">
+                Portal do Farmacêutico
+              </span>
+            </div>
+
             <h1
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] tracking-tight mb-6"
+              className="text-[2rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-5 sm:mb-6 animate-slide-up"
               style={{
                 background: 'linear-gradient(135deg, #ffffff 0%, #b8e0f0 40%, #7ec8e3 70%, #e0f4fc 100%)',
                 backgroundClip: 'text',
@@ -98,23 +114,42 @@ export default function HeroGradient() {
             >
               Bem-vindo ao CRFAL
             </h1>
-            <p className="text-lg md:text-xl text-white/90 mb-10 max-w-xl leading-relaxed">
+
+            <p className="text-base sm:text-lg md:text-xl text-white/85 mb-8 sm:mb-10 max-w-xl leading-relaxed">
               Conselho Regional de Farmácia do Estado de Alagoas. Regulação, serviços e apoio ao farmacêutico.
             </p>
-            <div className="flex flex-wrap gap-4">
+
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <a
                 href="#servicos"
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-crfal-blue font-semibold rounded-full hover:bg-white/95 hover:shadow-xl transition-all duration-300"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-crfal-blue font-semibold rounded-full hover:bg-white/95 dark:!bg-blue-100 dark:!text-slate-900 dark:hover:!bg-blue-50 hover:shadow-xl active:scale-[0.98] transition-all duration-300 text-sm sm:text-base"
               >
                 Conheça nossos serviços
                 <ArrowRight className="w-5 h-5" />
               </a>
               <a
                 href="/instituicao"
-                className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/10 text-white font-medium rounded-full border border-white/30 hover:bg-white/20 transition-all duration-300"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white/10 text-white font-medium rounded-full border border-white/30 hover:bg-white/20 dark:bg-slate-900/40 dark:text-slate-100 dark:border-slate-300/30 dark:hover:bg-slate-900/60 active:scale-[0.98] transition-all duration-300 text-sm sm:text-base"
               >
                 Nossa instituição
               </a>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 sm:flex sm:items-center sm:gap-6 mt-10 sm:mt-12 pt-8 border-t border-white/10">
+              <div>
+                <p className="text-2xl sm:text-3xl font-bold text-white">8+</p>
+                <p className="text-xs sm:text-sm text-white/60">Serviços Online</p>
+              </div>
+              <div className="hidden sm:block w-px h-10 bg-white/20" />
+              <div>
+                <p className="text-2xl sm:text-3xl font-bold text-white">24h</p>
+                <p className="text-xs sm:text-sm text-white/60">Disponibilidade</p>
+              </div>
+              <div className="hidden sm:block w-px h-10 bg-white/20" />
+              <div>
+                <p className="text-2xl sm:text-3xl font-bold text-white">100%</p>
+                <p className="text-xs sm:text-sm text-white/60">Digital</p>
+              </div>
             </div>
           </div>
 
@@ -123,11 +158,15 @@ export default function HeroGradient() {
               className="w-full max-w-md aspect-square rounded-3xl opacity-90"
               style={{
                 background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.12) 0%, transparent 70%)',
-                boxShadow: '0 0 120px rgba(255,255,255,0.08)',
               }}
             />
           </div>
         </div>
+      </div>
+
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-fade-in" style={{ animationDelay: '1s' }}>
+        <span className="text-white/40 text-xs tracking-widest uppercase hidden sm:block">Explorar</span>
+        <ChevronDown className="w-5 h-5 text-white/40 animate-float" />
       </div>
     </section>
   );
