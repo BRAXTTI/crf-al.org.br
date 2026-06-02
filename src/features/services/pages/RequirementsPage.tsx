@@ -19,6 +19,8 @@ import {
   ArrowLeft,
   Info,
   AlertCircle,
+  Workflow,
+  X,
 } from 'lucide-react';
 
 interface RequirementItem {
@@ -32,6 +34,7 @@ interface RequirementItem {
   taxaAplicavel?: string;
   prazo?: string;
   downloadUrl?: string;
+  fluxogramaUrl?: string;
 }
 
 interface MenuCategory {
@@ -49,10 +52,44 @@ const individualMenu: MenuCategory[] = [
     title: 'Inscrições',
     items: [
       {
-        id: 'inscricao-definitiva-provisoria',
+        id: 'primeira-inscricao-profissional-provisoria',
         icon: UserPlus,
-        title: 'Inscrição Profissional Definitiva e Provisória',
-        description: 'Serviço realizado pelo CRF-AL em Casa para novos farmacêuticos.',
+        title: 'Primeira Inscrição Profissional (Provisória)',
+        description: 'Serviço realizado pelo CRF-AL em Casa para primeira inscrição profissional provisória.',
+        documentos: [
+          '03 fotos 3x4 coloridas e recentes (entregar na sede/seccional)',
+          'Certidão ou declaração de conclusão do curso de Bacharelado em Farmácia',
+          'Histórico da graduação acadêmica (original e cópia)',
+          'RG ou CNH (original e cópia)',
+          'CPF (original e cópia)',
+          'Carteira de reservista/certificado de dispensa (original e cópia)',
+          'Título de eleitor (original e cópia)',
+          'Comprovante de residência (cópia)',
+          'Carteira de trabalho física (original e cópia) ou folha de rosto da CTPS digital',
+          'Exame de comprovação de tipo sanguíneo',
+        ],
+        instrucoes: [
+          'Acesse o portal do CRF em Casa',
+          'Clique em "Pré Inscrição Pessoa Física"',
+          'Preencha o formulário atentamente',
+          'Anexe os documentos necessários',
+          'Imprima seu protocolo e leve sua documentação original na sede/seccional do CRFAL',
+          'Aguarde a análise da sua documentação pelo CRFAL',
+          'Após a análise e aprovação em plenária, você receberá um email avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição',
+          'Efetue o pagamento, aguarde a compensação do pagamento para receber a confirmação da sua inscrição',
+        ],
+        observacoesImportantes: [
+          'Leve os documentos originais na sede/seccional para conferência após o protocolo online.',
+        ],
+        prazo: 'Conforme análise do CRF-AL',
+        downloadUrl: 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf',
+        fluxogramaUrl: '/images/fluxograma-primeira-inscricao-crfal.png',
+      },
+      {
+        id: 'inscricao-profissional-definitiva',
+        icon: BadgeCheck,
+        title: 'Inscrição Definitiva',
+        description: 'Serviço realizado pelo CRF-AL em Casa para inscrição profissional definitiva.',
         documentos: [
           '03 fotos 3x4 coloridas e recentes (entregar na sede/seccional)',
           'Diploma do curso de Bacharelado em Farmácia (entregar na sede/seccional)',
@@ -66,14 +103,13 @@ const individualMenu: MenuCategory[] = [
           'Exame de comprovação de tipo sanguíneo',
         ],
         instrucoes: [
-        'Acesse o portal do CRF em Casa',
-        'Clique em "Pré Inscrição Pessoa Física"',
-        'Preencha o formulário atentamente',
-        'Anexe os documentos necessários',
-        'Imprima seu protocolo e leve sua documentação original na sede/seccional do CRFAL',
-        'Aguarde a análise da sua documentação pelo CRFAL',
-        'Após a análise e aprovação em plenária, você receberá um email avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição',
-        'Efetue o pagamento, aguarde a compensação do pagamento para receber a confirmação da sua inscrição',
+          'Acesse o portal do CRF em Casa',
+          'Selecione a opção de inscrição definitiva ou alteração para definitiva',
+          'Preencha o formulário atentamente',
+          'Anexe o diploma e os documentos necessários',
+          'Imprima seu protocolo e leve sua documentação original na sede/seccional do CRFAL',
+          'Aguarde a análise da sua documentação pelo CRFAL',
+          'Após a análise e aprovação, acompanhe a confirmação da sua inscrição pelo portal CRF em Casa',
         ],
         observacoesImportantes: [
           'Leve os documentos originais na sede/seccional para conferência após o protocolo online.',
@@ -495,6 +531,7 @@ export default function RequirementsPage() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<RequirementItem | null>(null);
   const [showObservationsModal, setShowObservationsModal] = useState(false);
+  const [selectedFlowchartItem, setSelectedFlowchartItem] = useState<RequirementItem | null>(null);
 
   const currentMenu = activeType === 'individual' ? individualMenu : corporateMenu;
   const selectedItemObservations = selectedItem?.observacoesImportantes;
@@ -711,6 +748,16 @@ export default function RequirementsPage() {
                           <span className="text-sm text-white">Observações Importantes</span>
                         </button>
                       )}
+                      {selectedItem.fluxogramaUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedFlowchartItem(selectedItem)}
+                          className="flex items-center gap-2 bg-white text-crfal-blue hover:bg-crfal-blue-lighter rounded-lg px-3 py-2 transition-colors"
+                        >
+                          <Workflow className="w-4 h-4" />
+                          <span className="text-sm font-semibold">Ver Fluxograma</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -774,6 +821,16 @@ export default function RequirementsPage() {
                         Formulário indisponível
                       </button>
                     )}
+                    {selectedItem.fluxogramaUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFlowchartItem(selectedItem)}
+                        className="btn-outline text-sm flex items-center gap-2"
+                      >
+                        <Workflow className="w-4 h-4" />
+                        Ver Fluxograma
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -804,6 +861,43 @@ export default function RequirementsPage() {
         </div>
       </div>
 
+
+      {selectedFlowchartItem?.fluxogramaUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="fluxograma-title"
+          onClick={() => setSelectedFlowchartItem(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-5xl w-full overflow-hidden animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-neutral-200 flex items-start justify-between gap-4">
+              <div>
+                <h3 id="fluxograma-title" className="font-bold text-crfal-blue text-lg">Fluxograma do processo</h3>
+                <p className="text-sm text-neutral-500 mt-1">{selectedFlowchartItem.title}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedFlowchartItem(null)}
+                className="rounded-full border border-neutral-200 p-2 text-neutral-500 transition-colors hover:border-crfal-blue hover:text-crfal-blue"
+                aria-label="Fechar fluxograma"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="max-h-[78vh] overflow-auto bg-neutral-50 p-4 sm:p-6">
+              <img
+                src={selectedFlowchartItem.fluxogramaUrl}
+                alt={`Fluxograma do requerimento ${selectedFlowchartItem.title}`}
+                className="mx-auto h-auto w-full max-w-none rounded-xl border border-neutral-200 bg-white object-contain shadow-sm"
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {showObservationsModal && selectedItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"

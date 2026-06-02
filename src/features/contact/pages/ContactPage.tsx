@@ -11,15 +11,15 @@ interface ContactInfo {
 }
 
 const contacts: ContactInfo[] = [
-  { id: 1, setor: 'Presidência', responsavel: 'João Batista dos Santos Neto', email: 'presidente@crf-al.org.br', telefone: '(82) 2121-0001' },
-  { id: 2, setor: 'Vice-Presidência', responsavel: 'Lyvia Quintela Cavalcante Trajano', email: 'vicepresidente@crfal.org.br', telefone: '(82) 2121-0002' },
-  { id: 3, setor: 'Secretaria-Geral', responsavel: 'Ana Renata de Almeida Lima', email: 'secretaria@crf-al.org.br', telefone: '(82) 2121-0003' },
-  { id: 4, setor: 'Tesouraria', responsavel: 'Isadora Lyra Cavalcanti', email: 'tesoureira@crf-al.org.br', telefone: '(82) 2121-0004' },
-  { id: 5, setor: 'Fiscalização', responsavel: 'Departamento de Fiscalização', email: 'fiscalizacao@crf-al.org.br', telefone: '(82) 2121-0005', whatsapp: '(82) 99999-0005' },
-  { id: 6, setor: 'Secretaria', responsavel: 'Departamento de Secretaria', email: 'secretaria@crf-al.org.br', telefone: '(82) 2121-0006' },
-  { id: 7, setor: 'Tecnologia da Informação', responsavel: 'Departamento de TI', email: 'tecnologia@crf-al.org.br', telefone: '(82) 2121-0007' },
-  { id: 8, setor: 'Comunicação', responsavel: 'Departamento de Comunicação', email: 'ascom@crf-al.org.br', telefone: '(82) 2121-0008', whatsapp: '(82) 99999-0008' },
-  { id: 9, setor: 'Ouvidoria', responsavel: 'Atendimento ao Cidadão', email: 'ouvidoria@crfal.org.br', telefone: '(82) 2121-0009', whatsapp: '(82) 99999-0009' },
+  { id: 1, setor: 'Presidência', responsavel: 'João Batista dos Santos Neto', email: 'presidente@crf-al.org.br', telefone: '(82) 99603-9110' },
+  { id: 2, setor: 'Vice-Presidência', responsavel: 'Lyvia Quintela Cavalcante Trajano', email: 'vicepresidente@crfal.org.br'},
+  { id: 3, setor: 'Secretaria-Geral', responsavel: 'Ana Renata de Almeida Lima', email: 'secretaria@crf-al.org.br', telefone: '(82) (82) 82 9 9971-0247' },
+  { id: 4, setor: 'Tesouraria', responsavel: 'Isadora Lyra Cavalcanti', email: 'tesouraria@crf-al.org.br'},
+  { id: 5, setor: 'Fiscalização', responsavel: 'Departamento de Fiscalização', email: 'fiscalizacao@crf-al.org.br', telefone: '(82)99971-0247', whatsapp: '(82) 9999-8624' },
+  { id: 6, setor: 'Secretaria', responsavel: 'Departamento de Secretaria', email: 'secretaria@crf-al.org.br', telefone: '(82) 8181-9050', whatsapp: '8298181-9050' },
+  { id: 7, setor: 'Tecnologia da Informação', responsavel: 'Departamento de TI', email: 'tecnologia@crf-al.org.br', telefone: '(82) 99355-8888' },
+  { id: 8, setor: 'Comunicação', responsavel: 'Departamento de Comunicação', email: 'ascom@crf-al.org.br'},
+  { id: 9, setor: 'Ouvidoria', responsavel: 'Atendimento ao Cidadão', email: 'ouvidoria@crf-al.org.br'}
 ];
 
 export default function ContactPage() {
@@ -83,8 +83,8 @@ export default function ContactPage() {
               <Phone className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">Telefone</h3>
-            <p className="text-sm text-neutral-600">(82) 2121-0000</p>
-            <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 8h às 17h</p>
+            <p className="text-sm text-neutral-600">(82) 9 9971-0247</p>
+            <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 09h às 17h (sem pausa para o almoço)</p>
           </div>
           <div className="bg-white rounded-2xl p-5 border border-neutral-200">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
@@ -99,8 +99,8 @@ export default function ContactPage() {
               <MessageCircle className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">WhatsApp</h3>
-            <p className="text-sm text-neutral-600">(82) 99999-0000</p>
-            <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 8h às 17h</p>
+            <p className="text-sm text-neutral-600">(82) 99971-0247</p>
+            <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 09h às 17h (sem pausa para o almoço)</p>
           </div>
         </div>
 
@@ -215,7 +215,7 @@ export default function ContactPage() {
                   atendimento@crf-al.org.br
                 </a>{' '}
                 ou pelo telefone{' '}
-                <a href="tel:08221210000" className="text-crfal-blue hover:underline font-medium">
+                <a href="tel:99971-0247" className="text-crfal-blue hover:underline font-medium">
                   (82) 2121-0000
                 </a>
                 . Retornaremos o mais breve possível.
