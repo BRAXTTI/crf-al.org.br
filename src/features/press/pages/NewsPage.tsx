@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper } from 'lucide-react';
+import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper, ChevronLeft } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { WP_POSTS_URL } from '@/services/wordpress/client';
 
@@ -107,33 +107,100 @@ function RevealCard({ children, index }: { children: React.ReactNode; index: num
   );
 }
 
+function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+}: {
+  page: number;
+  totalPages: number;
+  onPageChange: (p: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+
+  const getPages = () => {
+    const pages: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push('...');
+      for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+        pages.push(i);
+      }
+      if (page < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-1 mt-10 flex-wrap">
+      <button
+        onClick={() => onPageChange(page - 1)}
+        disabled={page === 1}
+        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium border border-neutral-200 bg-white text-neutral-600 hover:border-crfal-blue/40 hover:text-crfal-blue transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Anterior
+      </button>
+
+      {getPages().map((p, i) =>
+        p === '...' ? (
+          <span key={`ellipsis-${i}`} className="px-2 py-2 text-neutral-400 text-sm select-none">
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onPageChange(p as number)}
+            className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+              p === page
+                ? 'bg-crfal-blue text-white shadow-md'
+                : 'border border-neutral-200 bg-white text-neutral-600 hover:border-crfal-blue/40 hover:text-crfal-blue'
+            }`}
+          >
+            {p}
+          </button>
+        )
+      )}
+
+      <button
+        onClick={() => onPageChange(page + 1)}
+        disabled={page === totalPages}
+        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium border border-neutral-200 bg-white text-neutral-600 hover:border-crfal-blue/40 hover:text-crfal-blue transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Próxima
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
 export default function NewsPage() {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [activeTag, setActiveTag] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const fetchPosts = useCallback(async (pageNum: number) => {
     try {
-      if (pageNum === 1) setLoading(true);
-      else setLoadingMore(true);
-
+      setLoading(true);
       const response = await fetch(`${WP_API_BASE}&page=${pageNum}`);
       const wpTotalPages = response.headers.get('X-WP-TotalPages');
+      const wpTotal = response.headers.get('X-WP-Total');
       if (wpTotalPages) setTotalPages(Number(wpTotalPages));
+      if (wpTotal) setTotalPosts(Number(wpTotal));
 
       const data: WPPost[] = await response.json();
-      const mapped = data.map(mapWPPost);
-
-      setPublications((prev) => (pageNum === 1 ? mapped : [...prev, ...mapped]));
+      setPublications(data.map(mapWPPost));
     } catch (error) {
       console.error('Erro ao buscar notícias:', error);
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   }, []);
 
@@ -145,31 +212,17 @@ export default function NewsPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !loadingMore && page < totalPages) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          fetchPosts(nextPage);
-        }
-      },
-      { rootMargin: '200px' }
-    );
-
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [page, totalPages, loadingMore, fetchPosts]);
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    setActiveTag('all');
+    fetchPosts(newPage);
+    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const filteredPublications =
     activeTag === 'all'
       ? publications
       : publications.filter((pub) => pub.tag === activeTag);
-
-  const hasReachedEnd = page >= totalPages && !loadingMore;
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -197,15 +250,15 @@ export default function NewsPage() {
             <div className="hidden md:flex justify-end">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
                 <Newspaper className="w-8 h-8 text-white mb-2" />
-                <span className="text-2xl font-bold text-white block">{publications.length}</span>
-                <span className="text-sm text-white/70">Notícias carregadas</span>
+                <span className="text-2xl font-bold text-white block">{totalPosts || publications.length}</span>
+                <span className="text-sm text-white/70">Notícias publicadas</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container-crfal py-10 md:py-16">
+      <div className="container-crfal py-10 md:py-16" ref={gridRef}>
         <div className="flex flex-wrap gap-2 mb-10">
           <div className="flex items-center gap-2 mr-2 text-neutral-500">
             <Filter className="w-4 h-4" />
@@ -285,20 +338,7 @@ export default function NewsPage() {
               ))}
             </div>
 
-            {loadingMore && (
-              <div className="text-center py-8 text-neutral-500">
-                <div className="animate-spin w-6 h-6 border-3 border-crfal-blue border-t-transparent rounded-full mx-auto mb-2"></div>
-                <span className="text-sm">Carregando mais notícias...</span>
-              </div>
-            )}
-
-            {hasReachedEnd && publications.length > 0 && (
-              <p className="text-center text-neutral-400 text-sm py-8">
-                Você chegou ao fim das notícias.
-              </p>
-            )}
-
-            <div ref={sentinelRef} className="h-1" />
+            <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
           </>
         )}
       </div>
