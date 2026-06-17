@@ -107,6 +107,7 @@ export default function BoardPage() {
   }, []);
 
   const secaoSelecionada = secoes.find((s) => s.id === secaoAtiva) || secoes[0];
+  const secoesDesativadas = ['conselheiros-efetivos', 'conselheiros-suplentes'];
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
@@ -157,12 +158,18 @@ export default function BoardPage() {
         <div className={`flex flex-wrap gap-3 mb-10 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           {secoes.map((secao) => {
             const Icon = secao.icon;
+            const isDisabled = secoesDesativadas.includes(secao.id);
             return (
               <button
                 key={secao.id}
+                type="button"
+                disabled={isDisabled}
                 onClick={() => setSecaoAtiva(secao.id)}
+                aria-disabled={isDisabled}
                 className={`flex items-center gap-2 px-5 py-2.5 text-sm rounded-full transition-all duration-200 ${
-                  secaoAtiva === secao.id
+                  isDisabled
+                    ? 'bg-neutral-100 dark:bg-slate-900/70 border border-neutral-200 dark:border-slate-700/70 text-neutral-400 dark:text-slate-600 cursor-not-allowed opacity-60'
+                    : secaoAtiva === secao.id
                     ? 'bg-crfal-blue text-white shadow-md'
                     : 'bg-white dark:bg-slate-900/90 border border-neutral-200 dark:border-slate-700/70 text-neutral-600 dark:text-slate-300 hover:border-crfal-blue/30 hover:text-crfal-blue'
                 }`}

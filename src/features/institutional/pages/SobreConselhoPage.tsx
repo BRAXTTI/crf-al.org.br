@@ -233,7 +233,7 @@ export default function SobreConselhoPage() {
     <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-20 md:pt-32 md:pb-28 overflow-hidden">
+      <div id="sobre-conselho" className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-20 md:pt-32 md:pb-28 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden>
           <span className="absolute -bottom-4 right-0 font-bold text-white/[0.055] text-[22vw] leading-none whitespace-nowrap">
             1960

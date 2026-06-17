@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, Search, Menu, X, User } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle';
 
@@ -33,14 +33,14 @@ const navItems: NavItem[] = [
     label: 'Fiscalização',
     href: '/fiscalizacao',
     submenu: [
-      { label: 'Custos da fiscalização', href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio' },
+      { label: 'Legislação', href: '/legislacao' },
       { label: 'Papel da Fiscalização', href: '/fiscalizacao/papel-da-fiscalizacao' },
       { label: 'Instrumentos de fiscalização', href: '/fiscalizacao/instrumentos-da-fiscalizacao' },
       { label: 'Plano de fiscalização anual', href: '/fiscalizacao/plano-de-fiscalizacao-anual' },
       { label: 'Relatórios', href: '/fiscalizacao/relatorios' },
       { label: 'Processo Administrativo Fiscal', href: '/fiscalizacao/processo-administrativo-fiscal' },
       { label: 'Afastamento Provisório', href: '/fiscalizacao/afastamento-provisorio' },
-      { label: 'Legislação', href: '/legislacao' },
+      { label: 'Custos da fiscalização', href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio' },
     ],
   },
   {
@@ -66,6 +66,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMobileItems, setExpandedMobileItems] = useState<string[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -107,6 +108,15 @@ export default function Header() {
   const isMobileItemExpanded = (label: string) =>
     expandedMobileItems.includes(label);
 
+  const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    setActiveDropdown(null);
+    setIsMobileMenuOpen(false);
+    setIsSearchOpen(false);
+    navigate('/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const { pathname } = useLocation();
   // Páginas que têm hero escuro no topo (logo deve ficar branca antes de rolar)
   const darkHeroPages = [
@@ -128,6 +138,7 @@ export default function Header() {
   const navLinkActiveLight = 'text-white bg-white/15';
   const navLinkInactiveSolid = 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-neutral-100 dark:hover:bg-slate-800';
   const navLinkActiveSolid = 'text-crfal-blue dark:text-sky-300 bg-neutral-100 dark:bg-slate-800';
+  const isExternalLink = (href: string) => href.startsWith('http');
 
   return (
     <header
@@ -139,7 +150,7 @@ export default function Header() {
     >
       <div className="container-crfal overflow-visible">
         <div className="flex items-center justify-between gap-2 min-h-[44px]">
-          <Link to="/" className="flex items-center gap-3 group shrink-0">
+          <Link to="/" onClick={handleLogoClick} className="flex items-center gap-3 group shrink-0">
             <img
               src="/images/logo-crf-azul.png"
               alt="CRFAL - Conselho Regional de Farmácia de Alagoas"
@@ -189,6 +200,8 @@ export default function Header() {
                   ) : (
                     <a
                       href={item.href}
+                      target={isExternalLink(item.href) ? '_blank' : undefined}
+                      rel={isExternalLink(item.href) ? 'noopener noreferrer' : undefined}
                       className={`${navLinkBase} ${
                         isOverHero
                           ? activeDropdown === item.label ? navLinkActiveLight : navLinkInactiveLight
@@ -225,6 +238,8 @@ export default function Header() {
                             <a
                               key={subItem.label}
                               href={subItem.href}
+                              target={isExternalLink(subItem.href) ? '_blank' : undefined}
+                              rel={isExternalLink(subItem.href) ? 'noopener noreferrer' : undefined}
                               className="block px-4 py-2.5 text-sm text-neutral-700 dark:text-slate-200 hover:bg-neutral-100 dark:hover:bg-slate-800 hover:text-crfal-blue dark:hover:text-sky-300 transition-colors"
                               style={{ animationDelay: `${index * 50}ms` }}
                             >
@@ -259,7 +274,7 @@ export default function Header() {
               }`}
             >
               <User className="w-4 h-4" />
-              <span className="whitespace-nowrap">Área do Farmacêutico</span>
+              <span className="whitespace-nowrap">CRF AL em Casa</span>
             </a>
           </div>
 
@@ -282,7 +297,7 @@ export default function Header() {
               }`}
             >
               <User className="w-4 h-4" />
-              <span className="hidden xs:inline">Área do Farmacêutico</span>
+              <span className="hidden xs:inline">CRF AL em Casa</span>
             </a>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -344,6 +359,8 @@ export default function Header() {
                         ) : (
                           <a
                             href={item.href}
+                            target={isExternalLink(item.href) ? '_blank' : undefined}
+                            rel={isExternalLink(item.href) ? 'noopener noreferrer' : undefined}
                             className="flex-1"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
@@ -380,6 +397,8 @@ export default function Header() {
                                 <a
                                   key={subItem.label}
                                   href={subItem.href}
+                                  target={isExternalLink(subItem.href) ? '_blank' : undefined}
+                                  rel={isExternalLink(subItem.href) ? 'noopener noreferrer' : undefined}
                                   className="block py-2.5 pl-3 text-sm text-neutral-700 dark:text-slate-300 hover:bg-neutral-200/70 dark:hover:bg-slate-700/70 hover:text-crfal-blue dark:hover:text-sky-300 rounded-lg transition-colors"
                                   onClick={() => setIsMobileMenuOpen(false)}
                                 >
@@ -395,12 +414,14 @@ export default function Header() {
                 </div>
 
                 <a
-                  href="#login"
+                  href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 mt-6 px-4 py-4 bg-crfal-blue text-white font-medium rounded-full w-full hover:bg-crfal-blue-dark transition-colors min-h-[48px]"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <User className="w-5 h-5" />
-                  Área do Farmacêutico
+                  CRF AL em Casa
                 </a>
               </div>
             </nav>

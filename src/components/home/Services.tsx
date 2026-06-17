@@ -59,7 +59,7 @@ export default function Services() {
                 <p className="text-neutral-600 mb-6 text-sm sm:text-base">
                   Conheça todos os serviços disponíveis para farmacêuticos e estabelecimentos. Clique em um serviço para ver o tutorial passo a passo.
                 </p>
-                <a href="/servicos/tutoriais" className="inline-flex items-center gap-2 btn-primary text-sm sm:text-base">
+                <a href="/servicos/requerimentos" className="inline-flex items-center gap-2 btn-primary text-sm sm:text-base">
                   Ver todos os serviços
                   <ChevronRight className="w-5 h-5" />
                 </a>
@@ -181,8 +181,8 @@ export default function Services() {
                           <FileText className="w-4 h-4" />
                           Acessar Serviço
                         </a>
-                        <a href="/servicos/tutoriais" className="btn-outline text-sm text-center">
-                          Ver página de tutoriais
+                        <a href="/servicos/requerimentos" className="btn-outline text-sm text-center">
+                          Ver requerimentos
                         </a>
                       </div>
                     </div>
