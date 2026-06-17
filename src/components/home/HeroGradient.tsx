@@ -98,7 +98,7 @@ export default function HeroGradient() {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-6 animate-fade-in">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-white/90 text-sm font-medium">
-                Portal do Farmacêutico
+                CRF AL em Casa
               </span>
             </div>
 
@@ -128,7 +128,7 @@ export default function HeroGradient() {
                 <ArrowRight className="w-5 h-5" />
               </a>
               <a
-                href="/instituicao"
+                href="/instituicao/sobre-conselho#sobre-conselho"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white/10 text-white font-medium rounded-full border border-white/30 hover:bg-white/20 dark:bg-slate-900/40 dark:text-slate-100 dark:border-slate-300/30 dark:hover:bg-slate-900/60 active:scale-[0.98] transition-all duration-300 text-sm sm:text-base"
               >
                 Nossa instituição

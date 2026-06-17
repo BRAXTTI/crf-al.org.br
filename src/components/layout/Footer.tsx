@@ -11,17 +11,17 @@ import {
 } from 'lucide-react';
 
 const quickLinks = [
-  { label: 'Institucional', href: '#instituicao' },
+  { label: 'Instituição', href: '/instituicao/sobre-conselho' },
   { label: 'Serviços', href: '#servicos' },
-  { label: 'Legislação', href: '#legislacao' },
-  { label: 'Transparência', href: '#transparencia' },
+  { label: 'Legislação', href: '/legislacao' },
+  { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/#publico/inicio' },
 ];
 
 const serviceLinks = [
-  { label: 'Inscrição', href: '#inscricao' },
-  { label: '2ª Via de Certidões', href: '#certidoes' },
-  { label: 'Consultar Inscrição', href: '#consulta' },
-  { label: 'Validar Documentos', href: '#validar' },
+  { label: 'Inscrição', href: '/servicos/tutoriais' },
+  { label: '2ª Via de Certidões', href: '/servicos/tutoriais' },
+  { label: 'Consultar Inscrição', href: '/servicos/tutoriais' },
+  { label: 'Validar Documentos', href: '/servicos/tutoriais' },
 ];
 
 const socialLinks = [
