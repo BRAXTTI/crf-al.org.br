@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import SEO from '@/components/SEO';
 import {
   ChevronRight,
   Users,
@@ -110,6 +111,11 @@ export default function BoardPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+      <SEO
+        title="Diretoria"
+        description="Conheça a diretoria e os membros do Conselho Regional de Farmácia de Alagoas (CRFAL) — gestão atual e suas responsabilidades."
+        path="/instituicao/diretoria"
+      />
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">

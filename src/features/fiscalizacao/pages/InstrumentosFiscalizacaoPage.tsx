@@ -2,7 +2,10 @@ import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 export default function InstrumentosFiscalizacaoPage() {
   return (
-    <FiscalizacaoPageShell title="Instrumentos de fiscalização">
+    <FiscalizacaoPageShell
+      title="Instrumentos de Fiscalização"
+      description="Conheça os instrumentos formais utilizados pelo CRFAL na fiscalização do exercício farmacêutico em Alagoas — autos, termos e notificações."
+    >
       <p>
         A fiscalização utiliza instrumentos formais para registrar constatações e determinar providências, assegurando transparência e padronização dos atos fiscalizatórios.
       </p>

@@ -1,12 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" href="/images/logo-crf-azul.png" />
     <link rel="apple-touch-icon" href="/images/logo-crf-azul.png" />
+
+    <!-- SEO base — sobrescrito por react-helmet-async em cada página -->
     <title>CRFAL - Conselho Regional de Farmácia de Alagoas</title>
+    <meta name="description" content="CRFAL — Conselho Regional de Farmácia de Alagoas. Fiscalização, registros, serviços e informações para profissionais de farmácia em Alagoas." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://crf-al.org.br/" />
+
+    <!-- Open Graph base -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="CRFAL - Conselho Regional de Farmácia de Alagoas" />
+    <meta property="og:image" content="https://crf-al.org.br/images/logo-crf-azul.png" />
+
+    <!-- JSON-LD: Organização -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GovernmentOrganization",
+      "name": "CRFAL - Conselho Regional de Farmácia de Alagoas",
+      "alternateName": "CRFAL",
+      "url": "https://crf-al.org.br",
+      "logo": "https://crf-al.org.br/images/logo-crf-azul.png",
+      "description": "Órgão de fiscalização do exercício da profissão farmacêutica no estado de Alagoas.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "AL",
+        "addressCountry": "BR"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "url": "https://crf-al.org.br/contato",
+        "availableLanguage": "Portuguese"
+      },
+      "sameAs": []
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

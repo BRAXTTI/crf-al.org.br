@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SEO from '@/components/SEO';
 import {
   User,
   Building2,
@@ -564,6 +565,11 @@ export default function RequirementsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEO
+        title="Requerimentos"
+        description="Acesse todos os requerimentos do CRFAL para pessoa física e jurídica — registro, renovação, certidões e muito mais para profissionais farmacêuticos em Alagoas."
+        path="/servicos/requerimentos"
+      />
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-10 w-72 h-72 bg-white rounded-full blur-3xl" />

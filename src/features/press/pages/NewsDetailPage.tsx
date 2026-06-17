@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import SEO from '@/components/SEO';
 import DOMPurify from 'dompurify';
 import {
   ArrowLeft,
@@ -147,6 +148,18 @@ export default function NewsDetailPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+      <SEO
+        title={post ? sanitizeHTML(post.title.rendered) : 'Notícia'}
+        description={
+          post
+            ? sanitizeHTML(post.excerpt.rendered).slice(0, 160)
+            : 'Leia as últimas notícias do CRFAL — Conselho Regional de Farmácia de Alagoas.'
+        }
+        path={`/imprensa/noticias/${id}`}
+        image={featuredImage !== IMG_FALLBACK ? featuredImage : undefined}
+        type="article"
+        publishedAt={post?.date}
+      />
       {/* Hero */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-14 md:pt-32 md:pb-16 overflow-hidden">
         <div className="absolute inset-0 opacity-10">

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://crf-al.org.br/sitemap.xml

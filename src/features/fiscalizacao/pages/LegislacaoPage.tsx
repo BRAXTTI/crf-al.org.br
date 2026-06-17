@@ -2,7 +2,10 @@ import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 export default function LegislacaoPage() {
   return (
-    <FiscalizacaoPageShell title="Legislação">
+    <FiscalizacaoPageShell
+      title="Legislação"
+      description="Consulte a legislação farmacêutica aplicável ao exercício profissional e à fiscalização do CRFAL em Alagoas — leis, resoluções e atos normativos."
+    >
       <p>
         Esta área reúne referências para consulta da legislação profissional farmacêutica e dos atos normativos aplicáveis ao exercício e à fiscalização.
       </p>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Target, Eye, Heart } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 interface SecaoMVV {
   id: string;
@@ -50,6 +51,11 @@ export default function MissionVisionPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+      <SEO
+        title="Missão, Visão e Valores"
+        description="Conheça a missão, visão e valores do CRFAL — Conselho Regional de Farmácia de Alagoas, pilares que orientam nossa atuação na farmácia alagoana."
+        path="/instituicao/missao-visao"
+      />
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">

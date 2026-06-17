@@ -1,8 +1,10 @@
 import { ExternalLink, ShieldCheck } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import SEO from '@/components/SEO';
 
 interface FiscalizacaoPageShellProps {
   title: string;
+  description?: string;
   children: React.ReactNode;
 }
 
@@ -18,10 +20,14 @@ const quickLinks = [
   { label: 'Legislação', href: '/legislacao' },
 ];
 
-export default function FiscalizacaoPageShell({ title, children }: FiscalizacaoPageShellProps) {
+export default function FiscalizacaoPageShell({ title, description, children }: FiscalizacaoPageShellProps) {
   const location = useLocation();
 
   return (
+    <>
+      {description && (
+        <SEO title={title} description={description} path={location.pathname} />
+      )}
     <section className="relative pt-24 pb-16 bg-neutral-50 dark:bg-slate-950 min-h-screen overflow-hidden">
       <div className="absolute inset-0 -z-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[440px] w-[880px] rounded-full bg-[radial-gradient(circle,_rgba(0,74,128,0.16)_0%,_rgba(0,74,128,0)_65%)] dark:bg-[radial-gradient(circle,_rgba(59,142,217,0.22)_0%,_rgba(59,142,217,0)_65%)]" />
@@ -99,5 +105,6 @@ export default function FiscalizacaoPageShell({ title, children }: FiscalizacaoP
         </div>
       </div>
     </section>
+    </>
   );
 }

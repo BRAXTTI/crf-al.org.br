@@ -2,7 +2,10 @@ import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 export default function ProcessoAdministrativoFiscalPage() {
   return (
-    <FiscalizacaoPageShell title="Processo Administrativo Fiscal">
+    <FiscalizacaoPageShell
+      title="Processo Administrativo Fiscal"
+      description="Entenda o Processo Administrativo Fiscal do CRFAL — rito processual, defesa, multas e penalidades para infrações à legislação farmacêutica em Alagoas."
+    >
       <p>
         O Processo Administrativo Fiscal é instaurado a partir da lavratura do auto de infração para estabelecimento que infringir determinações da Lei 3.820/60, observando o rito da Resolução CFF nº 566/12.
       </p>

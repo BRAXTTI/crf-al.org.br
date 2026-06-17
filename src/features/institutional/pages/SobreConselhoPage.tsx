@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import SEO from '@/components/SEO';
 import {
   ChevronRight,
   Target,
@@ -231,6 +232,11 @@ export default function SobreConselhoPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+      <SEO
+        title="Sobre o Conselho"
+        description="Conheça a história e a trajetória do CRFAL — Conselho Regional de Farmácia de Alagoas, suas atribuições e papel na saúde pública alagoana."
+        path="/instituicao/sobre-conselho"
+      />
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-20 md:pt-32 md:pb-28 overflow-hidden">

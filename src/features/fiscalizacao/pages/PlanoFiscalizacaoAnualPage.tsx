@@ -2,7 +2,10 @@ import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 export default function PlanoFiscalizacaoAnualPage() {
   return (
-    <FiscalizacaoPageShell title="Plano de fiscalização anual">
+    <FiscalizacaoPageShell
+      title="Plano de Fiscalização Anual"
+      description="Acesse o Plano de Fiscalização Anual (PFA) do CRFAL — documento estratégico que orienta as atividades de fiscalização farmacêutica em Alagoas."
+    >
       <p>
         O Plano de Fiscalização Anual (PFA) é o documento estratégico para planejamento, elaboração e execução das atividades de fiscalização do exercício profissional.
       </p>

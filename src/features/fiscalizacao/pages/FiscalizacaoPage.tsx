@@ -2,7 +2,10 @@ import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 export default function FiscalizacaoPage() {
   return (
-    <FiscalizacaoPageShell title="Fiscalização">
+    <FiscalizacaoPageShell
+      title="Fiscalização"
+      description="Saiba como o CRFAL fiscaliza o exercício profissional farmacêutico em Alagoas — procedimentos, atuações, penalidades e base legal."
+    >
       <p>
         O Conselho Regional de Farmácia do Estado de Alagoas é uma autarquia federal criada pela Lei Federal 3.820, de 11 de novembro de 1960. Entre suas atribuições legais está fiscalizar o exercício da profissão farmacêutica e coibir infrações à legislação.
       </p>

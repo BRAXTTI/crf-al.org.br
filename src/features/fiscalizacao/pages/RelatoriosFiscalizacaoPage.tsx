@@ -2,7 +2,10 @@ import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 export default function RelatoriosFiscalizacaoPage() {
   return (
-    <FiscalizacaoPageShell title="Relatórios">
+    <FiscalizacaoPageShell
+      title="Relatórios de Fiscalização"
+      description="Acesse os Relatórios de Fiscalização Anual (RFA) do CRFAL — resultados e execução das atividades de fiscalização farmacêutica em Alagoas."
+    >
       <p>
         O Relatório de Fiscalização Anual (RFA) apresenta a execução e os resultados das atividades de fiscalização do exercício profissional no exercício anterior.
       </p>

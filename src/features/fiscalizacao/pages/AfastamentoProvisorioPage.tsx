@@ -2,7 +2,10 @@ import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 export default function AfastamentoProvisorioPage() {
   return (
-    <FiscalizacaoPageShell title="Afastamento Provisório">
+    <FiscalizacaoPageShell
+      title="Afastamento Provisório"
+      description="Saiba como comunicar o afastamento provisório do farmacêutico ao CRFAL — procedimentos, requerimento e canais de protocolo em Alagoas."
+    >
       <p>
         As comunicações de afastamento provisório do farmacêutico podem ser protocoladas na sede ou seccional do CRF-AL, ou encaminhadas para fiscalizacao@crf-al.org.br mediante requerimento próprio.
       </p>

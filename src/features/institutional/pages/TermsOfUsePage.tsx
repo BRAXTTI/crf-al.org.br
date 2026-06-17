@@ -1,8 +1,15 @@
 import { ChevronRight } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 export default function TermsOfUsePage() {
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEO
+        title="Termos de Uso"
+        description="Termos de Uso do site CRFAL — condições gerais de uso do portal do Conselho Regional de Farmácia de Alagoas."
+        path="/termos-de-uso"
+        noindex
+      />
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 right-10 w-72 h-72 bg-white rounded-full blur-3xl" />

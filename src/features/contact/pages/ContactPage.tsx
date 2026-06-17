@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Mail, Phone, User, Building2, MessageCircle } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 interface ContactInfo {
   id: number;
@@ -42,6 +43,11 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEO
+        title="Contato"
+        description="Entre em contato com o CRFAL — Conselho Regional de Farmácia de Alagoas. Fale com nossos setores por e-mail, telefone ou WhatsApp."
+        path="/contato"
+      />
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />

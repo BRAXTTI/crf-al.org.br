@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import SEO from '@/components/SEO';
 import {
   Search,
   ChevronRight,
@@ -57,6 +58,11 @@ export default function TutorialsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEO
+        title="Tutoriais"
+        description="Tutoriais e guias passo a passo para os serviços do CRFAL — aprenda como realizar seus registros, renovações e demais serviços online de forma simples."
+        path="/servicos/tutoriais"
+      />
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
