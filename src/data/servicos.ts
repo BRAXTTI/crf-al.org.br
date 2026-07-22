@@ -14,7 +14,7 @@ export interface ServiceItem {
   description: string;
   category: string;
   valor: string;
-  prazo: string;
+  prazo?: string;
   tutorial: {
     steps: string[];
     videoUrl?: string;
@@ -96,7 +96,6 @@ export const servicesData: ServiceItem[] = [
       'Comunique seu afastamento provisório 100% online e evite autuações.',
     category: 'Responsabilidade Técnica',
     valor: 'Gratuito',
-    prazo: 'Até 10 dias úteis',
     tutorial: {
       videoUrl: 'https://www.youtube.com/watch?v=nd6smKz0R78',
       steps: [
@@ -121,7 +120,6 @@ export const servicesData: ServiceItem[] = [
       'Em caso de autuação ou qualquer outro motivo, você pode solicitar a justificativa de ausência para o CRFAL.',
     category: 'Consultas e Justificativas',
     valor: 'Gratuito',
-    prazo: 'Até 10 dias corridos',
     tutorial: {
       steps: [
         'Acesse o CRF AL em Casa como Pessoa Física',

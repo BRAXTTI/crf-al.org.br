@@ -1,183 +1,181 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronLeft, ChevronRight, ArrowRight, Pause, Play } from 'lucide-react';
 
 interface Slide {
-  id: number;
   image: string;
+  tagline: string;
   title: string;
   subtitle: string;
-  cta: string;
-  href: string;
+  ctaPrimary: { label: string; href: string };
+  ctaSecondary: { label: string; href: string };
 }
 
 const slides: Slide[] = [
   {
-    id: 1,
     image: '/images/banner1.jpg',
-    title: 'Bem-vindo ao CRFAL',
-    subtitle: 'Conselho Regional de Farmácia do Estado de Alagoas',
-    cta: 'Conheça nossos serviços',
-    href: '#servicos',
+    tagline: 'Autarquia Federal · Alagoas',
+    title: 'Conselho Regional de Farmácia de Alagoas',
+    subtitle: 'Fiscalização, registro e valorização do exercício profissional farmacêutico em todo o estado.',
+    ctaPrimary: { label: 'Conheça nossos serviços', href: '#servicos' },
+    ctaSecondary: { label: 'Nossa instituição', href: '/instituicao/sobre-conselho#sobre-conselho' },
   },
   {
-    id: 2,
     image: '/images/banner2.jpg',
-    title: 'Inscrição 2024',
-    subtitle: 'Renove sua inscrição e mantenha-se regularizado',
-    cta: 'Faça sua inscrição',
-    href: '#inscricao',
+    tagline: 'Serviços Digitais',
+    title: 'Inscrição e regularização profissional',
+    subtitle: 'Realize sua inscrição, renove seu cadastro e mantenha-se em dia com o Conselho — tudo online.',
+    ctaPrimary: { label: 'Fazer inscrição', href: '/servicos/requerimentos' },
+    ctaSecondary: { label: 'Ver tutoriais', href: '/servicos/tutoriais' },
   },
   {
-    id: 3,
     image: '/images/banner3.jpg',
-    title: 'Fiscalização',
-    subtitle: 'Garantindo a qualidade e segurança da assistência farmacêutica',
-    cta: 'Saiba mais',
-    href: '#fiscalizacao',
+    tagline: 'Atuação institucional',
+    title: 'Fiscalização farmacêutica em Alagoas',
+    subtitle: 'Garantindo a qualidade e a segurança da assistência farmacêutica nos 102 municípios alagoanos.',
+    ctaPrimary: { label: 'Saiba mais', href: '/fiscalizacao' },
+    ctaSecondary: { label: 'Ver Relatórios', href: '/fiscalizacao/relatorios' },
   },
 ];
 
 export default function HeroSlider() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [direction, setDirection] = useState<'next' | 'prev'>('next');
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isReducedMotion] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const goToSlide = useCallback((index: number, dir: 'next' | 'prev') => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setDirection(dir);
-    setCurrentSlide(index);
-    setTimeout(() => setIsAnimating(false), 800);
-  }, [isAnimating]);
+  const goTo = useCallback((index: number) => {
+    const wrapped = ((index % slides.length) + slides.length) % slides.length;
+    setCurrent(wrapped);
+  }, []);
 
-  const nextSlide = useCallback(() => {
-    const next = (currentSlide + 1) % slides.length;
-    goToSlide(next, 'next');
-  }, [currentSlide, goToSlide]);
-
-  const prevSlide = useCallback(() => {
-    const prev = (currentSlide - 1 + slides.length) % slides.length;
-    goToSlide(prev, 'prev');
-  }, [currentSlide, goToSlide]);
+  const next = useCallback(() => goTo(current + 1), [current, goTo]);
+  const prev = useCallback(() => goTo(current - 1), [current, goTo]);
 
   useEffect(() => {
-    const timer = setInterval(nextSlide, 6000);
-    return () => clearInterval(timer);
-  }, [nextSlide]);
+    if (isReducedMotion || isPaused) {
+      clearInterval(intervalRef.current ?? undefined);
+      return;
+    }
+    intervalRef.current = setInterval(next, 6000);
+    return () => clearInterval(intervalRef.current ?? undefined);
+  }, [current, isPaused, isReducedMotion, next]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    },
+    [prev, next]
+  );
 
   return (
-    <section className="relative w-full h-[500px] md:h-[600px] overflow-hidden bg-crfal-gray">
-      <div className="relative w-full h-full">
-        {slides.map((slide, index) => {
-          const isActive = index === currentSlide;
-          const isPrev = index === (currentSlide - 1 + slides.length) % slides.length;
-          const isNext = index === (currentSlide + 1) % slides.length;
-
-          return (
+    <section
+      className="relative flex h-[100svh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="region"
+      aria-roledescription="carrossel"
+      aria-label="Destaques"
+    >
+      {slides.map((slide, index) => {
+        const isActive = index === current;
+        return (
+          <div
+            key={index}
+            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
+            aria-hidden={!isActive}
+            {...(isActive ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` } : {})}
+          >
             <div
-              key={slide.id}
-              className={`absolute inset-0 transition-all duration-800 ease-out ${
-                isActive
-                  ? 'opacity-100 z-10'
-                  : isPrev && direction === 'next'
-                  ? 'opacity-0 -translate-x-full z-0'
-                  : isNext && direction === 'prev'
-                  ? 'opacity-0 translate-x-full z-0'
-                  : 'opacity-0 z-0'
-              }`}
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-[12s] ease-out"
               style={{
-                transform: isActive
-                  ? 'translateX(0) scale(1)'
-                  : isPrev && direction === 'next'
-                  ? 'translateX(-100%) scale(0.95)'
-                  : isNext && direction === 'prev'
-                  ? 'translateX(100%) scale(0.95)'
-                  : 'translateX(0) scale(1)',
+                backgroundImage: `url(${slide.image})`,
+                transform: isActive ? 'scale(1.08)' : 'scale(1)',
               }}
-            >
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-[8000ms]"
-                style={{
-                  backgroundImage: `url(${slide.image})`,
-                  transform: isActive ? 'scale(1.05)' : 'scale(1)',
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-crfal-blue/90 via-crfal-blue/70 to-transparent" />
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
 
-              <div className="relative z-10 h-full flex items-center">
-                <div className="container-crfal">
-                  <div className="max-w-2xl">
-                    <h1
-                      className={`text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight transition-all duration-700 ${
-                        isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                      }`}
-                      style={{ transitionDelay: isActive ? '200ms' : '0ms' }}
-                    >
-                      {slide.title}
-                    </h1>
-                    <p
-                      className={`text-lg md:text-xl text-white/90 mb-8 transition-all duration-700 ${
-                        isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                      }`}
-                      style={{ transitionDelay: isActive ? '400ms' : '0ms' }}
-                    >
-                      {slide.subtitle}
-                    </p>
-                    <a
-                      href={slide.href}
-                      className={`inline-flex items-center gap-2 px-8 py-4 bg-white text-crfal-blue font-semibold rounded-lg hover:bg-crfal-blue-lighter transition-all duration-500 hover:-translate-y-1 hover:shadow-lg ${
-                        isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                      }`}
-                      style={{ transitionDelay: isActive ? '600ms' : '0ms' }}
-                    >
-                      {slide.cta}
-                      <ChevronRight className="w-5 h-5" />
-                    </a>
-                  </div>
+            <div className="container-crfal relative z-10 flex h-full items-center">
+              <div className="max-w-2xl">
+                <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-[0.28em] text-white/70 sm:text-sm">
+                  {slide.tagline}
+                </span>
+
+                <h1 className="mb-4 text-[2rem] font-bold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-5xl lg:text-6xl">
+                  {isActive ? (
+                    <span className="animate-slide-up inline-block">{slide.title}</span>
+                  ) : (
+                    slide.title
+                  )}
+                </h1>
+
+                <p className="mb-8 max-w-xl text-base leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:text-lg">
+                  {slide.subtitle}
+                </p>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                  <a
+                    href={slide.ctaPrimary.href}
+                    className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#ffffff] px-7 py-3.5 text-sm font-semibold text-crfal-blue transition-all duration-300 hover:bg-crfal-blue-lighter active:scale-[0.98] sm:text-base"
+                  >
+                    {slide.ctaPrimary.label}
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </a>
+                  <a
+                    href={slide.ctaSecondary.href}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-7 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-white/50 hover:bg-white/20 active:scale-[0.98] sm:text-base"
+                  >
+                    {slide.ctaSecondary.label}
+                  </a>
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
 
       <button
-        onClick={prevSlide}
-        disabled={isAnimating}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-crfal-blue shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
+        onClick={prev}
+        className="absolute left-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
         aria-label="Slide anterior"
       >
-        <ChevronLeft className="w-6 h-6" />
+        <ChevronLeft className="h-6 w-6" />
       </button>
+
       <button
-        onClick={nextSlide}
-        disabled={isAnimating}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-crfal-blue shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50"
+        onClick={next}
+        className="absolute right-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
         aria-label="Próximo slide"
       >
-        <ChevronRight className="w-6 h-6" />
+        <ChevronRight className="h-6 w-6" />
       </button>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index, index > currentSlide ? 'next' : 'prev')}
-            className={`transition-all duration-300 ${
-              index === currentSlide
-                ? 'w-8 h-3 bg-white rounded-full'
-                : 'w-3 h-3 bg-white/50 hover:bg-white/80 rounded-full'
-            }`}
-            aria-label={`Ir para slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4">
+        <div className="flex items-center gap-2.5">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goTo(index)}
+              className={`rounded-full transition-all duration-300 ${
+                index === current
+                  ? 'h-2.5 w-8 bg-white shadow-md'
+                  : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
+              }`}
+              aria-label={`Ir para slide ${index + 1}`}
+            />
+          ))}
+        </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-20">
-        <div
-          className="h-full bg-white transition-all duration-300"
-          style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
-        />
+        <button
+          onClick={() => setIsPaused(!isPaused)}
+          className="ml-2 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white/90"
+          aria-label={isPaused ? 'Retomar reprodução' : 'Pausar reprodução'}
+        >
+          {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
+        </button>
       </div>
     </section>
   );

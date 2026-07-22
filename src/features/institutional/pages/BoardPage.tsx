@@ -91,6 +91,52 @@ const secoes: Secao[] = [
   },
 ];
 
+function MemberCard({ membro, index, isVisible }: { membro: Membro; index: number; isVisible: boolean }) {
+  return (
+    <article
+      className={`group overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-crfal-blue/30 hover:shadow-card-hover dark:border-slate-700/70 dark:bg-slate-900 dark:hover:border-crfal-blue/40 ${
+        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+      }`}
+      style={{ transitionDelay: isVisible ? `${index * 80}ms` : '0ms' }}
+    >
+      <div className="relative aspect-[4/4.4] overflow-hidden bg-gradient-to-br from-crfal-blue to-crfal-blue-dark">
+        {membro.foto ? (
+          <img
+            src={membro.foto}
+            alt={membro.nome}
+            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <UserCircle className="h-20 w-20 text-white/50" />
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent p-4 pt-10">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+            <Award className="h-3 w-3" />
+            {membro.cargo}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-4 sm:p-5">
+        <h3 className="text-base font-bold leading-snug text-neutral-800 transition-colors duration-300 group-hover:text-crfal-blue dark:text-white sm:text-lg">
+          {membro.nome}
+        </h3>
+        {membro.email && (
+          <a
+            href={`mailto:${membro.email}`}
+            className="mt-2.5 inline-flex items-center gap-2 text-sm text-neutral-500 transition-colors duration-300 hover:text-crfal-blue dark:text-neutral-400 dark:hover:text-crfal-blue-light"
+          >
+            <Mail className="h-4 w-4 shrink-0" />
+            <span className="truncate">{membro.email}</span>
+          </a>
+        )}
+      </div>
+    </article>
+  );
+}
+
 export default function BoardPage() {
   const [secaoAtiva, setSecaoAtiva] = useState<string>('diretoria');
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -111,46 +157,53 @@ export default function BoardPage() {
   const secoesDesativadas = ['conselheiros-efetivos', 'conselheiros-suplentes'];
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <SEO
         title="Diretoria"
         description="Conheça a diretoria e os membros do Conselho Regional de Farmácia de Alagoas (CRFAL) — gestão atual e suas responsabilidades."
         path="/instituicao/diretoria"
       />
-      {/* Hero Banner */}
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
-        </div>
+
+      <div className="relative overflow-hidden bg-crfal-blue-dark pb-16 pt-28 md:pb-20 md:pt-36">
+        <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
+        <div className="absolute inset-0 opacity-[0.06]" style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)',
+          backgroundSize: '56px 56px',
+        }} aria-hidden />
+
         <div className="container-crfal relative z-10">
-          <div className="flex flex-wrap items-center gap-2 text-white/60 text-xs sm:text-sm mb-4">
-            <a href="/" className="hover:text-white transition-colors">Início</a>
-            <ChevronRight className="w-4 h-4" />
+          <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm" aria-label="Breadcrumb">
+            <a href="/" className="transition-colors hover:text-white">Início</a>
+            <ChevronRight className="h-4 w-4" />
             <span>Instituição</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="h-4 w-4" />
             <span className="text-white">Diretoria</span>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+          </nav>
+
+          <div className="grid items-end gap-8 md:grid-cols-2">
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+              <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
+                Governança
+              </span>
+              <h1 className="mb-4 text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl">
                 Diretoria e Conselho
               </h1>
-              <p className="text-white/80 text-base sm:text-lg">
+              <p className="max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
                 Conheça os membros da diretoria executiva e os conselheiros que compõem o Conselho Regional de Farmácia de Alagoas.
               </p>
             </div>
-            <div className="hidden md:flex justify-end">
+
+            <div className="hidden justify-end md:flex">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
-                  <Briefcase className="w-8 h-8 text-white mb-2" />
-                  <span className="text-2xl font-bold text-white block">{secoes[0].membros.length}</span>
-                  <span className="text-sm text-white/70">Diretores</span>
+                <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+                  <Briefcase className="mb-2 h-7 w-7 text-white" />
+                  <span className="block font-display text-3xl font-light text-white">{secoes[0].membros.length}</span>
+                  <span className="text-xs uppercase tracking-wider text-white/70">Diretores</span>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
-                  <Users className="w-8 h-8 text-white mb-2" />
-                  <span className="text-2xl font-bold text-white block">{secoes[1].membros.length + secoes[2].membros.length}</span>
-                  <span className="text-sm text-white/70">Conselheiros</span>
+                <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+                  <Users className="mb-2 h-7 w-7 text-white" />
+                  <span className="block font-display text-3xl font-light text-white">{secoes[1].membros.length + secoes[2].membros.length}</span>
+                  <span className="text-xs uppercase tracking-wider text-white/70">Conselheiros</span>
                 </div>
               </div>
             </div>
@@ -158,10 +211,8 @@ export default function BoardPage() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="container-crfal py-10 md:py-16" ref={sectionRef}>
-        {/* Section Tabs */}
-        <div className={`flex flex-wrap gap-3 mb-10 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        <div className={`mb-10 flex flex-wrap gap-2.5 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
           {secoes.map((secao) => {
             const Icon = secao.icon;
             const isDisabled = secoesDesativadas.includes(secao.id);
@@ -172,113 +223,78 @@ export default function BoardPage() {
                 disabled={isDisabled}
                 onClick={() => setSecaoAtiva(secao.id)}
                 aria-disabled={isDisabled}
-                className={`flex items-center gap-2 px-5 py-2.5 text-sm rounded-full transition-all duration-200 ${
+                className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 active:scale-95 ${
                   isDisabled
-                    ? 'bg-neutral-100 dark:bg-slate-900/70 border border-neutral-200 dark:border-slate-700/70 text-neutral-400 dark:text-slate-600 cursor-not-allowed opacity-60'
+                    ? 'cursor-not-allowed bg-neutral-100 text-neutral-400 opacity-60 dark:bg-slate-800/70 dark:text-slate-600'
                     : secaoAtiva === secao.id
-                    ? 'bg-crfal-blue text-white shadow-md'
-                    : 'bg-white dark:bg-slate-900/90 border border-neutral-200 dark:border-slate-700/70 text-neutral-600 dark:text-slate-300 hover:border-crfal-blue/30 hover:text-crfal-blue'
+                      ? 'bg-crfal-blue text-white shadow-sm'
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-slate-800 dark:text-neutral-300 dark:hover:bg-slate-700'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="h-4 w-4" />
                 {secao.titulo}
               </button>
             );
           })}
         </div>
 
-        {/* Grid Layout */}
-        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
-          {/* Sidebar */}
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-28">
-              <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
-                <span className="inline-block px-4 py-1.5 bg-crfal-blue text-white text-sm font-semibold rounded-full mb-4">
+              <div className={`transition-all duration-700 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'}`}>
+                <span className="mb-4 inline-block rounded-full bg-crfal-blue-lighter px-4 py-1.5 text-sm font-semibold text-crfal-blue dark:bg-crfal-blue/10 dark:text-crfal-blue-light">
                   {secaoSelecionada.titulo}
                 </span>
-                <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 dark:text-slate-100 mb-4">
+                <h2 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-white sm:text-3xl">
                   {secaoSelecionada.id === 'diretoria' ? 'Gestão do CRFAL' : 'Plenário do CRFAL'}
                 </h2>
-                <p className="text-neutral-600 dark:text-slate-400 mb-6">{secaoSelecionada.descricao}</p>
+                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400 sm:text-base">
+                  {secaoSelecionada.descricao}
+                </p>
               </div>
+
               <div
-                className={`mt-6 grid grid-cols-2 gap-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                className={`mt-8 grid grid-cols-2 gap-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 style={{ transitionDelay: '200ms' }}
               >
-                <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 border border-neutral-200 dark:border-slate-700/70">
-                  <span className="text-3xl font-bold text-crfal-blue">{secaoSelecionada.membros.length}</span>
-                  <p className="text-sm text-neutral-600 dark:text-slate-400">Membros</p>
+                <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-slate-700/70 dark:bg-slate-900">
+                  <span className="font-display text-3xl font-light text-crfal-blue dark:text-crfal-blue-light">{secaoSelecionada.membros.length}</span>
+                  <p className="mt-1 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Membros</p>
                 </div>
-                <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 border border-neutral-200 dark:border-slate-700/70">
-                  <span className="text-3xl font-bold text-crfal-blue">{secoes.reduce((acc, s) => acc + s.membros.length, 0)}</span>
-                  <p className="text-sm text-neutral-600 dark:text-slate-400">Total Geral</p>
+                <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-slate-700/70 dark:bg-slate-900">
+                  <span className="font-display text-3xl font-light text-crfal-blue dark:text-crfal-blue-light">{secoes.reduce((acc, s) => acc + s.membros.length, 0)}</span>
+                  <p className="mt-1 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Total Geral</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Member Cards */}
           <div className="lg:col-span-8">
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid gap-5 sm:grid-cols-2">
               {secaoSelecionada.membros.map((membro, index) => (
-                <div
-                  key={membro.id}
-                  className={`bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-crfal-blue/20 hover:-translate-y-1 ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  }`}
-                  style={{ transitionDelay: isVisible ? `${index * 80}ms` : '0ms' }}
-                >
-                  <div className="bg-gradient-to-r from-crfal-blue to-crfal-blue-dark p-4">
-                    <div className="flex items-center gap-3">
-                      {membro.foto ? (
-                        <img src={membro.foto} alt={membro.nome} className="w-14 h-14 rounded-xl object-cover border-2 border-white/30" />
-                      ) : (
-                        <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-                          <UserCircle className="w-8 h-8 text-white" />
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-white text-sm truncate">{membro.nome}</h3>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <Award className="w-3.5 h-3.5 text-white/70" />
-                          <span className="text-xs text-white/80">{membro.cargo}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-400">
-                      <Briefcase className="w-4 h-4 text-crfal-blue" />
-                      <span>{membro.cargo}</span>
-                    </div>
-                    {membro.email && (
-                      <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-slate-400 mt-2">
-                        <Mail className="w-4 h-4 text-crfal-blue" />
-                        <a href={`mailto:${membro.email}`} className="hover:text-crfal-blue transition-colors truncate">
-                          {membro.email}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <MemberCard key={membro.id} membro={membro} index={index} isVisible={isVisible} />
               ))}
             </div>
 
             <div
-              className={`mt-8 bg-crfal-blue-lighter dark:bg-crfal-blue/10 rounded-2xl border border-crfal-blue/10 dark:border-crfal-blue/20 p-6 transition-all duration-700 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+              className={`mt-8 rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/60 p-6 transition-all duration-700 dark:border-crfal-blue/25 dark:bg-crfal-blue/10 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}
               style={{ transitionDelay: '400ms' }}
             >
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Award className="w-5 h-5 text-crfal-blue" />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-crfal-blue text-white dark:bg-crfal-blue dark:text-white">
+                  <Award className="h-5 w-5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-neutral-800 dark:text-slate-100 mb-1">Gestão {new Date().getFullYear()}</h4>
-                  <p className="text-sm text-neutral-600 dark:text-slate-400">
+                  <h4 className="mb-1 font-bold text-neutral-800 dark:text-white">
+                    Gestão {new Date().getFullYear()}
+                  </h4>
+                  <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
                     A diretoria e os conselheiros do CRFAL são eleitos pelos profissionais farmacêuticos do estado de Alagoas para mandatos conforme previsto no estatuto do Conselho. Saiba mais consultando o{' '}
-                    <a href="/instituicao/estatuto" className="text-crfal-blue hover:underline font-medium">Estatuto do CRFAL</a>.
+                    <a href="/instituicao/estatuto" className="font-semibold text-crfal-blue transition-colors hover:underline dark:text-crfal-blue-light">
+                      Estatuto do CRFAL
+                    </a>.
                   </p>
                 </div>
               </div>

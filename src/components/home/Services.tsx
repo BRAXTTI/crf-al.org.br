@@ -120,10 +120,12 @@ export default function Services() {
                             <BadgeDollarSign className="w-4 h-4 text-white/70" />
                             <span className="text-sm text-white">Valor: <strong>{service.valor}</strong></span>
                           </div>
-                          <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
-                            <Clock3 className="w-4 h-4 text-white/70" />
-                            <span className="text-sm text-white">Prazo: <strong>{service.prazo}</strong></span>
-                          </div>
+                          {service.prazo && (
+                            <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                              <Clock3 className="w-4 h-4 text-white/70" />
+                              <span className="text-sm text-white">Prazo: <strong>{service.prazo}</strong></span>
+                            </div>
+                          )}
                           <button
                             onClick={(e) => { e.stopPropagation(); setSelectedService(service); setShowVideoModal(true); }}
                             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 transition-colors"

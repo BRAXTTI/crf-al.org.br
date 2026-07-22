@@ -10,8 +10,8 @@ createRoot(document.getElementById('root')!).render(
     <HelmetProvider>
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
-        enableSystem
+        defaultTheme="dark"
+        forcedTheme="dark"
         disableTransitionOnChange
       >
         <App />

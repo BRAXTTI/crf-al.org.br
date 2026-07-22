@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:wght@100;300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:wght@100;300;400;500;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -316,5 +316,110 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   2026 CSS layer — progressive enhancements.
+   Everything below degrades gracefully: unsupported browsers simply skip it.
+--------------------------------------------------------------------------- */
+
+::selection {
+  background: #0077cc;
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid #0077cc;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@keyframes fade-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes rule-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* IO-driven reveal (works everywhere) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scroll-driven animations — pure CSS 2026, no JS, where supported */
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: fade-blur-in linear both;
+    animation-timeline: view();
+    animation-range: entry 5% entry 45%;
+  }
+
+  .scroll-rule {
+    transform-origin: left center;
+    animation: rule-grow linear both;
+    animation-timeline: view();
+    animation-range: entry 10% entry 60%;
+  }
+}
+
+/* Pillar rows: siblings dim via :has(), rows lift via :hover */
+.pillars-list:hover .pillar-row:not(:hover) {
+  opacity: 0.45;
+}
+
+.pillar-row {
+  transition:
+    opacity 0.45s ease,
+    background-color 0.45s ease,
+    padding-left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  container-type: inline-size;
+}
+
+.pillar-row:hover,
+.pillar-row:focus-visible {
+  padding-left: 1.25rem;
+}
+
+.pillar-row .pillar-arrow {
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.4s ease,
+    color 0.4s ease;
+}
+
+.pillar-row:hover .pillar-arrow {
+  transform: translateX(6px) rotate(-45deg);
+}
+
+/* Fluid type via clamp() — scales with the container, not the viewport */
+@container (min-width: 40rem) {
+  .pillar-title {
+    font-size: clamp(1.5rem, 4.5cqi + 0.5rem, 2.75rem);
   }
 }
