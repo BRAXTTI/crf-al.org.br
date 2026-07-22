@@ -23,6 +23,7 @@ import RelatoriosFiscalizacaoPage from '@/features/fiscalizacao/pages/Relatorios
 import ProcessoAdministrativoFiscalPage from '@/features/fiscalizacao/pages/ProcessoAdministrativoFiscalPage';
 import AfastamentoProvisorioPage from '@/features/fiscalizacao/pages/AfastamentoProvisorioPage';
 import LegislacaoPage from '@/features/fiscalizacao/pages/LegislacaoPage';
+import EventosPage from '@/features/events/pages/EventosPage';
 
 export default function AppRouter() {
   return (
@@ -52,6 +53,7 @@ export default function AppRouter() {
           <Route path="fiscalizacao/processo-administrativo-fiscal" element={<ProcessoAdministrativoFiscalPage />} />
           <Route path="fiscalizacao/afastamento-provisorio" element={<AfastamentoProvisorioPage />} />
           <Route path="legislacao" element={<LegislacaoPage />} />
+          <Route path="eventos" element={<EventosPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

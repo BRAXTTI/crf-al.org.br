@@ -14,6 +14,7 @@ const quickLinks = [
   { label: 'Instituição', href: '/instituicao/sobre-conselho' },
   { label: 'Serviços', href: '#servicos' },
   { label: 'Legislação', href: '/legislacao' },
+  { label: 'Eventos', href: '/eventos' },
   { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/#publico/inicio' },
 ];
 

@@ -20,6 +20,7 @@ import {
   BarChart3,
   Newspaper,
   ExternalLink,
+  Calendar,
 } from 'lucide-react';
 
 
@@ -107,6 +108,7 @@ const navItems: NavItem[] = [
         title: 'Comunicação',
         items: [
           { label: 'Notícias', href: '/imprensa/noticias', icon: Newspaper },
+          { label: 'Eventos', href: '/eventos', icon: Calendar },
         ],
       },
     ],
@@ -271,64 +273,66 @@ export default function Header() {
                   {item.columns && activeDropdown === item.label && (
                     <>
                       <div className="absolute top-full left-1/2 -translate-x-1/2 h-4 w-[720px]" aria-hidden />
-                      <div
-                        className={`absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-50 w-[720px] overflow-hidden rounded-2xl border shadow-2xl animate-scale-in origin-top ${
-                          isOverHero
-                            ? 'bg-white dark:bg-slate-900 border-white/20 dark:border-slate-700'
-                            : 'bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700'
-                        }`}
-                      >
-                        <div className="grid grid-cols-2 gap-8 p-6">
-                          {item.columns.map((column) => (
-                            <div key={column.title}>
-                              <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
-                                {column.title}
-                              </h4>
-                              <ul className="space-y-1">
-                                {column.items.map((subItem) => {
-                                  const Icon = subItem.icon;
-                                  const content = (
-                                    <>
-                                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors duration-200 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white">
-                                        <Icon className="h-4.5 w-4.5" />
-                                      </span>
-                                      <span className="flex-1">
-                                        <span className="block text-sm font-semibold text-neutral-700 transition-colors duration-200 group-hover:text-crfal-blue dark:text-slate-200 dark:group-hover:text-crfal-blue-light">
-                                          {subItem.label}
+                      <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-50 w-[720px]">
+                        <div
+                          className={`overflow-hidden rounded-2xl border shadow-2xl animate-scale-in origin-top ${
+                            isOverHero
+                              ? 'bg-white dark:bg-slate-900 border-white/20 dark:border-slate-700'
+                              : 'bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700'
+                          }`}
+                        >
+                          <div className="grid grid-cols-2 gap-8 p-6">
+                            {item.columns.map((column) => (
+                              <div key={column.title}>
+                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
+                                  {column.title}
+                                </h4>
+                                <ul className="space-y-1">
+                                  {column.items.map((subItem) => {
+                                    const Icon = subItem.icon;
+                                    const content = (
+                                      <>
+                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors duration-200 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white">
+                                          <Icon className="h-4.5 w-4.5" />
                                         </span>
-                                        {subItem.external && (
-                                          <span className="block text-[10px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                                            Link externo
+                                        <span className="flex-1">
+                                          <span className="block text-sm font-semibold text-neutral-700 transition-colors duration-200 group-hover:text-crfal-blue dark:text-slate-200 dark:group-hover:text-crfal-blue-light">
+                                            {subItem.label}
                                           </span>
+                                          {subItem.external && (
+                                            <span className="block text-[10px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                              Link externo
+                                            </span>
+                                          )}
+                                        </span>
+                                      </>
+                                    );
+                                    return (
+                                      <li key={subItem.label}>
+                                        {subItem.href.startsWith('/') ? (
+                                          <Link
+                                            to={subItem.href}
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-slate-800"
+                                          >
+                                            {content}
+                                          </Link>
+                                        ) : (
+                                          <a
+                                            href={subItem.href}
+                                            target={subItem.external ? '_blank' : undefined}
+                                            rel={subItem.external ? 'noopener noreferrer' : undefined}
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-slate-800"
+                                          >
+                                            {content}
+                                          </a>
                                         )}
-                                      </span>
-                                    </>
-                                  );
-                                  return (
-                                    <li key={subItem.label}>
-                                      {subItem.href.startsWith('/') ? (
-                                        <Link
-                                          to={subItem.href}
-                                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-slate-800"
-                                        >
-                                          {content}
-                                        </Link>
-                                      ) : (
-                                        <a
-                                          href={subItem.href}
-                                          target={subItem.external ? '_blank' : undefined}
-                                          rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-slate-800"
-                                        >
-                                          {content}
-                                        </a>
-                                      )}
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
-                          ))}
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </>
