@@ -42,7 +42,7 @@ export default function ContactPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-crfal-gray-50">
       <SEO
         title="Contato"
         description="Entre em contato com o CRFAL — Conselho Regional de Farmácia de Alagoas. Fale com nossos setores por e-mail, telefone ou WhatsApp."
@@ -75,38 +75,38 @@ export default function ContactPage() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-xl p-5 border border-crfal-gray-200">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <Building2 className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">Endereço</h3>
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-crfal-gray-600">
               Rua Oldemburgo da Silva Paranhos (antiga Rua Goiás) N° 290, Farol – CEP 57055-320 – Maceió-AL
             </p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-xl p-5 border border-crfal-gray-200">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <Phone className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">Telefone</h3>
-            <p className="text-sm text-neutral-600">(82) 9 9971-0247</p>
-            <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 09h às 17h (sem pausa para o almoço)</p>
+            <p className="text-sm text-crfal-gray-600">(82) 9 9971-0247</p>
+            <p className="text-xs text-crfal-gray-500 mt-1">Seg - Sex: 09h às 17h (sem pausa para o almoço)</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-xl p-5 border border-crfal-gray-200">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <Mail className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">E-mail Geral</h3>
-            <p className="text-sm text-neutral-600">atendimento@crf-al.org.br</p>
-            <p className="text-xs text-neutral-500 mt-1">Atendimento 24h* (Inteligencia Artificial)</p>
+            <p className="text-sm text-crfal-gray-600">atendimento@crf-al.org.br</p>
+            <p className="text-xs text-crfal-gray-500 mt-1">Atendimento 24h* (Inteligencia Artificial)</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 border border-neutral-200">
+          <div className="bg-white rounded-xl p-5 border border-crfal-gray-200">
             <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-3">
               <MessageCircle className="w-5 h-5 text-crfal-blue" />
             </div>
             <h3 className="font-semibold text-neutral-800 mb-1">WhatsApp</h3>
-            <p className="text-sm text-neutral-600">(82) 99971-0247</p>
-            <p className="text-xs text-neutral-500 mt-1">Seg - Sex: 09h às 17h (sem pausa para o almoço)</p>
+            <p className="text-sm text-crfal-gray-600">(82) 99971-0247</p>
+            <p className="text-xs text-crfal-gray-500 mt-1">Seg - Sex: 09h às 17h (sem pausa para o almoço)</p>
           </div>
         </div>
 
@@ -119,7 +119,7 @@ export default function ContactPage() {
           <h2 className="text-2xl md:text-3xl font-bold text-neutral-800 mb-2">
             Contatos por Departamento
           </h2>
-          <p className="text-neutral-600">
+          <p className="text-crfal-gray-600">
             Encontre o responsável pelo setor que você precisa contactar.
           </p>
         </div>
@@ -128,7 +128,7 @@ export default function ContactPage() {
           {contacts.map((contact, index) => (
             <div
               key={contact.id}
-              className={`group bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-crfal-blue/20 hover:-translate-y-1 ${
+              className={`group bg-white rounded-xl border border-crfal-gray-200 overflow-hidden transition-all duration-500 hover:shadow-card-hover hover:border-crfal-blue/20 hover:-translate-y-1 ${
                 isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
               }`}
               style={{ transitionDelay: isVisible ? `${200 + index * 80}ms` : '0ms' }}
@@ -148,7 +148,7 @@ export default function ContactPage() {
                 <div className="flex items-start gap-2">
                   <User className="w-4 h-4 text-crfal-blue mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-xs text-neutral-500 uppercase tracking-wide">Responsável</p>
+                    <p className="text-xs text-crfal-gray-500 uppercase tracking-wide">Responsável</p>
                     <p className="text-sm font-medium text-neutral-800">{contact.responsavel}</p>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ export default function ContactPage() {
                 <div className="flex items-start gap-2">
                   <Mail className="w-4 h-4 text-crfal-blue mt-0.5 flex-shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-xs text-neutral-500 uppercase tracking-wide">E-mail</p>
+                    <p className="text-xs text-crfal-gray-500 uppercase tracking-wide">E-mail</p>
                     <a
                       href={`mailto:${contact.email}`}
                       className="text-sm text-neutral-700 hover:text-crfal-blue transition-colors truncate block"
@@ -170,7 +170,7 @@ export default function ContactPage() {
                   <div className="flex items-start gap-2">
                     <Phone className="w-4 h-4 text-crfal-blue mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-neutral-500 uppercase tracking-wide">Telefone</p>
+                      <p className="text-xs text-crfal-gray-500 uppercase tracking-wide">Telefone</p>
                       <a
                         href={`tel:${contact.telefone.replace(/\D/g, '')}`}
                         className="text-sm text-neutral-700 hover:text-crfal-blue transition-colors"
@@ -185,7 +185,7 @@ export default function ContactPage() {
                   <div className="flex items-start gap-2">
                     <MessageCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-xs text-neutral-500 uppercase tracking-wide">WhatsApp</p>
+                      <p className="text-xs text-crfal-gray-500 uppercase tracking-wide">WhatsApp</p>
                       <a
                         href={`https://wa.me/55${contact.whatsapp.replace(/\D/g, '')}`}
                         target="_blank"
@@ -203,7 +203,7 @@ export default function ContactPage() {
         </div>
 
         <div
-          className={`mt-10 bg-crfal-blue-lighter rounded-2xl border border-crfal-blue/10 p-6 transition-all duration-700 ${
+          className={`mt-10 bg-crfal-blue-lighter rounded-xl border border-crfal-blue/10 p-6 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '600ms' }}
@@ -214,7 +214,7 @@ export default function ContactPage() {
             </div>
             <div>
               <h4 className="font-bold text-neutral-800 mb-1">Precisa de ajuda?</h4>
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-crfal-gray-600">
                 Se não encontrou o contato que procura, entre em contato pelo nosso
                 e-mail geral{' '}
                 <a href="mailto:atendimento@crf-al.org.br" className="text-crfal-blue hover:underline font-medium">

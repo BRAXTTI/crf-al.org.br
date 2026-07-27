@@ -228,8 +228,8 @@ export default function Header() {
                             ? 'text-white bg-white/15'
                             : 'text-white/90 hover:text-white hover:bg-white/10'
                           : activeDropdown === item.label
-                            ? 'text-crfal-blue dark:text-sky-300 bg-neutral-100 dark:bg-slate-800'
-                            : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-neutral-100 dark:hover:bg-slate-800'
+                            ? 'text-crfal-blue dark:text-sky-300 bg-crfal-gray-100 dark:bg-slate-800'
+                            : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-crfal-gray-100 dark:hover:bg-slate-800'
                       }`}
                       onClick={() =>
                         setActiveDropdown(activeDropdown === item.label ? null : item.label)
@@ -248,7 +248,7 @@ export default function Header() {
                       className={`${navLinkBase} ${
                         isOverHero
                           ? 'text-white/90 hover:text-white hover:bg-white/10'
-                          : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-neutral-100 dark:hover:bg-slate-800'
+                          : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-crfal-gray-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       {item.directIcon && <item.directIcon className="w-3.5 h-3.5" />}
@@ -262,7 +262,7 @@ export default function Header() {
                       className={`${navLinkBase} ${
                         isOverHero
                           ? 'text-white/90 hover:text-white hover:bg-white/10'
-                          : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-neutral-100 dark:hover:bg-slate-800'
+                          : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-crfal-gray-100 dark:hover:bg-slate-800'
                       }`}
                     >
                       {item.directIcon && <item.directIcon className="w-3.5 h-3.5" />}
@@ -275,16 +275,16 @@ export default function Header() {
                       <div className="absolute top-full left-1/2 -translate-x-1/2 h-4 w-[720px]" aria-hidden />
                       <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-50 w-[720px]">
                         <div
-                          className={`overflow-hidden rounded-2xl border shadow-2xl animate-scale-in origin-top ${
+                          className={`overflow-hidden rounded-xl border shadow-2xl animate-scale-in origin-top ${
                             isOverHero
                               ? 'bg-white dark:bg-slate-900 border-white/20 dark:border-slate-700'
-                              : 'bg-white dark:bg-slate-900 border-neutral-200 dark:border-slate-700'
+                              : 'bg-white dark:bg-slate-900 border-crfal-gray-200 dark:border-slate-700'
                           }`}
                         >
                           <div className="grid grid-cols-2 gap-8 p-6">
                             {item.columns.map((column) => (
                               <div key={column.title}>
-                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
+                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-crfal-gray-400 dark:text-crfal-gray-500">
                                   {column.title}
                                 </h4>
                                 <ul className="space-y-1">
@@ -300,7 +300,7 @@ export default function Header() {
                                             {subItem.label}
                                           </span>
                                           {subItem.external && (
-                                            <span className="block text-[10px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                            <span className="block text-[10px] uppercase tracking-wider text-crfal-gray-400 dark:text-crfal-gray-500">
                                               Link externo
                                             </span>
                                           )}
@@ -312,7 +312,7 @@ export default function Header() {
                                         {subItem.href.startsWith('/') ? (
                                           <Link
                                             to={subItem.href}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-slate-800"
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 dark:hover:bg-slate-800"
                                           >
                                             {content}
                                           </Link>
@@ -321,7 +321,7 @@ export default function Header() {
                                             href={subItem.href}
                                             target={subItem.external ? '_blank' : undefined}
                                             rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-slate-800"
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 dark:hover:bg-slate-800"
                                           >
                                             {content}
                                           </a>
@@ -344,7 +344,7 @@ export default function Header() {
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`p-2.5 rounded-lg transition-all ${
-                isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-neutral-600 hover:bg-neutral-100'
+                isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-crfal-gray-600 hover:bg-crfal-gray-100'
               }`}
               aria-label="Buscar"
             >
@@ -370,7 +370,7 @@ export default function Header() {
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-all ${
-                isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-neutral-700 hover:bg-neutral-100'
+                isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-neutral-700 hover:bg-crfal-gray-100'
               }`}
               aria-label="Buscar"
             >
@@ -390,7 +390,7 @@ export default function Header() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-all ${
-                isOverHero ? 'text-white hover:bg-white/10' : 'text-neutral-700 hover:bg-neutral-100'
+                isOverHero ? 'text-white hover:bg-white/10' : 'text-neutral-700 hover:bg-crfal-gray-100'
               }`}
               aria-label="Menu"
             >
@@ -405,9 +405,9 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Buscar no site..."
-                className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700 rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 dark:text-white"
+                className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-900 border border-crfal-gray-200 dark:border-slate-700 rounded-xl shadow-card focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 dark:text-white"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-neutral-500 hover:text-crfal-blue rounded-lg transition-colors">
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-crfal-gray-500 hover:text-crfal-blue rounded-lg transition-colors">
                 <Search className="w-5 h-5" />
               </button>
             </div>
@@ -427,14 +427,14 @@ export default function Header() {
           >
             <nav className="min-h-full pb-24">
               <div className="container-crfal py-6">
-                <div className="bg-neutral-50 dark:bg-slate-900 rounded-2xl border border-neutral-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-crfal-gray-50 dark:bg-slate-900 rounded-xl border border-crfal-gray-200 dark:border-slate-700 overflow-hidden">
                   {navItems.map((item) => {
                     const ItemIcon = item.directIcon;
                     return (
-                      <div key={item.label} className="border-b border-neutral-200 last:border-0 dark:border-slate-700">
+                      <div key={item.label} className="border-b border-crfal-gray-200 last:border-0 dark:border-slate-700">
                         <button
                           onClick={() => item.columns && toggleMobileItem(item.label)}
-                          className="w-full flex items-center justify-between py-4 px-4 text-neutral-800 dark:text-slate-100 hover:bg-neutral-100 dark:hover:bg-slate-800 font-medium text-left transition-colors min-h-[48px]"
+                          className="w-full flex items-center justify-between py-4 px-4 text-neutral-800 dark:text-slate-100 hover:bg-crfal-gray-100 dark:hover:bg-slate-800 font-medium text-left transition-colors min-h-[48px]"
                         >
                           <span className="flex items-center gap-2">
                             {ItemIcon && <ItemIcon className="w-4 h-4" />}
@@ -477,10 +477,10 @@ export default function Header() {
                                 : 'max-h-0 opacity-0'
                             }`}
                           >
-                            <div className="pb-3 pl-4 pr-4 space-y-4 bg-neutral-100/50 dark:bg-slate-800/50">
+                            <div className="pb-3 pl-4 pr-4 space-y-4 bg-crfal-gray-100/50 dark:bg-slate-800/50">
                               {item.columns.map((column) => (
                                 <div key={column.title}>
-                                  <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                                  <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400 dark:text-crfal-gray-500">
                                     {column.title}
                                   </p>
                                   <div className="space-y-1">

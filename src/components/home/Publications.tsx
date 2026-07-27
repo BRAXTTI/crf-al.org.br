@@ -128,7 +128,7 @@ export default function Publications() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 active:scale-95 ${
                   activeTag === tag.value
                     ? 'bg-crfal-blue text-white shadow-sm'
-                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-slate-800 dark:text-neutral-300 dark:hover:bg-slate-700'
+                    : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-neutral-200 dark:bg-slate-800 dark:text-neutral-300 dark:hover:bg-slate-700'
                 }`}
               >
                 {tag.label}
@@ -138,14 +138,14 @@ export default function Publications() {
         </div>
 
         {loading ? (
-          <div className="text-center py-16 sm:py-20 text-neutral-500">
+          <div className="text-center py-16 sm:py-20 text-crfal-gray-500">
             <div className="animate-spin w-8 h-8 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4" />
             <p className="text-sm sm:text-base">Carregando notícias...</p>
           </div>
         ) : filteredPublications.length === 0 ? (
           <div className="text-center py-16 sm:py-20">
             <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-            <p className="text-neutral-500 text-sm sm:text-base">Nenhuma publicação encontrada para esta categoria.</p>
+            <p className="text-crfal-gray-500 text-sm sm:text-base">Nenhuma publicação encontrada para esta categoria.</p>
             <button onClick={() => setActiveTag('all')} className="mt-4 text-crfal-blue text-sm font-medium hover:underline">
               Ver todas as publicações
             </button>
@@ -156,7 +156,7 @@ export default function Publications() {
               {filteredPublications.map((pub, index) => (
                 <article
                   key={pub.id}
-                  className={`group bg-white dark:bg-slate-900/90 rounded-2xl overflow-hidden border border-neutral-200 dark:border-slate-700/70 hover:border-crfal-blue/30 hover:shadow-card-hover transition-all duration-300 ${
+                  className={`group bg-white dark:bg-slate-900/90 rounded-xl overflow-hidden border border-crfal-gray-200 dark:border-slate-700/70 hover:border-crfal-blue/30 hover:shadow-card-hover transition-all duration-300 ${
                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                   style={{ transitionDelay: isVisible ? `${200 + index * 80}ms` : '0ms' }}
@@ -179,7 +179,7 @@ export default function Publications() {
                     </div>
                   </Link>
                   <div className="p-5">
-                    <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400 text-sm mb-3">
+                    <div className="flex items-center gap-2 text-crfal-gray-500 dark:text-crfal-gray-400 text-sm mb-3">
                       <Calendar className="w-4 h-4" />
                       {pub.date}
                     </div>
@@ -189,7 +189,7 @@ export default function Publications() {
                         dangerouslySetInnerHTML={{ __html: pub.title }}
                       />
                     </Link>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 line-clamp-2">
+                    <p className="text-sm text-crfal-gray-600 dark:text-crfal-gray-400 mb-4 line-clamp-2">
                       {pub.excerpt}
                     </p>
                     <Link

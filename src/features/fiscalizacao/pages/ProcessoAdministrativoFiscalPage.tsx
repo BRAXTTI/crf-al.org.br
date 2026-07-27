@@ -57,20 +57,20 @@ export default function ProcessoAdministrativoFiscalPage() {
             </div>
             <div className="pb-6">
               <h3 className="mb-1 text-sm font-bold text-neutral-800 dark:text-white">{etapa.title}</h3>
-              <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{etapa.desc}</p>
+              <p className="text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">{etapa.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 rounded-xl border border-neutral-200 bg-neutral-50 p-5 dark:border-slate-700 dark:bg-slate-800/50">
+      <div className="mt-4 rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-5 dark:border-slate-700 dark:bg-slate-800/50">
         <div className="flex items-start gap-3">
           <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
           <div>
             <p className="text-sm font-semibold text-neutral-800 dark:text-white">Atenção aos prazos</p>
             <ul className="mt-1.5 space-y-1.5">
-              <li className="text-sm text-neutral-600 dark:text-neutral-400">Defesa intempestiva não é considerada para fins de julgamento.</li>
-              <li className="text-sm text-neutral-600 dark:text-neutral-400">Na ausência de defesa válida, o processo segue o rito regular, podendo resultar em revelia.</li>
+              <li className="text-sm text-crfal-gray-600 dark:text-crfal-gray-400">Defesa intempestiva não é considerada para fins de julgamento.</li>
+              <li className="text-sm text-crfal-gray-600 dark:text-crfal-gray-400">Na ausência de defesa válida, o processo segue o rito regular, podendo resultar em revelia.</li>
             </ul>
           </div>
         </div>

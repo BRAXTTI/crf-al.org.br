@@ -139,7 +139,7 @@ export default function HeroSlider() {
 
       <button
         onClick={prev}
-        className="absolute left-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+        className="absolute left-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
         aria-label="Slide anterior"
       >
         <ChevronLeft className="h-6 w-6" />
@@ -147,7 +147,7 @@ export default function HeroSlider() {
 
       <button
         onClick={next}
-        className="absolute right-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+        className="absolute right-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
         aria-label="Próximo slide"
       >
         <ChevronRight className="h-6 w-6" />
@@ -161,7 +161,7 @@ export default function HeroSlider() {
               onClick={() => goTo(index)}
               className={`rounded-full transition-all duration-300 ${
                 index === current
-                  ? 'h-2.5 w-8 bg-white shadow-md'
+                  ? 'h-2.5 w-8 bg-white shadow-card'
                   : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
               }`}
               aria-label={`Ir para slide ${index + 1}`}

@@ -147,7 +147,7 @@ export default function NewsDetailPage() {
   const categoria = post?._embedded?.['wp:term']?.[0]?.[0]?.name || 'Notícia';
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
       <SEO
         title={post ? sanitizeHTML(post.title.rendered) : 'Notícia'}
         description={
@@ -185,14 +185,14 @@ export default function NewsDetailPage() {
 
       <div className="container-crfal py-8 md:py-12">
         {loading && (
-          <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-10 text-center text-neutral-500">
+          <div className="bg-white dark:bg-slate-900/90 rounded-xl border border-crfal-gray-200 dark:border-slate-700/70 p-10 text-center text-crfal-gray-500">
             <div className="animate-spin w-8 h-8 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4" />
             Carregando matéria...
           </div>
         )}
 
         {error && (
-          <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-red-200 dark:border-red-800/60 p-8">
+          <div className="bg-white dark:bg-slate-900/90 rounded-xl border border-red-200 dark:border-red-800/60 p-8">
             <p className="text-red-600 mb-4">{error}</p>
             <Link to="/imprensa/noticias" className="btn-outline text-sm">Voltar para notícias</Link>
           </div>
@@ -202,7 +202,7 @@ export default function NewsDetailPage() {
           <div className="grid lg:grid-cols-12 gap-8">
             {/* Article */}
             <main className="lg:col-span-8">
-              <article className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden">
+              <article className="bg-white dark:bg-slate-900/90 rounded-xl border border-crfal-gray-200 dark:border-slate-700/70 overflow-hidden">
                 <div className="relative h-56 sm:h-72 md:h-80">
                   <img
                     src={featuredImage}
@@ -216,7 +216,7 @@ export default function NewsDetailPage() {
                 </div>
 
                 <div className="p-5 sm:p-7">
-                  <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-slate-400 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-crfal-gray-500 dark:text-slate-400 mb-4">
                     <Calendar className="w-4 h-4" />
                     {formatarData(post.date)}
                   </div>
@@ -226,7 +226,7 @@ export default function NewsDetailPage() {
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.title.rendered) }}
                   />
 
-                  <p className="text-neutral-600 dark:text-slate-400 leading-relaxed mb-6 text-sm sm:text-base">
+                  <p className="text-crfal-gray-600 dark:text-slate-400 leading-relaxed mb-6 text-sm sm:text-base">
                     {sanitizeHTML(post.excerpt.rendered)}
                   </p>
 
@@ -250,19 +250,19 @@ export default function NewsDetailPage() {
             <aside className="lg:col-span-4">
               <div className="lg:sticky lg:top-24 space-y-4">
                 {/* Related posts */}
-                <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-5">
+                <div className="bg-white dark:bg-slate-900/90 rounded-xl border border-crfal-gray-200 dark:border-slate-700/70 p-5">
                   <h3 className="text-lg font-bold text-neutral-800 dark:text-slate-100 mb-3">Outras Notícias</h3>
                   {related.length === 0 ? (
-                    <p className="text-sm text-neutral-500 dark:text-slate-400">Não há outras matérias para exibir agora.</p>
+                    <p className="text-sm text-crfal-gray-500 dark:text-slate-400">Não há outras matérias para exibir agora.</p>
                   ) : (
                     <div className="space-y-3">
                       {related.map((item) => (
                         <Link
                           key={item.id}
                           to={`/imprensa/noticias/${item.id}`}
-                          className="block p-3 rounded-xl border border-neutral-200 dark:border-slate-700 hover:border-crfal-blue/40 transition-colors"
+                          className="block p-3 rounded-xl border border-crfal-gray-200 dark:border-slate-700 hover:border-crfal-blue/40 transition-colors"
                         >
-                          <p className="text-xs text-neutral-500 dark:text-slate-400 mb-1">{item.date}</p>
+                          <p className="text-xs text-crfal-gray-500 dark:text-slate-400 mb-1">{item.date}</p>
                           <p className="text-sm font-semibold text-neutral-800 dark:text-slate-100 line-clamp-2">{item.title}</p>
                         </Link>
                       ))}
@@ -271,12 +271,12 @@ export default function NewsDetailPage() {
                 </div>
 
                 {/* Service shortcuts */}
-                <div className="bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-5">
+                <div className="bg-white dark:bg-slate-900/90 rounded-xl border border-crfal-gray-200 dark:border-slate-700/70 p-5">
                   <span className="inline-flex px-3 py-1 rounded-full bg-crfal-blue-lighter text-crfal-blue text-xs font-semibold mb-3">
                     Serviços em Destaque
                   </span>
                   <h3 className="text-xl font-bold text-neutral-800 dark:text-slate-100 mb-2">Acesso Rápido</h3>
-                  <p className="text-sm text-neutral-600 dark:text-slate-400">
+                  <p className="text-sm text-crfal-gray-600 dark:text-slate-400">
                     Navegue direto para os serviços mais usados pelos profissionais.
                   </p>
                 </div>
@@ -284,7 +284,7 @@ export default function NewsDetailPage() {
                 {serviceShortcuts.map((item) => {
                   const Icon = item.icon;
                   const isExternal = item.target === '_blank';
-                  const cardClass = "block bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all";
+                  const cardClass = "block bg-white dark:bg-slate-900/90 rounded-xl border border-crfal-gray-200 dark:border-slate-700/70 p-4 hover:border-crfal-blue/40 hover:shadow-sm transition-all";
                   const inner = (
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-crfal-blue-lighter text-crfal-blue flex items-center justify-center shrink-0">
@@ -292,7 +292,7 @@ export default function NewsDetailPage() {
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-semibold text-neutral-800 dark:text-slate-100 text-sm mb-1">{item.title}</h4>
-                        <p className="text-xs text-neutral-600 dark:text-slate-400 leading-relaxed">{item.description}</p>
+                        <p className="text-xs text-crfal-gray-600 dark:text-slate-400 leading-relaxed">{item.description}</p>
                         <span className="inline-flex items-center gap-1 text-crfal-blue text-xs font-medium mt-2">
                           Acessar
                           {isExternal ? <ExternalLink className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}

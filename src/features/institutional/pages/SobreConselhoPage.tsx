@@ -231,7 +231,7 @@ export default function SobreConselhoPage() {
   const hinoRef = useInView();
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
       <SEO
         title="Sobre o Conselho"
         description="Conheça a história e a trajetória do CRFAL — Conselho Regional de Farmácia de Alagoas, suas atribuições e papel na saúde pública alagoana."
@@ -294,7 +294,7 @@ export default function SobreConselhoPage() {
           </div>
 
           <div className={`max-w-3xl mb-14 transition-all duration-700 delay-150 ${histRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <p className="text-neutral-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
+            <p className="text-crfal-gray-600 dark:text-slate-400 text-base sm:text-lg leading-relaxed">
               O{' '}
               <strong className="text-crfal-blue dark:text-crfal-blue-light">
                 Conselho Regional de Farmácia do Estado de Alagoas — CRF-AL
@@ -317,8 +317,8 @@ export default function SobreConselhoPage() {
                       ? 'bg-amber-400 border-amber-500 shadow-[0_0_14px_rgba(245,158,11,0.55)]'
                       : 'bg-crfal-blue dark:bg-crfal-blue-light border-white dark:border-slate-900'
                   }`} />
-                  <div className={`bg-white dark:bg-slate-800 border rounded-2xl p-5 sm:p-6 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 ${
-                    m.highlight ? 'border-amber-200 dark:border-amber-700/40' : 'border-neutral-200 dark:border-slate-700/70'
+                  <div className={`bg-white dark:bg-slate-800 border rounded-xl p-5 sm:p-6 hover:-translate-y-0.5 hover:shadow-card transition-all duration-300 ${
+                    m.highlight ? 'border-amber-200 dark:border-amber-700/40' : 'border-crfal-gray-200 dark:border-slate-700/70'
                   }`}>
                     <div className="flex flex-wrap items-center gap-3 mb-2.5">
                       <span className={`text-2xl sm:text-3xl font-bold leading-none ${
@@ -333,7 +333,7 @@ export default function SobreConselhoPage() {
                       )}
                     </div>
                     <h3 className="font-semibold text-neutral-800 dark:text-slate-100 text-base sm:text-lg mb-2">{m.title}</h3>
-                    <p className="text-neutral-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">{m.description}</p>
+                    <p className="text-crfal-gray-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">{m.description}</p>
                   </div>
                 </div>
               ))}
@@ -362,7 +362,7 @@ export default function SobreConselhoPage() {
               return (
                 <div
                   key={item.id}
-                  className={`group relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 sm:p-7 hover:bg-white/[0.15] hover:-translate-y-1 transition-all duration-500 ${
+                  className={`group relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 sm:p-7 hover:bg-white/[0.15] hover:-translate-y-1 transition-all duration-500 ${
                     mvvRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                   style={{ transitionDelay: `${200 + i * 140}ms` }}
@@ -382,13 +382,13 @@ export default function SobreConselhoPage() {
       </section>
 
       {/* ── ATRIBUIÇÕES ──────────────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-neutral-50 dark:bg-slate-950">
+      <section className="py-16 md:py-24 bg-crfal-gray-50 dark:bg-slate-950">
         <div ref={atribRef.ref} className="container-crfal">
           <div className={`mb-12 transition-all duration-700 ${atribRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
             <p className="text-amber-600 dark:text-amber-400 text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Competências Legais</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-crfal-blue dark:text-crfal-blue-light leading-tight">Atribuições do CRF-AL</h2>
             <div className="mt-4 w-14 h-1 bg-amber-500 rounded-full" />
-            <p className="mt-5 max-w-2xl text-neutral-600 dark:text-slate-400 text-base leading-relaxed">
+            <p className="mt-5 max-w-2xl text-crfal-gray-600 dark:text-slate-400 text-base leading-relaxed">
               Com base na Lei Federal nº 3.820/1960 e legislações complementares, o CRF-AL exerce as seguintes competências em prol da sociedade e da classe farmacêutica alagoana.
             </p>
           </div>
@@ -399,7 +399,7 @@ export default function SobreConselhoPage() {
               return (
                 <div
                   key={item.num}
-                  className={`group bg-white dark:bg-slate-900 border border-neutral-200 dark:border-slate-700/70 rounded-2xl p-5 sm:p-6 hover:border-crfal-blue/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-500 ${
+                  className={`group bg-white dark:bg-slate-900 border border-crfal-gray-200 dark:border-slate-700/70 rounded-xl p-5 sm:p-6 hover:border-crfal-blue/30 hover:shadow-card hover:-translate-y-1 transition-all duration-500 ${
                     atribRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                   style={{ transitionDelay: `${120 + i * 65}ms` }}
@@ -411,7 +411,7 @@ export default function SobreConselhoPage() {
                     <span className="text-3xl font-bold text-neutral-100 dark:text-slate-800 leading-none select-none">{item.num}</span>
                   </div>
                   <h3 className="font-semibold text-neutral-800 dark:text-slate-100 text-sm sm:text-base mb-2">{item.title}</h3>
-                  <p className="text-neutral-500 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">{item.description}</p>
+                  <p className="text-crfal-gray-500 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">{item.description}</p>
                 </div>
               );
             })}
@@ -426,13 +426,13 @@ export default function SobreConselhoPage() {
             <p className="text-amber-600 dark:text-amber-400 text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Tradição e Orgulho</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-crfal-blue dark:text-crfal-blue-light leading-tight">Hino Farmacêutico</h2>
             <div className="mt-4 mx-auto w-14 h-1 bg-amber-500 rounded-full" />
-            <p className="mt-5 max-w-xl mx-auto text-neutral-600 dark:text-slate-400 text-base leading-relaxed">
+            <p className="mt-5 max-w-xl mx-auto text-crfal-gray-600 dark:text-slate-400 text-base leading-relaxed">
               Entoado nas solenidades da classe farmacêutica brasileira, o Hino Farmacêutico celebra a missão, os valores e o orgulho de uma profissão dedicada à vida.
             </p>
           </div>
 
           <div className={`max-w-2xl mx-auto transition-all duration-700 delay-300 ${hinoRef.inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="relative bg-gradient-to-br from-amber-50 via-orange-50/60 to-amber-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800/60 border border-amber-200/70 dark:border-amber-700/25 rounded-3xl p-8 sm:p-10 overflow-hidden shadow-xl">
+            <div className="relative bg-gradient-to-br from-amber-50 via-orange-50/60 to-amber-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-800/60 border border-amber-200/70 dark:border-amber-700/25 rounded-xl p-8 sm:p-10 overflow-hidden shadow-xl">
               <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.045] dark:opacity-[0.06]" aria-hidden>
                 {[18, 26, 34, 42, 50, 58, 66, 74, 82].map((top) => (
                   <div key={top} className="absolute left-0 right-0 h-px bg-amber-900 dark:bg-amber-300" style={{ top: `${top}%` }} />

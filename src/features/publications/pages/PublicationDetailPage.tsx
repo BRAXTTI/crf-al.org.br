@@ -77,7 +77,7 @@ export default function PublicationDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-neutral-500">Carregando publicação...</p>
+          <p className="text-crfal-gray-500">Carregando publicação...</p>
         </div>
       </div>
     );
@@ -88,7 +88,7 @@ export default function PublicationDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-neutral-800 mb-4">Publicação não encontrada</h2>
-          <p className="text-neutral-500 mb-6">A publicação que você procura não existe ou foi removida.</p>
+          <p className="text-crfal-gray-500 mb-6">A publicação que você procura não existe ou foi removida.</p>
           <Link to="/#publicacoes" className="btn-primary inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             Voltar para publicações
@@ -119,7 +119,7 @@ export default function PublicationDetailPage() {
             <Tag className="w-3 h-3" />
             {category}
           </span>
-          <span className="flex items-center gap-2 text-neutral-500 text-sm">
+          <span className="flex items-center gap-2 text-crfal-gray-500 text-sm">
             <Calendar className="w-4 h-4" />
             {formatDate(post.date)}
           </span>
@@ -131,7 +131,7 @@ export default function PublicationDetailPage() {
         />
 
         {image && (
-          <div className="rounded-2xl overflow-hidden mb-10">
+          <div className="rounded-xl overflow-hidden mb-10">
             <img
               src={image}
               alt={post.title.rendered.replace(/<[^>]*>/g, '')}
@@ -145,7 +145,7 @@ export default function PublicationDetailPage() {
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content.rendered) }}
         />
 
-        <div className="mt-12 pt-8 border-t border-neutral-200">
+        <div className="mt-12 pt-8 border-t border-crfal-gray-200">
           <Link to="/#publicacoes" className="btn-outline inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             Voltar para publicações

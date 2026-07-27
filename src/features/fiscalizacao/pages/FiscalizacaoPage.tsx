@@ -44,12 +44,12 @@ export default function FiscalizacaoPage() {
 
       <div className="my-6 grid gap-4 sm:grid-cols-2">
         {funcoes.map((fn) => (
-          <div key={fn.title} className="rounded-xl border border-neutral-200 bg-neutral-50 p-5 transition-colors hover:border-crfal-blue/25 hover:bg-white dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-crfal-blue/30 dark:hover:bg-slate-800">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-700 dark:text-crfal-blue-light">
+          <div key={fn.title} className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-5 transition-colors hover:border-crfal-blue/25 hover:bg-white dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-crfal-blue/30 dark:hover:bg-slate-800">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-green-light text-crfal-green dark:bg-crfal-green/20 dark:text-crfal-green">
               <fn.icon className="h-5 w-5" />
             </div>
             <h3 className="mb-2 text-sm font-bold text-neutral-800 dark:text-white">{fn.title}</h3>
-            <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{fn.desc}</p>
+            <p className="text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">{fn.desc}</p>
           </div>
         ))}
       </div>
@@ -85,9 +85,9 @@ export default function FiscalizacaoPage() {
           { value: 'CFF nº 700/21', label: 'Resolução vigente' },
           { value: 'CRFAL', label: 'Execução estadual' },
         ].map((s) => (
-          <div key={s.label} className="rounded-lg border border-neutral-200 bg-white px-4 py-3.5 text-center dark:border-slate-700 dark:bg-slate-800/60">
+          <div key={s.label} className="rounded-lg border border-crfal-gray-200 bg-white px-4 py-3.5 text-center dark:border-slate-700 dark:bg-slate-800/60">
             <p className="text-lg font-bold text-crfal-blue dark:text-crfal-blue-light">{s.value}</p>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-neutral-500 dark:text-neutral-400">{s.label}</p>
+            <p className="text-[10px] font-medium uppercase tracking-wider text-crfal-gray-500 dark:text-crfal-gray-400">{s.label}</p>
           </div>
         ))}
       </div>

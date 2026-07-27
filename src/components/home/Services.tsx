@@ -43,7 +43,7 @@ export default function Services() {
     <section
       ref={sectionRef}
       id="servicos"
-      className="py-16 sm:py-20 md:py-28 bg-neutral-50 relative overflow-x-clip"
+      className="py-16 sm:py-20 md:py-28 bg-crfal-gray-50 relative overflow-x-clip"
     >
       <div className="container-crfal">
         <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12">
@@ -56,7 +56,7 @@ export default function Services() {
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-800 mb-3 sm:mb-4">
                   Nossos Serviços
                 </h2>
-                <p className="text-neutral-600 mb-6 text-sm sm:text-base">
+                <p className="text-crfal-gray-600 mb-6 text-sm sm:text-base">
                   Conheça todos os serviços disponíveis para farmacêuticos e estabelecimentos. Clique em um serviço para ver o tutorial passo a passo.
                 </p>
                 <a href="/servicos/requerimentos" className="inline-flex items-center gap-2 btn-primary text-sm sm:text-base">
@@ -69,13 +69,13 @@ export default function Services() {
                 className={`mt-10 hidden lg:grid grid-cols-2 gap-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
                 style={{ transitionDelay: '200ms' }}
               >
-                <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 border border-neutral-200 dark:border-slate-700/70">
+                <div className="bg-white dark:bg-slate-900/90 rounded-xl p-4 border border-crfal-gray-200 dark:border-slate-700/70">
                   <span className="text-3xl font-bold text-crfal-blue">{servicesData.length}</span>
-                  <p className="text-sm text-neutral-600">Serviços Online</p>
+                  <p className="text-sm text-crfal-gray-600">Serviços Online</p>
                 </div>
-                <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-4 border border-neutral-200 dark:border-slate-700/70">
+                <div className="bg-white dark:bg-slate-900/90 rounded-xl p-4 border border-crfal-gray-200 dark:border-slate-700/70">
                   <span className="text-3xl font-bold text-crfal-blue">24h</span>
-                  <p className="text-sm text-neutral-600">Disponibilidade</p>
+                  <p className="text-sm text-crfal-gray-600">Disponibilidade</p>
                 </div>
               </div>
             </div>
@@ -90,8 +90,8 @@ export default function Services() {
                 return (
                   <div
                     key={service.id}
-                    className={`bg-white dark:bg-slate-900/90 rounded-2xl border overflow-hidden transition-all duration-300 ${
-                      isExpanded ? 'border-crfal-blue/30 shadow-card' : 'border-neutral-200 dark:border-slate-700/70'
+                    className={`bg-white dark:bg-slate-900/90 rounded-xl border overflow-hidden transition-all duration-300 ${
+                      isExpanded ? 'border-crfal-blue/30 shadow-card' : 'border-crfal-gray-200 dark:border-slate-700/70'
                     } ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
                     style={{ transitionDelay: isVisible ? `${index * 60}ms` : '0ms' }}
                   >
@@ -138,7 +138,7 @@ export default function Services() {
                     ) : (
                       <button
                         onClick={() => handleServiceClick(service)}
-                        className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-neutral-50 dark:hover:bg-slate-800/50 transition-colors duration-200 min-h-[64px]"
+                        className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 text-left hover:bg-crfal-gray-50 dark:hover:bg-slate-800/50 transition-colors duration-200 min-h-[64px]"
                       >
                         <div className="w-10 h-10 sm:w-11 sm:h-11 bg-crfal-blue-lighter text-crfal-blue rounded-xl flex items-center justify-center flex-shrink-0">
                           <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -150,14 +150,14 @@ export default function Services() {
                             </span>
                           </div>
                           <h3 className="font-bold text-neutral-800 dark:text-slate-100 text-sm sm:text-base leading-snug">{service.title}</h3>
-                          <p className="text-xs sm:text-sm text-neutral-500 dark:text-slate-400 leading-relaxed hidden sm:block">{service.description}</p>
+                          <p className="text-xs sm:text-sm text-crfal-gray-500 dark:text-slate-400 leading-relaxed hidden sm:block">{service.description}</p>
                         </div>
                         <ChevronDown className="w-5 h-5 text-crfal-blue flex-shrink-0" />
                       </button>
                     )}
 
                     <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isExpanded ? 'max-h-[1400px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                      <div className="p-4 sm:p-6 border-b border-neutral-100 dark:border-slate-700/50">
+                      <div className="p-4 sm:p-6 border-b border-crfal-gray-100 dark:border-slate-700/50">
                         <h4 className="font-bold text-neutral-800 dark:text-slate-100 flex items-center gap-2 mb-4 text-sm sm:text-base">
                           <Play className="w-5 h-5 text-crfal-blue" />
                           Tutorial Passo a Passo
@@ -173,7 +173,7 @@ export default function Services() {
                           ))}
                         </ol>
                       </div>
-                      <div className="p-4 sm:p-6 bg-neutral-50 dark:bg-slate-800/50 flex flex-col sm:flex-row gap-3">
+                      <div className="p-4 sm:p-6 bg-crfal-gray-50 dark:bg-slate-800/50 flex flex-col sm:flex-row gap-3">
                         <a
                           href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
                           target="_blank"
@@ -202,7 +202,7 @@ export default function Services() {
           onClick={() => setShowVideoModal(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full overflow-hidden max-h-[92svh] animate-scale-in"
+            className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-xl max-w-2xl w-full overflow-hidden max-h-[92svh] animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-4 border-b border-crfal-gray-medium dark:border-slate-700">

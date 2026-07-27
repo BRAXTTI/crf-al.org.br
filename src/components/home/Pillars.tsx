@@ -43,7 +43,7 @@ const pillars: Pillar[] = [
 
 export default function Pillars() {
   return (
-    <section className="relative bg-neutral-50 py-16 dark:bg-slate-950 sm:py-20 md:py-28">
+    <section className="relative bg-crfal-gray-50 py-16 dark:bg-slate-950 sm:py-20 md:py-28">
       <div className="container-crfal">
         <Reveal>
           <div className="mb-12 flex flex-col gap-6 sm:mb-16 md:flex-row md:items-end md:justify-between">
@@ -58,14 +58,14 @@ export default function Pillars() {
                 </em>
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-neutral-600 dark:text-neutral-400 sm:text-base">
+            <p className="max-w-sm text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400 sm:text-base">
               Tudo o que o CRFAL faz se organiza em quatro frentes permanentes de
               trabalho. Explore cada uma delas.
             </p>
           </div>
         </Reveal>
 
-        <div className="pillars-list border-t border-neutral-200 dark:border-slate-800">
+        <div className="pillars-list border-t border-crfal-gray-200 dark:border-slate-800">
           {pillars.map((pillar, i) => (
             <Reveal key={pillar.index} delay={i * 80}>
               <a
@@ -73,21 +73,21 @@ export default function Pillars() {
                 {...(pillar.external
                   ? { target: '_blank', rel: 'noopener noreferrer' }
                   : {})}
-                className="pillar-row group flex items-center gap-5 border-b border-neutral-200 py-7 dark:border-slate-800 sm:gap-10 sm:py-9"
+                className="pillar-row group flex items-center gap-5 border-b border-crfal-gray-200 py-7 dark:border-slate-800 sm:gap-10 sm:py-9"
               >
-                <span className="font-display w-10 shrink-0 text-sm italic text-neutral-400 dark:text-neutral-500 sm:w-14 sm:text-base">
+                <span className="font-display w-10 shrink-0 text-sm italic text-crfal-gray-400 dark:text-crfal-gray-500 sm:w-14 sm:text-base">
                   {pillar.index}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="pillar-title block text-xl font-bold tracking-tight text-neutral-800 transition-colors duration-300 group-hover:text-crfal-blue dark:text-white dark:group-hover:text-crfal-blue-light sm:text-3xl">
                     {pillar.title}
                   </span>
-                  <span className="mt-1.5 hidden max-w-2xl text-sm leading-relaxed text-neutral-500 dark:text-neutral-400 sm:block">
+                  <span className="mt-1.5 hidden max-w-2xl text-sm leading-relaxed text-crfal-gray-500 dark:text-crfal-gray-400 sm:block">
                     {pillar.description}
                   </span>
                 </span>
                 <span
-                  className="pillar-arrow flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-neutral-500 group-hover:border-crfal-blue group-hover:bg-crfal-blue group-hover:text-white dark:border-slate-700 dark:text-neutral-400 dark:group-hover:border-crfal-blue-light dark:group-hover:bg-crfal-blue-light dark:group-hover:text-slate-950 sm:h-12 sm:w-12"
+                  className="pillar-arrow flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-neutral-300 text-crfal-gray-500 group-hover:border-crfal-blue group-hover:bg-crfal-blue group-hover:text-white dark:border-slate-700 dark:text-crfal-gray-400 dark:group-hover:border-crfal-blue-light dark:group-hover:bg-crfal-blue-light dark:group-hover:text-slate-950 sm:h-12 sm:w-12"
                   aria-hidden
                 >
                   <ArrowUpRight className="h-5 w-5" />

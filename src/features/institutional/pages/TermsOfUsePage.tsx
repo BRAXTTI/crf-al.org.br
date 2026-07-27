@@ -3,7 +3,7 @@ import SEO from '@/components/SEO';
 
 export default function TermsOfUsePage() {
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-crfal-gray-50">
       <SEO
         title="Termos de Uso"
         description="Termos de Uso do site CRFAL — condições gerais de uso do portal do Conselho Regional de Farmácia de Alagoas."
@@ -29,7 +29,7 @@ export default function TermsOfUsePage() {
       </div>
 
       <div className="container-crfal py-10 md:py-16">
-        <div className="bg-white rounded-2xl border border-neutral-200 p-6 md:p-10 space-y-8 text-neutral-700">
+        <div className="bg-white rounded-xl border border-crfal-gray-200 p-6 md:p-10 space-y-8 text-neutral-700">
           <section>
             <h2 className="text-xl font-bold text-neutral-900 mb-3">1. Aceitação dos Termos</h2>
             <p>
@@ -83,7 +83,7 @@ export default function TermsOfUsePage() {
             </p>
           </section>
 
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-crfal-gray-500">
             Última atualização: 29 de maio de 2026.
           </p>
         </div>

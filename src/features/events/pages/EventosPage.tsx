@@ -159,8 +159,8 @@ const STATUS_COLORS: Record<StatusEvento, { bg: string; text: string; icon: Reac
     icon: Clock,
   },
   encerrado: {
-    bg: 'bg-neutral-100 dark:bg-slate-800',
-    text: 'text-neutral-500 dark:text-slate-400',
+    bg: 'bg-crfal-gray-100 dark:bg-slate-800',
+    text: 'text-crfal-gray-500 dark:text-slate-400',
     icon: CheckCircle2,
   },
   cancelado: {
@@ -251,7 +251,7 @@ export default function EventosPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
       <SEO
         title="Eventos"
         description="Confira a agenda de eventos do CRF-AL — Conselho Regional de Farmácia de Alagoas. Congressos, palestras, capacitações e ações sociais."
@@ -308,12 +308,12 @@ export default function EventosPage() {
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-all border ${
                     filtroStatus === filtro.value
                       ? 'bg-crfal-blue text-white border-crfal-blue shadow-sm'
-                      : 'bg-white dark:bg-slate-900 text-neutral-600 dark:text-slate-300 border-neutral-200 dark:border-slate-700 hover:border-crfal-blue/40 hover:text-crfal-blue dark:hover:text-sky-300'
+                      : 'bg-white dark:bg-slate-900 text-crfal-gray-600 dark:text-slate-300 border-crfal-gray-200 dark:border-slate-700 hover:border-crfal-blue/40 hover:text-crfal-blue dark:hover:text-sky-300'
                   }`}
                 >
                   {filtro.label}
                   <span className={`ml-1.5 text-xs ${
-                    filtroStatus === filtro.value ? 'text-white/70' : 'text-neutral-400 dark:text-slate-500'
+                    filtroStatus === filtro.value ? 'text-white/70' : 'text-crfal-gray-400 dark:text-slate-500'
                   }`}>
                     {filtro.count}
                   </span>
@@ -329,10 +329,10 @@ export default function EventosPage() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
-            <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-8 h-8 text-neutral-400 dark:text-slate-500" />
+            <div className="w-16 h-16 mx-auto mb-4 bg-crfal-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-crfal-gray-400 dark:text-slate-500" />
             </div>
-            <p className="text-neutral-500 dark:text-slate-400 text-lg">
+            <p className="text-crfal-gray-500 dark:text-slate-400 text-lg">
               Nenhum evento encontrado para o filtro selecionado.
             </p>
           </div>
@@ -355,7 +355,7 @@ export default function EventosPage() {
                 <h2 className="text-xl font-bold text-neutral-800 dark:text-slate-100">
                   {STATUS_LABELS[grupo.status]}
                 </h2>
-                <span className="text-sm text-neutral-400 dark:text-slate-500">
+                <span className="text-sm text-crfal-gray-400 dark:text-slate-500">
                   {grupo.eventos.length} evento{grupo.eventos.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -364,10 +364,10 @@ export default function EventosPage() {
                 {grupo.eventos.map((evento, index) => (
                   <div
                     key={evento.id}
-                    className={`group bg-white dark:bg-slate-900 rounded-2xl border overflow-hidden transition-all duration-500 ${
+                    className={`group bg-white dark:bg-slate-900 rounded-xl border overflow-hidden transition-all duration-500 ${
                       evento.status === 'cancelado'
                         ? 'border-red-200 dark:border-red-900/30 opacity-75'
-                        : 'border-neutral-200 dark:border-slate-700 hover:shadow-card-hover hover:border-crfal-blue/20 dark:hover:border-sky-500/20 hover:-translate-y-0.5'
+                        : 'border-crfal-gray-200 dark:border-slate-700 hover:shadow-card-hover hover:border-crfal-blue/20 dark:hover:border-sky-500/20 hover:-translate-y-0.5'
                     } ${
                       isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                     }`}
@@ -400,22 +400,22 @@ export default function EventosPage() {
 
                           <h3 className={`text-lg font-bold mb-2 transition-colors ${
                             evento.status === 'cancelado'
-                              ? 'text-neutral-400 dark:text-slate-500 line-through'
+                              ? 'text-crfal-gray-400 dark:text-slate-500 line-through'
                               : 'text-neutral-800 dark:text-slate-100'
                           }`}>
                             {evento.titulo}
                           </h3>
 
-                          <p className="text-sm text-neutral-600 dark:text-slate-400 mb-4 line-clamp-2">
+                          <p className="text-sm text-crfal-gray-600 dark:text-slate-400 mb-4 line-clamp-2">
                             {evento.descricao}
                           </p>
 
                           <div className="flex flex-wrap gap-x-6 gap-y-2">
-                            <div className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-slate-400">
+                            <div className="flex items-center gap-1.5 text-sm text-crfal-gray-500 dark:text-slate-400">
                               <Calendar className="w-4 h-4 text-crfal-blue dark:text-sky-400 shrink-0" />
                               <span>{formatarData(evento.data, evento.dataFim)}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-slate-400">
+                            <div className="flex items-center gap-1.5 text-sm text-crfal-gray-500 dark:text-slate-400">
                               {evento.modalidade === 'online' ? (
                                 <Monitor className="w-4 h-4 text-crfal-blue dark:text-sky-400 shrink-0" />
                               ) : (
@@ -424,7 +424,7 @@ export default function EventosPage() {
                               <span>{evento.local}</span>
                             </div>
                             {evento.publico && (
-                              <div className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-slate-400">
+                              <div className="flex items-center gap-1.5 text-sm text-crfal-gray-500 dark:text-slate-400">
                                 <Building2 className="w-4 h-4 text-crfal-blue dark:text-sky-400 shrink-0" />
                                 <span>{evento.publico}</span>
                               </div>

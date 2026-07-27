@@ -140,7 +140,7 @@ function Pagination({
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page === 1}
-        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium border border-neutral-200 bg-white text-neutral-600 hover:border-crfal-blue/40 hover:text-crfal-blue transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium border border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue transition-all disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <ChevronLeft className="w-4 h-4" />
         Anterior
@@ -148,7 +148,7 @@ function Pagination({
 
       {getPages().map((p, i) =>
         p === '...' ? (
-          <span key={`ellipsis-${i}`} className="px-2 py-2 text-neutral-400 text-sm select-none">
+          <span key={`ellipsis-${i}`} className="px-2 py-2 text-crfal-gray-400 text-sm select-none">
             …
           </span>
         ) : (
@@ -157,8 +157,8 @@ function Pagination({
             onClick={() => onPageChange(p as number)}
             className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
               p === page
-                ? 'bg-crfal-blue text-white shadow-md'
-                : 'border border-neutral-200 bg-white text-neutral-600 hover:border-crfal-blue/40 hover:text-crfal-blue'
+                ? 'bg-crfal-blue text-white shadow-card'
+                : 'border border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue'
             }`}
           >
             {p}
@@ -169,7 +169,7 @@ function Pagination({
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page === totalPages}
-        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium border border-neutral-200 bg-white text-neutral-600 hover:border-crfal-blue/40 hover:text-crfal-blue transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium border border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue transition-all disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Próxima
         <ChevronRight className="w-4 h-4" />
@@ -226,7 +226,7 @@ export default function NewsPage() {
       : publications.filter((pub) => pub.tag === activeTag);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-crfal-gray-50">
       <SEO
         title="Notícias"
         description="Fique por dentro das últimas notícias e comunicados do CRFAL — Conselho Regional de Farmácia de Alagoas."
@@ -254,7 +254,7 @@ export default function NewsPage() {
               </p>
             </div>
             <div className="hidden md:flex justify-end">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10">
                 <Newspaper className="w-8 h-8 text-white mb-2" />
                 <span className="text-2xl font-bold text-white block">{totalPosts || publications.length}</span>
                 <span className="text-sm text-white/70">Notícias publicadas</span>
@@ -266,7 +266,7 @@ export default function NewsPage() {
 
       <div className="container-crfal py-10 md:py-16" ref={gridRef}>
         <div className="flex flex-wrap gap-2 mb-10">
-          <div className="flex items-center gap-2 mr-2 text-neutral-500">
+          <div className="flex items-center gap-2 mr-2 text-crfal-gray-500">
             <Filter className="w-4 h-4" />
             <span className="text-sm font-medium">Filtrar:</span>
           </div>
@@ -276,8 +276,8 @@ export default function NewsPage() {
               onClick={() => setActiveTag(tag.value)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 activeTag === tag.value
-                  ? `${tag.color} text-white shadow-md`
-                  : 'bg-white border border-neutral-200 text-neutral-600 hover:border-crfal-blue/30 hover:text-crfal-blue'
+                  ? `${tag.color} text-white shadow-card`
+                  : 'bg-white border border-crfal-gray-200 text-crfal-gray-600 hover:border-crfal-blue/30 hover:text-crfal-blue'
               }`}
             >
               {tag.label}
@@ -286,7 +286,7 @@ export default function NewsPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-neutral-500">
+          <div className="text-center py-20 text-crfal-gray-500">
             <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
             Carregando notícias...
           </div>
@@ -294,14 +294,14 @@ export default function NewsPage() {
           <div className="text-center py-20">
             <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-neutral-700 mb-2">Nenhuma notícia encontrada</h3>
-            <p className="text-neutral-500 text-sm">Não há notícias na categoria selecionada.</p>
+            <p className="text-crfal-gray-500 text-sm">Não há notícias na categoria selecionada.</p>
           </div>
         ) : (
           <>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPublications.map((pub, index) => (
                 <RevealCard key={pub.id} index={index}>
-                  <article className="group bg-white rounded-2xl overflow-hidden border border-neutral-200 hover:border-crfal-blue/30 hover:shadow-lg transition-all duration-300 h-full">
+                  <article className="group bg-white rounded-xl overflow-hidden border border-crfal-gray-200 hover:border-crfal-blue/30 hover:shadow-card transition-all duration-300 h-full">
                     <div className="relative h-48 overflow-hidden">
                       <img
                         src={pub.image}
@@ -319,7 +319,7 @@ export default function NewsPage() {
                     </div>
 
                     <div className="p-5">
-                      <div className="flex items-center gap-2 text-neutral-500 text-sm mb-3">
+                      <div className="flex items-center gap-2 text-crfal-gray-500 text-sm mb-3">
                         <Calendar className="w-4 h-4" />
                         {pub.date}
                       </div>
@@ -329,7 +329,7 @@ export default function NewsPage() {
                         dangerouslySetInnerHTML={{ __html: pub.title }}
                       />
 
-                      <p className="text-sm text-neutral-600 mb-4 line-clamp-2">{pub.excerpt}</p>
+                      <p className="text-sm text-crfal-gray-600 mb-4 line-clamp-2">{pub.excerpt}</p>
 
                       <Link
                         to={pub.href}

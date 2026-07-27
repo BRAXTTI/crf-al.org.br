@@ -56,7 +56,7 @@ export default function ImpactStrip() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden border-y border-neutral-200/70 bg-white py-14 dark:border-slate-800 dark:bg-slate-950 sm:py-16"
+      className="relative overflow-hidden border-y border-crfal-gray-200/70 bg-white py-14 dark:border-slate-800 dark:bg-slate-950 sm:py-16"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-[0.12]"
@@ -105,7 +105,7 @@ function Metric({
         {value}
         <span className="text-[0.55em] align-baseline">{suffix}</span>
       </p>
-      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
+      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-crfal-gray-500 dark:text-crfal-gray-400">
         {label}
       </p>
       <span

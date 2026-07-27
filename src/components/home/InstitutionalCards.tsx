@@ -63,7 +63,7 @@ function Card({ item, index }: { item: CardItem; index: number }) {
     <a
       href={item.href}
       {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className="group relative flex flex-col rounded-xl border border-neutral-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-crfal-blue/30 hover:shadow-card-hover dark:border-slate-700/70 dark:bg-slate-900 dark:hover:border-crfal-blue/40"
+      className="group relative flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-crfal-blue/30 hover:shadow-card-hover dark:border-slate-700/70 dark:bg-slate-900 dark:hover:border-crfal-blue/40"
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-all duration-300 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white">
@@ -73,7 +73,7 @@ function Card({ item, index }: { item: CardItem; index: number }) {
       <h3 className="mb-2 text-lg font-semibold text-neutral-800 transition-colors duration-300 group-hover:text-crfal-blue dark:text-white">
         {item.title}
       </h3>
-      <p className="mb-5 flex-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+      <p className="mb-5 flex-1 text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">
         {item.description}
       </p>
 
@@ -106,7 +106,7 @@ export default function InstitutionalCards() {
   return (
     <section
       ref={sectionRef}
-      className="bg-neutral-50 py-16 dark:bg-slate-950 sm:py-20 md:py-28"
+      className="bg-crfal-gray-50 py-16 dark:bg-slate-950 sm:py-20 md:py-28"
     >
       <div className="container-crfal">
         <div
@@ -120,7 +120,7 @@ export default function InstitutionalCards() {
           <h2 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-white sm:text-3xl md:text-4xl">
             Conheça o CRFAL
           </h2>
-          <p className="mx-auto max-w-2xl text-base text-neutral-600 dark:text-neutral-400 sm:text-lg">
+          <p className="mx-auto max-w-2xl text-base text-crfal-gray-600 dark:text-crfal-gray-400 sm:text-lg">
             Acesse os principais serviços e informações do Conselho Regional de Farmácia de Alagoas.
           </p>
         </div>

@@ -50,7 +50,7 @@ export default function MissionVisionPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
       <SEO
         title="Missão, Visão e Valores"
         description="Conheça a missão, visão e valores do CRFAL — Conselho Regional de Farmácia de Alagoas, pilares que orientam nossa atuação na farmácia alagoana."
@@ -89,7 +89,7 @@ export default function MissionVisionPage() {
             return (
               <div
                 key={secao.id}
-                className={`group bg-white dark:bg-slate-900/90 rounded-2xl border border-neutral-200 dark:border-slate-700/70 overflow-hidden transition-all duration-500 hover:shadow-lg hover:border-crfal-blue/20 hover:-translate-y-1 ${
+                className={`group bg-white dark:bg-slate-900/90 rounded-xl border border-crfal-gray-200 dark:border-slate-700/70 overflow-hidden transition-all duration-500 hover:shadow-card hover:border-crfal-blue/20 hover:-translate-y-1 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ transitionDelay: isVisible ? `${index * 150}ms` : '0ms' }}
@@ -102,7 +102,7 @@ export default function MissionVisionPage() {
                   <p className="text-white/70 text-sm mt-1">{secao.subtitulo}</p>
                 </div>
                 <div className="p-6">
-                  <p className="text-neutral-600 dark:text-slate-400 leading-relaxed">{secao.descricao}</p>
+                  <p className="text-crfal-gray-600 dark:text-slate-400 leading-relaxed">{secao.descricao}</p>
                 </div>
               </div>
             );
@@ -110,7 +110,7 @@ export default function MissionVisionPage() {
         </div>
 
         <div
-          className={`mt-12 bg-crfal-blue-lighter dark:bg-crfal-blue/10 rounded-2xl border border-crfal-blue/10 dark:border-crfal-blue/20 p-6 md:p-8 transition-all duration-700 ${
+          className={`mt-12 bg-crfal-blue-lighter dark:bg-crfal-blue/10 rounded-xl border border-crfal-blue/10 dark:border-crfal-blue/20 p-6 md:p-8 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
           style={{ transitionDelay: '500ms' }}
@@ -123,7 +123,7 @@ export default function MissionVisionPage() {
               <h3 className="text-xl font-bold text-neutral-800 dark:text-slate-100 mb-2">
                 Compromisso com a Profissão Farmacêutica
               </h3>
-              <p className="text-neutral-600 dark:text-slate-400">
+              <p className="text-crfal-gray-600 dark:text-slate-400">
                 O CRFAL atua com base em princípios éticos e profissionais, buscando sempre a excelência no exercício da farmácia e a valorização do farmacêutico em Alagoas. Nossa missão, visão e valores refletem o compromisso com a sociedade e com a classe.
               </p>
             </div>

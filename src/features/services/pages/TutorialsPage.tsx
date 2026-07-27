@@ -57,7 +57,7 @@ export default function TutorialsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-crfal-gray-50">
       <SEO
         title="Tutoriais"
         description="Tutoriais e guias passo a passo para os serviços do CRFAL — aprenda como realizar seus registros, renovações e demais serviços online de forma simples."
@@ -86,12 +86,12 @@ export default function TutorialsPage() {
             </div>
             <div className="hidden md:flex justify-end">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10">
                   <BookOpen className="w-8 h-8 text-white mb-2" />
                   <span className="text-2xl font-bold text-white block">{tutorials.length}</span>
                   <span className="text-sm text-white/70">Tutoriais</span>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10">
                   <Clock className="w-8 h-8 text-white mb-2" />
                   <span className="text-2xl font-bold text-white block">2-5</span>
                   <span className="text-sm text-white/70">Min. cada</span>
@@ -108,7 +108,7 @@ export default function TutorialsPage() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className="flex items-center gap-2 mr-2 text-neutral-500">
+          <div className="flex items-center gap-2 mr-2 text-crfal-gray-500">
             <Filter className="w-4 h-4" />
             <span className="text-sm font-medium">Filtrar:</span>
           </div>
@@ -121,8 +121,8 @@ export default function TutorialsPage() {
               }}
               className={`px-4 py-2 text-sm rounded-full transition-all duration-200 ${
                 activeCategory === cat
-                  ? 'bg-crfal-blue text-white shadow-md'
-                  : 'bg-white border border-neutral-200 text-neutral-600 hover:border-crfal-blue/30 hover:text-crfal-blue'
+                  ? 'bg-crfal-blue text-white shadow-card'
+                  : 'bg-white border border-crfal-gray-200 text-crfal-gray-600 hover:border-crfal-blue/30 hover:text-crfal-blue'
               }`}
             >
               {cat}
@@ -144,7 +144,7 @@ export default function TutorialsPage() {
                 <h2 className="text-3xl md:text-4xl font-bold text-neutral-800 mb-4">
                   Aprenda com Nossos Tutoriais
                 </h2>
-                <p className="text-neutral-600 mb-6">
+                <p className="text-crfal-gray-600 mb-6">
                   Selecione um tutorial para ver o passo a passo detalhado.
                   Cada tutorial inclui todas as informações necessárias para
                   você utilizar nossos serviços com facilidade.
@@ -166,15 +166,15 @@ export default function TutorialsPage() {
                 }`}
                 style={{ transitionDelay: '200ms' }}
               >
-                <div className="bg-white rounded-2xl p-4 border border-neutral-200">
+                <div className="bg-white rounded-xl p-4 border border-crfal-gray-200">
                   <span className="text-3xl font-bold text-crfal-blue">{filteredTutorials.length}</span>
-                  <p className="text-sm text-neutral-600">
+                  <p className="text-sm text-crfal-gray-600">
                     {activeCategory === 'Todos' ? 'Tutoriais Disponíveis' : `em ${activeCategory}`}
                   </p>
                 </div>
-                <div className="bg-white rounded-2xl p-4 border border-neutral-200">
+                <div className="bg-white rounded-xl p-4 border border-crfal-gray-200">
                   <span className="text-3xl font-bold text-crfal-blue">24h</span>
-                  <p className="text-sm text-neutral-600">Disponibilidade</p>
+                  <p className="text-sm text-crfal-gray-600">Disponibilidade</p>
                 </div>
               </div>
             </div>
@@ -189,7 +189,7 @@ export default function TutorialsPage() {
                 return (
                   <div
                     key={tutorial.id}
-                    className={`bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all duration-300 ${
+                    className={`bg-white rounded-xl border border-crfal-gray-200 overflow-hidden transition-all duration-300 ${
                       isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
                     }`}
                     style={{ transitionDelay: isVisible ? `${index * 80}ms` : '0ms' }}
@@ -197,7 +197,7 @@ export default function TutorialsPage() {
                     <button
                       onClick={() => handleTutorialClick(tutorial)}
                       className={`w-full flex items-center gap-4 p-5 text-left transition-all duration-300 ${
-                        isExpanded ? 'bg-crfal-blue-lighter' : 'hover:bg-neutral-50'
+                        isExpanded ? 'bg-crfal-blue-lighter' : 'hover:bg-crfal-gray-50'
                       }`}
                     >
                       <div
@@ -212,13 +212,13 @@ export default function TutorialsPage() {
                           <span className="text-xs px-2 py-0.5 bg-crfal-blue-lighter text-crfal-blue rounded-full font-medium">
                             {tutorial.category}
                           </span>
-                          <span className="text-xs text-neutral-400 flex items-center gap-1">
+                          <span className="text-xs text-crfal-gray-400 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             2-5 min
                           </span>
                         </div>
                         <h3 className="font-bold text-neutral-800">{tutorial.title}</h3>
-                        <p className="text-sm text-neutral-600 line-clamp-1">{tutorial.description}</p>
+                        <p className="text-sm text-crfal-gray-600 line-clamp-1">{tutorial.description}</p>
                       </div>
                       <ChevronRight
                         className={`w-5 h-5 text-crfal-blue transition-transform duration-300 flex-shrink-0 ${
@@ -232,7 +232,7 @@ export default function TutorialsPage() {
                         isExpanded ? 'max-h-[800px]' : 'max-h-0'
                       }`}
                     >
-                      <div className="p-5 pt-0 border-t border-neutral-200">
+                      <div className="p-5 pt-0 border-t border-crfal-gray-200">
                         <div className="mt-4">
                           <div className="flex items-center justify-between mb-4">
                             <h4 className="font-semibold text-crfal-blue flex items-center gap-2">
@@ -285,10 +285,10 @@ export default function TutorialsPage() {
               })}
 
               {filteredTutorials.length === 0 && (
-                <div className="bg-white rounded-2xl border border-neutral-200 p-12 text-center">
+                <div className="bg-white rounded-xl border border-crfal-gray-200 p-12 text-center">
                   <Search className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
                   <h3 className="text-lg font-bold text-neutral-700 mb-2">Nenhum tutorial encontrado</h3>
-                  <p className="text-neutral-500 text-sm">Não há tutoriais na categoria selecionada.</p>
+                  <p className="text-crfal-gray-500 text-sm">Não há tutoriais na categoria selecionada.</p>
                 </div>
               )}
             </div>
@@ -302,12 +302,12 @@ export default function TutorialsPage() {
           onClick={() => setShowVideoModal(false)}
         >
           <div
-            className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden animate-scale-in"
+            className="bg-white rounded-xl max-w-2xl w-full overflow-hidden animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+            <div className="flex items-center justify-between p-4 border-b border-crfal-gray-200">
               <h3 className="font-bold text-crfal-blue">Tutorial: {selectedTutorial.title}</h3>
-              <button onClick={() => setShowVideoModal(false)} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
+              <button onClick={() => setShowVideoModal(false)} className="p-2 hover:bg-crfal-gray-100 rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -322,10 +322,10 @@ export default function TutorialsPage() {
                 />
               </div>
             ) : (
-              <div className="aspect-video bg-neutral-100 flex items-center justify-center">
+              <div className="aspect-video bg-crfal-gray-100 flex items-center justify-center">
                 <div className="text-center">
                   <Play className="w-16 h-16 text-crfal-blue mx-auto mb-4" />
-                  <p className="text-neutral-500">Vídeo tutorial em breve</p>
+                  <p className="text-crfal-gray-500">Vídeo tutorial em breve</p>
                 </div>
               </div>
             )}

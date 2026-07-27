@@ -28,13 +28,13 @@ export default function PlanoFiscalizacaoAnualPage() {
 
       <div className="my-5 space-y-3">
         {etapas.map((etapa, i) => (
-          <div key={i} className="flex items-start gap-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+          <div key={i} className="flex items-start gap-4 rounded-lg border border-crfal-gray-200 bg-crfal-gray-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-700 dark:text-crfal-blue-light">
               <etapa.icon className="h-4.5 w-4.5" />
             </span>
             <div>
               <h3 className="text-sm font-bold text-neutral-800 dark:text-white">{etapa.title}</h3>
-              <p className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">{etapa.desc}</p>
+              <p className="text-xs leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">{etapa.desc}</p>
             </div>
           </div>
         ))}
@@ -44,7 +44,7 @@ export default function PlanoFiscalizacaoAnualPage() {
 
       <div className="my-5 grid gap-3 sm:grid-cols-2">
         {conteudos.map((item, i) => (
-          <div key={i} className="flex items-start gap-3 rounded-lg border border-neutral-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/60">
+          <div key={i} className="flex items-start gap-3 rounded-lg border border-crfal-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/60">
             <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-crfal-blue dark:text-crfal-blue-light" />
             <p className="text-sm leading-relaxed text-neutral-700 dark:text-slate-200">{item.text}</p>
           </div>

@@ -20,6 +20,8 @@ import {
   AlertCircle,
   Clock,
   Lock,
+  ChevronDown,
+  MapPin,
 } from 'lucide-react';
 import {
   Form,
@@ -50,105 +52,29 @@ import {
 } from '@/components/ui/dialog';
 
 const manifestationTypes = [
-  {
-    id: 'denuncia',
-    label: 'Denúncia',
-    description: 'Reporte de irregularidades ou condutas inadequadas',
-    icon: AlertTriangle,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200',
-  },
-  {
-    id: 'elogio',
-    label: 'Elogio',
-    description: 'Reconhecimento de atendimento ou serviço de qualidade',
-    icon: ThumbsUp,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-  },
-  {
-    id: 'critica',
-    label: 'Crítica',
-    description: 'Apontamento de falhas ou pontos a melhorar',
-    icon: AlertCircle,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200',
-  },
-  {
-    id: 'sugestao',
-    label: 'Sugestão',
-    description: 'Ideias para melhoria dos serviços',
-    icon: Lightbulb,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-200',
-  },
-  {
-    id: 'reclamacao',
-    label: 'Reclamação',
-    description: 'Insatisfação com produto ou serviço',
-    icon: MessageSquare,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
-  },
-  {
-    id: 'solicitacao',
-    label: 'Solicitação',
-    description: 'Pedido de informação ou serviço',
-    icon: FileText,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-  },
-  {
-    id: 'outros',
-    label: 'Outros',
-    description: 'Demais tipos de manifestação',
-    icon: HelpCircle,
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-50',
-    borderColor: 'border-gray-200',
-  },
+  { id: 'denuncia', label: 'Denúncia', icon: AlertTriangle, color: 'text-red-600 dark:text-red-400', bgColor: 'bg-red-50 dark:bg-red-900/25' },
+  { id: 'elogio', label: 'Elogio', icon: ThumbsUp, color: 'text-emerald-600 dark:text-emerald-400', bgColor: 'bg-emerald-50 dark:bg-emerald-900/25' },
+  { id: 'critica', label: 'Crítica', icon: AlertCircle, color: 'text-orange-600 dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/25' },
+  { id: 'sugestao', label: 'Sugestão', icon: Lightbulb, color: 'text-amber-600 dark:text-amber-400', bgColor: 'bg-amber-50 dark:bg-amber-900/25' },
+  { id: 'reclamacao', label: 'Reclamação', icon: MessageSquare, color: 'text-purple-600 dark:text-purple-400', bgColor: 'bg-purple-50 dark:bg-purple-900/25' },
+  { id: 'solicitacao', label: 'Solicitação', icon: FileText, color: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/25' },
+  { id: 'outros', label: 'Outros', icon: HelpCircle, color: 'text-gray-600 dark:text-gray-400', bgColor: 'bg-gray-50 dark:bg-gray-900/25' },
 ] as const;
 
+const faqs = [
+  { q: 'Quanto tempo leva para receber uma resposta?', a: 'O prazo médio de resposta é de até 10 dias úteis a partir do registro da manifestação.' },
+  { q: 'Posso fazer uma denúncia anônima?', a: 'Sim. Para denúncias anônimas, você pode deixar os campos de identificação em branco, informando apenas os detalhes da denúncia.' },
+  { q: 'Como acompanho o status da minha manifestação?', a: 'Após o envio, você receberá um e-mail de confirmação com um número de protocolo para acompanhamento.' },
+];
+
 const ombudsmanSchema = z.object({
-  nome: z
-    .string()
-    .min(3, 'Nome deve ter pelo menos 3 caracteres')
-    .max(100, 'Nome deve ter no máximo 100 caracteres'),
-  email: z
-    .string()
-    .email('E-mail inválido')
-    .max(100, 'E-mail deve ter no máximo 100 caracteres'),
-  telefone: z
-    .string()
-    .max(20, 'Telefone deve ter no máximo 20 caracteres')
-    .optional()
-    .or(z.literal('')),
-  tipoManifestacao: z.enum([
-    'denuncia',
-    'elogio',
-    'critica',
-    'sugestao',
-    'reclamacao',
-    'solicitacao',
-    'outros',
-  ]),
-  assunto: z
-    .string()
-    .min(5, 'Assunto deve ter pelo menos 5 caracteres')
-    .max(150, 'Assunto deve ter no máximo 150 caracteres'),
-  mensagem: z
-    .string()
-    .min(20, 'Mensagem deve ter pelo menos 20 caracteres')
-    .max(2000, 'Mensagem deve ter no máximo 2000 caracteres'),
-  lgpdConsentimento: z.boolean().refine((val) => val === true, {
-    message: 'Você deve concordar com o uso dos dados para prosseguir',
-  }),
+  nome: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres').max(100, 'Nome deve ter no máximo 100 caracteres'),
+  email: z.string().email('E-mail inválido').max(100, 'E-mail deve ter no máximo 100 caracteres'),
+  telefone: z.string().max(20, 'Telefone deve ter no máximo 20 caracteres').optional().or(z.literal('')),
+  tipoManifestacao: z.enum(['denuncia', 'elogio', 'critica', 'sugestao', 'reclamacao', 'solicitacao', 'outros']),
+  assunto: z.string().min(5, 'Assunto deve ter pelo menos 5 caracteres').max(150, 'Assunto deve ter no máximo 150 caracteres'),
+  mensagem: z.string().min(20, 'Mensagem deve ter pelo menos 20 caracteres').max(2000, 'Mensagem deve ter no máximo 2000 caracteres'),
+  lgpdConsentimento: z.boolean().refine((val) => val === true, { message: 'Você deve concordar com o uso dos dados para prosseguir' }),
 });
 
 type OmbudsmanFormData = z.infer<typeof ombudsmanSchema>;
@@ -159,6 +85,7 @@ export default function OmbudsmanPage() {
   const [showLgpdModal, setShowLgpdModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [charCount, setCharCount] = useState(0);
@@ -166,24 +93,14 @@ export default function OmbudsmanPage() {
   const form = useForm<OmbudsmanFormData>({
     resolver: zodResolver(ombudsmanSchema),
     defaultValues: {
-      nome: '',
-      email: '',
-      telefone: '',
-      tipoManifestacao: undefined as unknown as 'denuncia',
-      assunto: '',
-      mensagem: '',
-      lgpdConsentimento: false,
+      nome: '', email: '', telefone: '', tipoManifestacao: undefined as unknown as 'denuncia',
+      assunto: '', mensagem: '', lgpdConsentimento: false,
     },
   });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
       { threshold: 0.05 }
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
@@ -212,163 +129,139 @@ export default function OmbudsmanPage() {
   const typeInfo = manifestationTypes.find((t) => t.id === selectedType);
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
       <SEO
         title="Ouvidoria"
         description="Ouvidoria do CRFAL — canal oficial para reclamações, sugestões, elogios e denúncias. Manifeste-se e contribua para a melhoria dos serviços farmacêuticos em Alagoas."
         path="/servicos/ouvidoria"
       />
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
-        </div>
+
+      <div className="relative overflow-hidden bg-crfal-blue-dark pb-16 pt-24 md:pb-20 md:pt-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
+        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)', backgroundSize: '56px 56px' }} aria-hidden />
+
         <div className="container-crfal relative z-10">
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-4">
-            <a href="/" className="hover:text-white transition-colors">
-              Início
-            </a>
-            <ChevronRight className="w-4 h-4" />
+          <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm" aria-label="Breadcrumb">
+            <a href="/" className="transition-colors hover:text-white">Início</a>
+            <ChevronRight className="h-4 w-4" />
             <span>Serviços</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="h-4 w-4" />
             <span className="text-white">Ouvidoria</span>
-          </div>
-          <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
-              Ouvidoria
-            </h1>
-            <p className="text-white/80 text-lg">
-              Canal direto de comunicação com o CRF-AL. Registre suas manifestações
-              de forma rápida, segura e transparente. Sua opinião é fundamental
-              para melhorarmos nossos serviços.
-            </p>
-          </div>
+          </nav>
+
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
+            <MessageSquare className="h-3.5 w-3.5" />
+            Canal de Manifestações
+          </span>
+
+          <h1 className="text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl">
+            Ouvidoria
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+            Sua voz é essencial para aprimorarmos nossos serviços. Registre denúncias, elogios, críticas, sugestões e reclamações de forma segura e transparente.
+          </p>
         </div>
       </div>
 
       <div className="container-crfal py-10 md:py-16" ref={sectionRef}>
-        <div className="grid lg:grid-cols-12 gap-8">
+        <div className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <div className="space-y-6 lg:sticky lg:top-24">
-              <div
-                className={`bg-white rounded-2xl border border-neutral-200 p-6 transition-all duration-700 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-              >
-                <div className="w-12 h-12 bg-crfal-blue/10 rounded-xl flex items-center justify-center mb-4">
-                  <MessageSquare className="w-6 h-6 text-crfal-blue" />
-                </div>
-                <h3 className="font-bold text-neutral-800 mb-2">
-                  Canal de Manifestações
-                </h3>
-                <p className="text-sm text-neutral-600 mb-4">
-                  A Ouvidoria é o canal adequado para registrar denúncias, elogios,
-                  críticas, sugestões e reclamações sobre os serviços do CRF-AL.
-                </p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <Clock className="w-4 h-4 text-crfal-blue" />
-                    <span className="text-neutral-600">
-                      Prazo de resposta: <strong>até 10 dias úteis</strong>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Mail className="w-4 h-4 text-crfal-blue" />
-                    <span className="text-neutral-600">ouvidoria@crf-al.org.br</span>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-5 lg:sticky lg:top-28">
+              <div className={`transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+                <button
+                  onClick={() => setMobileInfoOpen(!mobileInfoOpen)}
+                  className="flex w-full items-center justify-between rounded-xl border border-crfal-gray-200 bg-white px-5 py-4 text-left shadow-sm transition-colors hover:bg-crfal-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 lg:cursor-default lg:pointer-events-none"
+                >
+                  <span className="flex items-center gap-3">
+                    <MessageSquare className="h-5 w-5 text-crfal-blue dark:text-crfal-blue-light" />
+                    <span className="text-sm font-semibold text-neutral-800 dark:text-white">Informações</span>
+                  </span>
+                  <ChevronDown className={`h-4 w-4 text-crfal-gray-400 transition-transform duration-300 lg:hidden ${mobileInfoOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-              <div
-                className={`bg-white rounded-2xl border border-neutral-200 p-6 transition-all duration-700 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-                style={{ transitionDelay: '100ms' }}
-              >
-                <h3 className="font-bold text-neutral-800 mb-4">
-                  Tipos de Manifestação
-                </h3>
-                <div className="space-y-3">
-                  {manifestationTypes.map((type) => {
-                    const Icon = type.icon;
-                    return (
-                      <div
-                        key={type.id}
-                        className={`flex items-start gap-3 p-3 rounded-xl transition-all ${
-                          selectedType === type.id
-                            ? `${type.bgColor} ${type.borderColor} border`
-                            : 'hover:bg-neutral-50'
-                        }`}
-                      >
-                        <div
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${type.bgColor}`}
-                        >
-                          <Icon className={`w-4 h-4 ${type.color}`} />
+                <div className={`mt-3 overflow-hidden transition-all duration-300 lg:mt-0 lg:block ${mobileInfoOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 lg:max-h-none lg:opacity-100'}`}>
+                  <div className="space-y-4 lg:space-y-5">
+                    <div className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                      <div className="mb-4 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-800 dark:text-crfal-blue-light">
+                          <Clock className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-medium text-sm text-neutral-800">{type.label}</p>
-                          <p className="text-xs text-neutral-500">{type.description}</p>
+                          <p className="text-sm font-semibold text-neutral-800 dark:text-white">Prazo de resposta</p>
+                          <p className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Até 10 dias úteis</p>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div className="flex items-center gap-3 border-t border-crfal-gray-100 pt-4 dark:border-slate-800">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-800 dark:text-crfal-blue-light">
+                          <Mail className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-neutral-800 dark:text-white">E-mail</p>
+                          <a href="mailto:ouvidoria@crf-al.org.br" className="text-xs text-crfal-blue hover:underline dark:text-crfal-blue-light">ouvidoria@crf-al.org.br</a>
+                        </div>
+                      </div>
+                    </div>
 
-              <div
-                className={`bg-gradient-to-br from-crfal-blue-lighter to-white rounded-2xl border border-crfal-blue/10 p-6 transition-all duration-700 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-                style={{ transitionDelay: '200ms' }}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-crfal-blue/10 rounded-xl flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-crfal-blue" />
+                    <div className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                      <h3 className="mb-3 text-sm font-semibold text-neutral-800 dark:text-white">Tipos de Manifestação</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {manifestationTypes.map((type) => (
+                          <div key={type.id} className={`rounded-lg px-3 py-2 text-center ${type.bgColor}`}>
+                            <type.icon className={`mx-auto mb-1 h-4 w-4 ${type.color}`} />
+                            <p className={`text-[11px] font-medium ${type.color}`}>{type.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-5 dark:border-crfal-blue/25 dark:bg-crfal-blue/10">
+                      <div className="mb-3 flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-crfal-blue text-white">
+                          <Shield className="h-4.5 w-4.5" />
+                        </div>
+                        <h3 className="text-sm font-semibold text-neutral-800 dark:text-white">Sua Privacidade</h3>
+                      </div>
+                      <p className="mb-3 text-xs leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">
+                        Em conformidade com a LGPD, seus dados são tratados com segurança e utilizados apenas para o atendimento da sua manifestação.
+                      </p>
+                      <button onClick={() => setShowPrivacyModal(true)} className="text-xs font-medium text-crfal-blue hover:underline dark:text-crfal-blue-light">
+                        Ver Política de Privacidade
+                      </button>
+                    </div>
+
+                    <div className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                      <div className="flex items-center gap-3">
+                        <MapPin className="h-5 w-5 text-crfal-blue dark:text-crfal-blue-light" />
+                        <div>
+                          <p className="text-sm font-semibold text-neutral-800 dark:text-white">Endereço</p>
+                          <p className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Rua Oldemburgo da Silva Paranhos, 290 — Farol, Maceió/AL</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-neutral-800">Sua Privacidade</h3>
                 </div>
-                <p className="text-sm text-neutral-600 mb-3">
-                  Em conformidade com a LGPD, seus dados são tratados com segurança
-                  e utilizados apenas para o atendimento da sua manifestação.
-                </p>
-                <button
-                  onClick={() => setShowPrivacyModal(true)}
-                  className="text-sm text-crfal-blue hover:underline font-medium"
-                >
-                  Ver Política de Privacidade
-                </button>
               </div>
             </div>
           </div>
 
           <div className="lg:col-span-8">
-            <div
-              className={`bg-white rounded-2xl border border-neutral-200 overflow-hidden transition-all duration-700 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
-              style={{ transitionDelay: '150ms' }}
-            >
-              <div className="bg-gradient-to-r from-crfal-blue to-crfal-blue-dark p-6">
+            <div className={`overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm transition-all duration-700 dark:border-slate-700 dark:bg-slate-900 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+              <div className="border-b border-crfal-gray-100 bg-gradient-to-r from-crfal-blue/5 to-transparent px-6 py-5 dark:border-slate-800 dark:from-crfal-blue/10">
                 <div className="flex items-center gap-4">
-                  <div
-                    className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                      typeInfo ? typeInfo.bgColor : 'bg-white/20'
-                    }`}
-                  >
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${typeInfo ? typeInfo.bgColor : 'bg-crfal-gray-100 dark:bg-slate-800'}`}>
                     {typeInfo ? (
-                      <typeInfo.icon className={`w-7 h-7 ${typeInfo.color}`} />
+                      <typeInfo.icon className={`h-6 w-6 ${typeInfo.color}`} />
                     ) : (
-                      <MessageSquare className="w-7 h-7 text-white" />
+                      <MessageSquare className="h-6 w-6 text-crfal-gray-400" />
                     )}
                   </div>
                   <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-white">
+                    <h2 className="text-lg font-bold text-neutral-800 dark:text-white md:text-xl">
                       {typeInfo ? typeInfo.label : 'Nova Manifestação'}
                     </h2>
-                    <p className="text-white/80 text-sm">
-                      {typeInfo
-                        ? typeInfo.description
-                        : 'Preencha o formulário abaixo para registrar sua manifestação'}
+                    <p className="text-sm text-crfal-gray-500 dark:text-crfal-gray-400">
+                      {typeInfo ? 'Preencha os dados abaixo' : 'Selecione o tipo e preencha os dados abaixo'}
                     </p>
                   </div>
                 </div>
@@ -382,20 +275,18 @@ export default function OmbudsmanPage() {
                       name="tipoManifestacao"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-neutral-800 font-medium">
-                            Tipo de Manifestação *
-                          </FormLabel>
+                          <FormLabel className="font-medium text-neutral-800 dark:text-white">Tipo de Manifestação *</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="h-12 border-neutral-200 focus:ring-crfal-blue">
-                                <SelectValue placeholder="Selecione o tipo de manifestação" />
+                              <SelectTrigger className="h-12 border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <SelectValue placeholder="Selecione o tipo" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               {manifestationTypes.map((type) => (
                                 <SelectItem key={type.id} value={type.id}>
                                   <div className="flex items-center gap-2">
-                                    <type.icon className={`w-4 h-4 ${type.color}`} />
+                                    <type.icon className={`h-4 w-4 ${type.color}`} />
                                     {type.label}
                                   </div>
                                 </SelectItem>
@@ -407,47 +298,33 @@ export default function OmbudsmanPage() {
                       )}
                     />
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid gap-4 md:grid-cols-2">
                       <FormField
                         control={form.control}
                         name="nome"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-neutral-800 font-medium">
-                              Nome Completo *
-                            </FormLabel>
+                            <FormLabel className="font-medium text-neutral-800 dark:text-white">Nome Completo *</FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                                <Input
-                                  placeholder="Digite seu nome completo"
-                                  className="pl-10 h-12 border-neutral-200 focus:ring-crfal-blue"
-                                  {...field}
-                                />
+                                <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
+                                <Input placeholder="Seu nome completo" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                               </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-
                       <FormField
                         control={form.control}
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-neutral-800 font-medium">
-                              E-mail *
-                            </FormLabel>
+                            <FormLabel className="font-medium text-neutral-800 dark:text-white">E-mail *</FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                                <Input
-                                  type="email"
-                                  placeholder="seu@email.com"
-                                  className="pl-10 h-12 border-neutral-200 focus:ring-crfal-blue"
-                                  {...field}
-                                />
+                                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
+                                <Input type="email" placeholder="seu@email.com" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                               </div>
                             </FormControl>
                             <FormMessage />
@@ -461,23 +338,14 @@ export default function OmbudsmanPage() {
                       name="telefone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-neutral-800 font-medium">
-                            Telefone (opcional)
-                          </FormLabel>
+                          <FormLabel className="font-medium text-neutral-800 dark:text-white">Telefone (opcional)</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                              <Input
-                                type="tel"
-                                placeholder="(82) 99999-9999"
-                                className="pl-10 h-12 border-neutral-200 focus:ring-crfal-blue"
-                                {...field}
-                              />
+                              <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
+                              <Input type="tel" placeholder="(82) 99999-9999" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                             </div>
                           </FormControl>
-                          <FormDescription className="text-xs text-neutral-500">
-                            Informe se deseja ser contatado por telefone
-                          </FormDescription>
+                          <FormDescription className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Informe se deseja ser contatado por telefone</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -488,15 +356,9 @@ export default function OmbudsmanPage() {
                       name="assunto"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-neutral-800 font-medium">
-                            Assunto *
-                          </FormLabel>
+                          <FormLabel className="font-medium text-neutral-800 dark:text-white">Assunto *</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="Resuma o motivo da sua manifestação"
-                              className="h-12 border-neutral-200 focus:ring-crfal-blue"
-                              {...field}
-                            />
+                            <Input placeholder="Resumo do motivo" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -508,62 +370,35 @@ export default function OmbudsmanPage() {
                       name="mensagem"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-neutral-800 font-medium">
-                            Mensagem *
-                          </FormLabel>
+                          <FormLabel className="font-medium text-neutral-800 dark:text-white">Mensagem *</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Descreva sua manifestação com o máximo de detalhes possível..."
-                              className="min-h-[180px] resize-none border-neutral-200 focus:ring-crfal-blue"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                setCharCount(e.target.value.length);
-                              }}
-                            />
+                            <Textarea placeholder="Descreva sua manifestação com detalhes..." className="min-h-[180px] resize-none border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} onChange={(e) => { field.onChange(e); setCharCount(e.target.value.length); }} />
                           </FormControl>
                           <div className="flex justify-between items-center">
-                            <FormDescription className="text-xs text-neutral-500">
-                              Mínimo de 20 caracteres, máximo de 2000
-                            </FormDescription>
-                            <span
-                              className={`text-xs ${
-                                charCount > 2000 ? 'text-red-500' : 'text-neutral-400'
-                              }`}
-                            >
-                              {charCount}/2000
-                            </span>
+                            <FormDescription className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Mínimo de 20 caracteres</FormDescription>
+                            <span className={`text-xs ${charCount > 2000 ? 'text-red-500' : 'text-crfal-gray-400'}`}>{charCount}/2000</span>
                           </div>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    <div className="bg-crfal-blue-lighter rounded-xl p-4 border border-crfal-blue/10">
+                    <div className="rounded-lg border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-4 dark:border-crfal-blue/25 dark:bg-crfal-blue/10">
                       <FormField
                         control={form.control}
                         name="lgpdConsentimento"
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="mt-0.5 border-crfal-blue data-[state=checked]:bg-crfal-blue"
-                              />
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} className="mt-0.5 border-crfal-blue data-[state=checked]:bg-crfal-blue" />
                             </FormControl>
                             <div className="space-y-1 leading-none">
-                              <FormLabel className="text-sm text-neutral-700 font-normal cursor-pointer">
+                              <FormLabel className="cursor-pointer text-sm font-normal text-neutral-700 dark:text-neutral-300">
                                 Li e concordo com o{' '}
-                                <button
-                                  type="button"
-                                  onClick={() => setShowLgpdModal(true)}
-                                  className="text-crfal-blue hover:underline font-medium"
-                                >
+                                <button type="button" onClick={() => setShowLgpdModal(true)} className="font-medium text-crfal-blue hover:underline dark:text-crfal-blue-light">
                                   tratamento dos meus dados pessoais
                                 </button>{' '}
-                                para fins de atendimento desta manifestação,
-                                conforme a Lei Geral de Proteção de Dados (LGPD).
+                                conforme a LGPD.
                               </FormLabel>
                               <FormMessage />
                             </div>
@@ -572,41 +407,48 @@ export default function OmbudsmanPage() {
                       />
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="flex-1 h-12 bg-crfal-blue hover:bg-crfal-blue-dark text-white font-medium rounded-xl transition-all duration-300 disabled:opacity-50"
-                      >
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <Button type="submit" disabled={isSubmitting} className="h-12 flex-1 rounded-lg bg-crfal-blue font-medium text-white transition-all hover:bg-crfal-blue-dark disabled:opacity-50">
                         {isSubmitting ? (
                           <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                            <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                             Enviando...
                           </>
                         ) : (
                           <>
-                            <Send className="w-5 h-5 mr-2" />
+                            <Send className="mr-2 h-5 w-5" />
                             Enviar Manifestação
                           </>
                         )}
                       </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => form.reset()}
-                        disabled={isSubmitting}
-                        className="h-12 px-6 border-neutral-200 text-neutral-600 hover:bg-neutral-50 rounded-xl"
-                      >
+                      <Button type="button" variant="outline" onClick={() => form.reset()} disabled={isSubmitting} className="h-12 rounded-lg border-crfal-gray-200 px-6 text-crfal-gray-600 hover:bg-crfal-gray-50 dark:border-slate-700 dark:text-crfal-gray-400 dark:hover:bg-slate-800">
                         Limpar
                       </Button>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-neutral-500 justify-center">
-                      <Lock className="w-4 h-4" />
-                      <span>Este formulário é protegido e seus dados são criptografados</span>
+                    <div className="flex items-center justify-center gap-2 text-xs text-crfal-gray-500 dark:text-crfal-gray-400">
+                      <Lock className="h-4 w-4" />
+                      <span>Formulário protegido — seus dados são criptografados</span>
                     </div>
                   </form>
                 </Form>
+              </div>
+            </div>
+
+            <div className={`mt-8 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '200ms' }}>
+              <div className="rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-neutral-800 dark:text-white">
+                  <HelpCircle className="h-5 w-5 text-crfal-blue dark:text-crfal-blue-light" />
+                  Perguntas Frequentes
+                </h3>
+                <div className="space-y-3">
+                  {faqs.map((faq) => (
+                    <div key={faq.q} className="rounded-lg bg-crfal-gray-50 p-4 dark:bg-slate-800/50">
+                      <p className="text-sm font-semibold text-neutral-800 dark:text-white">{faq.q}</p>
+                      <p className="mt-1 text-sm text-crfal-gray-600 dark:text-crfal-gray-400">{faq.a}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -616,145 +458,55 @@ export default function OmbudsmanPage() {
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <DialogTitle className="text-center text-xl">
-              Manifestação Enviada!
-            </DialogTitle>
+            <DialogTitle className="text-center text-xl">Manifestação Enviada!</DialogTitle>
             <DialogDescription className="text-center">
-              Sua manifestação foi registrada com sucesso e encaminhada para a
-              Ouvidoria do CRF-AL. Você receberá um e-mail de confirmação em breve.
-              <br />
-              <br />
+              Sua manifestação foi registrada com sucesso e encaminhada para a Ouvidoria do CRF-AL.
+              <br /><br />
               <strong>Prazo de resposta:</strong> até 10 dias úteis.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4">
-            <Button
-              onClick={() => setShowSuccessDialog(false)}
-              className="w-full bg-crfal-blue hover:bg-crfal-blue-dark"
-            >
-              Entendi
-            </Button>
+            <Button onClick={() => setShowSuccessDialog(false)} className="w-full bg-crfal-blue hover:bg-crfal-blue-dark">Entendi</Button>
           </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showLgpdModal} onOpenChange={setShowLgpdModal}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-crfal-blue" />
-              Tratamento de Dados Pessoais
-            </DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-crfal-blue" />Tratamento de Dados Pessoais</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 text-sm text-neutral-600">
-            <p>
-              O Conselho Regional de Farmácia de Alagoas (CRF-AL), inscrito no
-              CNPJ sob o nº 03.483.952/0001-06, com sede na Rua Oldemburgo da
-              Silva Paranhos, nº 290, Farol, Maceió/AL, CEP 57055-320, é o
-              controlador dos dados pessoais coletados por meio deste formulário.
-            </p>
-            <h4 className="font-semibold text-neutral-800">Finalidade do Tratamento</h4>
-            <p>
-              Os dados pessoais coletados (nome, e-mail e telefone) serão
-              utilizados exclusivamente para:
-            </p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>Identificação do manifestante</li>
-              <li>Comunicação sobre o andamento da manifestação</li>
-              <li>Envio de resposta à manifestação</li>
-              <li>Geração de estatísticas internas (dados anonimizados)</li>
-            </ul>
-            <h4 className="font-semibold text-neutral-800">Base Legal</h4>
-            <p>
-              O tratamento de dados é realizado com base no art. 7º, inciso V, da
-              Lei nº 13.709/2018 (LGPD), que autoriza o tratamento para o
-              exercício regular de direitos em processo judicial, administrativo
-              ou arbitral.
-            </p>
-            <h4 className="font-semibold text-neutral-800">Seus Direitos</h4>
-            <p>Você tem direito a:</p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>Confirmar a existência de tratamento de seus dados</li>
-              <li>Acessar seus dados</li>
-              <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
-              <li>Solicitar anonimização, bloqueio ou eliminação de dados</li>
-              <li>Revogar o consentimento a qualquer momento</li>
-            </ul>
-            <p>
-              Para exercer seus direitos, entre em contato pelo e-mail:{' '}
-              <a href="mailto:ouvidoria@crf-al.org.br" className="text-crfal-blue hover:underline">
-                ouvidoria@crf-al.org.br
-              </a>
-            </p>
+          <div className="space-y-4 text-sm text-crfal-gray-600 dark:text-crfal-gray-400">
+            <p>O CRF-AL, inscrito no CNPJ sob o nº 03.483.952/0001-06, com sede na Rua Oldemburgo da Silva Paranhos, nº 290, Farol, Maceió/AL, é o controlador dos dados pessoais coletados por meio deste formulário.</p>
+            <h4 className="font-semibold text-neutral-800 dark:text-white">Finalidade</h4>
+            <p>Os dados coletados serão utilizados exclusivamente para identificação do manifestante, comunicação sobre o andamento e envio de resposta à manifestação.</p>
+            <h4 className="font-semibold text-neutral-800 dark:text-white">Base Legal</h4>
+            <p>Art. 7º, inciso V, da Lei nº 13.709/2018 (LGPD).</p>
+            <h4 className="font-semibold text-neutral-800 dark:text-white">Seus Direitos</h4>
+            <p>Você tem direito a confirmar, acessar, corrigir e solicitar a eliminação de seus dados. Para exercê-los, contate ouvidoria@crf-al.org.br.</p>
           </div>
-          <div className="mt-4">
-            <Button
-              onClick={() => setShowLgpdModal(false)}
-              className="w-full bg-crfal-blue hover:bg-crfal-blue-dark"
-            >
-              Entendi
-            </Button>
-          </div>
+          <div className="mt-4"><Button onClick={() => setShowLgpdModal(false)} className="w-full bg-crfal-blue hover:bg-crfal-blue-dark">Entendi</Button></div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showPrivacyModal} onOpenChange={setShowPrivacyModal}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-crfal-blue" />
-              Política de Privacidade
-            </DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Lock className="h-5 w-5 text-crfal-blue" />Política de Privacidade</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 text-sm text-neutral-600">
-            <p>
-              O CRF-AL valoriza a privacidade de seus usuários e está comprometido
-              com a proteção dos dados pessoais em conformidade com a Lei Geral de
-              Proteção de Dados (LGPD - Lei 13.709/2018).
-            </p>
-            <h4 className="font-semibold text-neutral-800">1. Coleta de Dados</h4>
-            <p>
-              Coletamos apenas os dados necessários para o atendimento adequado de
-              sua manifestação: nome, e-mail, telefone (opcional) e conteúdo da
-              manifestação.
-            </p>
-            <h4 className="font-semibold text-neutral-800">2. Uso dos Dados</h4>
-            <p>
-              Seus dados são utilizados exclusivamente para processar e responder
-              sua manifestação. Não utilizamos seus dados para fins de marketing
-              nem os compartilhamos com terceiros sem sua autorização.
-            </p>
-            <h4 className="font-semibold text-neutral-800">3. Segurança</h4>
-            <p>
-              Implementamos medidas técnicas e administrativas adequadas para
-              proteger seus dados contra acesso não autorizado, perda, destruição
-              ou vazamento.
-            </p>
-            <h4 className="font-semibold text-neutral-800">4. Retenção</h4>
-            <p>
-              Mantemos seus dados pelo período necessário para cumprimento de
-              obrigações legais e regulatórias, ou conforme determinado pela
-              legislação aplicável.
-            </p>
-            <h4 className="font-semibold text-neutral-800">5. Contato</h4>
-            <p>
-              Em caso de dúvidas sobre esta política, entre em contato pelo e-mail:{' '}
-              <a href="mailto:ouvidoria@crf-al.org.br" className="text-crfal-blue hover:underline">
-                ouvidoria@crf-al.org.br
-              </a>
-            </p>
+          <div className="space-y-4 text-sm text-crfal-gray-600 dark:text-crfal-gray-400">
+            <p>O CRF-AL está comprometido com a proteção dos dados pessoais em conformidade com a LGPD (Lei 13.709/2018).</p>
+            <h4 className="font-semibold text-neutral-800 dark:text-white">Coleta</h4>
+            <p>Coletamos apenas os dados necessários para o atendimento da manifestação.</p>
+            <h4 className="font-semibold text-neutral-800 dark:text-white">Uso</h4>
+            <p>Seus dados são utilizados exclusivamente para processar e responder sua manifestação.</p>
+            <h4 className="font-semibold text-neutral-800 dark:text-white">Segurança</h4>
+            <p>Implementamos medidas técnicas adequadas para proteger seus dados.</p>
           </div>
-          <div className="mt-4">
-            <Button
-              onClick={() => setShowPrivacyModal(false)}
-              className="w-full bg-crfal-blue hover:bg-crfal-blue-dark"
-            >
-              Fechar
-            </Button>
-          </div>
+          <div className="mt-4"><Button onClick={() => setShowPrivacyModal(false)} className="w-full bg-crfal-blue hover:bg-crfal-blue-dark">Fechar</Button></div>
         </DialogContent>
       </Dialog>
     </div>

@@ -28,14 +28,29 @@
     --radius: 0.625rem;
 
     --crfal-blue: #004a80;
-    --crfal-blue-dark: #003b66;
+    --crfal-blue-dark: #002140;
     --crfal-blue-light: #0077cc;
     --crfal-blue-lighter: #e6f7ff;
     --crfal-white: #ffffff;
-    --crfal-gray: #f5f5f5;
-    --crfal-gray-medium: #e0e0e0;
-    --crfal-gray-dark: #333333;
-    --crfal-text-gray: #666666;
+
+    --crfal-gray-50: #f7f9fc;
+    --crfal-gray-100: #edf1f7;
+    --crfal-gray-200: #d8e0e8;
+    --crfal-gray-300: #b4c2d1;
+    --crfal-gray-400: #9ba8b8;
+    --crfal-gray-500: #8a9bb0;
+    --crfal-gray-600: #5f6b7a;
+    --crfal-gray-700: #3d4754;
+    --crfal-gray-800: #1e293b;
+    --crfal-gray-900: #0f172a;
+
+    --crfal-green: #0b5e4b;
+    --crfal-green-light: #e6f4f0;
+
+    --crfal-gray: #f7f9fc;
+    --crfal-gray-medium: #d8e0e8;
+    --crfal-gray-dark: #3d4754;
+    --crfal-text-gray: #5f6b7a;
   }
 
   .dark {
@@ -57,14 +72,29 @@
     --input: 216 27% 26%;
     --ring: 207 92% 56%;
 
-    --crfal-blue: #3b8ed9;
-    --crfal-blue-dark: #2a6ca7;
-    --crfal-blue-light: #77b7f0;
-    --crfal-blue-lighter: #123254;
+    --crfal-blue: #2b5f8e;
+    --crfal-blue-dark: #0f1d2e;
+    --crfal-blue-light: #4a85c4;
+    --crfal-blue-lighter: #0c1a2b;
     --crfal-white: #0b1220;
+
+    --crfal-gray-50: #0b1220;
+    --crfal-gray-100: #122033;
+    --crfal-gray-200: #1e3a5c;
+    --crfal-gray-300: #2d4a6e;
+    --crfal-gray-400: #4d6b94;
+    --crfal-gray-500: #6b87a8;
+    --crfal-gray-600: #94a3b8;
+    --crfal-gray-700: #b8c6d4;
+    --crfal-gray-800: #d8e0e8;
+    --crfal-gray-900: #edf1f7;
+
+    --crfal-green: #2d8a6b;
+    --crfal-green-light: #122a24;
+
     --crfal-gray: #0b1220;
-    --crfal-gray-medium: #334155;
-    --crfal-gray-dark: #e2e8f0;
+    --crfal-gray-medium: #1e3a5c;
+    --crfal-gray-dark: #d8e0e8;
     --crfal-text-gray: #94a3b8;
   }
 }
@@ -178,19 +208,79 @@
   }
 
   .dark .bg-neutral-100 {
-    background-color: rgb(30 41 59 / 0.9);
+    background-color: rgb(18 32 51 / 0.9);
   }
 
   .dark .bg-neutral-200 {
-    background-color: rgb(51 65 85 / 0.9);
+    background-color: rgb(30 58 92 / 0.9);
   }
 
   .dark .border-neutral-100 {
-    border-color: rgb(39 52 73 / 1);
+    border-color: rgb(30 58 92 / 1);
   }
 
   .dark .border-neutral-200 {
-    border-color: rgb(51 65 85 / 1);
+    border-color: rgb(45 74 110 / 1);
+  }
+
+  .dark .bg-crfal-gray-50 {
+    background-color: rgb(11 18 32 / 0.9);
+  }
+
+  .dark .bg-crfal-gray-100 {
+    background-color: rgb(18 32 51 / 0.9);
+  }
+
+  .dark .bg-crfal-gray-200 {
+    background-color: rgb(30 58 92 / 0.9);
+  }
+
+  .dark .border-crfal-gray-100 {
+    border-color: rgb(30 58 92 / 1);
+  }
+
+  .dark .border-crfal-gray-200 {
+    border-color: rgb(45 74 110 / 1);
+  }
+
+  .dark .border-crfal-gray-300 {
+    border-color: rgb(61 90 130 / 1);
+  }
+
+  .dark .text-crfal-gray-900 {
+    color: rgb(237 241 247 / 1);
+  }
+
+  .dark .text-crfal-gray-800 {
+    color: rgb(216 224 232 / 1);
+  }
+
+  .dark .text-crfal-gray-700 {
+    color: rgb(184 198 212 / 1);
+  }
+
+  .dark .text-crfal-gray-600 {
+    color: rgb(148 163 184 / 1);
+  }
+
+  .dark .text-crfal-gray-400 {
+    color: rgb(77 107 148 / 1);
+  }
+
+  .dark .text-crfal-gray-500 {
+    color: rgb(107 135 168 / 1);
+  }
+
+  .dark .hover\:bg-crfal-gray-50:hover {
+    background-color: rgb(18 32 51 / 0.65);
+  }
+
+  .dark .hover\:bg-crfal-gray-100:hover {
+    background-color: rgb(30 58 92 / 0.8);
+  }
+
+  .dark .hover\:border-crfal-gray-300:hover {
+    border-color: rgb(77 110 154 / 1);
   }
 
   .dark .text-neutral-950 {

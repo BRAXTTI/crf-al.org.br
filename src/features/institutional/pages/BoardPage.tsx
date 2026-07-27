@@ -94,7 +94,7 @@ const secoes: Secao[] = [
 function MemberCard({ membro, index, isVisible }: { membro: Membro; index: number; isVisible: boolean }) {
   return (
     <article
-      className={`group overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-crfal-blue/30 hover:shadow-card-hover dark:border-slate-700/70 dark:bg-slate-900 dark:hover:border-crfal-blue/40 ${
+      className={`group overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-crfal-blue/30 hover:shadow-card-hover dark:border-slate-700/70 dark:bg-slate-900 dark:hover:border-crfal-blue/40 ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}
       style={{ transitionDelay: isVisible ? `${index * 80}ms` : '0ms' }}
@@ -126,7 +126,7 @@ function MemberCard({ membro, index, isVisible }: { membro: Membro; index: numbe
         {membro.email && (
           <a
             href={`mailto:${membro.email}`}
-            className="mt-2.5 inline-flex items-center gap-2 text-sm text-neutral-500 transition-colors duration-300 hover:text-crfal-blue dark:text-neutral-400 dark:hover:text-crfal-blue-light"
+            className="mt-2.5 inline-flex items-center gap-2 text-sm text-crfal-gray-500 transition-colors duration-300 hover:text-crfal-blue dark:text-crfal-gray-400 dark:hover:text-crfal-blue-light"
           >
             <Mail className="h-4 w-4 shrink-0" />
             <span className="truncate">{membro.email}</span>
@@ -225,10 +225,10 @@ export default function BoardPage() {
                 aria-disabled={isDisabled}
                 className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 active:scale-95 ${
                   isDisabled
-                    ? 'cursor-not-allowed bg-neutral-100 text-neutral-400 opacity-60 dark:bg-slate-800/70 dark:text-slate-600'
+                    ? 'cursor-not-allowed bg-crfal-gray-100 text-crfal-gray-400 opacity-60 dark:bg-slate-800/70 dark:text-slate-600'
                     : secaoAtiva === secao.id
                       ? 'bg-crfal-blue text-white shadow-sm'
-                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-slate-800 dark:text-neutral-300 dark:hover:bg-slate-700'
+                      : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-neutral-200 dark:bg-slate-800 dark:text-neutral-300 dark:hover:bg-slate-700'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -248,7 +248,7 @@ export default function BoardPage() {
                 <h2 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-white sm:text-3xl">
                   {secaoSelecionada.id === 'diretoria' ? 'Gestão do CRFAL' : 'Plenário do CRFAL'}
                 </h2>
-                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400 sm:text-base">
+                <p className="text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400 sm:text-base">
                   {secaoSelecionada.descricao}
                 </p>
               </div>
@@ -257,13 +257,13 @@ export default function BoardPage() {
                 className={`mt-8 grid grid-cols-2 gap-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 style={{ transitionDelay: '200ms' }}
               >
-                <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-slate-700/70 dark:bg-slate-900">
+                <div className="rounded-xl border border-crfal-gray-200 bg-white p-4 dark:border-slate-700/70 dark:bg-slate-900">
                   <span className="font-display text-3xl font-light text-crfal-blue dark:text-crfal-blue-light">{secaoSelecionada.membros.length}</span>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Membros</p>
+                  <p className="mt-1 text-xs uppercase tracking-wider text-crfal-gray-500 dark:text-crfal-gray-400">Membros</p>
                 </div>
-                <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-slate-700/70 dark:bg-slate-900">
+                <div className="rounded-xl border border-crfal-gray-200 bg-white p-4 dark:border-slate-700/70 dark:bg-slate-900">
                   <span className="font-display text-3xl font-light text-crfal-blue dark:text-crfal-blue-light">{secoes.reduce((acc, s) => acc + s.membros.length, 0)}</span>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Total Geral</p>
+                  <p className="mt-1 text-xs uppercase tracking-wider text-crfal-gray-500 dark:text-crfal-gray-400">Total Geral</p>
                 </div>
               </div>
             </div>
@@ -290,7 +290,7 @@ export default function BoardPage() {
                   <h4 className="mb-1 font-bold text-neutral-800 dark:text-white">
                     Gestão {new Date().getFullYear()}
                   </h4>
-                  <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  <p className="text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">
                     A diretoria e os conselheiros do CRFAL são eleitos pelos profissionais farmacêuticos do estado de Alagoas para mandatos conforme previsto no estatuto do Conselho. Saiba mais consultando o{' '}
                     <a href="/instituicao/estatuto" className="font-semibold text-crfal-blue transition-colors hover:underline dark:text-crfal-blue-light">
                       Estatuto do CRFAL

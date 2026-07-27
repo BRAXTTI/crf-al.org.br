@@ -49,7 +49,7 @@ export default function AfastamentoProvisorioPage() {
             </div>
             <div className="pb-5">
               <h3 className="mb-1 text-sm font-bold text-neutral-800 dark:text-white">{passo.title}</h3>
-              <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{passo.desc}</p>
+              <p className="text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">{passo.desc}</p>
             </div>
           </div>
         ))}

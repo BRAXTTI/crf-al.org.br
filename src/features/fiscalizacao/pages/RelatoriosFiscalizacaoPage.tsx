@@ -33,12 +33,12 @@ export default function RelatoriosFiscalizacaoPage() {
 
       <div className="my-6 grid gap-4 sm:grid-cols-3">
         {finalidades.map((fn) => (
-          <div key={fn.title} className="rounded-xl border border-neutral-200 bg-neutral-50 p-5 transition-colors hover:border-crfal-blue/25 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-crfal-blue/30">
+          <div key={fn.title} className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-5 transition-colors hover:border-crfal-blue/25 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-crfal-blue/30">
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-700 dark:text-crfal-blue-light">
               <fn.icon className="h-5 w-5" />
             </div>
             <h3 className="mb-1.5 text-sm font-bold text-neutral-800 dark:text-white">{fn.title}</h3>
-            <p className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">{fn.desc}</p>
+            <p className="text-xs leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">{fn.desc}</p>
           </div>
         ))}
       </div>

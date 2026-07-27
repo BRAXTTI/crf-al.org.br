@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import SEO from '@/components/SEO';
 import {
   User,
@@ -22,6 +22,9 @@ import {
   AlertCircle,
   Workflow,
   X,
+  Search,
+  Clock,
+  ListChecks,
 } from 'lucide-react';
 
 interface RequirementItem {
@@ -533,8 +536,22 @@ export default function RequirementsPage() {
   const [selectedItem, setSelectedItem] = useState<RequirementItem | null>(null);
   const [showObservationsModal, setShowObservationsModal] = useState(false);
   const [selectedFlowchartItem, setSelectedFlowchartItem] = useState<RequirementItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'documentos' | 'instrucoes' | 'observacoes'>('documentos');
 
   const currentMenu = activeType === 'individual' ? individualMenu : corporateMenu;
+
+  const filteredMenu = useMemo(() => {
+    if (!searchQuery.trim()) return currentMenu;
+    const q = searchQuery.toLowerCase().trim();
+    return currentMenu
+      .map((cat) => ({
+        ...cat,
+        items: cat.items.filter((item) => item.title.toLowerCase().includes(q)),
+      }))
+      .filter((cat) => cat.items.length > 0);
+  }, [currentMenu, searchQuery]);
+
   const selectedItemObservations = selectedItem?.observacoesImportantes;
   const normalizedSelectedItemObservations = selectedItem
     ? Array.isArray(selectedItemObservations)
@@ -560,302 +577,376 @@ export default function RequirementsPage() {
     setActiveType(type);
     setExpandedCategory(null);
     setSelectedItem(null);
+    setSearchQuery('');
     setShowObservationsModal(false);
   };
 
+  const handleSelectItem = (item: RequirementItem) => {
+    setSelectedItem(item);
+    setActiveTab('documentos');
+    setShowObservationsModal(false);
+  };
+
+  const isSearching = searchQuery.trim().length > 0;
+
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
       <SEO
         title="Requerimentos"
         description="Acesse todos os requerimentos do CRFAL para pessoa física e jurídica — registro, renovação, certidões e muito mais para profissionais farmacêuticos em Alagoas."
         path="/servicos/requerimentos"
       />
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
-        </div>
+
+      <div className="relative overflow-hidden bg-crfal-blue-dark pb-14 pt-24 md:pb-18 md:pt-32">
+        <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)',
+            backgroundSize: '56px 56px',
+          }}
+          aria-hidden
+        />
+
         <div className="container-crfal relative z-10">
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-4">
-            <a href="/" className="hover:text-white transition-colors">Início</a>
-            <ChevronRight className="w-4 h-4" />
+          <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm" aria-label="Breadcrumb">
+            <a href="/" className="transition-colors hover:text-white">Início</a>
+            <ChevronRight className="h-4 w-4" />
             <span>Serviços</span>
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="h-4 w-4" />
             <span className="text-white">Requerimentos</span>
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Requerimentos</h1>
-          <p className="text-white/80 text-lg max-w-2xl">
-            Acesse todos os requerimentos disponíveis para pessoa física e pessoa jurídica.
-            Selecione o tipo e o serviço desejado para visualizar os documentos necessários e instruções.
+          </nav>
+
+          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
+            <ClipboardList className="h-3.5 w-3.5" />
+            Atendimento Digital
+          </span>
+
+          <h1 className="text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl">
+            Requerimentos
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+            Selecione o tipo de pessoa, escolha a categoria e o serviço desejado para visualizar documentos necessários e instruções detalhadas.
           </p>
         </div>
       </div>
 
-      <div className="container-crfal py-10 md:py-16">
-        <div className="flex flex-col sm:flex-row gap-4 mb-10">
-          <button
-            onClick={() => handleTypeChange('individual')}
-            className={`flex-1 flex items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
-              activeType === 'individual'
-                ? 'border-crfal-blue bg-crfal-blue text-white shadow-lg shadow-crfal-blue/20'
-                : 'border-neutral-200 bg-white text-neutral-700 hover:border-crfal-blue/30 hover:shadow-md'
-            }`}
-          >
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                activeType === 'individual' ? 'bg-white/20' : 'bg-crfal-blue-lighter text-crfal-blue'
-              }`}
-            >
-              <User className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h3 className="font-bold text-lg">Pessoa Física</h3>
-              <p className={`text-sm ${activeType === 'individual' ? 'text-white/70' : 'text-neutral-500'}`}>
-                Farmacêuticos e profissionais
-              </p>
-            </div>
-          </button>
+      <div className="container-crfal py-8 md:py-12">
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="inline-flex w-full rounded-xl border border-crfal-gray-200 bg-white p-1.5 shadow-card dark:border-slate-700 dark:bg-slate-900 sm:w-auto">
+            {(
+              [
+                { id: 'individual', label: 'Pessoa Física', icon: User },
+                { id: 'corporate', label: 'Pessoa Jurídica', icon: Building2 },
+              ] as const
+            ).map((tab) => {
+              const TabIcon = tab.icon;
+              const isActive = activeType === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTypeChange(tab.id)}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-all duration-300 sm:flex-initial ${
+                    isActive
+                      ? 'bg-crfal-blue text-white shadow-card'
+                      : 'text-crfal-gray-600 hover:text-crfal-blue dark:text-slate-300 dark:hover:text-crfal-blue-light'
+                  }`}
+                >
+                  <TabIcon className="h-4 w-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
 
-          <button
-            onClick={() => handleTypeChange('corporate')}
-            className={`flex-1 flex items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
-              activeType === 'corporate'
-                ? 'border-crfal-blue bg-crfal-blue text-white shadow-lg shadow-crfal-blue/20'
-                : 'border-neutral-200 bg-white text-neutral-700 hover:border-crfal-blue/30 hover:shadow-md'
-            }`}
-          >
-            <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                activeType === 'corporate' ? 'bg-white/20' : 'bg-crfal-blue-lighter text-crfal-blue'
-              }`}
-            >
-              <Building2 className="w-6 h-6" />
-            </div>
-            <div className="text-left">
-              <h3 className="font-bold text-lg">Pessoa Jurídica</h3>
-              <p className={`text-sm ${activeType === 'corporate' ? 'text-white/70' : 'text-neutral-500'}`}>
-                Empresas e estabelecimentos
-              </p>
-            </div>
-          </button>
+          <div className="relative w-full lg:max-w-md">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar requerimento..."
+              className="h-12 w-full rounded-xl border border-crfal-gray-200 bg-white pl-12 pr-4 text-sm text-crfal-gray-800 shadow-card transition-all placeholder:text-crfal-gray-400 focus:border-crfal-blue focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-crfal-gray-400 transition-colors hover:text-crfal-gray-600"
+                aria-label="Limpar busca"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-8">
+        <div className="grid gap-8 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden sticky top-24">
-              <div className="p-4 bg-gradient-to-r from-crfal-blue to-crfal-blue-dark">
-                <h2 className="text-white font-bold flex items-center gap-2">
+            <div className="sticky top-24 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-card dark:border-slate-700 dark:bg-slate-900">
+              <div className="border-b border-crfal-gray-200 bg-crfal-blue-dark px-5 py-4 dark:border-slate-700">
+                <h2 className="flex items-center gap-2 font-bold text-white">
                   {activeType === 'individual' ? (
-                    <><User className="w-5 h-5" /> Pessoa Física</>
+                    <><User className="h-5 w-5" /> Categorias — Pessoa Física</>
                   ) : (
-                    <><Building2 className="w-5 h-5" /> Pessoa Jurídica</>
+                    <><Building2 className="h-5 w-5" /> Categorias — Pessoa Jurídica</>
                   )}
                 </h2>
               </div>
 
-              <div className="divide-y divide-neutral-100">
-                {currentMenu.map((category) => (
-                  <div key={category.id}>
-                    <button
-                      onClick={() => handleCategoryClick(category.id)}
-                      className={`w-full flex items-center justify-between px-4 py-3.5 text-left transition-all duration-200 ${
-                        expandedCategory === category.id
-                          ? 'bg-crfal-blue-lighter text-crfal-blue'
-                          : 'hover:bg-neutral-50 text-neutral-700'
-                      }`}
-                    >
-                      <span className="font-semibold text-sm">{category.title}</span>
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-300 ${
-                          expandedCategory === category.id ? 'rotate-180' : ''
+              {isSearching && filteredMenu.length === 0 ? (
+                <div className="p-6 text-center">
+                  <p className="text-sm text-crfal-gray-500 dark:text-slate-400">
+                    Nenhum requerimento encontrado para "{searchQuery}".
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-crfal-gray-100 dark:divide-slate-700/70">
+                  {filteredMenu.map((category) => (
+                    <div key={category.id}>
+                      <button
+                        onClick={() => handleCategoryClick(category.id)}
+                        className={`flex w-full items-center justify-between px-4 py-3.5 text-left transition-all duration-200 ${
+                          expandedCategory === category.id || isSearching
+                            ? 'bg-crfal-blue text-white'
+                            : 'text-crfal-gray-800 hover:bg-crfal-blue-lighter hover:text-crfal-blue dark:text-slate-100 dark:hover:bg-slate-800 dark:hover:text-crfal-blue-light'
                         }`}
-                      />
-                    </button>
-
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ${
-                        expandedCategory === category.id ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-                      }`}
-                    >
-                      <div className="bg-neutral-50/50 py-1">
-                        {category.items.map((item) => {
-                          const Icon = item.icon;
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => setSelectedItem(item)}
-                              className={`w-full flex items-center gap-3 px-6 py-2.5 text-left text-sm transition-all duration-200 ${
-                                selectedItem?.id === item.id
-                                  ? 'bg-crfal-blue text-white'
-                                  : 'text-neutral-600 hover:bg-neutral-100 hover:text-crfal-blue'
+                      >
+                        <span className="text-sm font-semibold">{category.title}</span>
+                        <span className="flex items-center gap-2">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            expandedCategory === category.id || isSearching
+                              ? 'bg-white/20 text-white'
+                              : 'bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-700 dark:text-crfal-blue-light'
+                          }`}>
+                            {category.items.length}
+                          </span>
+                          {!isSearching && (
+                            <ChevronDown
+                              className={`h-4 w-4 transition-transform duration-300 ${
+                                expandedCategory === category.id ? 'rotate-180' : ''
                               }`}
-                            >
-                              <Icon className="w-4 h-4 flex-shrink-0" />
-                              <span>{item.title}</span>
-                            </button>
-                          );
-                        })}
+                            />
+                          )}
+                        </span>
+                      </button>
+
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ${
+                          expandedCategory === category.id || isSearching ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+                        }`}
+                      >
+                        <div className="bg-crfal-gray-50 py-1 dark:bg-slate-800/50">
+                          {category.items.map((item) => {
+                            const Icon = item.icon;
+                            const isSelected = selectedItem?.id === item.id;
+                            return (
+                              <button
+                                key={item.id}
+                                onClick={() => handleSelectItem(item)}
+                                className={`flex w-full items-center gap-3 px-6 py-2.5 text-left text-sm transition-all duration-200 ${
+                                  isSelected
+                                    ? 'border-l-4 border-crfal-blue bg-crfal-blue/10 font-semibold text-crfal-blue dark:bg-crfal-blue/20 dark:text-crfal-blue-light'
+                                    : 'border-l-4 border-transparent text-crfal-gray-700 hover:bg-crfal-blue/5 hover:text-crfal-blue dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-crfal-blue-light'
+                                }`}
+                              >
+                                <Icon className="h-4 w-4 shrink-0" />
+                                <span className="leading-snug">{item.title}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="lg:col-span-8">
             {selectedItem ? (
               <div className="animate-fade-in">
-                <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
-                  <div className="bg-gradient-to-r from-crfal-blue to-crfal-blue-dark p-6">
+                <div className="overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-card dark:border-slate-700 dark:bg-slate-900">
+                  <div className="border-b border-crfal-gray-200 bg-gradient-to-r from-crfal-blue-dark to-crfal-blue p-5 sm:p-6 dark:border-slate-700">
                     <button
                       onClick={() => setSelectedItem(null)}
-                      className="flex items-center gap-1 text-white/70 hover:text-white text-sm mb-3 transition-colors"
+                      className="mb-4 flex items-center gap-1.5 text-sm text-white/70 transition-colors hover:text-white"
                     >
-                      <ArrowLeft className="w-4 h-4" />
-                      Voltar
+                      <ArrowLeft className="h-4 w-4" />
+                      Voltar à lista
                     </button>
+
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/15">
                         {(() => {
                           const Icon = selectedItem.icon;
-                          return <Icon className="w-7 h-7 text-white" />;
+                          return <Icon className="h-7 w-7 text-white" />;
                         })()}
                       </div>
-                      <div>
-                        <h2 className="text-xl md:text-2xl font-bold text-white">{selectedItem.title}</h2>
-                        <p className="text-white/80 mt-1">{selectedItem.description}</p>
+                      <div className="min-w-0">
+                        <h2 className="text-lg font-bold text-white sm:text-xl md:text-2xl">{selectedItem.title}</h2>
+                        <p className="mt-1 text-sm leading-relaxed text-white/80">{selectedItem.description}</p>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 mt-5">
-                      {selectedItem.taxaAplicavel && (
-                        <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
-                          <Info className="w-4 h-4 text-white/70" />
-                          <span className="text-sm text-white">
-                            Taxa: <strong>{selectedItem.taxaAplicavel}</strong>
-                          </span>
-                        </div>
-                      )}
+                    <div className="mt-5 flex flex-wrap gap-2.5">
                       {selectedItem.prazo && (
-                        <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
-                          <AlertCircle className="w-4 h-4 text-white/70" />
-                          <span className="text-sm text-white">
-                            Prazo: <strong>{selectedItem.prazo}</strong>
-                          </span>
-                        </div>
+                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
+                          <Clock className="h-3.5 w-3.5 text-white/70" />
+                          Prazo: {selectedItem.prazo}
+                        </span>
                       )}
-                      {hasSelectedItemObservations && (
-                        <button
-                          onClick={() => setShowObservationsModal(true)}
-                          className="flex items-center gap-2 bg-white/15 hover:bg-white/25 rounded-lg px-3 py-2 transition-colors"
-                        >
-                          <Info className="w-4 h-4 text-white/80" />
-                          <span className="text-sm text-white">Observações Importantes</span>
-                        </button>
+                      {selectedItem.taxaAplicavel && (
+                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
+                          <Info className="h-3.5 w-3.5 text-white/70" />
+                          Taxa: {selectedItem.taxaAplicavel}
+                        </span>
                       )}
                       {selectedItem.fluxogramaUrl && (
                         <button
                           type="button"
                           onClick={() => setSelectedFlowchartItem(selectedItem)}
-                          className="flex items-center gap-2 bg-white text-crfal-blue hover:bg-crfal-blue-lighter rounded-lg px-3 py-2 transition-colors"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter"
                         >
-                          <Workflow className="w-4 h-4" />
-                          <span className="text-sm font-semibold">Ver Fluxograma</span>
+                          <Workflow className="h-3.5 w-3.5" />
+                          Ver Fluxograma
                         </button>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-6 border-b border-neutral-100">
-                    <h3 className="font-bold text-neutral-800 flex items-center gap-2 mb-4">
-                      <ClipboardList className="w-5 h-5 text-crfal-blue" />
-                      Documentos Necessários
-                    </h3>
-                    <ul className="space-y-2.5">
-                      {selectedItem.documentos.map((doc, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-6 h-6 bg-crfal-blue-lighter text-crfal-blue text-xs font-bold rounded-full flex items-center justify-center mt-0.5">
-                            {index + 1}
-                          </span>
-                          <span className="text-sm text-neutral-700">{doc}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="border-b border-crfal-gray-200 dark:border-slate-700">
+                    <div className="flex">
+                      {(
+                        [
+                          { id: 'documentos', label: 'Documentos', icon: ListChecks, count: selectedItem.documentos.length },
+                          { id: 'instrucoes', label: 'Instruções', icon: FileText, count: selectedItem.instrucoes.length },
+                          { id: 'observacoes', label: 'Observações', icon: Info, count: allSelectedItemObservations.length },
+                        ] as const
+                      ).map((tab) => {
+                        const TabIcon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        const isDisabled = tab.id === 'observacoes' && !hasSelectedItemObservations;
+                        return (
+                          <button
+                            key={tab.id}
+                            onClick={() => !isDisabled && setActiveTab(tab.id)}
+                            disabled={isDisabled}
+                            className={`flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3.5 text-xs font-semibold transition-all sm:text-sm ${
+                              isDisabled
+                                ? 'cursor-not-allowed border-transparent text-crfal-gray-300 dark:text-slate-600'
+                                : isActive
+                                  ? 'border-crfal-blue text-crfal-blue dark:border-crfal-blue-light dark:text-crfal-blue-light'
+                                  : 'border-transparent text-crfal-gray-500 hover:text-crfal-blue dark:text-slate-400 dark:hover:text-crfal-blue-light'
+                            }`}
+                          >
+                            <TabIcon className="h-4 w-4" />
+                            <span className="hidden sm:inline">{tab.label}</span>
+                            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                              isActive
+                                ? 'bg-crfal-blue-lighter text-crfal-blue dark:bg-crfal-blue/20 dark:text-crfal-blue-light'
+                                : 'bg-crfal-gray-100 text-crfal-gray-500 dark:bg-slate-800 dark:text-slate-400'
+                            }`}>
+                              {tab.count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div className="p-6 border-b border-neutral-100">
-                    <h3 className="font-bold text-neutral-800 flex items-center gap-2 mb-4">
-                      <FileText className="w-5 h-5 text-crfal-blue" />
-                      Instruções Passo a Passo
-                    </h3>
-                    <ol className="space-y-3">
-                      {selectedItem.instrucoes.map((instrucao, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-7 h-7 bg-crfal-blue text-white text-xs font-bold rounded-full flex items-center justify-center">
-                            {index + 1}
-                          </span>
-                          <span className="text-sm text-neutral-700 pt-1">{instrucao}</span>
-                        </li>
-                      ))}
-                    </ol>
+                  <div className="p-5 sm:p-6">
+                    {activeTab === 'documentos' && (
+                      <ul className="space-y-2.5">
+                        {selectedItem.documentos.map((doc, index) => (
+                          <li key={index} className="flex items-start gap-3 rounded-lg bg-crfal-gray-50 p-3 dark:bg-slate-800/50">
+                            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-crfal-blue text-xs font-bold text-white">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm leading-relaxed text-crfal-gray-700 dark:text-slate-200">{doc}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {activeTab === 'instrucoes' && (
+                      <ol className="space-y-0">
+                        {selectedItem.instrucoes.map((instrucao, index) => (
+                          <li key={index} className="flex gap-4">
+                            <div className="flex flex-col items-center">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-sm font-bold text-crfal-blue dark:bg-crfal-blue/20 dark:text-crfal-blue-light">
+                                {index + 1}
+                              </span>
+                              {index < selectedItem.instrucoes.length - 1 && (
+                                <div className="mt-1 h-full w-px bg-crfal-gray-200 dark:bg-slate-700" />
+                              )}
+                            </div>
+                            <p className="pb-5 pt-1 text-sm leading-relaxed text-crfal-gray-700 dark:text-slate-200">{instrucao}</p>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+
+                    {activeTab === 'observacoes' && hasSelectedItemObservations && (
+                      <div className="space-y-3">
+                        {allSelectedItemObservations.map((observacao, index) => (
+                          <div key={index} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-600/25 dark:bg-amber-900/15">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-amber-800 dark:text-amber-200">{observacao}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="p-6 bg-neutral-50 flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-5 dark:border-slate-700 dark:bg-slate-800/40 sm:p-6">
                     <a
                       href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-primary text-sm flex items-center gap-2"
+                      className="inline-flex items-center gap-2 rounded-lg bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
                     >
-                      <FileText className="w-4 h-4" />
-                      Acessar Portal
+                      <FileText className="h-4 w-4" />
+                      Acessar CRF AL em Casa
                     </a>
                     {selectedItem.downloadUrl ? (
                       <a
                         href={selectedItem.downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-outline text-sm flex items-center gap-2"
+                        className="inline-flex items-center gap-2 rounded-lg border-2 border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white dark:border-crfal-blue-light dark:text-crfal-blue-light dark:hover:bg-crfal-blue-light dark:hover:text-slate-950"
                       >
-                        <Download className="w-4 h-4" />
+                        <Download className="h-4 w-4" />
                         Baixar Formulário
                       </a>
                     ) : (
-                      <button className="btn-outline text-sm flex items-center gap-2 opacity-60 cursor-not-allowed" disabled>
-                        <Download className="w-4 h-4" />
+                      <span className="inline-flex items-center gap-2 rounded-lg border-2 border-crfal-gray-200 px-5 py-2.5 text-sm font-medium text-crfal-gray-400 dark:border-slate-700 dark:text-slate-500">
+                        <Download className="h-4 w-4" />
                         Formulário indisponível
-                      </button>
-                    )}
-                    {selectedItem.fluxogramaUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFlowchartItem(selectedItem)}
-                        className="btn-outline text-sm flex items-center gap-2"
-                      >
-                        <Workflow className="w-4 h-4" />
-                        Ver Fluxograma
-                      </button>
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-neutral-200 p-12 md:p-16 text-center">
-                <div className="w-20 h-20 bg-crfal-blue-lighter rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <ClipboardList className="w-10 h-10 text-crfal-blue" />
+              <div className="rounded-xl border border-crfal-gray-200 bg-white p-10 text-center shadow-card dark:border-slate-700 dark:bg-slate-900 md:p-14">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-xl bg-crfal-blue-lighter dark:bg-crfal-blue/15">
+                  <ClipboardList className="h-10 w-10 text-crfal-blue dark:text-crfal-blue-light" />
                 </div>
-                <h3 className="text-xl font-bold text-neutral-800 mb-3">Selecione um requerimento</h3>
-                <p className="text-neutral-500 max-w-md mx-auto">
-                  Escolha uma categoria no menu ao lado e selecione o tipo de requerimento
-                  que deseja para visualizar os documentos necessários e instruções detalhadas.
+                <h3 className="mb-3 text-xl font-bold text-crfal-gray-800 dark:text-white">
+                  Selecione um requerimento
+                </h3>
+                <p className="mx-auto max-w-md text-sm leading-relaxed text-crfal-gray-500 dark:text-slate-400">
+                  Escolha o tipo de pessoa acima, navegue pelas categorias ao lado e selecione o serviço desejado para visualizar documentos e instruções.
                 </p>
-                <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <div className="mt-8 flex flex-wrap justify-center gap-2.5">
                   {currentMenu.map((cat) => (
                     <button
                       key={cat.id}
                       onClick={() => handleCategoryClick(cat.id)}
-                      className="px-4 py-2 text-sm bg-crfal-blue-lighter text-crfal-blue rounded-full hover:bg-crfal-blue hover:text-white transition-all duration-200"
+                      className="rounded-full bg-crfal-blue-lighter px-4 py-2 text-sm font-medium text-crfal-blue transition-all duration-200 hover:bg-crfal-blue hover:text-white dark:bg-crfal-blue/15 dark:text-crfal-blue-light dark:hover:bg-crfal-blue dark:hover:text-white"
                     >
                       {cat.title}
                     </button>
@@ -867,67 +958,67 @@ export default function RequirementsPage() {
         </div>
       </div>
 
-
       {selectedFlowchartItem?.fluxogramaUrl && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="fluxograma-title"
           onClick={() => setSelectedFlowchartItem(null)}
         >
           <div
-            className="bg-white rounded-2xl max-w-5xl w-full overflow-hidden animate-scale-in"
+            className="w-full max-w-5xl overflow-hidden rounded-xl bg-white shadow-2xl animate-scale-in dark:bg-slate-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-neutral-200 flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 border-b border-crfal-gray-200 p-5 dark:border-slate-700">
               <div>
-                <h3 id="fluxograma-title" className="font-bold text-crfal-blue text-lg">Fluxograma do processo</h3>
-                <p className="text-sm text-neutral-500 mt-1">{selectedFlowchartItem.title}</p>
+                <h3 id="fluxograma-title" className="text-lg font-bold text-crfal-blue dark:text-crfal-blue-light">Fluxograma do processo</h3>
+                <p className="mt-1 text-sm text-crfal-gray-500 dark:text-slate-400">{selectedFlowchartItem.title}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedFlowchartItem(null)}
-                className="rounded-full border border-neutral-200 p-2 text-neutral-500 transition-colors hover:border-crfal-blue hover:text-crfal-blue"
+                className="rounded-full border border-crfal-gray-200 p-2 text-crfal-gray-500 transition-colors hover:border-crfal-blue hover:text-crfal-blue dark:border-slate-600 dark:hover:border-crfal-blue-light dark:hover:text-crfal-blue-light"
                 aria-label="Fechar fluxograma"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="max-h-[78vh] overflow-auto bg-neutral-50 p-4 sm:p-6">
+            <div className="max-h-[78vh] overflow-auto bg-crfal-gray-50 p-4 dark:bg-slate-950 sm:p-6">
               <img
                 src={selectedFlowchartItem.fluxogramaUrl}
                 alt={`Fluxograma do requerimento ${selectedFlowchartItem.title}`}
-                className="mx-auto h-auto w-full max-w-none rounded-xl border border-neutral-200 bg-white object-contain shadow-sm"
+                className="mx-auto h-auto w-full max-w-none rounded-xl border border-crfal-gray-200 bg-white object-contain shadow-sm dark:border-slate-700"
               />
             </div>
           </div>
         </div>
       )}
+
       {showObservationsModal && selectedItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
           onClick={() => setShowObservationsModal(false)}
         >
           <div
-            className="bg-white rounded-2xl max-w-xl w-full overflow-hidden animate-scale-in"
+            className="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl animate-scale-in dark:bg-slate-900"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-neutral-200">
-              <h3 className="font-bold text-crfal-blue text-lg">Observações Importantes</h3>
-              <p className="text-sm text-neutral-500 mt-1">{selectedItem.title}</p>
+            <div className="border-b border-crfal-gray-200 p-5 dark:border-slate-700">
+              <h3 className="text-lg font-bold text-crfal-blue dark:text-crfal-blue-light">Observações Importantes</h3>
+              <p className="mt-1 text-sm text-crfal-gray-500 dark:text-slate-400">{selectedItem.title}</p>
             </div>
             <div className="p-5">
               {allSelectedItemObservations.map((observacao, index) => (
-                <p key={index} className="text-sm text-neutral-700 whitespace-pre-line">
+                <p key={index} className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-700 dark:text-slate-200">
                   {observacao}
                 </p>
               ))}
             </div>
-            <div className="p-5 bg-neutral-50 border-t border-neutral-200 flex justify-end">
+            <div className="flex justify-end border-t border-crfal-gray-200 bg-crfal-gray-50 p-5 dark:border-slate-700 dark:bg-slate-800/40">
               <button
                 onClick={() => setShowObservationsModal(false)}
-                className="btn-primary text-sm"
+                className="rounded-lg bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
               >
                 Fechar
               </button>
