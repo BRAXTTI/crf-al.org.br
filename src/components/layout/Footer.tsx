@@ -34,7 +34,7 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="bg-crfal-blue text-white relative overflow-hidden">
+    <footer className="bg-[#0B192C] text-white relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-crfal-blue-light rounded-full translate-x-1/2 -translate-y-1/2 opacity-10" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-crfal-blue-dark rounded-full -translate-x-1/2 translate-y-1/2 opacity-20" />
 
@@ -52,7 +52,7 @@ export default function Footer() {
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
+                  <MapPin className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Sede</p>
                     <p>Rua Oldemburgo da Silva Paranhos, 290 - Farol, Maceió - AL, 57055-320</p>
@@ -60,7 +60,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
+                  <MapPin className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Seccional</p>
                     <p>Rua Delmiro Gouveia, 1382 - sala 01 - 1°andar - Sen. Teotônio Vilela, Arapiraca - AL, 57312-415</p>
@@ -68,7 +68,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
+                  <Clock className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Horário de Funcionamento</p>
                     <p>Segunda a Sexta: 09h às 17h (sem pausa para o almoço)</p>
@@ -76,7 +76,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-crfal-blue-light flex-shrink-0 mt-0.5" />
+                  <Phone className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Canais de Atendimento</p>
                     <a
@@ -98,7 +98,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-                <span className="w-1 h-6 bg-crfal-blue-light rounded-full" />
+                <span className="w-1 h-6 bg-[#C59B27] rounded-full" />
                 Links Rápidos
               </h3>
               <ul className="space-y-3">
@@ -120,7 +120,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-                <span className="w-1 h-6 bg-crfal-blue-light rounded-full" />
+                <span className="w-1 h-6 bg-[#C59B27] rounded-full" />
                 Serviços
               </h3>
               <ul className="space-y-3">
@@ -142,7 +142,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-                <span className="w-1 h-6 bg-crfal-blue-light rounded-full" />
+                <span className="w-1 h-6 bg-[#C59B27] rounded-full" />
                 Redes Sociais
               </h3>
 
@@ -173,7 +173,7 @@ export default function Footer() {
                     placeholder="Seu e-mail"
                     className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-sm placeholder:text-white/50 focus:outline-none focus:border-crfal-blue-light"
                   />
-                  <button className="px-3 py-2 bg-crfal-blue-light hover:bg-crfal-blue-lighter text-crfal-blue rounded-lg transition-colors">
+                  <button className="px-3 py-2 bg-[#C59B27] hover:bg-[#A9821F] text-white rounded-lg transition-colors">
                     <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>

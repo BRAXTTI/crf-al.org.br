@@ -1,6 +1,6 @@
 import { useState, useEffect, type MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
   Search,
@@ -125,18 +125,11 @@ const navItems: NavItem[] = [
 ];
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMobileItems, setExpandedMobileItems] = useState<string[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -170,10 +163,8 @@ export default function Header() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const { pathname } = useLocation();
-  const darkHeroPages = ['/', '/imprensa/noticias'];
-  const hasDarkHero = darkHeroPages.includes(pathname) || pathname.startsWith('/imprensa/noticias/');
-  const isOverHero = hasDarkHero && !isScrolled;
+  // The institutional header keeps a stable navy background for readability on every page.
+  const isOverHero = false;
 
   const isExternalLink = (href: string) => href.startsWith('http');
 
@@ -183,9 +174,7 @@ export default function Header() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.06)] dark:shadow-[0_1px_0_rgba(255,255,255,0.04)] py-2'
-          : 'bg-gradient-to-b from-black/55 via-black/25 to-transparent py-3'
+        'bg-[#003366] shadow-header py-2'
       }`}
     >
       <div className="container-crfal">
@@ -198,11 +187,9 @@ export default function Header() {
             <img
               src="/images/logo-crf-azul.png"
               alt="CRFAL"
-              className={`h-11 w-auto object-contain transition-all duration-300 group-hover:scale-105 ${
-                isOverHero ? 'brightness-0 invert' : ''
-              }`}
+              className="h-11 w-auto object-contain brightness-0 invert transition-all duration-300 group-hover:scale-105"
             />
-            <div className={`hidden xl:block transition-colors duration-300 ${isOverHero ? 'text-white' : 'text-neutral-800 dark:text-white'}`}>
+            <div className="hidden xl:block text-white">
               <p className="text-[11px] font-medium uppercase tracking-wider leading-none opacity-80">
                 Conselho Regional de Farmácia
               </p>
@@ -227,9 +214,9 @@ export default function Header() {
                           ? activeDropdown === item.label
                             ? 'text-white bg-white/15'
                             : 'text-white/90 hover:text-white hover:bg-white/10'
-                          : activeDropdown === item.label
-                            ? 'text-crfal-blue dark:text-sky-300 bg-crfal-gray-100 dark:bg-slate-800'
-                            : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-crfal-gray-100 dark:hover:bg-slate-800'
+                           : activeDropdown === item.label
+                             ? 'text-white bg-white/15'
+                             : 'text-white/90 hover:text-white hover:bg-white/10'
                       }`}
                       onClick={() =>
                         setActiveDropdown(activeDropdown === item.label ? null : item.label)
@@ -248,7 +235,7 @@ export default function Header() {
                       className={`${navLinkBase} ${
                         isOverHero
                           ? 'text-white/90 hover:text-white hover:bg-white/10'
-                          : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-crfal-gray-100 dark:hover:bg-slate-800'
+                           : 'text-white/90 hover:text-white hover:bg-white/10'
                       }`}
                     >
                       {item.directIcon && <item.directIcon className="w-3.5 h-3.5" />}
@@ -262,7 +249,7 @@ export default function Header() {
                       className={`${navLinkBase} ${
                         isOverHero
                           ? 'text-white/90 hover:text-white hover:bg-white/10'
-                          : 'text-neutral-700 dark:text-slate-200 hover:text-crfal-blue dark:hover:text-sky-300 hover:bg-crfal-gray-100 dark:hover:bg-slate-800'
+                           : 'text-white/90 hover:text-white hover:bg-white/10'
                       }`}
                     >
                       {item.directIcon && <item.directIcon className="w-3.5 h-3.5" />}
@@ -343,9 +330,7 @@ export default function Header() {
 
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`p-2.5 rounded-lg transition-all ${
-                isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-crfal-gray-600 hover:bg-crfal-gray-100'
-              }`}
+              className="p-2.5 rounded-lg text-white/90 hover:bg-white/10 transition-all"
               aria-label="Buscar"
             >
               <Search className="w-4 h-4" />
@@ -358,7 +343,7 @@ export default function Header() {
               className={`ml-2 flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all shrink-0 ${
                 isOverHero
                   ? 'bg-white text-crfal-blue hover:bg-white/95'
-                  : 'bg-crfal-blue text-white hover:bg-crfal-blue-dark'
+                  : 'bg-[#00875A] text-white hover:bg-[#006b47]'
               }`}
             >
               <User className="w-4 h-4" />
@@ -369,9 +354,7 @@ export default function Header() {
           <div className="flex lg:hidden items-center gap-1 shrink-0">
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-all ${
-                isOverHero ? 'text-white/90 hover:bg-white/10' : 'text-neutral-700 hover:bg-crfal-gray-100'
-              }`}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-white/90 hover:bg-white/10 transition-all"
               aria-label="Buscar"
             >
               <Search className="w-5 h-5" />
@@ -381,7 +364,7 @@ export default function Header() {
               target="_blank"
               rel="noopener noreferrer"
               className={`flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-full text-sm font-medium ${
-                isOverHero ? 'bg-white text-crfal-blue' : 'bg-crfal-blue text-white'
+                'bg-[#00875A] text-white hover:bg-[#006b47]'
               }`}
             >
               <User className="w-4 h-4" />
@@ -389,9 +372,7 @@ export default function Header() {
             </a>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-all ${
-                isOverHero ? 'text-white hover:bg-white/10' : 'text-neutral-700 hover:bg-crfal-gray-100'
-              }`}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-white hover:bg-white/10 transition-all"
               aria-label="Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -419,7 +400,7 @@ export default function Header() {
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="lg:hidden fixed left-0 right-0 bottom-0 top-[72px] z-[9999] bg-white dark:bg-slate-950 overflow-y-auto"
+            className="lg:hidden fixed left-0 right-0 bottom-0 top-[72px] z-[9999] bg-[#F8FAFC] overflow-y-auto"
             style={{ WebkitOverflowScrolling: 'touch' }}
             aria-modal
             role="dialog"

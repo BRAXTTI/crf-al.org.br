@@ -63,7 +63,7 @@ function Card({ item, index }: { item: CardItem; index: number }) {
     <a
       href={item.href}
       {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className="group relative flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:border-crfal-blue/30 hover:shadow-card-hover dark:border-slate-700/70 dark:bg-slate-900 dark:hover:border-crfal-blue/40"
+      className="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-7 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-crfal-blue/30 hover:shadow-card-hover"
       style={{ animationDelay: `${index * 80}ms` }}
     >
       <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-all duration-300 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white">
@@ -106,7 +106,7 @@ export default function InstitutionalCards() {
   return (
     <section
       ref={sectionRef}
-      className="bg-crfal-gray-50 py-16 dark:bg-slate-950 sm:py-20 md:py-28"
+      className="bg-[#F8FAFC] py-16 sm:py-20 md:py-28"
     >
       <div className="container-crfal">
         <div

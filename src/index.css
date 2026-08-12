@@ -6,51 +6,52 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 20%;
+    --background: 210 40% 98%;
+    --foreground: 215 25% 17%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card-foreground: 215 25% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
-    --primary: 207 100% 25%;
+    --popover-foreground: 215 25% 17%;
+    --primary: 210 100% 20%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 200 100% 95%;
-    --secondary-foreground: 207 100% 25%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 200 100% 95%;
-    --accent-foreground: 207 100% 25%;
+    --secondary: 158 100% 27%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 210 100% 20%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 87%;
-    --input: 0 0% 87%;
-    --ring: 207 100% 25%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 100% 40%;
     --radius: 0.625rem;
 
-    --crfal-blue: #004a80;
-    --crfal-blue-dark: #002140;
-    --crfal-blue-light: #0077cc;
-    --crfal-blue-lighter: #e6f7ff;
+    --crfal-blue: #003366;
+    --crfal-blue-dark: #0b192c;
+    --crfal-blue-light: #0066cc;
+    --crfal-blue-lighter: #e6f0f8;
     --crfal-white: #ffffff;
 
-    --crfal-gray-50: #f7f9fc;
-    --crfal-gray-100: #edf1f7;
-    --crfal-gray-200: #d8e0e8;
+    --crfal-gray-50: #f8fafc;
+    --crfal-gray-100: #f1f5f9;
+    --crfal-gray-200: #e2e8f0;
     --crfal-gray-300: #b4c2d1;
     --crfal-gray-400: #9ba8b8;
     --crfal-gray-500: #8a9bb0;
-    --crfal-gray-600: #5f6b7a;
-    --crfal-gray-700: #3d4754;
+    --crfal-gray-600: #64748b;
+    --crfal-gray-700: #334155;
     --crfal-gray-800: #1e293b;
     --crfal-gray-900: #0f172a;
 
-    --crfal-green: #0b5e4b;
-    --crfal-green-light: #e6f4f0;
+    --crfal-green: #00875a;
+    --crfal-green-light: #e6f5ef;
+    --crfal-gold: #c59b27;
 
-    --crfal-gray: #f7f9fc;
-    --crfal-gray-medium: #d8e0e8;
-    --crfal-gray-dark: #3d4754;
-    --crfal-text-gray: #5f6b7a;
+    --crfal-gray: #f8fafc;
+    --crfal-gray-medium: #e2e8f0;
+    --crfal-gray-dark: #1e293b;
+    --crfal-text-gray: #64748b;
   }
 
   .dark {
@@ -115,6 +116,7 @@
     font-family: 'Montserrat', sans-serif;
     line-height: 1.55;
     overflow-x: hidden;
+    background: #f8fafc;
   }
 
   #root {
@@ -135,14 +137,18 @@
   }
 
   .btn-primary {
-    @apply bg-crfal-blue text-white px-6 py-3 rounded-lg font-medium
-           transition-all duration-300 hover:bg-crfal-blue-dark
+    @apply bg-crfal-green text-white px-6 py-3 rounded-lg font-medium
+           transition-all duration-300 hover:bg-[#006b47]
            hover:shadow-lg hover:-translate-y-0.5;
   }
 
   .btn-outline {
     @apply border-2 border-crfal-blue text-crfal-blue px-6 py-3 rounded-lg font-medium
            transition-all duration-300 hover:bg-crfal-blue hover:text-white;
+  }
+
+  .btn-gold {
+    @apply bg-[#c59b27] text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-[#a9821f] hover:shadow-lg;
   }
 
   .dark .btn-outline {
