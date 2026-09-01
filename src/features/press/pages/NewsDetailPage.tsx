@@ -1,7 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
-import DOMPurify from 'dompurify';
+import {
+  getPostCategory,
+  getPostImage,
+  sanitizeWP,
+  stripHTML,
+} from '@/services/wordpress/client';
+import { usePost, useRelatedPosts } from '@/services/wordpress/hooks';
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,18 +19,6 @@ import {
   MessageSquare,
   UserCircle,
 } from 'lucide-react';
-
-interface WPPost {
-  id: number;
-  date: string;
-  title: { rendered: string };
-  excerpt: { rendered: string };
-  content: { rendered: string };
-  _embedded?: {
-    'wp:featuredmedia'?: Array<{ source_url: string }>;
-    'wp:term'?: Array<Array<{ id: number; name: string }>>;
-  };
-}
 
 interface RelatedItem {
   id: number;
@@ -41,7 +35,7 @@ interface ServiceShortcut {
   icon: React.ElementType;
 }
 
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'/%3E%3C/svg%3E";
+const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'%3E%3C/svg%3E";
 
 const serviceShortcuts: ServiceShortcut[] = [
   {
@@ -83,76 +77,43 @@ function formatarData(dataISO: string) {
   });
 }
 
-function sanitizeHTML(html: string) {
-  return html.replace(/<[^>]+>/g, '').trim();
-}
-
 export default function NewsDetailPage() {
   const { id } = useParams();
-  const [post, setPost] = useState<WPPost | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [related, setRelated] = useState<RelatedItem[]>([]);
+  const postId = Number(id);
+  const isInvalidId = !id || Number.isNaN(postId);
+
+  const { data: post, isLoading, isError, error, refetch } = usePost(postId);
+  const { data: relatedPosts } = useRelatedPosts(postId, 3);
 
   useEffect(() => {
-    if (!id) return;
-
-    const postId = Number(id);
-    if (Number.isNaN(postId)) {
-      setError('Notícia inválida.');
-      setLoading(false);
-      return;
-    }
-
-    async function fetchPost() {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(
-          `https://wordpress.crf-al.org.br/wp-json/wp/v2/posts/${postId}?_embed`
-        );
-        if (!response.ok) throw new Error('Não foi possível carregar esta notícia.');
-        const data: WPPost = await response.json();
-        setPost(data);
-
-        const relatedResponse = await fetch(
-          'https://wordpress.crf-al.org.br/wp-json/wp/v2/posts?_embed&per_page=4'
-        );
-        if (relatedResponse.ok) {
-          const relatedData: WPPost[] = await relatedResponse.json();
-          setRelated(
-            relatedData
-              .filter((item) => item.id !== data.id)
-              .slice(0, 3)
-              .map((item) => ({
-                id: item.id,
-                title: sanitizeHTML(item.title.rendered),
-                date: formatarData(item.date),
-              }))
-          );
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Falha ao carregar notícia.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchPost();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   }, [id]);
 
-  const featuredImage =
-    post?._embedded?.['wp:featuredmedia']?.[0]?.source_url || IMG_FALLBACK;
-  const categoria = post?._embedded?.['wp:term']?.[0]?.[0]?.name || 'Notícia';
+  const related: RelatedItem[] =
+    relatedPosts?.map((item) => ({
+      id: item.id,
+      title: stripHTML(item.title.rendered),
+      date: formatarData(item.date),
+    })) ?? [];
+
+  const featuredImage = (post && getPostImage(post)) || IMG_FALLBACK;
+  const categoria = (post && getPostCategory(post)) || 'Notícia';
+
+  const errorMessage = isInvalidId
+    ? 'Notícia inválida.'
+    : isError
+      ? error instanceof Error
+        ? error.message
+        : 'Falha ao carregar notícia.'
+      : null;
 
   return (
     <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
       <SEO
-        title={post ? sanitizeHTML(post.title.rendered) : 'Notícia'}
+        title={post ? sanitizeWP(post.title.rendered) : 'Notícia'}
         description={
           post
-            ? sanitizeHTML(post.excerpt.rendered).slice(0, 160)
+            ? stripHTML(post.excerpt.rendered).slice(0, 160)
             : 'Leia as últimas notícias do CRFAL — Conselho Regional de Farmácia de Alagoas.'
         }
         path={`/imprensa/noticias/${id}`}
@@ -184,21 +145,28 @@ export default function NewsDetailPage() {
       </div>
 
       <div className="container-crfal py-8 md:py-12">
-        {loading && (
+        {isLoading && (
           <div className="bg-white dark:bg-slate-900/90 rounded-xl border border-crfal-gray-200 dark:border-slate-700/70 p-10 text-center text-crfal-gray-500">
             <div className="animate-spin w-8 h-8 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4" />
             Carregando matéria...
           </div>
         )}
 
-        {error && (
+        {errorMessage && (
           <div className="bg-white dark:bg-slate-900/90 rounded-xl border border-red-200 dark:border-red-800/60 p-8">
-            <p className="text-red-600 mb-4">{error}</p>
-            <Link to="/imprensa/noticias" className="btn-outline text-sm">Voltar para notícias</Link>
+            <p className="text-red-600 mb-4">{errorMessage}</p>
+            <div className="flex flex-wrap gap-3">
+              {isError && (
+                <button onClick={() => refetch()} className="btn-outline text-sm">
+                  Tentar novamente
+                </button>
+              )}
+              <Link to="/imprensa/noticias" className="btn-outline text-sm">Voltar para notícias</Link>
+            </div>
           </div>
         )}
 
-        {!loading && !error && post && (
+        {!isLoading && !errorMessage && post && (
           <div className="grid lg:grid-cols-12 gap-8">
             {/* Article */}
             <main className="lg:col-span-8">
@@ -206,7 +174,7 @@ export default function NewsDetailPage() {
                 <div className="relative h-56 sm:h-72 md:h-80">
                   <img
                     src={featuredImage}
-                    alt={sanitizeHTML(post.title.rendered)}
+                    alt={stripHTML(post.title.rendered)}
                     className="w-full h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
                   />
@@ -223,11 +191,11 @@ export default function NewsDetailPage() {
 
                   <h1
                     className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-slate-100 leading-tight mb-4"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.title.rendered) }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeWP(post.title.rendered) }}
                   />
 
                   <p className="text-crfal-gray-600 dark:text-slate-400 leading-relaxed mb-6 text-sm sm:text-base">
-                    {sanitizeHTML(post.excerpt.rendered)}
+                    {stripHTML(post.excerpt.rendered)}
                   </p>
 
                   <div
@@ -240,7 +208,7 @@ export default function NewsDetailPage() {
                       [&_li]:mb-2
                       [&_a]:text-crfal-blue [&_a]:underline
                       [&_img]:rounded-xl [&_img]:my-4 [&_img]:w-full"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content.rendered) }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeWP(post.content?.rendered ?? '') }}
                   />
                 </div>
               </article>

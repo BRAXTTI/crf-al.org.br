@@ -453,21 +453,6 @@
   }
 }
 
-/* IO-driven reveal (works everywhere) */
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition:
-    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--reveal-delay, 0ms);
-}
-
-.reveal.is-revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 /* Scroll-driven animations — pure CSS 2026, no JS, where supported */
 @supports (animation-timeline: view()) {
   .scroll-reveal {
@@ -481,41 +466,5 @@
     animation: rule-grow linear both;
     animation-timeline: view();
     animation-range: entry 10% entry 60%;
-  }
-}
-
-/* Pillar rows: siblings dim via :has(), rows lift via :hover */
-.pillars-list:hover .pillar-row:not(:hover) {
-  opacity: 0.45;
-}
-
-.pillar-row {
-  transition:
-    opacity 0.45s ease,
-    background-color 0.45s ease,
-    padding-left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  container-type: inline-size;
-}
-
-.pillar-row:hover,
-.pillar-row:focus-visible {
-  padding-left: 1.25rem;
-}
-
-.pillar-row .pillar-arrow {
-  transition:
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.4s ease,
-    color 0.4s ease;
-}
-
-.pillar-row:hover .pillar-arrow {
-  transform: translateX(6px) rotate(-45deg);
-}
-
-/* Fluid type via clamp() — scales with the container, not the viewport */
-@container (min-width: 40rem) {
-  .pillar-title {
-    font-size: clamp(1.5rem, 4.5cqi + 0.5rem, 2.75rem);
   }
 }

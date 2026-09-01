@@ -1,10 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import SEO from '@/components/SEO';
+import {
+  LEGACY_WP_UPLOADS_URL,
+  WP_UPLOADS_URL,
+} from '@/services/wordpress/client';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   User,
   Building2,
   ChevronRight,
-  ChevronDown,
   FileText,
   Download,
   ClipboardList,
@@ -25,6 +34,7 @@ import {
   Search,
   Clock,
   ListChecks,
+  ExternalLink,
 } from 'lucide-react';
 
 interface RequirementItem {
@@ -138,7 +148,7 @@ const individualMenu: MenuCategory[] = [
           'Protocole no canal oficial do CRF-AL.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/12/Inscricao-profissional-Secundaria-transferencia-reativacaoinscricao.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/12/Inscricao-profissional-Secundaria-transferencia-reativacaoinscricao.docx`,
       },
       {
         id: 'prorrogacao-inscricao-provisoria',
@@ -155,7 +165,7 @@ const individualMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe a análise.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/03/Requerimento-Prorrogacao-de-Inscricao-Provisoria.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/03/Requerimento-Prorrogacao-de-Inscricao-Provisoria.docx`,
       },
     ],
   },
@@ -178,8 +188,8 @@ const individualMenu: MenuCategory[] = [
           'Salve o Protocolo e acompanhe o tramite na opção de "Protocolos Web"',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/03/Requerimento-Inscricao-profissional-carteira-definitiva-segunda-via-de-carteira-definitiva-cedula.docx',
-        
+        downloadUrl: `${WP_UPLOADS_URL}/2024/03/Requerimento-Inscricao-profissional-carteira-definitiva-segunda-via-de-carteira-definitiva-cedula.docx`,
+
       },
       {
         id: 'certidao-regularidade-pf',
@@ -219,7 +229,7 @@ const individualMenu: MenuCategory[] = [
           'Protocole no CRF-AL em casa e acompanhe o trâmite na opção de "Protocolos Web".',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/03/Requerimento-de-transferencia-para-outro-regional.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/03/Requerimento-de-transferencia-para-outro-regional.docx`,
       },
       {
         id: 'cancelamento-inscricao',
@@ -237,7 +247,7 @@ const individualMenu: MenuCategory[] = [
           'Protocole no CRF-AL.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/03/Requerimento-de-Cancelamento-de-Inscricao.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/03/Requerimento-de-Cancelamento-de-Inscricao.docx`,
       },
     ],
   },
@@ -270,7 +280,7 @@ const corporateMenu: MenuCategory[] = [
           'Se a contratação for 12x36, use o requerimento específico de plantonista.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2026/04/Contratacao-de-RT-e-Declaracao-de-outras-atividades_ATUALIZADO.docx',
+        downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2026/04/Contratacao-de-RT-e-Declaracao-de-outras-atividades_ATUALIZADO.docx`,
       },
       {
         id: 'registro-inicial-servico-publico',
@@ -292,14 +302,14 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe eventuais exigências.',
           'Se a contratação for 12x36, use o requerimento específico de plantonista.',
         ],
-        observacoesImportantes: [ 'Somente serão aceitas declarações de farmacêuticos que: possuam inscrição definitiva há pelo menos 02 anos, Estejam com sua anuidade em dia, não estão respondendo ou tenham respondido a processo ético-disciplinar nos ultimos 05 anos, possuam perfil de Assistência tipo 01 (presença em pelo menos 70% das inspeções realizadas no seu horário de assistência farmacêutica Resolução 579/13 do CFF)', 
+        observacoesImportantes: [ 'Somente serão aceitas declarações de farmacêuticos que: possuam inscrição definitiva há pelo menos 02 anos, Estejam com sua anuidade em dia, não estão respondendo ou tenham respondido a processo ético-disciplinar nos ultimos 05 anos, possuam perfil de Assistência tipo 01 (presença em pelo menos 70% das inspeções realizadas no seu horário de assistência farmacêutica Resolução 579/13 do CFF)',
         ' Os interessados no registro de Posto de Medicamentos deverão apresentar: I) certificado ou declaração de conclusão do ensino médio com fotocópia autenticada, ll) II comprovação de experiência mínima de 05 (cinco) anos em farmácias ou drogarias, com registro na Carteira de Trabalho e Previdência Social (CTPS).',
         'Na documentação deverá constar exclusivamente como Atividade Econômica o comércio varejista de produtos farmacêuticos, sem manipulação de fórmulas.',
         ' Somente será permitido o uso da designação “Posto de Medicamentos”, seguido do nome de fantasia.',
         'Não será permitido o registro de mais de 01 (um) Posto de Medicamentos por localidade.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/08/Contratacao-de-RT-plantonista-12x36-DOA.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/08/Contratacao-de-RT-plantonista-12x36-DOA.docx`,
       },
       {
         id: 'registro-posto-medicamentos',
@@ -323,7 +333,7 @@ const corporateMenu: MenuCategory[] = [
           'Informação sujeita à validação manual: critérios adicionais podem ser exigidos.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/02/Requerimento-de-Registro-de-Posto-de-Medicamento.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/02/Requerimento-de-Registro-de-Posto-de-Medicamento.docx`,
       },
     ],
   },
@@ -347,7 +357,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe a análise.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2025/02/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx',
+        downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2025/02/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx`,
       },
       {
         id: 'contratacao-rt-servico-publico',
@@ -365,7 +375,7 @@ const corporateMenu: MenuCategory[] = [
           'Se for jornada 12x36, use o formulário específico de plantonista.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/08/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx',
+        downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2024/08/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx`,
       },
       {
         id: 'contratacao-rt-plantonista',
@@ -384,7 +394,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL para homologação.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://www.crf-al.org.br/app/uploads/2024/08/Contratacao-de-RT-plantonista-12x36-DOA.docx',
+        downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2024/08/Contratacao-de-RT-plantonista-12x36-DOA.docx`,
       },
     ],
   },
@@ -408,7 +418,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL em casa e acompanhe em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/08/Declaracao-de-horarios.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/08/Declaracao-de-horarios.docx`,
       },
     ],
   },
@@ -431,7 +441,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL em casa e acompanhe a atualização cadastral em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/02/Requerimento-para-Transferencia-de-RT-entre-MATRIZ_FILIAL.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/02/Requerimento-para-Transferencia-de-RT-entre-MATRIZ_FILIAL.docx`,
       },
       {
         id: 'alteracao-contratual-firma',
@@ -449,7 +459,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe deferimento.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/02/Requerimento-de-Alteracao-Contratual-de-Firma.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/02/Requerimento-de-Alteracao-Contratual-de-Firma.docx`,
       },
       {
         id: 'dap',
@@ -466,7 +476,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL em casa e acompanhe em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/09/Declaracao-de-Atividade-Profissional-DAP.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/09/Declaracao-de-Atividade-Profissional-DAP.docx`,
       },
     ],
   },
@@ -490,7 +500,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole dentro do prazo indicado na notificação.',
         ],
         prazo: 'Conforme prazo processual',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/02/Defesa-ao-Auto-de-Infracao.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/02/Defesa-ao-Auto-de-Infracao.docx`,
       },
       {
         id: 'recurso-multa-fiscal',
@@ -507,7 +517,7 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no prazo regulamentar.',
         ],
         prazo: 'Conforme prazo processual',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/02/Recurso-de-multa-fiscal-Homologada-pelo-CRF.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/02/Recurso-de-multa-fiscal-Homologada-pelo-CRF.docx`,
       },
       {
         id: 'reconsideracao-indeferimento',
@@ -524,70 +534,82 @@ const corporateMenu: MenuCategory[] = [
           'Protocole no CRF-AL e acompanhe a nova análise em Protocolos Web.',
         ],
         prazo: 'Conforme prazo processual',
-        downloadUrl: 'https://wordpress.crf-al.org.br/wp-content/uploads/2024/02/Reconsideracao-de-Indeferimento.docx',
+        downloadUrl: `${WP_UPLOADS_URL}/2024/02/Reconsideracao-de-Indeferimento.docx`,
       },
     ],
   },
 ];
 
+function normalizar(texto: string): string {
+  return texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+const TODOS_OS_ITENS = [...individualMenu, ...corporateMenu].flatMap((cat) => cat.items);
+
+const ESTATISTICAS = {
+  servicos: TODOS_OS_ITENS.length,
+  formularios: TODOS_OS_ITENS.filter((item) => item.downloadUrl).length,
+  categorias: individualMenu.length + corporateMenu.length,
+};
+
 export default function RequirementsPage() {
   const [activeType, setActiveType] = useState<'individual' | 'corporate'>('individual');
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [busca, setBusca] = useState('');
+  const [categoria, setCategoria] = useState<string>('todas');
   const [selectedItem, setSelectedItem] = useState<RequirementItem | null>(null);
-  const [showObservationsModal, setShowObservationsModal] = useState(false);
-  const [selectedFlowchartItem, setSelectedFlowchartItem] = useState<RequirementItem | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'documentos' | 'instrucoes' | 'observacoes'>('documentos');
+  const [mostraFluxograma, setMostraFluxograma] = useState(false);
 
   const currentMenu = activeType === 'individual' ? individualMenu : corporateMenu;
 
-  const filteredMenu = useMemo(() => {
-    if (!searchQuery.trim()) return currentMenu;
-    const q = searchQuery.toLowerCase().trim();
+  const termo = normalizar(busca.trim());
+
+  const itensFiltrados = useMemo(() => {
     return currentMenu
+      .filter((cat) => categoria === 'todas' || cat.id === categoria)
       .map((cat) => ({
         ...cat,
-        items: cat.items.filter((item) => item.title.toLowerCase().includes(q)),
+        items: cat.items.filter(
+          (item) => termo === '' || normalizar(`${item.title} ${item.description}`).includes(termo)
+        ),
       }))
       .filter((cat) => cat.items.length > 0);
-  }, [currentMenu, searchQuery]);
+  }, [currentMenu, categoria, termo]);
 
-  const selectedItemObservations = selectedItem?.observacoesImportantes;
-  const normalizedSelectedItemObservations = selectedItem
-    ? Array.isArray(selectedItemObservations)
-      ? selectedItemObservations.filter((obs) => obs.trim().length > 0)
-      : selectedItemObservations?.trim()
-        ? [selectedItemObservations.trim()]
-        : []
-    : [];
-  const allSelectedItemObservations = selectedItem
-    ? normalizedSelectedItemObservations.length > 0
-      ? normalizedSelectedItemObservations
-      : [DEFAULT_IMPORTANT_OBSERVATION]
-    : [];
-  const hasSelectedItemObservations = allSelectedItemObservations.length > 0;
+  const totalResultados = itensFiltrados.reduce((soma, cat) => soma + cat.items.length, 0);
 
-  const handleCategoryClick = (catId: string) => {
-    setExpandedCategory(expandedCategory === catId ? null : catId);
-    setSelectedItem(null);
-    setShowObservationsModal(false);
-  };
+  const observacoesSelecionadas = useMemo(() => {
+    if (!selectedItem) return [];
+    const obs = selectedItem.observacoesImportantes;
+    const lista = Array.isArray(obs)
+      ? obs.filter((o) => o.trim().length > 0)
+      : obs?.trim()
+        ? [obs.trim()]
+        : [];
+    return lista.length > 0 ? lista : [DEFAULT_IMPORTANT_OBSERVATION];
+  }, [selectedItem]);
 
-  const handleTypeChange = (type: 'individual' | 'corporate') => {
+  const handleTypeChange = useCallback((type: 'individual' | 'corporate') => {
     setActiveType(type);
-    setExpandedCategory(null);
-    setSelectedItem(null);
-    setSearchQuery('');
-    setShowObservationsModal(false);
-  };
+    setCategoria('todas');
+    setBusca('');
+  }, []);
 
-  const handleSelectItem = (item: RequirementItem) => {
+  const handleSelectItem = useCallback((item: RequirementItem) => {
     setSelectedItem(item);
     setActiveTab('documentos');
-    setShowObservationsModal(false);
-  };
+    setMostraFluxograma(false);
+  }, []);
 
-  const isSearching = searchQuery.trim().length > 0;
+  const handleOpenChange = useCallback((aberto: boolean) => {
+    if (!aberto) {
+      setSelectedItem(null);
+      setMostraFluxograma(false);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
@@ -597,20 +619,17 @@ export default function RequirementsPage() {
         path="/servicos/requerimentos"
       />
 
-      <div className="relative overflow-hidden bg-crfal-blue-dark pb-14 pt-24 md:pb-18 md:pt-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
-        <div
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-          }}
-          aria-hidden
-        />
+      {/* Hero */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a]">
+        <div aria-hidden className="absolute inset-0">
+          <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:26px_26px]" />
+          <div className="absolute -left-24 -top-24 h-96 w-96 animate-float rounded-full bg-crfal-blue-light/25 blur-3xl" />
+          <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
+          <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
+        </div>
 
-        <div className="container-crfal relative z-10">
-          <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm" aria-label="Breadcrumb">
+        <div className="container-crfal relative z-10 pb-14 pt-28 md:pb-20 md:pt-36">
+          <nav aria-label="Trilha de navegação" className="mb-6 flex items-center gap-2 text-sm text-white/60">
             <a href="/" className="transition-colors hover:text-white">Início</a>
             <ChevronRight className="h-4 w-4" />
             <span>Serviços</span>
@@ -618,234 +637,353 @@ export default function RequirementsPage() {
             <span className="text-white">Requerimentos</span>
           </nav>
 
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
-            <ClipboardList className="h-3.5 w-3.5" />
-            Atendimento Digital
-          </span>
+          <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
+            <ClipboardList className="h-4 w-4 text-crfal-gold" />
+            Atendimento digital · CRF-AL
+          </p>
 
-          <h1 className="text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl">
-            Requerimentos
+          <h1 className="max-w-3xl font-display text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Central de{' '}
+            <span className="bg-gradient-to-r from-[#8FC1F2] to-crfal-gold bg-clip-text text-transparent">
+              Requerimentos
+            </span>
           </h1>
 
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
-            Selecione o tipo de pessoa, escolha a categoria e o serviço desejado para visualizar documentos necessários e instruções detalhadas.
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
+            Escolha o perfil, encontre o serviço e acompanhe documentos e
+            instruções passo a passo — tudo em um só lugar.
           </p>
-        </div>
-      </div>
 
-      <div className="container-crfal py-8 md:py-12">
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="inline-flex w-full rounded-xl border border-crfal-gray-200 bg-white p-1.5 shadow-card dark:border-slate-700 dark:bg-slate-900 sm:w-auto">
-            {(
-              [
-                { id: 'individual', label: 'Pessoa Física', icon: User },
-                { id: 'corporate', label: 'Pessoa Jurídica', icon: Building2 },
-              ] as const
-            ).map((tab) => {
-              const TabIcon = tab.icon;
-              const isActive = activeType === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTypeChange(tab.id)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-all duration-300 sm:flex-initial ${
-                    isActive
-                      ? 'bg-crfal-blue text-white shadow-card'
-                      : 'text-crfal-gray-600 hover:text-crfal-blue dark:text-slate-300 dark:hover:text-crfal-blue-light'
-                  }`}
-                >
-                  <TabIcon className="h-4 w-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="relative w-full lg:max-w-md">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar requerimento..."
-              className="h-12 w-full rounded-xl border border-crfal-gray-200 bg-white pl-12 pr-4 text-sm text-crfal-gray-800 shadow-card transition-all placeholder:text-crfal-gray-400 focus:border-crfal-blue focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-crfal-gray-400 transition-colors hover:text-crfal-gray-600"
-                aria-label="Limpar busca"
+          <dl className="mt-9 grid max-w-lg grid-cols-3 gap-3">
+            {[
+              { valor: ESTATISTICAS.servicos, rotulo: 'Serviços' },
+              { valor: ESTATISTICAS.formularios, rotulo: 'Formulários' },
+              { valor: ESTATISTICAS.categorias, rotulo: 'Categorias' },
+            ].map((item) => (
+              <div
+                key={item.rotulo}
+                className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
               >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <div className="sticky top-24 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-card dark:border-slate-700 dark:bg-slate-900">
-              <div className="border-b border-crfal-gray-200 bg-crfal-blue-dark px-5 py-4 dark:border-slate-700">
-                <h2 className="flex items-center gap-2 font-bold text-white">
-                  {activeType === 'individual' ? (
-                    <><User className="h-5 w-5" /> Categorias — Pessoa Física</>
-                  ) : (
-                    <><Building2 className="h-5 w-5" /> Categorias — Pessoa Jurídica</>
-                  )}
-                </h2>
+                <dd className="font-display text-2xl font-bold text-white sm:text-3xl">{item.valor}</dd>
+                <dt className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
+                  {item.rotulo}
+                </dt>
               </div>
+            ))}
+          </dl>
+        </div>
+      </header>
 
-              {isSearching && filteredMenu.length === 0 ? (
-                <div className="p-6 text-center">
-                  <p className="text-sm text-crfal-gray-500 dark:text-slate-400">
-                    Nenhum requerimento encontrado para "{searchQuery}".
-                  </p>
-                </div>
-              ) : (
-                <div className="divide-y divide-crfal-gray-100 dark:divide-slate-700/70">
-                  {filteredMenu.map((category) => (
-                    <div key={category.id}>
-                      <button
-                        onClick={() => handleCategoryClick(category.id)}
-                        className={`flex w-full items-center justify-between px-4 py-3.5 text-left transition-all duration-200 ${
-                          expandedCategory === category.id || isSearching
-                            ? 'bg-crfal-blue text-white'
-                            : 'text-crfal-gray-800 hover:bg-crfal-blue-lighter hover:text-crfal-blue dark:text-slate-100 dark:hover:bg-slate-800 dark:hover:text-crfal-blue-light'
-                        }`}
-                      >
-                        <span className="text-sm font-semibold">{category.title}</span>
-                        <span className="flex items-center gap-2">
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                            expandedCategory === category.id || isSearching
-                              ? 'bg-white/20 text-white'
-                              : 'bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-700 dark:text-crfal-blue-light'
-                          }`}>
-                            {category.items.length}
-                          </span>
-                          {!isSearching && (
-                            <ChevronDown
-                              className={`h-4 w-4 transition-transform duration-300 ${
-                                expandedCategory === category.id ? 'rotate-180' : ''
-                              }`}
-                            />
-                          )}
-                        </span>
-                      </button>
+      <main className="container-crfal py-8 md:py-12">
+        {/* Toolbar sticky */}
+        <div className="sticky top-[72px] z-30 rounded-2xl border border-crfal-gray-200/80 bg-white/85 p-3 shadow-card backdrop-blur-lg dark:border-slate-700/80 dark:bg-slate-900/85 sm:p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+            <div
+              role="group"
+              aria-label="Selecionar tipo de pessoa"
+              className="inline-flex shrink-0 rounded-full border border-crfal-gray-200 bg-crfal-gray-100 p-1 dark:border-slate-700 dark:bg-slate-800"
+            >
+              {(
+                [
+                  { id: 'individual', label: 'Pessoa Física', icon: User },
+                  { id: 'corporate', label: 'Pessoa Jurídica', icon: Building2 },
+                ] as const
+              ).map((tab) => {
+                const TabIcon = tab.icon;
+                const ativo = activeType === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTypeChange(tab.id)}
+                    aria-pressed={ativo}
+                    className={`inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light lg:flex-initial ${
+                      ativo
+                        ? 'bg-crfal-blue text-white shadow-md'
+                        : 'text-crfal-gray-600 hover:text-crfal-blue dark:text-slate-300 dark:hover:text-sky-300'
+                    }`}
+                  >
+                    <TabIcon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
 
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ${
-                          expandedCategory === category.id || isSearching ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
-                        }`}
-                      >
-                        <div className="bg-crfal-gray-50 py-1 dark:bg-slate-800/50">
-                          {category.items.map((item) => {
-                            const Icon = item.icon;
-                            const isSelected = selectedItem?.id === item.id;
-                            return (
-                              <button
-                                key={item.id}
-                                onClick={() => handleSelectItem(item)}
-                                className={`flex w-full items-center gap-3 px-6 py-2.5 text-left text-sm transition-all duration-200 ${
-                                  isSelected
-                                    ? 'border-l-4 border-crfal-blue bg-crfal-blue/10 font-semibold text-crfal-blue dark:bg-crfal-blue/20 dark:text-crfal-blue-light'
-                                    : 'border-l-4 border-transparent text-crfal-gray-700 hover:bg-crfal-blue/5 hover:text-crfal-blue dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-crfal-blue-light'
-                                }`}
-                              >
-                                <Icon className="h-4 w-4 shrink-0" />
-                                <span className="leading-snug">{item.title}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <div className="relative lg:ml-auto lg:max-w-xs lg:flex-1">
+              <label htmlFor="busca-requerimento" className="sr-only">Buscar requerimento</label>
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-crfal-gray-400" />
+              <input
+                id="busca-requerimento"
+                type="search"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar requerimento..."
+                className="min-h-[44px] w-full rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-neutral-800 transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-none focus:ring-2 focus:ring-crfal-blue-light/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              />
+              {busca && (
+                <button
+                  onClick={() => setBusca('')}
+                  aria-label="Limpar busca"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               )}
             </div>
           </div>
 
-          <div className="lg:col-span-8">
-            {selectedItem ? (
-              <div className="animate-fade-in">
-                <div className="overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-card dark:border-slate-700 dark:bg-slate-900">
-                  <div className="border-b border-crfal-gray-200 bg-gradient-to-r from-crfal-blue-dark to-crfal-blue p-5 sm:p-6 dark:border-slate-700">
+          <div
+            role="group"
+            aria-label="Filtrar por categoria"
+            className="mt-3 flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            <button
+              onClick={() => setCategoria('todas')}
+              aria-pressed={categoria === 'todas'}
+              className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                categoria === 'todas'
+                  ? 'border-crfal-blue bg-crfal-blue text-white'
+                  : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+              }`}
+            >
+              Todas
+              <span className={`rounded-full px-1.5 text-[10px] font-bold ${
+                categoria === 'todas'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-crfal-gray-100 text-crfal-gray-500 dark:bg-slate-700 dark:text-slate-400'
+              }`}>
+                {currentMenu.reduce((soma, cat) => soma + cat.items.length, 0)}
+              </span>
+            </button>
+            {currentMenu.map((cat) => {
+              const ativo = categoria === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategoria(cat.id)}
+                  aria-pressed={ativo}
+                  className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                    ativo
+                      ? 'border-crfal-blue bg-crfal-blue text-white'
+                      : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                  }`}
+                >
+                  {cat.title}
+                  <span className={`rounded-full px-1.5 text-[10px] font-bold ${
+                    ativo
+                      ? 'bg-white/20 text-white'
+                      : 'bg-crfal-gray-100 text-crfal-gray-500 dark:bg-slate-700 dark:text-slate-400'
+                  }`}>
+                    {cat.items.length}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Resultados */}
+        <div className="mt-8">
+          {totalResultados === 0 ? (
+            <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white py-14 text-center dark:border-slate-700 dark:bg-slate-900">
+              <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300 dark:text-slate-600" />
+              <h2 className="font-display text-lg font-semibold text-neutral-800 dark:text-slate-100">
+                Nenhum requerimento encontrado
+              </h2>
+              <p className="mt-1 text-sm text-crfal-gray-500 dark:text-slate-400">
+                Tente ajustar a busca ou os filtros selecionados.
+              </p>
+              <button
+                onClick={() => {
+                  setBusca('');
+                  setCategoria('todas');
+                }}
+                className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
+              >
+                Limpar filtros
+              </button>
+            </div>
+          ) : (
+            itensFiltrados.map((cat) => (
+              <section key={cat.id} aria-labelledby={`cat-${cat.id}`} className="mb-10 last:mb-0">
+                <div className="mb-5 flex items-center gap-3">
+                  <h2
+                    id={`cat-${cat.id}`}
+                    className="font-display text-xl font-semibold text-neutral-800 dark:text-slate-100 md:text-2xl"
+                  >
+                    {cat.title}
+                  </h2>
+                  <span className="rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-xs font-bold text-crfal-blue dark:bg-crfal-blue/20 dark:text-sky-300">
+                    {cat.items.length}
+                  </span>
+                  <div
+                    aria-hidden
+                    className="hidden h-px flex-1 bg-gradient-to-r from-crfal-gray-200 to-transparent dark:from-slate-700 sm:block"
+                  />
+                </div>
+
+                <div
+                  key={`${activeType}|${categoria}|${termo}`}
+                  className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
+                >
+                  {cat.items.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                      <article
+                        key={item.id}
+                        className="group relative flex animate-in flex-col rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-card duration-500 fill-mode-backwards fade-in slide-in-from-bottom-3 transition-all hover:-translate-y-1.5 hover:border-crfal-blue/25 hover:shadow-card-hover dark:border-slate-700 dark:bg-slate-900"
+                        style={{ animationDelay: `${index * 70}ms` }}
+                      >
+                        <div className="flex items-start gap-3.5">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-crfal-blue-lighter text-crfal-blue transition-colors group-hover:bg-crfal-blue group-hover:text-white dark:bg-crfal-blue/15 dark:text-crfal-blue-light">
+                            <Icon className="h-6 w-6" />
+                          </div>
+                          <h3 className="font-display text-base font-semibold leading-snug text-neutral-800 transition-colors group-hover:text-crfal-blue dark:text-slate-100 dark:group-hover:text-sky-300 sm:text-lg">
+                            <button
+                              type="button"
+                              onClick={() => handleSelectItem(item)}
+                              className="after:absolute after:inset-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light"
+                            >
+                              {item.title}
+                            </button>
+                          </h3>
+                        </div>
+
+                        <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-crfal-gray-600 dark:text-slate-400">
+                          {item.description}
+                        </p>
+
+                        <div className="mt-4 flex items-center justify-between gap-3 border-t border-crfal-gray-100 pt-3.5 dark:border-slate-800">
+                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-all group-hover:gap-2.5 dark:text-sky-300">
+                            Ver detalhes
+                            <ChevronRight className="h-4 w-4" />
+                          </span>
+                          {item.downloadUrl && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-crfal-gray-100 px-2.5 py-1 text-[11px] font-semibold text-crfal-gray-600 dark:bg-slate-800 dark:text-slate-400">
+                              <Download className="h-3 w-3" />
+                              Formulário
+                            </span>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ))
+          )}
+        </div>
+      </main>
+
+      {/* Dialog de detalhes */}
+      <Dialog open={selectedItem !== null} onOpenChange={handleOpenChange}>
+        <DialogContent
+          showCloseButton={false}
+          className="flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl"
+        >
+          {selectedItem && (
+            <>
+              <div className="relative shrink-0 bg-gradient-to-r from-crfal-blue-dark to-crfal-blue p-5 sm:p-6">
+                <button
+                  type="button"
+                  onClick={() => handleOpenChange(false)}
+                  aria-label="Fechar detalhes"
+                  className="absolute right-4 top-4 rounded-full p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+
+                <div className="flex items-start gap-4 pr-12">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 sm:h-14 sm:w-14">
+                    {(() => {
+                      const Icon = selectedItem.icon;
+                      return <Icon className="h-6 w-6 text-white sm:h-7 sm:w-7" />;
+                    })()}
+                  </div>
+                  <div className="min-w-0">
+                    <DialogTitle className="font-display text-lg font-semibold leading-snug text-white sm:text-xl">
+                      {selectedItem.title}
+                    </DialogTitle>
+                    <DialogDescription className="mt-1.5 text-sm leading-relaxed text-white/80">
+                      {selectedItem.description}
+                    </DialogDescription>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {selectedItem.prazo && (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
+                      <Clock className="h-3.5 w-3.5 text-white/70" />
+                      Prazo: {selectedItem.prazo}
+                    </span>
+                  )}
+                  {selectedItem.taxaAplicavel && (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
+                      <Info className="h-3.5 w-3.5 text-white/70" />
+                      Taxa: {selectedItem.taxaAplicavel}
+                    </span>
+                  )}
+                  {selectedItem.fluxogramaUrl && !mostraFluxograma && (
                     <button
-                      onClick={() => setSelectedItem(null)}
-                      className="mb-4 flex items-center gap-1.5 text-sm text-white/70 transition-colors hover:text-white"
+                      type="button"
+                      onClick={() => setMostraFluxograma(true)}
+                      className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                    >
+                      <Workflow className="h-3.5 w-3.5" />
+                      Ver fluxograma
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {mostraFluxograma && selectedItem.fluxogramaUrl ? (
+                <div className="flex min-h-0 flex-1 flex-col">
+                  <div className="flex items-center justify-between border-b border-crfal-gray-200 px-5 py-3 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setMostraFluxograma(false)}
+                      className="inline-flex min-h-[36px] items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light dark:text-crfal-blue-light"
                     >
                       <ArrowLeft className="h-4 w-4" />
-                      Voltar à lista
+                      Voltar aos detalhes
                     </button>
-
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/15">
-                        {(() => {
-                          const Icon = selectedItem.icon;
-                          return <Icon className="h-7 w-7 text-white" />;
-                        })()}
-                      </div>
-                      <div className="min-w-0">
-                        <h2 className="text-lg font-bold text-white sm:text-xl md:text-2xl">{selectedItem.title}</h2>
-                        <p className="mt-1 text-sm leading-relaxed text-white/80">{selectedItem.description}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap gap-2.5">
-                      {selectedItem.prazo && (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
-                          <Clock className="h-3.5 w-3.5 text-white/70" />
-                          Prazo: {selectedItem.prazo}
-                        </span>
-                      )}
-                      {selectedItem.taxaAplicavel && (
-                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
-                          <Info className="h-3.5 w-3.5 text-white/70" />
-                          Taxa: {selectedItem.taxaAplicavel}
-                        </span>
-                      )}
-                      {selectedItem.fluxogramaUrl && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedFlowchartItem(selectedItem)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter"
-                        >
-                          <Workflow className="h-3.5 w-3.5" />
-                          Ver Fluxograma
-                        </button>
-                      )}
-                    </div>
                   </div>
-
-                  <div className="border-b border-crfal-gray-200 dark:border-slate-700">
+                  <div className="min-h-0 flex-1 overflow-auto bg-crfal-gray-50 p-4 dark:bg-slate-950 sm:p-6">
+                    <img
+                      src={selectedItem.fluxogramaUrl}
+                      alt={`Fluxograma do requerimento ${selectedItem.title}`}
+                      className="mx-auto h-auto w-full rounded-xl border border-crfal-gray-200 bg-white object-contain shadow-sm dark:border-slate-700"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="shrink-0 border-b border-crfal-gray-200 dark:border-slate-700">
                     <div className="flex">
                       {(
                         [
                           { id: 'documentos', label: 'Documentos', icon: ListChecks, count: selectedItem.documentos.length },
                           { id: 'instrucoes', label: 'Instruções', icon: FileText, count: selectedItem.instrucoes.length },
-                          { id: 'observacoes', label: 'Observações', icon: Info, count: allSelectedItemObservations.length },
+                          { id: 'observacoes', label: 'Observações', icon: Info, count: observacoesSelecionadas.length },
                         ] as const
                       ).map((tab) => {
                         const TabIcon = tab.icon;
-                        const isActive = activeTab === tab.id;
-                        const isDisabled = tab.id === 'observacoes' && !hasSelectedItemObservations;
+                        const ativo = activeTab === tab.id;
                         return (
                           <button
                             key={tab.id}
-                            onClick={() => !isDisabled && setActiveTab(tab.id)}
-                            disabled={isDisabled}
-                            className={`flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3.5 text-xs font-semibold transition-all sm:text-sm ${
-                              isDisabled
-                                ? 'cursor-not-allowed border-transparent text-crfal-gray-300 dark:text-slate-600'
-                                : isActive
-                                  ? 'border-crfal-blue text-crfal-blue dark:border-crfal-blue-light dark:text-crfal-blue-light'
-                                  : 'border-transparent text-crfal-gray-500 hover:text-crfal-blue dark:text-slate-400 dark:hover:text-crfal-blue-light'
+                            onClick={() => setActiveTab(tab.id)}
+                            aria-pressed={ativo}
+                            className={`flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3.5 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue-light sm:text-sm ${
+                              ativo
+                                ? 'border-crfal-blue text-crfal-blue dark:border-crfal-blue-light dark:text-crfal-blue-light'
+                                : 'border-transparent text-crfal-gray-500 hover:text-crfal-blue dark:text-slate-400 dark:hover:text-crfal-blue-light'
                             }`}
                           >
                             <TabIcon className="h-4 w-4" />
                             <span className="hidden sm:inline">{tab.label}</span>
                             <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                              isActive
+                              ativo
                                 ? 'bg-crfal-blue-lighter text-crfal-blue dark:bg-crfal-blue/20 dark:text-crfal-blue-light'
                                 : 'bg-crfal-gray-100 text-crfal-gray-500 dark:bg-slate-800 dark:text-slate-400'
                             }`}>
@@ -857,7 +995,7 @@ export default function RequirementsPage() {
                     </div>
                   </div>
 
-                  <div className="p-5 sm:p-6">
+                  <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
                     {activeTab === 'documentos' && (
                       <ul className="space-y-2.5">
                         {selectedItem.documentos.map((doc, index) => (
@@ -889,9 +1027,9 @@ export default function RequirementsPage() {
                       </ol>
                     )}
 
-                    {activeTab === 'observacoes' && hasSelectedItemObservations && (
+                    {activeTab === 'observacoes' && (
                       <div className="space-y-3">
-                        {allSelectedItemObservations.map((observacao, index) => (
+                        {observacoesSelecionadas.map((observacao, index) => (
                           <div key={index} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-600/25 dark:bg-amber-900/15">
                             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
                             <p className="whitespace-pre-line text-sm leading-relaxed text-amber-800 dark:text-amber-200">{observacao}</p>
@@ -901,14 +1039,14 @@ export default function RequirementsPage() {
                     )}
                   </div>
 
-                  <div className="flex flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-5 dark:border-slate-700 dark:bg-slate-800/40 sm:p-6">
+                  <div className="flex shrink-0 flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-5 dark:border-slate-700 dark:bg-slate-800/40 sm:p-6">
                     <a
                       href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
+                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark active:scale-95"
                     >
-                      <FileText className="h-4 w-4" />
+                      <ExternalLink className="h-4 w-4" />
                       Acessar CRF AL em Casa
                     </a>
                     {selectedItem.downloadUrl ? (
@@ -916,116 +1054,24 @@ export default function RequirementsPage() {
                         href={selectedItem.downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-lg border-2 border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white dark:border-crfal-blue-light dark:text-crfal-blue-light dark:hover:bg-crfal-blue-light dark:hover:text-slate-950"
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border-2 border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white dark:border-crfal-blue-light dark:text-crfal-blue-light dark:hover:bg-crfal-blue-light dark:hover:text-slate-950"
                       >
                         <Download className="h-4 w-4" />
-                        Baixar Formulário
+                        Baixar formulário
                       </a>
                     ) : (
-                      <span className="inline-flex items-center gap-2 rounded-lg border-2 border-crfal-gray-200 px-5 py-2.5 text-sm font-medium text-crfal-gray-400 dark:border-slate-700 dark:text-slate-500">
+                      <span className="inline-flex items-center gap-2 rounded-full border-2 border-crfal-gray-200 px-5 py-2.5 text-sm font-medium text-crfal-gray-400 dark:border-slate-700 dark:text-slate-500">
                         <Download className="h-4 w-4" />
                         Formulário indisponível
                       </span>
                     )}
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-crfal-gray-200 bg-white p-10 text-center shadow-card dark:border-slate-700 dark:bg-slate-900 md:p-14">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-xl bg-crfal-blue-lighter dark:bg-crfal-blue/15">
-                  <ClipboardList className="h-10 w-10 text-crfal-blue dark:text-crfal-blue-light" />
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-crfal-gray-800 dark:text-white">
-                  Selecione um requerimento
-                </h3>
-                <p className="mx-auto max-w-md text-sm leading-relaxed text-crfal-gray-500 dark:text-slate-400">
-                  Escolha o tipo de pessoa acima, navegue pelas categorias ao lado e selecione o serviço desejado para visualizar documentos e instruções.
-                </p>
-                <div className="mt-8 flex flex-wrap justify-center gap-2.5">
-                  {currentMenu.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => handleCategoryClick(cat.id)}
-                      className="rounded-full bg-crfal-blue-lighter px-4 py-2 text-sm font-medium text-crfal-blue transition-all duration-200 hover:bg-crfal-blue hover:text-white dark:bg-crfal-blue/15 dark:text-crfal-blue-light dark:hover:bg-crfal-blue dark:hover:text-white"
-                    >
-                      {cat.title}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {selectedFlowchartItem?.fluxogramaUrl && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="fluxograma-title"
-          onClick={() => setSelectedFlowchartItem(null)}
-        >
-          <div
-            className="w-full max-w-5xl overflow-hidden rounded-xl bg-white shadow-2xl animate-scale-in dark:bg-slate-900"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-crfal-gray-200 p-5 dark:border-slate-700">
-              <div>
-                <h3 id="fluxograma-title" className="text-lg font-bold text-crfal-blue dark:text-crfal-blue-light">Fluxograma do processo</h3>
-                <p className="mt-1 text-sm text-crfal-gray-500 dark:text-slate-400">{selectedFlowchartItem.title}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedFlowchartItem(null)}
-                className="rounded-full border border-crfal-gray-200 p-2 text-crfal-gray-500 transition-colors hover:border-crfal-blue hover:text-crfal-blue dark:border-slate-600 dark:hover:border-crfal-blue-light dark:hover:text-crfal-blue-light"
-                aria-label="Fechar fluxograma"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="max-h-[78vh] overflow-auto bg-crfal-gray-50 p-4 dark:bg-slate-950 sm:p-6">
-              <img
-                src={selectedFlowchartItem.fluxogramaUrl}
-                alt={`Fluxograma do requerimento ${selectedFlowchartItem.title}`}
-                className="mx-auto h-auto w-full max-w-none rounded-xl border border-crfal-gray-200 bg-white object-contain shadow-sm dark:border-slate-700"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showObservationsModal && selectedItem && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setShowObservationsModal(false)}
-        >
-          <div
-            className="w-full max-w-xl overflow-hidden rounded-xl bg-white shadow-2xl animate-scale-in dark:bg-slate-900"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="border-b border-crfal-gray-200 p-5 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-crfal-blue dark:text-crfal-blue-light">Observações Importantes</h3>
-              <p className="mt-1 text-sm text-crfal-gray-500 dark:text-slate-400">{selectedItem.title}</p>
-            </div>
-            <div className="p-5">
-              {allSelectedItemObservations.map((observacao, index) => (
-                <p key={index} className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-700 dark:text-slate-200">
-                  {observacao}
-                </p>
-              ))}
-            </div>
-            <div className="flex justify-end border-t border-crfal-gray-200 bg-crfal-gray-50 p-5 dark:border-slate-700 dark:bg-slate-800/40">
-              <button
-                onClick={() => setShowObservationsModal(false)}
-                className="rounded-lg bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                </>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

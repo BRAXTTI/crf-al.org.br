@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import SEO from '@/components/SEO';
-import { useForm } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import SEO from '@/components/SEO';
 import {
   ChevronRight,
   MessageSquare,
@@ -35,13 +35,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -84,11 +77,9 @@ export default function OmbudsmanPage() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showLgpdModal, setShowLgpdModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-  const [selectedType, setSelectedType] = useState<string | null>(null);
   const [mobileInfoOpen, setMobileInfoOpen] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  const [faqAberta, setFaqAberta] = useState<number | null>(0);
 
   const form = useForm<OmbudsmanFormData>({
     resolver: zodResolver(ombudsmanSchema),
@@ -98,35 +89,17 @@ export default function OmbudsmanPage() {
     },
   });
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); observer.disconnect(); } },
-      { threshold: 0.05 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const tipoSelecionado = useWatch({ control: form.control, name: 'tipoManifestacao' }) as string | undefined;
+  const typeInfo = manifestationTypes.find((t) => t.id === tipoSelecionado);
 
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      setSelectedType(value.tipoManifestacao as string);
-      setCharCount(value.mensagem?.length || 0);
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
-
-  const onSubmit = async (data: OmbudsmanFormData) => {
+  const onSubmit = async () => {
     setIsSubmitting(true);
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log('Dados enviados:', data);
     setIsSubmitting(false);
     setShowSuccessDialog(true);
     form.reset();
     setCharCount(0);
-    setSelectedType(null);
   };
-
-  const typeInfo = manifestationTypes.find((t) => t.id === selectedType);
 
   return (
     <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
@@ -136,12 +109,17 @@ export default function OmbudsmanPage() {
         path="/servicos/ouvidoria"
       />
 
-      <div className="relative overflow-hidden bg-crfal-blue-dark pb-16 pt-24 md:pb-20 md:pt-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
-        <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)', backgroundSize: '56px 56px' }} aria-hidden />
+      {/* Hero */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a]">
+        <div aria-hidden className="absolute inset-0">
+          <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:26px_26px]" />
+          <div className="absolute -left-24 -top-24 h-96 w-96 animate-float rounded-full bg-crfal-blue-light/25 blur-3xl" />
+          <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
+          <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
+        </div>
 
-        <div className="container-crfal relative z-10">
-          <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm" aria-label="Breadcrumb">
+        <div className="container-crfal relative z-10 pb-14 pt-28 md:pb-20 md:pt-36">
+          <nav aria-label="Trilha de navegação" className="mb-6 flex items-center gap-2 text-sm text-white/60">
             <a href="/" className="transition-colors hover:text-white">Início</a>
             <ChevronRight className="h-4 w-4" />
             <span>Serviços</span>
@@ -149,29 +127,54 @@ export default function OmbudsmanPage() {
             <span className="text-white">Ouvidoria</span>
           </nav>
 
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
-            <MessageSquare className="h-3.5 w-3.5" />
-            Canal de Manifestações
-          </span>
+          <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
+            <MessageSquare className="h-4 w-4 text-crfal-gold" />
+            Canal oficial · CRF-AL
+          </p>
 
-          <h1 className="text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl">
-            Ouvidoria
+          <h1 className="max-w-3xl font-display text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Ouvidoria{' '}
+            <span className="bg-gradient-to-r from-[#8FC1F2] to-crfal-gold bg-clip-text text-transparent">
+              CRF-AL
+            </span>
           </h1>
 
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
-            Sua voz é essencial para aprimorarmos nossos serviços. Registre denúncias, elogios, críticas, sugestões e reclamações de forma segura e transparente.
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
+            Sua voz é essencial para aprimorarmos nossos serviços. Registre
+            denúncias, elogios, críticas, sugestões e reclamações de forma
+            segura e transparente.
           </p>
-        </div>
-      </div>
 
-      <div className="container-crfal py-10 md:py-16" ref={sectionRef}>
+          <dl className="mt-9 grid max-w-lg grid-cols-3 gap-3">
+            {[
+              { valor: '10', rotulo: 'Dias úteis p/ resposta' },
+              { valor: '7', rotulo: 'Tipos de manifestação' },
+              { valor: '24h', rotulo: 'Canal disponível' },
+            ].map((item) => (
+              <div
+                key={item.rotulo}
+                className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
+              >
+                <dd className="font-display text-2xl font-bold text-white sm:text-3xl">{item.valor}</dd>
+                <dt className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
+                  {item.rotulo}
+                </dt>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </header>
+
+      <main className="container-crfal py-10 md:py-14">
         <div className="grid gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-4">
+          {/* Sidebar */}
+          <aside className="lg:col-span-4">
             <div className="space-y-5 lg:sticky lg:top-28">
-              <div className={`transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+              <div className="animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards duration-500">
                 <button
                   onClick={() => setMobileInfoOpen(!mobileInfoOpen)}
-                  className="flex w-full items-center justify-between rounded-xl border border-crfal-gray-200 bg-white px-5 py-4 text-left shadow-sm transition-colors hover:bg-crfal-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 lg:cursor-default lg:pointer-events-none"
+                  aria-expanded={mobileInfoOpen}
+                  className="flex w-full items-center justify-between rounded-xl border border-crfal-gray-200 bg-white px-5 py-4 text-left shadow-card transition-colors hover:bg-crfal-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 lg:pointer-events-none lg:cursor-default"
                 >
                   <span className="flex items-center gap-3">
                     <MessageSquare className="h-5 w-5 text-crfal-blue dark:text-crfal-blue-light" />
@@ -180,87 +183,74 @@ export default function OmbudsmanPage() {
                   <ChevronDown className={`h-4 w-4 text-crfal-gray-400 transition-transform duration-300 lg:hidden ${mobileInfoOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                <div className={`mt-3 overflow-hidden transition-all duration-300 lg:mt-0 lg:block ${mobileInfoOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 lg:max-h-none lg:opacity-100'}`}>
-                  <div className="space-y-4 lg:space-y-5">
-                    <div className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                      <div className="mb-4 flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-800 dark:text-crfal-blue-light">
-                          <Clock className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-neutral-800 dark:text-white">Prazo de resposta</p>
-                          <p className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Até 10 dias úteis</p>
-                        </div>
+                <div className={`mt-3 space-y-4 overflow-hidden transition-all duration-300 lg:mt-0 lg:block lg:space-y-5 ${mobileInfoOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 lg:max-h-none lg:opacity-100'}`}>
+                  <div className="rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-card dark:border-slate-700 dark:bg-slate-900">
+                    <div className="mb-4 flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-800 dark:text-crfal-blue-light">
+                        <Clock className="h-5 w-5" />
                       </div>
-                      <div className="flex items-center gap-3 border-t border-crfal-gray-100 pt-4 dark:border-slate-800">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-800 dark:text-crfal-blue-light">
-                          <Mail className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-neutral-800 dark:text-white">E-mail</p>
-                          <a href="mailto:ouvidoria@crf-al.org.br" className="text-xs text-crfal-blue hover:underline dark:text-crfal-blue-light">ouvidoria@crf-al.org.br</a>
-                        </div>
+                      <div>
+                        <p className="text-sm font-semibold text-neutral-800 dark:text-white">Prazo de resposta</p>
+                        <p className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Até 10 dias úteis</p>
                       </div>
                     </div>
-
-                    <div className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                      <h3 className="mb-3 text-sm font-semibold text-neutral-800 dark:text-white">Tipos de Manifestação</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {manifestationTypes.map((type) => (
-                          <div key={type.id} className={`rounded-lg px-3 py-2 text-center ${type.bgColor}`}>
-                            <type.icon className={`mx-auto mb-1 h-4 w-4 ${type.color}`} />
-                            <p className={`text-[11px] font-medium ${type.color}`}>{type.label}</p>
-                          </div>
-                        ))}
+                    <div className="flex items-center gap-3 border-t border-crfal-gray-100 pt-4 dark:border-slate-800">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-800 dark:text-crfal-blue-light">
+                        <Mail className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-neutral-800 dark:text-white">E-mail</p>
+                        <a href="mailto:ouvidoria@crf-al.org.br" className="text-xs text-crfal-blue hover:underline dark:text-crfal-blue-light">ouvidoria@crf-al.org.br</a>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-5 dark:border-crfal-blue/25 dark:bg-crfal-blue/10">
-                      <div className="mb-3 flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-crfal-blue text-white">
-                          <Shield className="h-4.5 w-4.5" />
-                        </div>
-                        <h3 className="text-sm font-semibold text-neutral-800 dark:text-white">Sua Privacidade</h3>
+                  <div className="rounded-2xl border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-5 dark:border-crfal-blue/25 dark:bg-crfal-blue/10">
+                    <div className="mb-3 flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-crfal-blue text-white">
+                        <Shield className="h-5 w-5" />
                       </div>
-                      <p className="mb-3 text-xs leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">
-                        Em conformidade com a LGPD, seus dados são tratados com segurança e utilizados apenas para o atendimento da sua manifestação.
-                      </p>
-                      <button onClick={() => setShowPrivacyModal(true)} className="text-xs font-medium text-crfal-blue hover:underline dark:text-crfal-blue-light">
-                        Ver Política de Privacidade
-                      </button>
+                      <h3 className="text-sm font-semibold text-neutral-800 dark:text-white">Sua Privacidade</h3>
                     </div>
+                    <p className="mb-3 text-xs leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">
+                      Em conformidade com a LGPD, seus dados são tratados com segurança e utilizados apenas para o atendimento da sua manifestação.
+                    </p>
+                    <button onClick={() => setShowPrivacyModal(true)} className="text-xs font-semibold text-crfal-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light dark:text-crfal-blue-light">
+                      Ver Política de Privacidade
+                    </button>
+                  </div>
 
-                    <div className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                      <div className="flex items-center gap-3">
-                        <MapPin className="h-5 w-5 text-crfal-blue dark:text-crfal-blue-light" />
-                        <div>
-                          <p className="text-sm font-semibold text-neutral-800 dark:text-white">Endereço</p>
-                          <p className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Rua Oldemburgo da Silva Paranhos, 290 — Farol, Maceió/AL</p>
-                        </div>
+                  <div className="rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-card dark:border-slate-700 dark:bg-slate-900">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-5 w-5 shrink-0 text-crfal-blue dark:text-crfal-blue-light" />
+                      <div>
+                        <p className="text-sm font-semibold text-neutral-800 dark:text-white">Endereço</p>
+                        <p className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Rua Oldemburgo da Silva Paranhos, 290 — Farol, Maceió/AL</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </aside>
 
+          {/* Formulário */}
           <div className="lg:col-span-8">
-            <div className={`overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm transition-all duration-700 dark:border-slate-700 dark:bg-slate-900 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
-              <div className="border-b border-crfal-gray-100 bg-gradient-to-r from-crfal-blue/5 to-transparent px-6 py-5 dark:border-slate-800 dark:from-crfal-blue/10">
+            <div className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-card animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards duration-500 dark:border-slate-700 dark:bg-slate-900" style={{ animationDelay: '80ms' }}>
+              <div className="border-b border-crfal-gray-100 bg-gradient-to-r from-crfal-blue-dark to-crfal-blue px-6 py-5 dark:border-slate-800">
                 <div className="flex items-center gap-4">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${typeInfo ? typeInfo.bgColor : 'bg-crfal-gray-100 dark:bg-slate-800'}`}>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl shadow-sm transition-colors ${typeInfo ? typeInfo.bgColor : 'bg-white/15'}`}>
                     {typeInfo ? (
                       <typeInfo.icon className={`h-6 w-6 ${typeInfo.color}`} />
                     ) : (
-                      <MessageSquare className="h-6 w-6 text-crfal-gray-400" />
+                      <MessageSquare className="h-6 w-6 text-white" />
                     )}
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-neutral-800 dark:text-white md:text-xl">
+                    <h2 className="font-display text-lg font-semibold text-white md:text-xl">
                       {typeInfo ? typeInfo.label : 'Nova Manifestação'}
                     </h2>
-                    <p className="text-sm text-crfal-gray-500 dark:text-crfal-gray-400">
+                    <p className="text-sm text-white/75">
                       {typeInfo ? 'Preencha os dados abaixo' : 'Selecione o tipo e preencha os dados abaixo'}
                     </p>
                   </div>
@@ -276,23 +266,34 @@ export default function OmbudsmanPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="font-medium text-neutral-800 dark:text-white">Tipo de Manifestação *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="h-12 border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                <SelectValue placeholder="Selecione o tipo" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {manifestationTypes.map((type) => (
-                                <SelectItem key={type.id} value={type.id}>
-                                  <div className="flex items-center gap-2">
-                                    <type.icon className={`h-4 w-4 ${type.color}`} />
+                          <FormControl>
+                            <div
+                              role="radiogroup"
+                              aria-label="Tipo de manifestação"
+                              className="grid grid-cols-2 gap-2.5 sm:grid-cols-4"
+                            >
+                              {manifestationTypes.map((type) => {
+                                const ativo = field.value === type.id;
+                                return (
+                                  <button
+                                    key={type.id}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={ativo}
+                                    onClick={() => field.onChange(type.id)}
+                                    className={`flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-xl border-2 px-2 py-3 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light focus-visible:ring-offset-1 ${
+                                      ativo
+                                        ? `${type.bgColor} ${type.color} border-current shadow-sm`
+                                        : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:-translate-y-0.5 hover:border-crfal-gray-300 hover:bg-crfal-gray-50 hover:text-crfal-gray-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:text-white'
+                                    }`}
+                                  >
+                                    <type.icon className="h-5 w-5" />
                                     {type.label}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -308,7 +309,7 @@ export default function OmbudsmanPage() {
                             <FormControl>
                               <div className="relative">
                                 <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
-                                <Input placeholder="Seu nome completo" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
+                                <Input placeholder="Seu nome completo" className="h-12 rounded-xl border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                               </div>
                             </FormControl>
                             <FormMessage />
@@ -324,7 +325,7 @@ export default function OmbudsmanPage() {
                             <FormControl>
                               <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
-                                <Input type="email" placeholder="seu@email.com" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
+                                <Input type="email" placeholder="seu@email.com" className="h-12 rounded-xl border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                               </div>
                             </FormControl>
                             <FormMessage />
@@ -342,7 +343,7 @@ export default function OmbudsmanPage() {
                           <FormControl>
                             <div className="relative">
                               <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-crfal-gray-400" />
-                              <Input type="tel" placeholder="(82) 99999-9999" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
+                              <Input type="tel" placeholder="(82) 99999-9999" className="h-12 rounded-xl border-crfal-gray-200 bg-crfal-gray-50 pl-10 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                             </div>
                           </FormControl>
                           <FormDescription className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Informe se deseja ser contatado por telefone</FormDescription>
@@ -358,7 +359,7 @@ export default function OmbudsmanPage() {
                         <FormItem>
                           <FormLabel className="font-medium text-neutral-800 dark:text-white">Assunto *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Resumo do motivo" className="h-12 border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
+                            <Input placeholder="Resumo do motivo" className="h-12 rounded-xl border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -372,18 +373,18 @@ export default function OmbudsmanPage() {
                         <FormItem>
                           <FormLabel className="font-medium text-neutral-800 dark:text-white">Mensagem *</FormLabel>
                           <FormControl>
-                            <Textarea placeholder="Descreva sua manifestação com detalhes..." className="min-h-[180px] resize-none border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} onChange={(e) => { field.onChange(e); setCharCount(e.target.value.length); }} />
+                            <Textarea placeholder="Descreva sua manifestação com detalhes..." className="min-h-[180px] resize-none rounded-xl border-crfal-gray-200 bg-crfal-gray-50 focus:ring-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-crfal-gray-500" {...field} onChange={(e) => { field.onChange(e); setCharCount(e.target.value.length); }} />
                           </FormControl>
-                          <div className="flex justify-between items-center">
+                          <div className="flex items-center justify-between gap-3">
                             <FormDescription className="text-xs text-crfal-gray-500 dark:text-crfal-gray-400">Mínimo de 20 caracteres</FormDescription>
-                            <span className={`text-xs ${charCount > 2000 ? 'text-red-500' : 'text-crfal-gray-400'}`}>{charCount}/2000</span>
+                            <span className={`text-xs tabular-nums ${charCount > 2000 ? 'text-red-500' : 'text-crfal-gray-400'}`}>{charCount}/2000</span>
                           </div>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
 
-                    <div className="rounded-lg border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-4 dark:border-crfal-blue/25 dark:bg-crfal-blue/10">
+                    <div className="rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-4 dark:border-crfal-blue/25 dark:bg-crfal-blue/10">
                       <FormField
                         control={form.control}
                         name="lgpdConsentimento"
@@ -395,7 +396,7 @@ export default function OmbudsmanPage() {
                             <div className="space-y-1 leading-none">
                               <FormLabel className="cursor-pointer text-sm font-normal text-neutral-700 dark:text-neutral-300">
                                 Li e concordo com o{' '}
-                                <button type="button" onClick={() => setShowLgpdModal(true)} className="font-medium text-crfal-blue hover:underline dark:text-crfal-blue-light">
+                                <button type="button" onClick={() => setShowLgpdModal(true)} className="font-semibold text-crfal-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light dark:text-crfal-blue-light">
                                   tratamento dos meus dados pessoais
                                 </button>{' '}
                                 conforme a LGPD.
@@ -408,7 +409,11 @@ export default function OmbudsmanPage() {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row">
-                      <Button type="submit" disabled={isSubmitting} className="h-12 flex-1 rounded-lg bg-crfal-blue font-medium text-white transition-all hover:bg-crfal-blue-dark disabled:opacity-50">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="min-h-[48px] flex-1 rounded-full bg-crfal-blue font-semibold text-white transition-all hover:bg-crfal-blue-dark active:scale-[0.98] disabled:opacity-50"
+                      >
                         {isSubmitting ? (
                           <>
                             <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -421,7 +426,13 @@ export default function OmbudsmanPage() {
                           </>
                         )}
                       </Button>
-                      <Button type="button" variant="outline" onClick={() => form.reset()} disabled={isSubmitting} className="h-12 rounded-lg border-crfal-gray-200 px-6 text-crfal-gray-600 hover:bg-crfal-gray-50 dark:border-slate-700 dark:text-crfal-gray-400 dark:hover:bg-slate-800">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => { form.reset(); setCharCount(0); }}
+                        disabled={isSubmitting}
+                        className="min-h-[48px] rounded-full border-crfal-gray-200 px-6 text-crfal-gray-600 hover:bg-crfal-gray-50 dark:border-slate-700 dark:text-crfal-gray-400 dark:hover:bg-slate-800"
+                      >
                         Limpar
                       </Button>
                     </div>
@@ -435,25 +446,48 @@ export default function OmbudsmanPage() {
               </div>
             </div>
 
-            <div className={`mt-8 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`} style={{ transitionDelay: '200ms' }}>
-              <div className="rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                <h3 className="mb-4 flex items-center gap-2 text-base font-bold text-neutral-800 dark:text-white">
-                  <HelpCircle className="h-5 w-5 text-crfal-blue dark:text-crfal-blue-light" />
-                  Perguntas Frequentes
-                </h3>
-                <div className="space-y-3">
-                  {faqs.map((faq) => (
-                    <div key={faq.q} className="rounded-lg bg-crfal-gray-50 p-4 dark:bg-slate-800/50">
-                      <p className="text-sm font-semibold text-neutral-800 dark:text-white">{faq.q}</p>
-                      <p className="mt-1 text-sm text-crfal-gray-600 dark:text-crfal-gray-400">{faq.a}</p>
+            {/* FAQ */}
+            <div
+              className="mt-8 rounded-2xl border border-crfal-gray-200 bg-white p-6 shadow-card animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards duration-500 dark:border-slate-700 dark:bg-slate-900"
+              style={{ animationDelay: '200ms' }}
+            >
+              <h3 className="mb-4 flex items-center gap-2 font-display text-base font-semibold text-neutral-800 dark:text-white md:text-lg">
+                <HelpCircle className="h-5 w-5 text-crfal-blue dark:text-crfal-blue-light" />
+                Perguntas Frequentes
+              </h3>
+              <div className="space-y-2.5">
+                {faqs.map((faq, index) => {
+                  const aberta = faqAberta === index;
+                  return (
+                    <div
+                      key={faq.q}
+                      className={`overflow-hidden rounded-xl border transition-colors ${
+                        aberta
+                          ? 'border-crfal-blue/30 bg-crfal-blue-lighter/40 dark:border-crfal-blue/30 dark:bg-crfal-blue/10'
+                          : 'border-crfal-gray-200 bg-crfal-gray-50 dark:border-slate-700 dark:bg-slate-800/50'
+                      }`}
+                    >
+                      <button
+                        onClick={() => setFaqAberta(aberta ? null : index)}
+                        aria-expanded={aberta}
+                        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 transition-colors hover:text-crfal-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue-light dark:text-white dark:hover:text-crfal-blue-light"
+                      >
+                        {faq.q}
+                        <ChevronDown className={`h-4 w-4 shrink-0 text-crfal-gray-400 transition-transform duration-300 ${aberta ? 'rotate-180 text-crfal-blue dark:text-crfal-blue-light' : ''}`} />
+                      </button>
+                      <div className={`grid transition-all duration-300 ease-out ${aberta ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                        <div className="overflow-hidden">
+                          <p className="px-4 pb-4 text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">{faq.a}</p>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md">
@@ -461,7 +495,7 @@ export default function OmbudsmanPage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
               <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <DialogTitle className="text-center text-xl">Manifestação Enviada!</DialogTitle>
+            <DialogTitle className="text-center font-display text-xl">Manifestação Enviada!</DialogTitle>
             <DialogDescription className="text-center">
               Sua manifestação foi registrada com sucesso e encaminhada para a Ouvidoria do CRF-AL.
               <br /><br />
@@ -469,7 +503,7 @@ export default function OmbudsmanPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4">
-            <Button onClick={() => setShowSuccessDialog(false)} className="w-full bg-crfal-blue hover:bg-crfal-blue-dark">Entendi</Button>
+            <Button onClick={() => setShowSuccessDialog(false)} className="min-h-[44px] w-full rounded-full bg-crfal-blue hover:bg-crfal-blue-dark">Entendi</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -488,7 +522,7 @@ export default function OmbudsmanPage() {
             <h4 className="font-semibold text-neutral-800 dark:text-white">Seus Direitos</h4>
             <p>Você tem direito a confirmar, acessar, corrigir e solicitar a eliminação de seus dados. Para exercê-los, contate ouvidoria@crf-al.org.br.</p>
           </div>
-          <div className="mt-4"><Button onClick={() => setShowLgpdModal(false)} className="w-full bg-crfal-blue hover:bg-crfal-blue-dark">Entendi</Button></div>
+          <div className="mt-4"><Button onClick={() => setShowLgpdModal(false)} className="min-h-[44px] w-full rounded-full bg-crfal-blue hover:bg-crfal-blue-dark">Entendi</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -506,7 +540,7 @@ export default function OmbudsmanPage() {
             <h4 className="font-semibold text-neutral-800 dark:text-white">Segurança</h4>
             <p>Implementamos medidas técnicas adequadas para proteger seus dados.</p>
           </div>
-          <div className="mt-4"><Button onClick={() => setShowPrivacyModal(false)} className="w-full bg-crfal-blue hover:bg-crfal-blue-dark">Fechar</Button></div>
+          <div className="mt-4"><Button onClick={() => setShowPrivacyModal(false)} className="min-h-[44px] w-full rounded-full bg-crfal-blue hover:bg-crfal-blue-dark">Fechar</Button></div>
         </DialogContent>
       </Dialog>
     </div>

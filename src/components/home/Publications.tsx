@@ -1,21 +1,16 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, Newspaper } from 'lucide-react';
-import DOMPurify from 'dompurify';
+import {
+  getPostCategory,
+  getPostImage,
+  sanitizeWP,
+  stripHTML,
+} from '@/services/wordpress/client';
+import { usePosts } from '@/services/wordpress/hooks';
+import type { WPPost } from '@/services/wordpress/types';
 
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='340'%3E%3Crect width='600' height='340' fill='%23e2e8f0'/%3E%3C/svg%3E";
-
-interface WPPost {
-  id: number;
-  date: string;
-  link: string;
-  title: { rendered: string };
-  excerpt: { rendered: string };
-  _embedded?: {
-    'wp:featuredmedia'?: Array<{ source_url: string }>;
-    'wp:term'?: Array<Array<{ id: number; name: string }>>;
-  };
-}
+const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='340'%3E%3Crect width='600' height='340' fill='%23e2e8f0'%3E%3C/svg%3E";
 
 interface Publication {
   id: number;
@@ -26,9 +21,6 @@ interface Publication {
   tag: string;
   tagColor: string;
 }
-
-const WP_API_URL = 'https://wordpress.crf-al.org.br/wp-json/wp/v2/posts?_embed&per_page=6';
-const HTML_TAG_RE = /<[^>]*>?/gm;
 
 const formatarData = (dataISO: string) =>
   new Date(dataISO).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -51,44 +43,34 @@ const tags = [
   { label: 'Eventos', value: 'Eventos' },
 ];
 
+function mapWPPost(post: WPPost): Publication {
+  const categoryName = getPostCategory(post);
+  return {
+    id: post.id,
+    title: sanitizeWP(post.title.rendered),
+    excerpt: stripHTML(post.excerpt.rendered).slice(0, 130) + '...',
+    image: getPostImage(post) || IMG_FALLBACK,
+    date: formatarData(post.date),
+    tag: categoryName,
+    tagColor: getTagColor(categoryName),
+  };
+}
+
 export default function Publications() {
   const [activeTag, setActiveTag] = useState('all');
-  const [publications, setPublications] = useState<Publication[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading, isError, refetch } = usePosts(1, 6);
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  const publications = useMemo(
+    () => data?.posts.map(mapWPPost) ?? [],
+    [data]
+  );
 
   const filteredPublications = useMemo(
     () => (activeTag === 'all' ? publications : publications.filter((pub) => pub.tag === activeTag)),
     [activeTag, publications]
   );
-
-  useEffect(() => {
-    async function fetchNews() {
-      try {
-        const response = await fetch(WP_API_URL);
-        const data: WPPost[] = await response.json();
-        const mappedNews: Publication[] = data.map((post) => {
-          const categoryName = post._embedded?.['wp:term']?.[0]?.[0]?.name || 'Geral';
-          return {
-            id: post.id,
-            title: DOMPurify.sanitize(post.title.rendered),
-            excerpt: post.excerpt.rendered.replace(HTML_TAG_RE, '').slice(0, 130) + '...',
-            image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || IMG_FALLBACK,
-            date: formatarData(post.date),
-            tag: categoryName,
-            tagColor: getTagColor(categoryName),
-          };
-        });
-        setPublications(mappedNews);
-      } catch (error) {
-        console.error('Erro ao buscar notícias:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchNews();
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -137,10 +119,20 @@ export default function Publications() {
           </div>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-16 sm:py-20 text-crfal-gray-500">
             <div className="animate-spin w-8 h-8 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4" />
             <p className="text-sm sm:text-base">Carregando notícias...</p>
+          </div>
+        ) : isError ? (
+          <div className="text-center py-16 sm:py-20">
+            <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+            <p className="text-crfal-gray-500 text-sm sm:text-base mb-5">
+              Não foi possível carregar as notícias agora. Tente novamente em instantes.
+            </p>
+            <button onClick={() => refetch()} className="btn-outline inline-flex items-center gap-2 text-sm">
+              Tentar novamente
+            </button>
           </div>
         ) : filteredPublications.length === 0 ? (
           <div className="text-center py-16 sm:py-20">
@@ -210,13 +202,13 @@ export default function Publications() {
               }`}
               style={{ transitionDelay: '700ms' }}
             >
-              <a
-                href="/imprensa/noticias"
+              <Link
+                to="/imprensa/noticias"
                 className="btn-outline inline-flex items-center gap-2 text-sm sm:text-base"
               >
                 Ver todas as publicações
                 <ArrowRight className="w-5 h-5" />
-              </a>
+              </Link>
             </div>
           </>
         )}

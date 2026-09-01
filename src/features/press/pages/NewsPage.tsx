@@ -1,24 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper, ChevronLeft } from 'lucide-react';
-import DOMPurify from 'dompurify';
-import { WP_POSTS_URL } from '@/services/wordpress/client';
+import {
+  getPostCategory,
+  getPostImage,
+  sanitizeWP,
+  stripHTML,
+} from '@/services/wordpress/client';
+import { usePosts } from '@/services/wordpress/hooks';
+import type { WPPost } from '@/services/wordpress/types';
 
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'/%3E%3C/svg%3E";
-
-interface WPPost {
-  id: number;
-  date: string;
-  link: string;
-  slug: string;
-  title: { rendered: string };
-  excerpt: { rendered: string };
-  _embedded?: {
-    'wp:featuredmedia'?: Array<{ source_url: string }>;
-    'wp:term'?: Array<Array<{ id: number; name: string }>>;
-  };
-}
+const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'%3E%3C/svg%3E";
 
 interface Publication {
   id: number;
@@ -31,7 +24,7 @@ interface Publication {
   href: string;
 }
 
-const WP_API_BASE = `${WP_POSTS_URL}&per_page=12`;
+const PER_PAGE = 12;
 
 function formatDate(isoDate: string) {
   return new Date(isoDate).toLocaleDateString('pt-BR', {
@@ -60,16 +53,16 @@ const filterTags = [
 ];
 
 function mapWPPost(post: WPPost): Publication {
-  const categoryName = post._embedded?.['wp:term']?.[0]?.[0]?.name || 'Geral';
+  const categoryName = getPostCategory(post);
   return {
     id: post.id,
-    title: DOMPurify.sanitize(post.title.rendered),
-    excerpt: post.excerpt.rendered.replace(/<[^>]*>?/gm, '').slice(0, 100) + '...',
-    image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || IMG_FALLBACK,
+    title: sanitizeWP(post.title.rendered),
+    excerpt: stripHTML(post.excerpt.rendered).slice(0, 100) + '...',
+    image: getPostImage(post) || IMG_FALLBACK,
     date: formatDate(post.date),
     tag: categoryName,
     tagColor: getTagColor(categoryName),
-    href: `/publicacao/${post.slug}`,
+    href: `/imprensa/noticias/${post.id}`,
   };
 }
 
@@ -179,35 +172,14 @@ function Pagination({
 }
 
 export default function NewsPage() {
-  const [publications, setPublications] = useState<Publication[]>([]);
   const [activeTag, setActiveTag] = useState('all');
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalPosts, setTotalPosts] = useState(0);
+  const { data, isLoading, isFetching, isError, refetch } = usePosts(page, PER_PAGE);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const fetchPosts = useCallback(async (pageNum: number) => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${WP_API_BASE}&page=${pageNum}`);
-      const wpTotalPages = response.headers.get('X-WP-TotalPages');
-      const wpTotal = response.headers.get('X-WP-Total');
-      if (wpTotalPages) setTotalPages(Number(wpTotalPages));
-      if (wpTotal) setTotalPosts(Number(wpTotal));
-
-      const data: WPPost[] = await response.json();
-      setPublications(data.map(mapWPPost));
-    } catch (error) {
-      console.error('Erro ao buscar notícias:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchPosts(1);
-  }, [fetchPosts]);
+  const publications = useMemo(() => data?.posts.map(mapWPPost) ?? [], [data]);
+  const totalPages = data?.totalPages ?? 1;
+  const totalPosts = data?.total ?? 0;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -216,7 +188,6 @@ export default function NewsPage() {
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
     setActiveTag('all');
-    fetchPosts(newPage);
     gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -285,10 +256,20 @@ export default function NewsPage() {
           ))}
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-20 text-crfal-gray-500">
             <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
             Carregando notícias...
+          </div>
+        ) : isError ? (
+          <div className="max-w-xl mx-auto bg-white rounded-xl border border-red-200 p-8 text-center">
+            <p className="text-red-600 mb-4">Não foi possível carregar as notícias agora.</p>
+            <p className="text-crfal-gray-500 text-sm mb-6">
+              Verifique sua conexão ou tente novamente em instantes.
+            </p>
+            <button onClick={() => refetch()} className="btn-outline text-sm">
+              Tentar novamente
+            </button>
           </div>
         ) : filteredPublications.length === 0 ? (
           <div className="text-center py-20">
@@ -297,7 +278,7 @@ export default function NewsPage() {
             <p className="text-crfal-gray-500 text-sm">Não há notícias na categoria selecionada.</p>
           </div>
         ) : (
-          <>
+          <div className={isFetching ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPublications.map((pub, index) => (
                 <RevealCard key={pub.id} index={index}>
@@ -345,7 +326,7 @@ export default function NewsPage() {
             </div>
 
             <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -63,21 +63,21 @@ function Card({ item, index }: { item: CardItem; index: number }) {
     <a
       href={item.href}
       {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-7 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-crfal-blue/30 hover:shadow-card-hover"
+      className="group relative flex min-h-[144px] touch-manipulation flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-crfal-blue/30 hover:shadow-card-hover focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 sm:min-h-0 sm:p-7"
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-all duration-300 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white">
-        <Icon className="h-6 w-6" />
+      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-all duration-300 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white sm:mb-5 sm:h-12 sm:w-12">
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>
 
-      <h3 className="mb-2 text-lg font-semibold text-neutral-800 transition-colors duration-300 group-hover:text-crfal-blue dark:text-white">
+      <h3 className="mb-1 text-base font-semibold leading-snug text-neutral-800 transition-colors duration-300 group-hover:text-crfal-blue dark:text-white sm:mb-2 sm:text-lg">
         {item.title}
       </h3>
       <p className="mb-5 flex-1 text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">
         {item.description}
       </p>
 
-      <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-all duration-300 group-hover:gap-2.5 dark:text-crfal-blue-light">
+      <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-crfal-blue transition-all duration-300 group-hover:gap-2.5 dark:text-crfal-blue-light sm:text-sm">
         Acessar
         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
       </span>
@@ -106,11 +106,11 @@ export default function InstitutionalCards() {
   return (
     <section
       ref={sectionRef}
-      className="bg-[#F8FAFC] py-16 sm:py-20 md:py-28"
+      className="bg-[#F8FAFC] py-12 sm:py-20 md:py-28"
     >
       <div className="container-crfal">
         <div
-          className={`mb-10 text-center transition-all duration-700 sm:mb-14 ${
+          className={`mb-8 text-center transition-all duration-700 sm:mb-14 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}
         >
@@ -120,13 +120,13 @@ export default function InstitutionalCards() {
           <h2 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-white sm:text-3xl md:text-4xl">
             Conheça o CRFAL
           </h2>
-          <p className="mx-auto max-w-2xl text-base text-crfal-gray-600 dark:text-crfal-gray-400 sm:text-lg">
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400 sm:text-lg">
             Acesse os principais serviços e informações do Conselho Regional de Farmácia de Alagoas.
           </p>
         </div>
 
         <div
-          className={`grid gap-5 transition-all duration-700 sm:grid-cols-2 lg:grid-cols-3 ${
+          className={`grid grid-cols-2 gap-3 transition-all duration-700 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}
           style={{ transitionDelay: '120ms' }}
