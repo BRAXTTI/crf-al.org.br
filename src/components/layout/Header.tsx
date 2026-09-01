@@ -59,7 +59,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Serviços',
-    href: '#servicos',
+    href: '/servicos/requerimentos',
     columns: [
       {
         title: 'Atendimento Digital',

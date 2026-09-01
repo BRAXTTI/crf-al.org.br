@@ -16,6 +16,7 @@ interface Membro {
   cargo: string;
   foto?: string;
   email?: string;
+  bio?: string;
 }
 
 interface Secao {
@@ -39,6 +40,7 @@ const secoes: Secao[] = [
         cargo: 'Presidente',
         foto: '/images/presidente.png',
         email: 'presidente@crf-al.org.br',
+        bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, com uma trajetória consolidada de dedicação à classe farmacêutica e à valorização do profissional em todas as suas frentes de atuação.',
       },
       {
         id: 2,
@@ -46,6 +48,7 @@ const secoes: Secao[] = [
         cargo: 'Vice-Presidente',
         foto: '/images/vice.png',
         email: 'vicepresidente@crfal.org.br',
+        bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Com especializações nas áreas clínica, de prescrição e estética, possui uma trajetória consolidada de dedicação à classe e forte atuação em prol da valorização da categoria.',
       },
       {
         id: 3,
@@ -53,6 +56,7 @@ const secoes: Secao[] = [
         cargo: 'Secretária-Geral',
         foto: '/images/secretaria-geral.png',
         email: 'secretaria@crf-al.org.br',
+        bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Com uma bagagem que une técnica à prática profissional, integra comitês e ações de fortalecimento da categoria em todo o estado.',
       },
       {
         id: 4,
@@ -60,6 +64,7 @@ const secoes: Secao[] = [
         cargo: 'Tesoureira',
         foto: '/images/tesoureira.png',
         email: 'tesoureira@crf-al.org.br',
+        bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Essa experiência confere à sua gestão um olhar atento à transparência e à valorização do profissional em todas as suas frentes de atuação.',
       },
     ],
   },
@@ -90,6 +95,57 @@ const secoes: Secao[] = [
     ],
   },
 ];
+
+function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
+  return (
+    <article className="group relative overflow-hidden rounded-2xl bg-white shadow-card transition-shadow duration-300 hover:shadow-card-hover dark:bg-slate-900">
+      <div
+        className={`absolute inset-y-0 z-10 hidden w-1.5 bg-gradient-to-b from-red-600 via-crfal-blue to-crfal-blue-dark sm:block ${
+          flip ? 'right-0' : 'left-0'
+        }`}
+        aria-hidden
+      />
+      <div className={`flex flex-col sm:flex-row ${flip ? 'sm:flex-row-reverse' : ''}`}>
+        <div className="relative aspect-[4/4.4] w-full shrink-0 bg-gradient-to-br from-crfal-blue to-crfal-blue-dark sm:aspect-auto sm:w-[190px] lg:w-[210px]">
+          {membro.foto ? (
+            <img
+              src={membro.foto}
+              alt={membro.nome}
+              className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <UserCircle className="h-20 w-20 text-white/50" />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col justify-center p-5 sm:p-7">
+          <span className="mb-3 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600 dark:bg-red-500/10 dark:text-red-400">
+            {membro.cargo}
+          </span>
+          <h3 className="mb-3 font-display text-xl font-bold uppercase leading-tight text-crfal-blue-dark dark:text-white sm:text-2xl">
+            {membro.nome}
+          </h3>
+          {membro.bio && (
+            <p className="mb-4 text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400 sm:text-[15px]">
+              {membro.bio}
+            </p>
+          )}
+          {membro.email && (
+            <a
+              href={`mailto:${membro.email}`}
+              className="inline-flex w-fit items-center gap-2 text-sm text-crfal-gray-500 transition-colors duration-300 hover:text-crfal-blue dark:text-crfal-gray-400 dark:hover:text-crfal-blue-light"
+            >
+              <Mail className="h-4 w-4 shrink-0" />
+              <span className="truncate">{membro.email}</span>
+            </a>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
 
 function MemberCard({ membro, index, isVisible }: { membro: Membro; index: number; isVisible: boolean }) {
   return (
@@ -155,6 +211,7 @@ export default function BoardPage() {
 
   const secaoSelecionada = secoes.find((s) => s.id === secaoAtiva) || secoes[0];
   const secoesDesativadas = ['conselheiros-efetivos', 'conselheiros-suplentes'];
+  const isDiretoria = secaoSelecionada.id === 'diretoria';
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
@@ -239,7 +296,7 @@ export default function BoardPage() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-4">
+          <div className={isDiretoria ? 'lg:col-span-12' : 'lg:col-span-4'}>
             <div className="lg:sticky lg:top-28">
               <div className={`transition-all duration-700 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'}`}>
                 <span className="mb-4 inline-block rounded-full bg-crfal-blue-lighter px-4 py-1.5 text-sm font-semibold text-crfal-blue dark:bg-crfal-blue/10 dark:text-crfal-blue-light">
@@ -269,11 +326,25 @@ export default function BoardPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-8">
-            <div className="grid gap-5 sm:grid-cols-2">
-              {secaoSelecionada.membros.map((membro, index) => (
-                <MemberCard key={membro.id} membro={membro} index={index} isVisible={isVisible} />
-              ))}
+          <div className={isDiretoria ? 'lg:col-span-12' : 'lg:col-span-8'}>
+            <div className={`grid gap-6 ${isDiretoria ? 'md:grid-cols-2' : ''}`}>
+              {secaoSelecionada.membros.map((membro, index) =>
+                membro.bio ? (
+                  <div
+                    key={membro.id}
+                    className={`transition-all duration-700 ${
+                      isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                    }`}
+                    style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
+                  >
+                    <DirectorCard membro={membro} flip={index % 2 === 1} />
+                  </div>
+                ) : (
+                  <div key={membro.id} className="sm:grid sm:grid-cols-2 sm:gap-5">
+                    <MemberCard membro={membro} index={index} isVisible={isVisible} />
+                  </div>
+                )
+              )}
             </div>
 
             <div

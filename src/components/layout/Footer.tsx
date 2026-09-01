@@ -12,7 +12,7 @@ import {
 
 const quickLinks = [
   { label: 'Instituição', href: '/instituicao/sobre-conselho' },
-  { label: 'Serviços', href: '#servicos' },
+  { label: 'Serviços', href: '/servicos/requerimentos' },
   { label: 'Legislação', href: '/legislacao' },
   { label: 'Eventos', href: '/eventos' },
   { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/#publico/inicio' },

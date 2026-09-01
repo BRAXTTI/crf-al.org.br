@@ -1,217 +1,160 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight, Tag, Newspaper } from 'lucide-react';
-import {
-  getPostCategory,
-  getPostImage,
-  sanitizeWP,
-  stripHTML,
-} from '@/services/wordpress/client';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getPostImage, sanitizeWP, stripHTML } from '@/services/wordpress/client';
 import { usePosts } from '@/services/wordpress/hooks';
 import type { WPPost } from '@/services/wordpress/types';
 
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='340'%3E%3Crect width='600' height='340' fill='%23e2e8f0'%3E%3C/svg%3E";
+const IMG_FALLBACK =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect width='600' height='400' fill='%23E6F0F8'/%3E%3C/svg%3E";
 
 interface Publication {
   id: number;
   title: string;
-  excerpt: string;
   image: string;
-  date: string;
-  tag: string;
-  tagColor: string;
 }
 
-const formatarData = (dataISO: string) =>
-  new Date(dataISO).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-
-const getTagColor = (tagName: string) => {
-  const map: Record<string, string> = {
-    'Notícias': 'bg-blue-600',
-    'Institucional': 'bg-indigo-600',
-    'Cursos': 'bg-emerald-600',
-    'Eventos': 'bg-amber-600',
-  };
-  return map[tagName] || 'bg-crfal-blue';
-};
-
-const tags = [
-  { label: 'Todas', value: 'all' },
-  { label: 'Institucional', value: 'Institucional' },
-  { label: 'Notícias', value: 'Notícias' },
-  { label: 'Cursos', value: 'Cursos' },
-  { label: 'Eventos', value: 'Eventos' },
-];
-
 function mapWPPost(post: WPPost): Publication {
-  const categoryName = getPostCategory(post);
   return {
     id: post.id,
-    title: sanitizeWP(post.title.rendered),
-    excerpt: stripHTML(post.excerpt.rendered).slice(0, 130) + '...',
+    title: stripHTML(sanitizeWP(post.title.rendered)),
     image: getPostImage(post) || IMG_FALLBACK,
-    date: formatarData(post.date),
-    tag: categoryName,
-    tagColor: getTagColor(categoryName),
   };
 }
 
 export default function Publications() {
-  const [activeTag, setActiveTag] = useState('all');
   const { data, isLoading, isError, refetch } = usePosts(1, 6);
-  const sectionRef = useRef<HTMLElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  const publications = useMemo(
-    () => data?.posts.map(mapWPPost) ?? [],
-    [data]
-  );
-
-  const filteredPublications = useMemo(
-    () => (activeTag === 'all' ? publications : publications.filter((pub) => pub.tag === activeTag)),
-    [activeTag, publications]
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const [perView, setPerView] = useState(() =>
+    typeof window === 'undefined' ? 3 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1
   );
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+    const onResize = () => {
+      setPerView(window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  const publications = useMemo(() => data?.posts.map(mapWPPost) ?? [], [data]);
+  const totalPages = Math.max(1, Math.ceil(publications.length / perView));
+
+  useEffect(() => {
+    setPage((p) => Math.min(p, totalPages - 1));
+  }, [totalPages]);
+
+  const goTo = useCallback(
+    (p: number) => {
+      const clamped = Math.max(0, Math.min(totalPages - 1, p));
+      setPage(clamped);
+      const track = trackRef.current;
+      if (track) {
+        track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' });
+      }
+    },
+    [totalPages]
+  );
+
+  const prev = useCallback(() => goTo(page - 1), [goTo, page]);
+  const next = useCallback(() => goTo(page + 1), [goTo, page]);
+
   return (
-    <section ref={sectionRef} id="publicacoes" className="py-16 sm:py-20 md:py-28 bg-white dark:bg-slate-950">
+    <section id="noticias" className="py-16 sm:py-20 md:py-24 bg-crfal-gray-50">
       <div className="container-crfal">
-        <div
-          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6 mb-10 sm:mb-14 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <div>
-            <span className="inline-block px-4 py-1.5 bg-crfal-blue-lighter text-crfal-blue text-sm font-semibold rounded-full mb-4 dark:bg-crfal-blue/10 dark:text-crfal-blue-light">
-              Comunicação
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-neutral-800 dark:text-white">
-              Nossas Notícias
-            </h2>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {tags.map((tag) => (
-              <button
-                key={tag.value}
-                onClick={() => setActiveTag(tag.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 active:scale-95 ${
-                  activeTag === tag.value
-                    ? 'bg-crfal-blue text-white shadow-sm'
-                    : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-neutral-200 dark:bg-slate-800 dark:text-neutral-300 dark:hover:bg-slate-700'
-                }`}
-              >
-                {tag.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <h2 className="mb-10 text-center font-display text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 sm:mb-14">
+          Notícias
+        </h2>
 
         {isLoading ? (
-          <div className="text-center py-16 sm:py-20 text-crfal-gray-500">
-            <div className="animate-spin w-8 h-8 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-sm sm:text-base">Carregando notícias...</p>
+          <div className="flex h-64 items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
           </div>
         ) : isError ? (
-          <div className="text-center py-16 sm:py-20">
-            <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-            <p className="text-crfal-gray-500 text-sm sm:text-base mb-5">
-              Não foi possível carregar as notícias agora. Tente novamente em instantes.
-            </p>
-            <button onClick={() => refetch()} className="btn-outline inline-flex items-center gap-2 text-sm">
+          <div className="py-16 text-center">
+            <p className="text-crfal-gray-600">Não foi possível carregar as notícias. Tente novamente.</p>
+            <button
+              onClick={() => refetch()}
+              className="mt-4 rounded-md border-2 border-red-600 px-5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white"
+            >
               Tentar novamente
             </button>
           </div>
-        ) : filteredPublications.length === 0 ? (
-          <div className="text-center py-16 sm:py-20">
-            <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-            <p className="text-crfal-gray-500 text-sm sm:text-base">Nenhuma publicação encontrada para esta categoria.</p>
-            <button onClick={() => setActiveTag('all')} className="mt-4 text-crfal-blue text-sm font-medium hover:underline">
-              Ver todas as publicações
-            </button>
-          </div>
+        ) : publications.length === 0 ? (
+          <p className="py-16 text-center text-crfal-gray-600">Nenhuma notícia publicada no momento.</p>
         ) : (
-          <>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredPublications.map((pub, index) => (
-                <article
-                  key={pub.id}
-                  className={`group bg-white dark:bg-slate-900/90 rounded-xl overflow-hidden border border-crfal-gray-200 dark:border-slate-700/70 hover:border-crfal-blue/30 hover:shadow-card-hover transition-all duration-300 ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  }`}
-                  style={{ transitionDelay: isVisible ? `${200 + index * 80}ms` : '0ms' }}
-                >
-                  <Link to={`/imprensa/noticias/${pub.id}`} className="block">
-                    <div className="relative aspect-[16/10] overflow-hidden">
-                      <img
-                        src={pub.image}
-                        alt={pub.title}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute top-4 left-4">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 ${pub.tagColor} text-white text-xs font-semibold rounded-full`}>
-                          <Tag className="w-3 h-3" />
-                          {pub.tag}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                  <div className="p-5">
-                    <div className="flex items-center gap-2 text-crfal-gray-500 dark:text-crfal-gray-400 text-sm mb-3">
-                      <Calendar className="w-4 h-4" />
-                      {pub.date}
-                    </div>
-                    <Link to={`/imprensa/noticias/${pub.id}`}>
-                      <h3
-                        className="font-bold text-neutral-800 dark:text-white mb-3 line-clamp-2 group-hover:text-crfal-blue transition-colors duration-300"
-                        dangerouslySetInnerHTML={{ __html: pub.title }}
-                      />
-                    </Link>
-                    <p className="text-sm text-crfal-gray-600 dark:text-crfal-gray-400 mb-4 line-clamp-2">
-                      {pub.excerpt}
-                    </p>
-                    <Link
-                      to={`/imprensa/noticias/${pub.id}`}
-                      className="inline-flex items-center gap-2 text-crfal-blue font-semibold text-sm group/link dark:text-crfal-blue-light"
-                    >
-                      <span className="group-hover/link:underline">Ler mais</span>
-                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/link:translate-x-1" />
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={prev}
+              aria-label="Notícias anteriores"
+              disabled={page === 0}
+              className="absolute left-2 top-[128px] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-crfal-gray-dark/80 text-white shadow-lg transition hover:bg-crfal-gray-dark disabled:pointer-events-none disabled:opacity-0 sm:flex lg:left-4"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              aria-label="Próximas notícias"
+              disabled={page >= totalPages - 1}
+              className="absolute right-2 top-[128px] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-crfal-gray-dark/80 text-white shadow-lg transition hover:bg-crfal-gray-dark disabled:pointer-events-none disabled:opacity-0 sm:flex lg:right-4"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
 
             <div
-              className={`mt-10 sm:mt-12 text-center transition-all duration-700 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-              style={{ transitionDelay: '700ms' }}
+              ref={trackRef}
+              className="overflow-x-auto scrollbar-none scroll-smooth sm:overflow-hidden"
             >
-              <Link
-                to="/imprensa/noticias"
-                className="btn-outline inline-flex items-center gap-2 text-sm sm:text-base"
+              <div
+                className="flex transition-transform duration-500 ease-out"
+                style={{ transform: `translateX(-${page * 100}%)` }}
               >
-                Ver todas as publicações
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+                {Array.from({ length: totalPages }).map((_, groupIndex) => {
+                  const group = publications.slice(groupIndex * perView, (groupIndex + 1) * perView);
+                  return (
+                    <div key={groupIndex} className="flex w-full shrink-0 gap-6">
+                      {group.map((pub) => (
+                        <article key={pub.id} className="w-full shrink-0 sm:w-1/2 lg:w-auto lg:flex-1">
+                          <Link to={`/imprensa/noticias/${pub.id}`} className="group block text-center">
+                            <div className="overflow-hidden rounded-xl">
+                              <img
+                                src={pub.image}
+                                alt={pub.title}
+                                loading="lazy"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = IMG_FALLBACK;
+                                }}
+                                className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                            </div>
+                            <h3 className="mx-auto mt-4 max-w-md text-base font-bold leading-snug text-crfal-blue sm:text-lg">
+                              {pub.title}
+                            </h3>
+                            <span className="mt-3 inline-block rounded-md bg-primary px-6 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
+                              Leia mais
+                            </span>
+                          </Link>
+                        </article>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </>
+          </div>
         )}
+
+        <div className="mt-10 text-center sm:mt-14">
+          <Link
+            to="/imprensa/noticias"
+            className="inline-block rounded-md border-2 border-red-600 px-8 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white sm:text-base"
+          >
+            Leia todas as notícias
+          </Link>
+        </div>
       </div>
     </section>
   );

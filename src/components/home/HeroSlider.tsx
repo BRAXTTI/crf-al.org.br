@@ -16,7 +16,7 @@ const slides: Slide[] = [
     tagline: 'Autarquia Federal · Alagoas',
     title: 'Conselho Regional de Farmácia de Alagoas',
     subtitle: 'Fiscalização, registro e valorização do exercício profissional farmacêutico em todo o estado.',
-    ctaPrimary: { label: 'Conheça nossos serviços', href: '#servicos' },
+    ctaPrimary: { label: 'Conheça nossos serviços', href: '/servicos/requerimentos' },
     ctaSecondary: { label: 'Nossa instituição', href: '/instituicao/sobre-conselho#sobre-conselho' },
   },
   {
@@ -72,7 +72,7 @@ export default function HeroSlider() {
 
   return (
     <section
-      className="relative flex h-[100svh] min-h-[560px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark"
+      className="relative flex min-h-[420px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark pt-28 pb-20 sm:min-h-[460px] md:pt-32 lg:min-h-[520px]"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
@@ -100,11 +100,11 @@ export default function HeroSlider() {
 
             <div className="container-crfal relative z-10 flex h-full items-center">
               <div className="max-w-2xl">
-                <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-[0.28em] text-white/70 sm:text-sm">
+                <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.28em] text-white/70 sm:text-sm">
                   {slide.tagline}
                 </span>
 
-                <h1 className="mb-4 text-[2rem] font-bold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-5xl lg:text-6xl">
+                <h1 className="font-display mb-3 text-[1.75rem] font-semibold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-4xl lg:text-[2.75rem]">
                   {isActive ? (
                     <span className="animate-slide-up inline-block">{slide.title}</span>
                   ) : (
@@ -112,21 +112,21 @@ export default function HeroSlider() {
                   )}
                 </h1>
 
-                <p className="mb-8 max-w-xl text-base leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:text-lg">
+                <p className="mb-6 max-w-xl text-sm leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:text-base">
                   {slide.subtitle}
                 </p>
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                   <a
                     href={slide.ctaPrimary.href}
-                    className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#ffffff] px-7 py-3.5 text-sm font-semibold text-crfal-blue transition-all duration-300 hover:bg-crfal-blue-lighter active:scale-[0.98] sm:text-base"
+                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#ffffff] px-6 py-3 text-sm font-semibold text-crfal-blue transition-all duration-300 hover:bg-crfal-blue-lighter active:scale-[0.98] sm:text-base"
                   >
                     {slide.ctaPrimary.label}
                     <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                   </a>
                   <a
                     href={slide.ctaSecondary.href}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-7 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-white/50 hover:bg-white/20 active:scale-[0.98] sm:text-base"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-white/50 hover:bg-white/20 active:scale-[0.98] sm:text-base"
                   >
                     {slide.ctaSecondary.label}
                   </a>
@@ -139,21 +139,21 @@ export default function HeroSlider() {
 
       <button
         onClick={prev}
-        className="absolute left-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+        className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
         aria-label="Slide anterior"
       >
-        <ChevronLeft className="h-6 w-6" />
+        <ChevronLeft className="h-5 w-5" />
       </button>
 
       <button
         onClick={next}
-        className="absolute right-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+        className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
         aria-label="Próximo slide"
       >
-        <ChevronRight className="h-6 w-6" />
+        <ChevronRight className="h-5 w-5" />
       </button>
 
-      <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4">
+      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4">
         <div className="flex items-center gap-2.5">
           {slides.map((_, index) => (
             <button

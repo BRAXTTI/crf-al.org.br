@@ -21,7 +21,7 @@ const cards: CardItem[] = [
   {
     title: 'Serviços Online',
     description: 'Requerimentos, tutoriais, ouvidoria e atendimento digital para farmacêuticos e estabelecimentos.',
-    href: '#servicos',
+    href: '/servicos/requerimentos',
     icon: ClipboardList,
   },
   {
