@@ -56,10 +56,10 @@ export default function ImpactStrip() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden border-y border-crfal-gray-200/70 bg-white py-14 dark:border-slate-800 dark:bg-slate-950 sm:py-16"
+      className="relative overflow-hidden border-y border-crfal-gray-200/70 bg-white py-14   sm:py-16"
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-[0.12]"
+        className="pointer-events-none absolute inset-0 opacity-[0.35] "
         style={{
           background:
             'radial-gradient(720px 200px at 50% -40%, rgba(0,119,204,0.14), transparent 70%)',
@@ -101,15 +101,15 @@ function Metric({
         transitionDelay: `${index * 90}ms`,
       }}
     >
-      <p className="font-display text-5xl font-light tracking-tight text-crfal-blue tabular-nums dark:text-crfal-blue-light sm:text-6xl">
+      <p className="font-display text-5xl font-light tracking-tight text-crfal-blue tabular-nums  sm:text-6xl">
         {value}
         <span className="text-[0.55em] align-baseline">{suffix}</span>
       </p>
-      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-crfal-gray-500 dark:text-crfal-gray-400">
+      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-crfal-gray-500 ">
         {label}
       </p>
       <span
-        className="mx-auto mt-4 block h-px w-10 bg-crfal-blue/30 transition-all duration-500 group-hover:w-16 group-hover:bg-crfal-blue/60 dark:bg-crfal-blue-light/30"
+        className="mx-auto mt-4 block h-px w-10 bg-crfal-blue/30 transition-all duration-500 group-hover:w-16 group-hover:bg-crfal-blue/60 "
         aria-hidden
       />
     </div>

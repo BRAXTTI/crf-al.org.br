@@ -66,18 +66,18 @@ function Card({ item, index }: { item: CardItem; index: number }) {
       className="group relative flex min-h-[144px] touch-manipulation flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-crfal-blue/30 hover:shadow-card-hover focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 sm:min-h-0 sm:p-7"
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-all duration-300 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white sm:mb-5 sm:h-12 sm:w-12">
+      <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-all duration-300 group-hover:bg-crfal-blue group-hover:text-white     sm:mb-5 sm:h-12 sm:w-12">
         <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>
 
-      <h3 className="mb-1 text-base font-semibold leading-snug text-neutral-800 transition-colors duration-300 group-hover:text-crfal-blue dark:text-white sm:mb-2 sm:text-lg">
+      <h3 className="mb-1 text-base font-semibold leading-snug text-neutral-800 transition-colors duration-300 group-hover:text-crfal-blue  sm:mb-2 sm:text-lg">
         {item.title}
       </h3>
-      <p className="mb-5 flex-1 text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">
+      <p className="mb-5 flex-1 text-sm leading-relaxed text-crfal-gray-600 ">
         {item.description}
       </p>
 
-      <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-crfal-blue transition-all duration-300 group-hover:gap-2.5 dark:text-crfal-blue-light sm:text-sm">
+      <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-crfal-blue transition-all duration-300 group-hover:gap-2.5  sm:text-sm">
         Acessar
         <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
       </span>
@@ -114,13 +114,13 @@ export default function InstitutionalCards() {
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}
         >
-          <span className="mb-4 inline-block rounded-full bg-crfal-blue-lighter px-4 py-1.5 text-sm font-semibold text-crfal-blue dark:bg-crfal-blue/10 dark:text-crfal-blue-light">
+          <span className="mb-4 inline-block rounded-full bg-crfal-blue-lighter px-4 py-1.5 text-sm font-semibold text-crfal-blue  ">
             Navegação Rápida
           </span>
-          <h2 className="mb-3 text-2xl font-bold text-neutral-800 dark:text-white sm:text-3xl md:text-4xl">
+          <h2 className="mb-3 text-2xl font-bold text-neutral-800  sm:text-3xl md:text-4xl">
             Conheça o CRFAL
           </h2>
-          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400 sm:text-lg">
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-crfal-gray-600  sm:text-lg">
             Acesse os principais serviços e informações do Conselho Regional de Farmácia de Alagoas.
           </p>
         </div>

@@ -3,7 +3,7 @@
 
   <!-- Página inicial -->
   <url>
-    <loc>https://crf-al.org.br/</loc>
+    <loc>https://institucional.crf-al.org.br/</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -11,31 +11,31 @@
 
   <!-- Institucional -->
   <url>
-    <loc>https://crf-al.org.br/instituicao</loc>
+    <loc>https://institucional.crf-al.org.br/instituicao</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/instituicao/sobre-conselho</loc>
+    <loc>https://institucional.crf-al.org.br/instituicao/sobre-conselho</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/instituicao/missao-visao</loc>
+    <loc>https://institucional.crf-al.org.br/instituicao/missao-visao</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/instituicao/diretoria</loc>
+    <loc>https://institucional.crf-al.org.br/instituicao/diretoria</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/instituicao/estatuto</loc>
+    <loc>https://institucional.crf-al.org.br/instituicao/estatuto</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
@@ -43,19 +43,19 @@
 
   <!-- Serviços -->
   <url>
-    <loc>https://crf-al.org.br/servicos/requerimentos</loc>
+    <loc>https://institucional.crf-al.org.br/servicos/requerimentos</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/servicos/tutoriais</loc>
+    <loc>https://institucional.crf-al.org.br/servicos/tutoriais</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/servicos/ouvidoria</loc>
+    <loc>https://institucional.crf-al.org.br/servicos/ouvidoria</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -63,7 +63,7 @@
 
   <!-- Imprensa -->
   <url>
-    <loc>https://crf-al.org.br/imprensa/noticias</loc>
+    <loc>https://institucional.crf-al.org.br/imprensa/noticias</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -71,49 +71,43 @@
 
   <!-- Fiscalização -->
   <url>
-    <loc>https://crf-al.org.br/fiscalizacao</loc>
+    <loc>https://institucional.crf-al.org.br/fiscalizacao</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/fiscalizacao/papel-da-fiscalizacao</loc>
+    <loc>https://institucional.crf-al.org.br/fiscalizacao/papel-da-fiscalizacao</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/fiscalizacao/instrumentos-da-fiscalizacao</loc>
+    <loc>https://institucional.crf-al.org.br/fiscalizacao/instrumentos-da-fiscalizacao</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/fiscalizacao/plano-de-fiscalizacao-anual</loc>
+    <loc>https://institucional.crf-al.org.br/fiscalizacao/plano-de-fiscalizacao-anual</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/fiscalizacao/relatorios</loc>
+    <loc>https://institucional.crf-al.org.br/fiscalizacao/relatorios</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/fiscalizacao/processo-administrativo-fiscal</loc>
+    <loc>https://institucional.crf-al.org.br/fiscalizacao/processo-administrativo-fiscal</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://crf-al.org.br/fiscalizacao/afastamento-provisorio</loc>
-    <lastmod>2026-06-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://crf-al.org.br/legislacao</loc>
+    <loc>https://institucional.crf-al.org.br/legislacao</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -121,7 +115,7 @@
 
   <!-- Contato -->
   <url>
-    <loc>https://crf-al.org.br/contato</loc>
+    <loc>https://institucional.crf-al.org.br/contato</loc>
     <lastmod>2026-06-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

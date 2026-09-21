@@ -40,10 +40,7 @@ export default function Publications() {
 
   const publications = useMemo(() => data?.posts.map(mapWPPost) ?? [], [data]);
   const totalPages = Math.max(1, Math.ceil(publications.length / perView));
-
-  useEffect(() => {
-    setPage((p) => Math.min(p, totalPages - 1));
-  }, [totalPages]);
+  const currentPage = Math.min(page, totalPages - 1);
 
   const goTo = useCallback(
     (p: number) => {
@@ -57,8 +54,8 @@ export default function Publications() {
     [totalPages]
   );
 
-  const prev = useCallback(() => goTo(page - 1), [goTo, page]);
-  const next = useCallback(() => goTo(page + 1), [goTo, page]);
+  const prev = useCallback(() => goTo(currentPage - 1), [goTo, currentPage]);
+  const next = useCallback(() => goTo(currentPage + 1), [goTo, currentPage]);
 
   return (
     <section id="noticias" className="py-16 sm:py-20 md:py-24 bg-crfal-gray-50">
@@ -89,7 +86,7 @@ export default function Publications() {
               type="button"
               onClick={prev}
               aria-label="Notícias anteriores"
-              disabled={page === 0}
+              disabled={currentPage === 0}
               className="absolute left-2 top-[128px] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-crfal-gray-dark/80 text-white shadow-lg transition hover:bg-crfal-gray-dark disabled:pointer-events-none disabled:opacity-0 sm:flex lg:left-4"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -98,7 +95,7 @@ export default function Publications() {
               type="button"
               onClick={next}
               aria-label="Próximas notícias"
-              disabled={page >= totalPages - 1}
+              disabled={currentPage >= totalPages - 1}
               className="absolute right-2 top-[128px] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-crfal-gray-dark/80 text-white shadow-lg transition hover:bg-crfal-gray-dark disabled:pointer-events-none disabled:opacity-0 sm:flex lg:right-4"
             >
               <ChevronRight className="h-5 w-5" />
@@ -110,7 +107,7 @@ export default function Publications() {
             >
               <div
                 className="flex transition-transform duration-500 ease-out"
-                style={{ transform: `translateX(-${page * 100}%)` }}
+                style={{ transform: `translateX(-${currentPage * 100}%)` }}
               >
                 {Array.from({ length: totalPages }).map((_, groupIndex) => {
                   const group = publications.slice(groupIndex * perView, (groupIndex + 1) * perView);

@@ -30,23 +30,23 @@ export const STATUS_LABELS: Record<StatusEvento, string> = {
 
 export const STATUS_COLORS: Record<StatusEvento, { bg: string; text: string; icon: ElementType }> = {
   'em-andamento': {
-    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-    text: 'text-emerald-700 dark:text-emerald-300',
+    bg: 'bg-emerald-50 ',
+    text: 'text-emerald-700 ',
     icon: CheckCircle2,
   },
   'em-breve': {
-    bg: 'bg-sky-50 dark:bg-sky-900/20',
-    text: 'text-sky-700 dark:text-sky-300',
+    bg: 'bg-sky-50 ',
+    text: 'text-sky-700 ',
     icon: Clock,
   },
   encerrado: {
-    bg: 'bg-crfal-gray-100 dark:bg-slate-800',
-    text: 'text-crfal-gray-500 dark:text-slate-400',
+    bg: 'bg-crfal-gray-100 ',
+    text: 'text-crfal-gray-500 ',
     icon: CheckCircle2,
   },
   cancelado: {
-    bg: 'bg-red-50 dark:bg-red-900/20',
-    text: 'text-red-600 dark:text-red-400',
+    bg: 'bg-red-50 ',
+    text: 'text-red-600 ',
     icon: XCircle,
   },
 };

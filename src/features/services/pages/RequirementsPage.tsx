@@ -612,7 +612,7 @@ export default function RequirementsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-crfal-gray-50 ">
       <SEO
         title="Requerimentos"
         description="Acesse todos os requerimentos do CRFAL para pessoa física e jurídica — registro, renovação, certidões e muito mais para profissionais farmacêuticos em Alagoas."
@@ -676,12 +676,12 @@ export default function RequirementsPage() {
 
       <main className="container-crfal py-8 md:py-12">
         {/* Toolbar sticky */}
-        <div className="sticky top-[72px] z-30 rounded-2xl border border-crfal-gray-200/80 bg-white/85 p-3 shadow-card backdrop-blur-lg dark:border-slate-700/80 dark:bg-slate-900/85 sm:p-4">
+        <div className="sticky top-[72px] z-30 rounded-2xl border border-crfal-gray-200/80 bg-white/85 p-3 shadow-card backdrop-blur-lg   sm:p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div
               role="group"
               aria-label="Selecionar tipo de pessoa"
-              className="inline-flex shrink-0 rounded-full border border-crfal-gray-200 bg-crfal-gray-100 p-1 dark:border-slate-700 dark:bg-slate-800"
+              className="inline-flex shrink-0 rounded-full border border-crfal-gray-200 bg-crfal-gray-100 p-1  "
             >
               {(
                 [
@@ -699,7 +699,7 @@ export default function RequirementsPage() {
                     className={`inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light lg:flex-initial ${
                       ativo
                         ? 'bg-crfal-blue text-white shadow-md'
-                        : 'text-crfal-gray-600 hover:text-crfal-blue dark:text-slate-300 dark:hover:text-sky-300'
+                        : 'text-crfal-gray-600 hover:text-crfal-blue  '
                     }`}
                   >
                     <TabIcon className="h-4 w-4" />
@@ -718,7 +718,7 @@ export default function RequirementsPage() {
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar requerimento..."
-                className="min-h-[44px] w-full rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-neutral-800 transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-none focus:ring-2 focus:ring-crfal-blue-light/40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                className="min-h-[44px] w-full rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-neutral-800 transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-none focus:ring-2 focus:ring-crfal-blue-light/40   "
               />
               {busca && (
                 <button
@@ -743,14 +743,14 @@ export default function RequirementsPage() {
               className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                 categoria === 'todas'
                   ? 'border-crfal-blue bg-crfal-blue text-white'
-                  : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                  : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue   '
               }`}
             >
               Todas
               <span className={`rounded-full px-1.5 text-[10px] font-bold ${
                 categoria === 'todas'
                   ? 'bg-white/20 text-white'
-                  : 'bg-crfal-gray-100 text-crfal-gray-500 dark:bg-slate-700 dark:text-slate-400'
+                  : 'bg-crfal-gray-100 text-crfal-gray-500  '
               }`}>
                 {currentMenu.reduce((soma, cat) => soma + cat.items.length, 0)}
               </span>
@@ -765,14 +765,14 @@ export default function RequirementsPage() {
                   className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                     ativo
                       ? 'border-crfal-blue bg-crfal-blue text-white'
-                      : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue   '
                   }`}
                 >
                   {cat.title}
                   <span className={`rounded-full px-1.5 text-[10px] font-bold ${
                     ativo
                       ? 'bg-white/20 text-white'
-                      : 'bg-crfal-gray-100 text-crfal-gray-500 dark:bg-slate-700 dark:text-slate-400'
+                      : 'bg-crfal-gray-100 text-crfal-gray-500  '
                   }`}>
                     {cat.items.length}
                   </span>
@@ -785,12 +785,12 @@ export default function RequirementsPage() {
         {/* Resultados */}
         <div className="mt-8">
           {totalResultados === 0 ? (
-            <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white py-14 text-center dark:border-slate-700 dark:bg-slate-900">
-              <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300 dark:text-slate-600" />
-              <h2 className="font-display text-lg font-semibold text-neutral-800 dark:text-slate-100">
+            <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white py-14 text-center  ">
+              <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300 " />
+              <h2 className="font-display text-lg font-semibold text-neutral-800 ">
                 Nenhum requerimento encontrado
               </h2>
-              <p className="mt-1 text-sm text-crfal-gray-500 dark:text-slate-400">
+              <p className="mt-1 text-sm text-crfal-gray-500 ">
                 Tente ajustar a busca ou os filtros selecionados.
               </p>
               <button
@@ -809,16 +809,16 @@ export default function RequirementsPage() {
                 <div className="mb-5 flex items-center gap-3">
                   <h2
                     id={`cat-${cat.id}`}
-                    className="font-display text-xl font-semibold text-neutral-800 dark:text-slate-100 md:text-2xl"
+                    className="font-display text-xl font-semibold text-neutral-800  md:text-2xl"
                   >
                     {cat.title}
                   </h2>
-                  <span className="rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-xs font-bold text-crfal-blue dark:bg-crfal-blue/20 dark:text-sky-300">
+                  <span className="rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-xs font-bold text-crfal-blue  ">
                     {cat.items.length}
                   </span>
                   <div
                     aria-hidden
-                    className="hidden h-px flex-1 bg-gradient-to-r from-crfal-gray-200 to-transparent dark:from-slate-700 sm:block"
+                    className="hidden h-px flex-1 bg-gradient-to-r from-crfal-gray-200 to-transparent  sm:block"
                   />
                 </div>
 
@@ -831,14 +831,14 @@ export default function RequirementsPage() {
                     return (
                       <article
                         key={item.id}
-                        className="group relative flex animate-in flex-col rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-card duration-500 fill-mode-backwards fade-in slide-in-from-bottom-3 transition-all hover:-translate-y-1.5 hover:border-crfal-blue/25 hover:shadow-card-hover dark:border-slate-700 dark:bg-slate-900"
+                        className="group relative flex animate-in flex-col rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-card duration-500 fill-mode-backwards fade-in slide-in-from-bottom-3 transition-all hover:-translate-y-1.5 hover:border-crfal-blue/25 hover:shadow-card-hover  "
                         style={{ animationDelay: `${index * 70}ms` }}
                       >
                         <div className="flex items-start gap-3.5">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-crfal-blue-lighter text-crfal-blue transition-colors group-hover:bg-crfal-blue group-hover:text-white dark:bg-crfal-blue/15 dark:text-crfal-blue-light">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-crfal-blue-lighter text-crfal-blue transition-colors group-hover:bg-crfal-blue group-hover:text-white  ">
                             <Icon className="h-6 w-6" />
                           </div>
-                          <h3 className="font-display text-base font-semibold leading-snug text-neutral-800 transition-colors group-hover:text-crfal-blue dark:text-slate-100 dark:group-hover:text-sky-300 sm:text-lg">
+                          <h3 className="font-display text-base font-semibold leading-snug text-neutral-800 transition-colors group-hover:text-crfal-blue   sm:text-lg">
                             <button
                               type="button"
                               onClick={() => handleSelectItem(item)}
@@ -849,17 +849,17 @@ export default function RequirementsPage() {
                           </h3>
                         </div>
 
-                        <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-crfal-gray-600 dark:text-slate-400">
+                        <p className="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-crfal-gray-600 ">
                           {item.description}
                         </p>
 
-                        <div className="mt-4 flex items-center justify-between gap-3 border-t border-crfal-gray-100 pt-3.5 dark:border-slate-800">
-                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-all group-hover:gap-2.5 dark:text-sky-300">
+                        <div className="mt-4 flex items-center justify-between gap-3 border-t border-crfal-gray-100 pt-3.5 ">
+                          <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-all group-hover:gap-2.5 ">
                             Ver detalhes
                             <ChevronRight className="h-4 w-4" />
                           </span>
                           {item.downloadUrl && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-crfal-gray-100 px-2.5 py-1 text-[11px] font-semibold text-crfal-gray-600 dark:bg-slate-800 dark:text-slate-400">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-crfal-gray-100 px-2.5 py-1 text-[11px] font-semibold text-crfal-gray-600  ">
                               <Download className="h-3 w-3" />
                               Formulário
                             </span>
@@ -938,27 +938,27 @@ export default function RequirementsPage() {
 
               {mostraFluxograma && selectedItem.fluxogramaUrl ? (
                 <div className="flex min-h-0 flex-1 flex-col">
-                  <div className="flex items-center justify-between border-b border-crfal-gray-200 px-5 py-3 dark:border-slate-700">
+                  <div className="flex items-center justify-between border-b border-crfal-gray-200 px-5 py-3 ">
                     <button
                       type="button"
                       onClick={() => setMostraFluxograma(false)}
-                      className="inline-flex min-h-[36px] items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light dark:text-crfal-blue-light"
+                      className="inline-flex min-h-[36px] items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light "
                     >
                       <ArrowLeft className="h-4 w-4" />
                       Voltar aos detalhes
                     </button>
                   </div>
-                  <div className="min-h-0 flex-1 overflow-auto bg-crfal-gray-50 p-4 dark:bg-slate-950 sm:p-6">
+                  <div className="min-h-0 flex-1 overflow-auto bg-crfal-gray-50 p-4  sm:p-6">
                     <img
                       src={selectedItem.fluxogramaUrl}
                       alt={`Fluxograma do requerimento ${selectedItem.title}`}
-                      className="mx-auto h-auto w-full rounded-xl border border-crfal-gray-200 bg-white object-contain shadow-sm dark:border-slate-700"
+                      className="mx-auto h-auto w-full rounded-xl border border-crfal-gray-200 bg-white object-contain shadow-sm "
                     />
                   </div>
                 </div>
               ) : (
                 <>
-                  <div className="shrink-0 border-b border-crfal-gray-200 dark:border-slate-700">
+                  <div className="shrink-0 border-b border-crfal-gray-200 ">
                     <div className="flex">
                       {(
                         [
@@ -976,16 +976,16 @@ export default function RequirementsPage() {
                             aria-pressed={ativo}
                             className={`flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3.5 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue-light sm:text-sm ${
                               ativo
-                                ? 'border-crfal-blue text-crfal-blue dark:border-crfal-blue-light dark:text-crfal-blue-light'
-                                : 'border-transparent text-crfal-gray-500 hover:text-crfal-blue dark:text-slate-400 dark:hover:text-crfal-blue-light'
+                                ? 'border-crfal-blue text-crfal-blue  '
+                                : 'border-transparent text-crfal-gray-500 hover:text-crfal-blue  '
                             }`}
                           >
                             <TabIcon className="h-4 w-4" />
                             <span className="hidden sm:inline">{tab.label}</span>
                             <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                               ativo
-                                ? 'bg-crfal-blue-lighter text-crfal-blue dark:bg-crfal-blue/20 dark:text-crfal-blue-light'
-                                : 'bg-crfal-gray-100 text-crfal-gray-500 dark:bg-slate-800 dark:text-slate-400'
+                                ? 'bg-crfal-blue-lighter text-crfal-blue  '
+                                : 'bg-crfal-gray-100 text-crfal-gray-500  '
                             }`}>
                               {tab.count}
                             </span>
@@ -999,11 +999,11 @@ export default function RequirementsPage() {
                     {activeTab === 'documentos' && (
                       <ul className="space-y-2.5">
                         {selectedItem.documentos.map((doc, index) => (
-                          <li key={index} className="flex items-start gap-3 rounded-lg bg-crfal-gray-50 p-3 dark:bg-slate-800/50">
+                          <li key={index} className="flex items-start gap-3 rounded-lg bg-crfal-gray-50 p-3 ">
                             <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-crfal-blue text-xs font-bold text-white">
                               {index + 1}
                             </span>
-                            <span className="text-sm leading-relaxed text-crfal-gray-700 dark:text-slate-200">{doc}</span>
+                            <span className="text-sm leading-relaxed text-crfal-gray-700 ">{doc}</span>
                           </li>
                         ))}
                       </ul>
@@ -1014,14 +1014,14 @@ export default function RequirementsPage() {
                         {selectedItem.instrucoes.map((instrucao, index) => (
                           <li key={index} className="flex gap-4">
                             <div className="flex flex-col items-center">
-                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-sm font-bold text-crfal-blue dark:bg-crfal-blue/20 dark:text-crfal-blue-light">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-sm font-bold text-crfal-blue  ">
                                 {index + 1}
                               </span>
                               {index < selectedItem.instrucoes.length - 1 && (
-                                <div className="mt-1 h-full w-px bg-crfal-gray-200 dark:bg-slate-700" />
+                                <div className="mt-1 h-full w-px bg-crfal-gray-200 " />
                               )}
                             </div>
-                            <p className="pb-5 pt-1 text-sm leading-relaxed text-crfal-gray-700 dark:text-slate-200">{instrucao}</p>
+                            <p className="pb-5 pt-1 text-sm leading-relaxed text-crfal-gray-700 ">{instrucao}</p>
                           </li>
                         ))}
                       </ol>
@@ -1030,16 +1030,16 @@ export default function RequirementsPage() {
                     {activeTab === 'observacoes' && (
                       <div className="space-y-3">
                         {observacoesSelecionadas.map((observacao, index) => (
-                          <div key={index} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-600/25 dark:bg-amber-900/15">
-                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                            <p className="whitespace-pre-line text-sm leading-relaxed text-amber-800 dark:text-amber-200">{observacao}</p>
+                          <div key={index} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-4  ">
+                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 " />
+                            <p className="whitespace-pre-line text-sm leading-relaxed text-amber-800 ">{observacao}</p>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex shrink-0 flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-5 dark:border-slate-700 dark:bg-slate-800/40 sm:p-6">
+                  <div className="flex shrink-0 flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-5   sm:p-6">
                     <a
                       href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
                       target="_blank"
@@ -1054,13 +1054,13 @@ export default function RequirementsPage() {
                         href={selectedItem.downloadUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border-2 border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white dark:border-crfal-blue-light dark:text-crfal-blue-light dark:hover:bg-crfal-blue-light dark:hover:text-slate-950"
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border-2 border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white    "
                       >
                         <Download className="h-4 w-4" />
                         Baixar formulário
                       </a>
                     ) : (
-                      <span className="inline-flex items-center gap-2 rounded-full border-2 border-crfal-gray-200 px-5 py-2.5 text-sm font-medium text-crfal-gray-400 dark:border-slate-700 dark:text-slate-500">
+                      <span className="inline-flex items-center gap-2 rounded-full border-2 border-crfal-gray-200 px-5 py-2.5 text-sm font-medium text-crfal-gray-400  ">
                         <Download className="h-4 w-4" />
                         Formulário indisponível
                       </span>

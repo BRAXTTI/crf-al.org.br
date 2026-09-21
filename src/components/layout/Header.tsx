@@ -264,14 +264,14 @@ export default function Header() {
                         <div
                           className={`overflow-hidden rounded-xl border shadow-2xl animate-scale-in origin-top ${
                             isOverHero
-                              ? 'bg-white dark:bg-slate-900 border-white/20 dark:border-slate-700'
-                              : 'bg-white dark:bg-slate-900 border-crfal-gray-200 dark:border-slate-700'
+                              ? 'bg-white  border-white/20 '
+                              : 'bg-white  border-crfal-gray-200 '
                           }`}
                         >
                           <div className="grid grid-cols-2 gap-8 p-6">
                             {item.columns.map((column) => (
                               <div key={column.title}>
-                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-crfal-gray-400 dark:text-crfal-gray-500">
+                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-crfal-gray-400 ">
                                   {column.title}
                                 </h4>
                                 <ul className="space-y-1">
@@ -279,15 +279,15 @@ export default function Header() {
                                     const Icon = subItem.icon;
                                     const content = (
                                       <>
-                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors duration-200 group-hover:bg-crfal-blue group-hover:text-white dark:bg-slate-800 dark:text-crfal-blue-light dark:group-hover:bg-crfal-blue dark:group-hover:text-white">
+                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors duration-200 group-hover:bg-crfal-blue group-hover:text-white    ">
                                           <Icon className="h-4.5 w-4.5" />
                                         </span>
                                         <span className="flex-1">
-                                          <span className="block text-sm font-semibold text-neutral-700 transition-colors duration-200 group-hover:text-crfal-blue dark:text-slate-200 dark:group-hover:text-crfal-blue-light">
+                                          <span className="block text-sm font-semibold text-neutral-700 transition-colors duration-200 group-hover:text-crfal-blue  ">
                                             {subItem.label}
                                           </span>
                                           {subItem.external && (
-                                            <span className="block text-[10px] uppercase tracking-wider text-crfal-gray-400 dark:text-crfal-gray-500">
+                                            <span className="block text-[10px] uppercase tracking-wider text-crfal-gray-400 ">
                                               Link externo
                                             </span>
                                           )}
@@ -299,7 +299,7 @@ export default function Header() {
                                         {subItem.href.startsWith('/') ? (
                                           <Link
                                             to={subItem.href}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 dark:hover:bg-slate-800"
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 "
                                           >
                                             {content}
                                           </Link>
@@ -308,7 +308,7 @@ export default function Header() {
                                             href={subItem.href}
                                             target={subItem.external ? '_blank' : undefined}
                                             rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 dark:hover:bg-slate-800"
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 "
                                           >
                                             {content}
                                           </a>
@@ -386,7 +386,7 @@ export default function Header() {
               <input
                 type="text"
                 placeholder="Buscar no site..."
-                className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-900 border border-crfal-gray-200 dark:border-slate-700 rounded-xl shadow-card focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 dark:text-white"
+                className="w-full px-4 py-3 pr-12 bg-white  border border-crfal-gray-200  rounded-xl shadow-card focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 "
               />
               <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-crfal-gray-500 hover:text-crfal-blue rounded-lg transition-colors">
                 <Search className="w-5 h-5" />
@@ -408,14 +408,14 @@ export default function Header() {
           >
             <nav className="min-h-full pb-24">
               <div className="container-crfal py-6">
-                <div className="bg-crfal-gray-50 dark:bg-slate-900 rounded-xl border border-crfal-gray-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-crfal-gray-50  rounded-xl border border-crfal-gray-200  overflow-hidden">
                   {navItems.map((item) => {
                     const ItemIcon = item.directIcon;
                     return (
-                      <div key={item.label} className="border-b border-crfal-gray-200 last:border-0 dark:border-slate-700">
+                      <div key={item.label} className="border-b border-crfal-gray-200 last:border-0 ">
                         <button
                           onClick={() => item.columns && toggleMobileItem(item.label)}
-                          className="w-full flex items-center justify-between py-4 px-4 text-neutral-800 dark:text-slate-100 hover:bg-crfal-gray-100 dark:hover:bg-slate-800 font-medium text-left transition-colors min-h-[48px]"
+                          className="w-full flex items-center justify-between py-4 px-4 text-neutral-800  hover:bg-crfal-gray-100  font-medium text-left transition-colors min-h-[48px]"
                         >
                           <span className="flex items-center gap-2">
                             {ItemIcon && <ItemIcon className="w-4 h-4" />}
@@ -458,10 +458,10 @@ export default function Header() {
                                 : 'max-h-0 opacity-0'
                             }`}
                           >
-                            <div className="pb-3 pl-4 pr-4 space-y-4 bg-crfal-gray-100/50 dark:bg-slate-800/50">
+                            <div className="pb-3 pl-4 pr-4 space-y-4 bg-crfal-gray-100/50 ">
                               {item.columns.map((column) => (
                                 <div key={column.title}>
-                                  <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400 dark:text-crfal-gray-500">
+                                  <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400 ">
                                     {column.title}
                                   </p>
                                   <div className="space-y-1">
@@ -471,7 +471,7 @@ export default function Header() {
                                         <Link
                                           key={subItem.label}
                                           to={subItem.href}
-                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700 dark:text-slate-300 hover:bg-neutral-200/70 dark:hover:bg-slate-700/70 hover:text-crfal-blue dark:hover:text-sky-300 transition-colors"
+                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700  hover:bg-neutral-200/70  hover:text-crfal-blue  transition-colors"
                                           onClick={() => setIsMobileMenuOpen(false)}
                                         >
                                           <SubIcon className="w-4 h-4 shrink-0" />
@@ -483,7 +483,7 @@ export default function Header() {
                                           href={subItem.href}
                                           target={subItem.external ? '_blank' : undefined}
                                           rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700 dark:text-slate-300 hover:bg-neutral-200/70 dark:hover:bg-slate-700/70 hover:text-crfal-blue dark:hover:text-sky-300 transition-colors"
+                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700  hover:bg-neutral-200/70  hover:text-crfal-blue  transition-colors"
                                           onClick={() => setIsMobileMenuOpen(false)}
                                         >
                                           <SubIcon className="w-4 h-4 shrink-0" />

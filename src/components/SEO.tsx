@@ -1,8 +1,8 @@
 import { Helmet } from 'react-helmet-async';
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 
-const BASE_URL = 'https://crf-al.org.br';
-const DEFAULT_IMAGE = `${BASE_URL}/images/logo-crf-azul.png`;
-const SITE_NAME = 'CRFAL - Conselho Regional de Farmácia de Alagoas';
+const BASE_URL = SITE_URL;
+const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;
 
 interface SEOProps {
   title: string;

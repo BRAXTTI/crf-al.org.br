@@ -1,3 +1,16 @@
 node_modules
 dist/
+
+# Variáveis de ambiente (nunca versionar segredos)
+.env
+.env.local
+.env.*.local
+
+# Exportações do WordPress e artefatos locais
 crf-al.WordPress.*.xml
+*.log
+
+# Sistema operacional / editor
+.DS_Store
+.idea/
+.vscode/

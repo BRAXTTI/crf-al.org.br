@@ -27,12 +27,12 @@ export default function PapelFiscalizacaoPage() {
 
       <div className="my-6 grid gap-4 sm:grid-cols-3">
         {objetivos.map((obj) => (
-          <div key={obj.title} className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-5 transition-colors hover:border-crfal-blue/25 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-crfal-blue/30">
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue dark:bg-slate-700 dark:text-crfal-blue-light">
+          <div key={obj.title} className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-5 transition-colors hover:border-crfal-blue/25   ">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue  ">
               <obj.icon className="h-5 w-5" />
             </div>
-            <h3 className="mb-1.5 text-sm font-bold text-neutral-800 dark:text-white">{obj.title}</h3>
-            <p className="text-xs leading-relaxed text-crfal-gray-600 dark:text-crfal-gray-400">{obj.desc}</p>
+            <h3 className="mb-1.5 text-sm font-bold text-neutral-800 ">{obj.title}</h3>
+            <p className="text-xs leading-relaxed text-crfal-gray-600 ">{obj.desc}</p>
           </div>
         ))}
       </div>
@@ -44,7 +44,7 @@ export default function PapelFiscalizacaoPage() {
 
       <div className="my-5 flex flex-wrap gap-3">
         {['Lei Federal 3.820/60', 'Resolução CFF nº 700/2021', 'Manual de procedimentos CRF-AL', 'Deliberações do Plenário'].map((item) => (
-          <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-crfal-blue/20 bg-crfal-blue-lighter px-3 py-1.5 text-xs font-medium text-crfal-blue dark:border-crfal-blue/30 dark:bg-crfal-blue/10 dark:text-crfal-blue-light">
+          <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-crfal-blue/20 bg-crfal-blue-lighter px-3 py-1.5 text-xs font-medium text-crfal-blue   ">
             <BookOpen className="h-3 w-3" />
             {item}
           </span>
@@ -55,17 +55,17 @@ export default function PapelFiscalizacaoPage() {
 
       <div className="my-5 space-y-3">
         {medidas.map((medida, i) => (
-          <div key={i} className="flex items-start gap-3 rounded-lg border border-crfal-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/60">
+          <div key={i} className="flex items-start gap-3 rounded-lg border border-crfal-gray-200 bg-white p-4  ">
             <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-crfal-blue text-xs font-bold text-white">{i + 1}</span>
-            <p className="text-sm leading-relaxed text-neutral-700 dark:text-slate-200">{medida}</p>
+            <p className="text-sm leading-relaxed text-neutral-700 ">{medida}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-6 rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-5 dark:border-crfal-blue/25 dark:bg-crfal-blue/10">
+      <div className="mt-6 rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/50 p-5  ">
         <div className="flex items-start gap-3">
-          <UserCheck className="mt-0.5 h-5 w-5 shrink-0 text-crfal-blue dark:text-crfal-blue-light" />
-          <p className="text-sm leading-relaxed text-neutral-700 dark:text-slate-200">
+          <UserCheck className="mt-0.5 h-5 w-5 shrink-0 text-crfal-blue " />
+          <p className="text-sm leading-relaxed text-neutral-700 ">
             A fiscalização é exercida <strong>exclusivamente por farmacêuticos fiscais</strong> aprovados em concurso público, com atuação em todo o estado de Alagoas, inclusive em períodos noturnos, finais de semana e feriados.
           </p>
         </div>

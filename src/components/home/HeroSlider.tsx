@@ -90,7 +90,7 @@ export default function HeroSlider() {
             {...(isActive ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` } : {})}
           >
             <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-[12s] ease-out"
+              className="absolute inset-0 bg-cover bg-center transition-transform [transition-duration:12000ms] ease-out"
               style={{
                 backgroundImage: `url(${slide.image})`,
                 transform: isActive ? 'scale(1.08)' : 'scale(1)',

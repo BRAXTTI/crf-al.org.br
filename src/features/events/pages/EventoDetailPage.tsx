@@ -58,14 +58,14 @@ function paraCRFEvent(evento: WPEventListing, bannerFallback?: string | null): C
 function InfoRow({ icon: Icon, rotulo, valor }: { icon: typeof Calendar; rotulo: string; valor: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="p-2 rounded-lg bg-crfal-blue-lighter dark:bg-crfal-blue/10 shrink-0">
-        <Icon className="w-4 h-4 text-crfal-blue dark:text-sky-400" />
+      <div className="p-2 rounded-lg bg-crfal-blue-lighter  shrink-0">
+        <Icon className="w-4 h-4 text-crfal-blue " />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-400 dark:text-slate-500">
+        <p className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-400 ">
           {rotulo}
         </p>
-        <p className="text-sm text-neutral-700 dark:text-slate-200 break-words">{valor}</p>
+        <p className="text-sm text-neutral-700  break-words">{valor}</p>
       </div>
     </div>
   );
@@ -105,9 +105,9 @@ export default function EventoDetailPage() {
 
   if (erroLista) {
     return (
-      <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950 flex items-center justify-center px-4">
-        <div className="max-w-xl w-full bg-white dark:bg-slate-900 rounded-xl border border-red-200 dark:border-red-900/30 p-8 text-center">
-          <p className="text-red-600 dark:text-red-400 mb-4">Não foi possível carregar o evento agora.</p>
+      <div className="min-h-screen bg-crfal-gray-50  flex items-center justify-center px-4">
+        <div className="max-w-xl w-full bg-white  rounded-xl border border-red-200  p-8 text-center">
+          <p className="text-red-600  mb-4">Não foi possível carregar o evento agora.</p>
           <button
             onClick={() => recarregarLista()}
             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full border border-crfal-blue text-crfal-blue hover:bg-crfal-blue hover:text-white transition-colors"
@@ -122,10 +122,10 @@ export default function EventoDetailPage() {
 
   if (carregandoLista) {
     return (
-      <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-crfal-gray-50  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-crfal-gray-500 dark:text-slate-400">Carregando evento...</p>
+          <p className="text-crfal-gray-500 ">Carregando evento...</p>
         </div>
       </div>
     );
@@ -133,13 +133,13 @@ export default function EventoDetailPage() {
 
   if (!resumo || !evento) {
     return (
-      <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-crfal-gray-50  flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-crfal-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-crfal-gray-400 dark:text-slate-500" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-crfal-gray-100  rounded-full flex items-center justify-center">
+            <AlertCircle className="w-8 h-8 text-crfal-gray-400 " />
           </div>
-          <h2 className="text-2xl font-bold text-neutral-800 dark:text-slate-100 mb-4">Evento não encontrado</h2>
-          <p className="text-crfal-gray-500 dark:text-slate-400 mb-6">
+          <h2 className="text-2xl font-bold text-neutral-800  mb-4">Evento não encontrado</h2>
+          <p className="text-crfal-gray-500  mb-6">
             O evento que você procura não existe ou foi removido.
           </p>
           <Link
@@ -162,7 +162,7 @@ export default function EventoDetailPage() {
     Boolean(evento.link) && evento.status !== 'cancelado' && evento.status !== 'encerrado';
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-crfal-gray-50 ">
       <SEO
         title={evento.titulo}
         description={evento.descricao || `Detalhes do evento ${evento.titulo} do CRF-AL.`}
@@ -189,7 +189,7 @@ export default function EventoDetailPage() {
               {STATUS_LABELS[evento.status]}
             </span>
             {evento.status === 'cancelado' && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50  text-red-600 ">
                 <Ban className="w-3 h-3" />
                 Não será realizado
               </span>
@@ -228,18 +228,18 @@ export default function EventoDetailPage() {
 
       <div className="container-crfal py-10 md:py-16">
         {evento.banner && (
-          <div className="rounded-xl overflow-hidden mb-10 border border-crfal-gray-200 dark:border-slate-700 shadow-card">
+          <div className="rounded-xl overflow-hidden mb-10 border border-crfal-gray-200  shadow-card">
             <img src={evento.banner} alt={evento.titulo} className="w-full h-auto object-cover max-h-[420px]" />
           </div>
         )}
 
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
           <div className="lg:col-span-2 min-w-0">
-            <h2 className="font-display text-xl font-semibold text-neutral-800 dark:text-slate-100 md:text-2xl mb-6">Sobre o evento</h2>
+            <h2 className="font-display text-xl font-semibold text-neutral-800  md:text-2xl mb-6">Sobre o evento</h2>
 
             {erroEvento ? (
-              <div className="bg-white dark:bg-slate-900 rounded-xl border border-red-200 dark:border-red-900/30 p-6 text-center">
-                <p className="text-red-600 dark:text-red-400 mb-4">
+              <div className="bg-white  rounded-xl border border-red-200  p-6 text-center">
+                <p className="text-red-600  mb-4">
                   Não foi possível carregar a descrição completa.
                 </p>
                 <button
@@ -252,13 +252,13 @@ export default function EventoDetailPage() {
               </div>
             ) : carregandoEvento ? (
               <div className="space-y-3 animate-pulse">
-                <div className="h-4 bg-crfal-gray-100 dark:bg-slate-800 rounded w-full"></div>
-                <div className="h-4 bg-crfal-gray-100 dark:bg-slate-800 rounded w-11/12"></div>
-                <div className="h-4 bg-crfal-gray-100 dark:bg-slate-800 rounded w-9/12"></div>
+                <div className="h-4 bg-crfal-gray-100  rounded w-full"></div>
+                <div className="h-4 bg-crfal-gray-100  rounded w-11/12"></div>
+                <div className="h-4 bg-crfal-gray-100  rounded w-9/12"></div>
               </div>
             ) : conteudo ? (
               <div
-                className="text-crfal-gray-600 dark:text-slate-300 leading-relaxed
+                className="text-crfal-gray-600  leading-relaxed
                   [&_a]:text-crfal-blue [&_a]:underline
                   [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]:mt-6 [&_h2]:mb-3
                   [&_h3]:font-bold [&_h3]:text-neutral-800 [&_h3]:mt-6 [&_h3]:mb-3
@@ -269,17 +269,17 @@ export default function EventoDetailPage() {
                 dangerouslySetInnerHTML={{ __html: conteudo }}
               />
             ) : evento.descricao ? (
-              <p className="text-crfal-gray-600 dark:text-slate-300 leading-relaxed">{evento.descricao}</p>
+              <p className="text-crfal-gray-600  leading-relaxed">{evento.descricao}</p>
             ) : (
-              <p className="text-crfal-gray-500 dark:text-slate-400">
+              <p className="text-crfal-gray-500 ">
                 A descrição completa deste evento ainda não foi disponibilizada.
               </p>
             )}
           </div>
 
           <aside className="lg:col-span-1">
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-crfal-gray-200 dark:border-slate-700 p-6 shadow-card lg:sticky lg:top-24">
-              <h2 className="text-lg font-bold text-neutral-800 dark:text-slate-100 mb-6">
+            <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card lg:sticky lg:top-24">
+              <h2 className="text-lg font-bold text-neutral-800  mb-6">
                 Informações do evento
               </h2>
 
@@ -296,7 +296,7 @@ export default function EventoDetailPage() {
                 {evento.publico && <InfoRow icon={Building2} rotulo="Público-alvo" valor={evento.publico} />}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-crfal-gray-200 dark:border-slate-700">
+              <div className="mt-8 pt-6 border-t border-crfal-gray-200 ">
                 {inscricaoAberta ? (
                   <a
                     href={evento.link}
@@ -308,7 +308,7 @@ export default function EventoDetailPage() {
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 ) : (
-                  <p className="text-sm text-crfal-gray-500 dark:text-slate-400 text-center">
+                  <p className="text-sm text-crfal-gray-500  text-center">
                     {evento.status === 'cancelado'
                       ? 'Este evento foi cancelado.'
                       : evento.status === 'encerrado'
@@ -322,7 +322,7 @@ export default function EventoDetailPage() {
                     href={eventoCompleto.event_details.videoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 px-5 py-3 border border-crfal-blue text-crfal-blue dark:text-sky-300 text-sm font-semibold rounded-full hover:bg-crfal-blue hover:text-white transition-colors"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 px-5 py-3 border border-crfal-blue text-crfal-blue  text-sm font-semibold rounded-full hover:bg-crfal-blue hover:text-white transition-colors"
                   >
                     <Video className="w-4 h-4" />
                     Assistir transmissão
@@ -334,9 +334,9 @@ export default function EventoDetailPage() {
         </div>
 
         {outrosEventos.length > 0 && (
-          <div className="mt-16 pt-10 border-t border-crfal-gray-200 dark:border-slate-700">
+          <div className="mt-16 pt-10 border-t border-crfal-gray-200 ">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-neutral-800 dark:text-slate-100">Outros eventos</h2>
+              <h2 className="text-xl font-bold text-neutral-800 ">Outros eventos</h2>
               <Link to="/eventos" className="inline-flex items-center gap-1 text-sm font-medium text-crfal-blue hover:underline">
                 Ver todos
                 <ArrowRight className="w-4 h-4" />
@@ -348,17 +348,17 @@ export default function EventoDetailPage() {
                 <Link
                   key={outro.id}
                   to={`/eventos/${outro.slug}`}
-                  className="flex items-center justify-between gap-4 bg-white dark:bg-slate-900 rounded-xl border border-crfal-gray-200 dark:border-slate-700 px-5 py-4 hover:border-crfal-blue/30 hover:shadow-card transition-all group"
+                  className="flex items-center justify-between gap-4 bg-white  rounded-xl border border-crfal-gray-200  px-5 py-4 hover:border-crfal-blue/30 hover:shadow-card transition-all group"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-neutral-800 dark:text-slate-100 truncate group-hover:text-crfal-blue dark:group-hover:text-sky-300 transition-colors">
+                    <p className="text-sm font-semibold text-neutral-800  truncate group-hover:text-crfal-blue  transition-colors">
                       {outro.titulo}
                     </p>
-                    <p className="text-xs text-crfal-gray-500 dark:text-slate-400 mt-0.5">
+                    <p className="text-xs text-crfal-gray-500  mt-0.5">
                       {formatarData(outro.data, outro.dataFim)} · {STATUS_LABELS[outro.status]}
                     </p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-crfal-gray-300 dark:text-slate-600 group-hover:text-crfal-blue transition-colors shrink-0" />
+                  <ChevronRight className="w-5 h-5 text-crfal-gray-300  group-hover:text-crfal-blue transition-colors shrink-0" />
                 </Link>
               ))}
             </div>
