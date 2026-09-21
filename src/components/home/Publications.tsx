@@ -26,6 +26,7 @@ export default function Publications() {
   const { data, isLoading, isError, refetch } = usePosts(1, 6);
   const trackRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [perView, setPerView] = useState(() =>
     typeof window === 'undefined' ? 3 : window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1
   );
@@ -56,6 +57,39 @@ export default function Publications() {
 
   const prev = useCallback(() => goTo(currentPage - 1), [goTo, currentPage]);
   const next = useCallback(() => goTo(currentPage + 1), [goTo, currentPage]);
+
+  const getStep = useCallback(() => {
+    const children = trackRef.current?.firstElementChild?.children;
+    if (!children || children.length < 2) return 0;
+    return (children[1] as HTMLElement).offsetLeft - (children[0] as HTMLElement).offsetLeft;
+  }, []);
+
+  const goToIndex = useCallback(
+    (index: number) => {
+      const track = trackRef.current;
+      const step = getStep();
+      if (!track || step <= 0) return;
+      track.scrollTo({ left: index * step, behavior: 'smooth' });
+    },
+    [getStep]
+  );
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const onScroll = () => {
+      const step = getStep();
+      if (step <= 0) {
+        setActiveIndex(0);
+        return;
+      }
+      const index = Math.round(track.scrollLeft / step);
+      setActiveIndex(Math.max(0, Math.min(publications.length - 1, index)));
+    };
+    track.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => track.removeEventListener('scroll', onScroll);
+  }, [getStep, publications.length]);
 
   return (
     <section id="noticias" className="py-16 sm:py-20 md:py-24 bg-crfal-gray-50">
@@ -146,6 +180,21 @@ export default function Publications() {
                   );
                 })}
               </div>
+            </div>
+
+            <div className="mt-6 flex justify-center gap-2 sm:hidden">
+              {publications.map((pub, index) => (
+                <button
+                  key={pub.id}
+                  type="button"
+                  onClick={() => goToIndex(index)}
+                  aria-label={`Ir para a notícia ${index + 1}`}
+                  aria-current={index === activeIndex}
+                  className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${
+                    index === activeIndex ? 'bg-crfal-blue' : 'bg-crfal-gray-300 hover:bg-crfal-gray-400'
+                  }`}
+                />
+              ))}
             </div>
           </div>
         )}
