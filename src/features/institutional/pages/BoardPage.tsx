@@ -9,6 +9,13 @@ import {
   UserCircle,
   Briefcase,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Membro {
   id: number;
@@ -96,54 +103,119 @@ const secoes: Secao[] = [
   },
 ];
 
-function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
+function BioModal({
+  membro,
+  open,
+  onOpenChange,
+}: {
+  membro: Membro;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   return (
-    <article className="group relative overflow-hidden rounded-2xl bg-white shadow-card transition-shadow duration-300 hover:shadow-card-hover ">
-      <div
-        className={`absolute inset-y-0 z-10 hidden w-1.5 bg-gradient-to-b from-red-600 via-crfal-blue to-crfal-blue-dark sm:block ${
-          flip ? 'right-0' : 'left-0'
-        }`}
-        aria-hidden
-      />
-      <div className={`flex flex-col sm:flex-row ${flip ? 'sm:flex-row-reverse' : ''}`}>
-        <div className="relative aspect-[4/4.4] w-full shrink-0 bg-gradient-to-br from-crfal-blue to-crfal-blue-dark sm:aspect-auto sm:w-[190px] lg:w-[210px]">
-          {membro.foto ? (
-            <img
-              src={membro.foto}
-              alt={membro.nome}
-              className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <UserCircle className="h-20 w-20 text-white/50" />
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-1 flex-col justify-center p-5 sm:p-7">
-          <span className="mb-3 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600  ">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl">
+        <DialogHeader className="border-b border-crfal-gray-200 p-5 pr-12 text-left sm:p-6 sm:pr-14">
+          <span className="mb-2 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600  ">
             {membro.cargo}
           </span>
-          <h3 className="mb-3 font-display text-xl font-bold uppercase leading-tight text-crfal-blue-dark  sm:text-2xl">
+          <DialogTitle className="font-display text-lg font-bold uppercase leading-tight text-crfal-blue-dark  sm:text-xl">
             {membro.nome}
-          </h3>
-          {membro.bio && (
-            <p className="mb-4 text-sm leading-relaxed text-crfal-gray-600  sm:text-[15px]">
-              {membro.bio}
-            </p>
-          )}
-          {membro.email && (
-            <a
-              href={`mailto:${membro.email}`}
-              className="inline-flex w-fit items-center gap-2 text-sm text-crfal-gray-500 transition-colors duration-300 hover:text-crfal-blue  "
-            >
-              <Mail className="h-4 w-4 shrink-0" />
-              <span className="truncate">{membro.email}</span>
-            </a>
-          )}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Minicurrículo de {membro.nome}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="overflow-y-auto p-5 sm:p-6">
+          <p className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-600  sm:text-[15px]">
+            {membro.bio}
+          </p>
         </div>
-      </div>
-    </article>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const bioRef = useRef<HTMLParagraphElement>(null);
+  const [isClamped, setIsClamped] = useState(false);
+
+  useEffect(() => {
+    const el = bioRef.current;
+    if (!el) return;
+    const check = () => setIsClamped(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [membro.bio]);
+
+  return (
+    <>
+      <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-card transition-shadow duration-300 hover:shadow-card-hover ">
+        <div
+          className={`absolute inset-y-0 z-10 hidden w-1.5 bg-gradient-to-b from-red-600 via-crfal-blue to-crfal-blue-dark sm:block ${
+            flip ? 'right-0' : 'left-0'
+          }`}
+          aria-hidden
+        />
+        <div className={`flex flex-1 flex-col sm:flex-row ${flip ? 'sm:flex-row-reverse' : ''}`}>
+          <div className="relative aspect-[4/4.4] w-full shrink-0 bg-gradient-to-br from-crfal-blue to-crfal-blue-dark sm:aspect-auto sm:h-auto sm:min-h-[240px] sm:w-[190px] lg:w-[210px]">
+            {membro.foto ? (
+              <img
+                src={membro.foto}
+                alt={membro.nome}
+                className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <UserCircle className="h-20 w-20 text-white/50" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-1 flex-col p-5 sm:p-7">
+            <span className="mb-3 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600  ">
+              {membro.cargo}
+            </span>
+            <h3 className="mb-3 font-display text-xl font-bold uppercase leading-tight text-crfal-blue-dark  sm:text-2xl">
+              {membro.nome}
+            </h3>
+            {membro.bio && (
+              <>
+                <p
+                  ref={bioRef}
+                  className="line-clamp-4 text-sm leading-relaxed text-crfal-gray-600  sm:text-[15px]"
+                >
+                  {membro.bio}
+                </p>
+                {isClamped && (
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(true)}
+                    className="mt-3 inline-flex w-fit items-center gap-1 text-sm font-semibold text-crfal-blue transition-colors duration-300 hover:text-crfal-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2  "
+                  >
+                    Ler mais
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                )}
+              </>
+            )}
+            {membro.email && (
+              <a
+                href={`mailto:${membro.email}`}
+                className="mt-auto inline-flex w-fit items-center gap-2 pt-4 text-sm text-crfal-gray-500 transition-colors duration-300 hover:text-crfal-blue  "
+              >
+                <Mail className="h-4 w-4 shrink-0" />
+                <span className="truncate">{membro.email}</span>
+              </a>
+            )}
+          </div>
+        </div>
+      </article>
+      <BioModal membro={membro} open={isOpen} onOpenChange={setIsOpen} />
+    </>
   );
 }
 
@@ -332,7 +404,7 @@ export default function BoardPage() {
                 membro.bio ? (
                   <div
                     key={membro.id}
-                    className={`transition-all duration-700 ${
+                    className={`h-full transition-all duration-700 ${
                       isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                     }`}
                     style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
