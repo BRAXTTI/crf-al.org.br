@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import SEO from '@/components/SEO';
+import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import {
   LEGACY_WP_UPLOADS_URL,
   WP_UPLOADS_URL,
@@ -35,6 +36,7 @@ import {
   Clock,
   ListChecks,
   ExternalLink,
+  Play,
 } from 'lucide-react';
 
 interface RequirementItem {
@@ -49,6 +51,7 @@ interface RequirementItem {
   prazo?: string;
   downloadUrl?: string;
   fluxogramaUrl?: string;
+  videoUrl?: string;
 }
 
 interface MenuCategory {
@@ -562,6 +565,12 @@ export default function RequirementsPage() {
   const [selectedItem, setSelectedItem] = useState<RequirementItem | null>(null);
   const [activeTab, setActiveTab] = useState<'documentos' | 'instrucoes' | 'observacoes'>('documentos');
   const [mostraFluxograma, setMostraFluxograma] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+
+  const videoEmbedUrl = useMemo(
+    () => getYouTubeEmbedUrl(selectedItem?.videoUrl),
+    [selectedItem?.videoUrl]
+  );
 
   const currentMenu = activeType === 'individual' ? individualMenu : corporateMenu;
 
@@ -602,12 +611,14 @@ export default function RequirementsPage() {
     setSelectedItem(item);
     setActiveTab('documentos');
     setMostraFluxograma(false);
+    setShowVideoModal(false);
   }, []);
 
   const handleOpenChange = useCallback((aberto: boolean) => {
     if (!aberto) {
       setSelectedItem(null);
       setMostraFluxograma(false);
+      setShowVideoModal(false);
     }
   }, []);
 
@@ -933,6 +944,16 @@ export default function RequirementsPage() {
                       Ver fluxograma
                     </button>
                   )}
+                  {selectedItem.videoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setShowVideoModal(true)}
+                      className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                    >
+                      <Play className="h-3.5 w-3.5" />
+                      Ver tutorial em vídeo
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1072,6 +1093,48 @@ export default function RequirementsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {showVideoModal && selectedItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+          onClick={() => setShowVideoModal(false)}
+        >
+          <div
+            className="w-full max-w-2xl animate-scale-in overflow-hidden rounded-xl bg-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-crfal-gray-200 p-4">
+              <h3 className="font-bold text-crfal-blue">Tutorial: {selectedItem.title}</h3>
+              <button
+                type="button"
+                onClick={() => setShowVideoModal(false)}
+                className="rounded-lg p-2 transition-colors hover:bg-crfal-gray-100"
+                aria-label="Fechar vídeo"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            {videoEmbedUrl ? (
+              <div className="aspect-video bg-black">
+                <iframe
+                  src={videoEmbedUrl}
+                  title={`Vídeo tutorial: ${selectedItem.title}`}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="flex aspect-video items-center justify-center bg-crfal-gray-100">
+                <div className="text-center">
+                  <Play className="mx-auto mb-4 h-16 w-16 text-crfal-blue" />
+                  <p className="text-crfal-gray-500">Vídeo tutorial em breve</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
