@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import type { CRFEvent, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
+import type { CRFBanner, CRFEvent, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
 
 /**
  * WordPress "novo" (wordpress.crf-al.org.br): eventos e demais recursos.
@@ -108,6 +108,24 @@ export async function fetchPostBySlug(slug: string, signal?: AbortSignal): Promi
     signal
   );
   return posts[0] ?? null;
+}
+
+/** Decodifica entidades HTML (ex.: `&ccedil;` -> `ç`) em texto puro vindo do WordPress. */
+export function decodeHTMLEntities(value: string): string {
+  if (typeof document === 'undefined') return value;
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = value;
+  return textarea.value;
+}
+
+/** Lista os banners da home gerenciados pelo MetaSlider. */
+export async function fetchBanners(signal?: AbortSignal): Promise<CRFBanner[]> {
+  const banners = await wpJson<CRFBanner[]>(restUrl('/crfal/v1/banners'), signal);
+  return banners.map((banner) => ({
+    ...banner,
+    title: decodeHTMLEntities(banner.title),
+    subtitle: decodeHTMLEntities(banner.subtitle),
+  }));
 }
 
 /** Lista todos os eventos (publicados e encerrados) vindos do WP Event Manager. */

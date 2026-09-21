@@ -37,6 +37,16 @@ export interface WPPostsPage {
   totalPages: number;
 }
 
+/** Slide do MetaSlider, retornado pela rota customizada `crfal/v1/banners`. */
+export interface CRFBanner {
+  id: number;
+  image: string | null;
+  title: string;
+  subtitle: string;
+  url: string;
+  target: '_blank' | '_self';
+}
+
 /** Evento do WP Event Manager, retornado pela rota customizada `crfal/v1/events`. */
 export interface CRFEvent {
   id: number;

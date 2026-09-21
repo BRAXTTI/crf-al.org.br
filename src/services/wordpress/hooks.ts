@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { fetchEventById, fetchEvents, fetchPostById, fetchPostBySlug, fetchPosts, fetchRelatedPosts } from './client';
+import { fetchBanners, fetchEventById, fetchEvents, fetchPostById, fetchPostBySlug, fetchPosts, fetchRelatedPosts } from './client';
 
 export function usePosts(page = 1, perPage = 10) {
   return useQuery({
@@ -30,6 +30,13 @@ export function useRelatedPosts(excludeId: number, perPage = 3) {
     queryKey: ['wp', 'posts', 'related', excludeId, perPage],
     queryFn: ({ signal }) => fetchRelatedPosts(excludeId, perPage, signal),
     enabled: Number.isFinite(excludeId),
+  });
+}
+
+export function useBanners() {
+  return useQuery({
+    queryKey: ['wp', 'banners'],
+    queryFn: ({ signal }) => fetchBanners(signal),
   });
 }
 

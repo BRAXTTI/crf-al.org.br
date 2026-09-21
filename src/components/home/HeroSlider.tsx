@@ -1,43 +1,57 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, Pause, Play } from 'lucide-react';
+import { useBanners } from '@/services/wordpress/hooks';
 
 interface Slide {
   image: string;
-  tagline: string;
   title: string;
   subtitle: string;
-  ctaPrimary: { label: string; href: string };
-  ctaSecondary: { label: string; href: string };
+  cta?: { label: string; href: string; target?: string };
 }
 
-const slides: Slide[] = [
+/** Rótulo do botão usado nos slides vindos do MetaSlider (que não possui campo de label). */
+const DEFAULT_CTA_LABEL = 'Saiba mais';
+
+/** Conteúdo de reserva exibido enquanto a API de banners não responde. */
+const fallbackSlides: Slide[] = [
   {
     image: '/images/banner1.jpg',
-    tagline: 'Autarquia Federal · Alagoas',
     title: 'Conselho Regional de Farmácia do Estado de Alagoas',
     subtitle: 'Fiscalização, registro e valorização do exercício profissional farmacêutico em todo o estado.',
-    ctaPrimary: { label: 'Conheça nossos serviços', href: '/servicos/requerimentos' },
-    ctaSecondary: { label: 'Nossa instituição', href: '/instituicao/sobre-conselho#sobre-conselho' },
+    cta: { label: 'Conheça nossos serviços', href: '/servicos/requerimentos' },
   },
   {
     image: '/images/banner2.jpg',
-    tagline: 'Serviços Digitais',
     title: 'Inscrição e regularização profissional',
     subtitle: 'Realize sua inscrição, renove seu cadastro e mantenha-se em dia com o Conselho — tudo online.',
-    ctaPrimary: { label: 'Fazer inscrição', href: '/servicos/requerimentos' },
-    ctaSecondary: { label: 'Ver tutoriais', href: '/servicos/tutoriais' },
+    cta: { label: 'Fazer inscrição', href: '/servicos/requerimentos' },
   },
   {
     image: '/images/banner3.jpg',
-    tagline: 'Atuação institucional',
     title: 'Fiscalização farmacêutica em Alagoas',
     subtitle: 'Garantindo a qualidade e a segurança da assistência farmacêutica nos 102 municípios alagoanos.',
-    ctaPrimary: { label: 'Saiba mais', href: '/fiscalizacao' },
-    ctaSecondary: { label: 'Ver Relatórios', href: '/fiscalizacao/relatorios' },
+    cta: { label: 'Saiba mais', href: '/fiscalizacao' },
   },
 ];
 
 export default function HeroSlider() {
+  const { data: banners } = useBanners();
+
+  const slides = useMemo<Slide[]>(() => {
+    const apiSlides = (banners ?? [])
+      .filter((banner) => banner.image)
+      .map((banner) => ({
+        image: banner.image as string,
+        title: banner.title,
+        subtitle: banner.subtitle,
+        cta: banner.url
+          ? { label: DEFAULT_CTA_LABEL, href: banner.url, target: banner.target }
+          : undefined,
+      }));
+
+    return apiSlides.length > 0 ? apiSlides : fallbackSlides;
+  }, [banners]);
+
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isReducedMotion] = useState(
@@ -48,19 +62,21 @@ export default function HeroSlider() {
   const goTo = useCallback((index: number) => {
     const wrapped = ((index % slides.length) + slides.length) % slides.length;
     setCurrent(wrapped);
-  }, []);
+  }, [slides.length]);
 
   const next = useCallback(() => goTo(current + 1), [current, goTo]);
   const prev = useCallback(() => goTo(current - 1), [current, goTo]);
 
+  const activeIndex = slides.length > 0 ? current % slides.length : 0;
+
   useEffect(() => {
-    if (isReducedMotion || isPaused) {
+    if (isReducedMotion || isPaused || slides.length <= 1) {
       clearInterval(intervalRef.current ?? undefined);
       return;
     }
     intervalRef.current = setInterval(next, 6000);
     return () => clearInterval(intervalRef.current ?? undefined);
-  }, [current, isPaused, isReducedMotion, next]);
+  }, [current, isPaused, isReducedMotion, next, slides.length]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -80,7 +96,7 @@ export default function HeroSlider() {
       aria-label="Destaques"
     >
       {slides.map((slide, index) => {
-        const isActive = index === current;
+        const isActive = index === activeIndex;
         return (
           <div
             key={index}
@@ -100,10 +116,6 @@ export default function HeroSlider() {
 
             <div className="container-crfal relative z-10 flex h-full items-center">
               <div className="max-w-2xl">
-                <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.28em] text-white/70 sm:text-sm">
-                  {slide.tagline}
-                </span>
-
                 <h1 className="font-display mb-3 text-[1.75rem] font-semibold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-4xl lg:text-[2.75rem]">
                   {isActive ? (
                     <span className="animate-slide-up inline-block">{slide.title}</span>
@@ -116,21 +128,19 @@ export default function HeroSlider() {
                   {slide.subtitle}
                 </p>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-                  <a
-                    href={slide.ctaPrimary.href}
-                    className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#ffffff] px-6 py-3 text-sm font-semibold text-crfal-blue transition-all duration-300 hover:bg-crfal-blue-lighter active:scale-[0.98] sm:text-base"
-                  >
-                    {slide.ctaPrimary.label}
-                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </a>
-                  <a
-                    href={slide.ctaSecondary.href}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-white/50 hover:bg-white/20 active:scale-[0.98] sm:text-base"
-                  >
-                    {slide.ctaSecondary.label}
-                  </a>
-                </div>
+                {slide.cta && (
+                  <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                    <a
+                      href={slide.cta.href}
+                      target={slide.cta.target}
+                      rel={slide.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
+                      className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#ffffff] px-6 py-3 text-sm font-semibold text-crfal-blue transition-all duration-300 hover:bg-crfal-blue-lighter active:scale-[0.98] sm:text-base"
+                    >
+                      {slide.cta.label}
+                      <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -160,7 +170,7 @@ export default function HeroSlider() {
               key={index}
               onClick={() => goTo(index)}
               className={`rounded-full transition-all duration-300 ${
-                index === current
+                index === activeIndex
                   ? 'h-2.5 w-8 bg-white shadow-card'
                   : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
               }`}
