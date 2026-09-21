@@ -35,7 +35,7 @@ const fallbackSlides: Slide[] = [
 ];
 
 export default function HeroSlider() {
-  const { data: banners } = useBanners();
+  const { data: banners, isPending } = useBanners();
 
   const slides = useMemo<Slide[]>(() => {
     const apiSlides = (banners ?? [])
@@ -49,8 +49,13 @@ export default function HeroSlider() {
           : undefined,
       }));
 
-    return apiSlides.length > 0 ? apiSlides : fallbackSlides;
-  }, [banners]);
+    if (apiSlides.length > 0) return apiSlides;
+    // Enquanto a API carrega, não exibe o conteúdo estático: evita o "flash"
+    // dos banners antigos sendo trocados pelos do MetaSlider.
+    if (isPending) return [];
+    // Fallback estático apenas quando a API falha ou não retorna banners.
+    return fallbackSlides;
+  }, [banners, isPending]);
 
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -60,6 +65,7 @@ export default function HeroSlider() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const goTo = useCallback((index: number) => {
+    if (slides.length === 0) return;
     const wrapped = ((index % slides.length) + slides.length) % slides.length;
     setCurrent(wrapped);
   }, [slides.length]);
@@ -147,46 +153,64 @@ export default function HeroSlider() {
         );
       })}
 
-      <button
-        onClick={prev}
-        className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
-        aria-label="Slide anterior"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-
-      <button
-        onClick={next}
-        className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
-        aria-label="Próximo slide"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4">
-        <div className="flex items-center gap-2.5">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goTo(index)}
-              className={`rounded-full transition-all duration-300 ${
-                index === activeIndex
-                  ? 'h-2.5 w-8 bg-white shadow-card'
-                  : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
-              }`}
-              aria-label={`Ir para slide ${index + 1}`}
-            />
-          ))}
+      {slides.length === 0 && (
+        <div className="absolute inset-0 z-10 flex items-center" aria-hidden="true">
+          <div className="container-crfal">
+            <div className="max-w-2xl animate-pulse space-y-4">
+              <div className="h-8 w-4/5 rounded bg-white/10 sm:h-10 lg:h-12" />
+              <div className="h-4 w-3/5 rounded bg-white/10" />
+              <div className="h-11 w-44 rounded-full bg-white/10" />
+            </div>
+          </div>
         </div>
+      )}
 
-        <button
-          onClick={() => setIsPaused(!isPaused)}
-          className="ml-2 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white/90"
-          aria-label={isPaused ? 'Retomar reprodução' : 'Pausar reprodução'}
-        >
-          {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
-        </button>
-      </div>
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+            aria-label="Slide anterior"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <button
+            onClick={next}
+            className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+            aria-label="Próximo slide"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </>
+      )}
+
+      {slides.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goTo(index)}
+                className={`rounded-full transition-all duration-300 ${
+                  index === activeIndex
+                    ? 'h-2.5 w-8 bg-white shadow-card'
+                    : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
+                }`}
+                aria-label={`Ir para slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className="ml-2 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white/90"
+            aria-label={isPaused ? 'Retomar reprodução' : 'Pausar reprodução'}
+          >
+            {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+      )}
     </section>
   );
 }
