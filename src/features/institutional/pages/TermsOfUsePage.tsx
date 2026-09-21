@@ -6,7 +6,7 @@ export default function TermsOfUsePage() {
     <div className="min-h-screen bg-crfal-gray-50">
       <SEO
         title="Termos de Uso"
-        description="Termos de Uso do site CRFAL — condições gerais de uso do portal do Conselho Regional de Farmácia de Alagoas."
+        description="Termos de Uso do site CRFAL — condições gerais de uso do portal do Conselho Regional de Farmácia do Estado de Alagoas."
         path="/termos-de-uso"
         noindex
       />

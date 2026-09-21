@@ -31,7 +31,7 @@ const secoes: Secao[] = [
   {
     id: 'diretoria',
     titulo: 'Diretoria Executiva',
-    descricao: 'Membros responsáveis pela gestão e administração do Conselho Regional de Farmácia de Alagoas.',
+    descricao: 'Membros responsáveis pela gestão e administração do Conselho Regional de Farmácia do Estado de Alagoas.',
     icon: Briefcase,
     membros: [
       {
@@ -217,7 +217,7 @@ export default function BoardPage() {
     <div className="min-h-screen bg-white ">
       <SEO
         title="Diretoria"
-        description="Conheça a diretoria e os membros do Conselho Regional de Farmácia de Alagoas (CRFAL) — gestão atual e suas responsabilidades."
+        description="Conheça a diretoria e os membros do Conselho Regional de Farmácia do Estado de Alagoas (CRFAL) — gestão atual e suas responsabilidades."
         path="/instituicao/diretoria"
       />
 
@@ -246,7 +246,7 @@ export default function BoardPage() {
                 Diretoria e Conselho
               </h1>
               <p className="max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-                Conheça os membros da diretoria executiva e os conselheiros que compõem o Conselho Regional de Farmácia de Alagoas.
+                Conheça os membros da diretoria executiva e os conselheiros que compõem o Conselho Regional de Farmácia do Estado de Alagoas.
               </p>
             </div>
 

@@ -370,7 +370,7 @@ export default function EventosPage() {
     <div className="min-h-screen bg-crfal-gray-50 ">
       <SEO
         title="Eventos"
-        description="Confira a agenda de eventos do CRF-AL — Conselho Regional de Farmácia de Alagoas. Congressos, palestras, capacitações e ações sociais."
+        description="Confira a agenda de eventos do CRF-AL — Conselho Regional de Farmácia do Estado de Alagoas. Congressos, palestras, capacitações e ações sociais."
         path="/eventos"
       />
 
@@ -404,7 +404,7 @@ export default function EventosPage() {
 
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
             Congressos, palestras, capacitações e ações sociais promovidos pelo
-            Conselho Regional de Farmácia de Alagoas. Inscreva-se e participe.
+            Conselho Regional de Farmácia do Estado de Alagoas. Inscreva-se e participe.
           </p>
 
           <dl className="mt-9 grid max-w-lg grid-cols-3 gap-3">

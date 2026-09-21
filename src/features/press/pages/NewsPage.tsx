@@ -200,7 +200,7 @@ export default function NewsPage() {
     <div className="min-h-screen bg-crfal-gray-50">
       <SEO
         title="Notícias"
-        description="Fique por dentro das últimas notícias e comunicados do CRFAL — Conselho Regional de Farmácia de Alagoas."
+        description="Fique por dentro das últimas notícias e comunicados do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas."
         path="/imprensa/noticias"
       />
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">
@@ -221,7 +221,7 @@ export default function NewsPage() {
               <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Notícias</h1>
               <p className="text-white/80 text-lg">
                 Acompanhe as últimas notícias, comunicados e novidades do
-                Conselho Regional de Farmácia de Alagoas.
+                Conselho Regional de Farmácia do Estado de Alagoas.
               </p>
             </div>
             <div className="hidden md:flex justify-end">

@@ -114,7 +114,7 @@ export default function NewsDetailPage() {
         description={
           post
             ? stripHTML(post.excerpt.rendered).slice(0, 160)
-            : 'Leia as últimas notícias do CRFAL — Conselho Regional de Farmácia de Alagoas.'
+            : 'Leia as últimas notícias do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas.'
         }
         path={`/imprensa/noticias/${id}`}
         image={featuredImage !== IMG_FALLBACK ? featuredImage : undefined}

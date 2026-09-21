@@ -45,7 +45,7 @@ export default function Footer() {
               <div className="mb-6">
                 <img
                   src="/images/logo-crf-azul.png"
-                  alt="CRFAL - Conselho Regional de Farmácia de Alagoas"
+                  alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
                   className="h-16 w-auto object-contain brightness-0 invert"
                 />
               </div>

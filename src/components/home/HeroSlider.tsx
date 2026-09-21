@@ -14,7 +14,7 @@ const slides: Slide[] = [
   {
     image: '/images/banner1.jpg',
     tagline: 'Autarquia Federal · Alagoas',
-    title: 'Conselho Regional de Farmácia de Alagoas',
+    title: 'Conselho Regional de Farmácia do Estado de Alagoas',
     subtitle: 'Fiscalização, registro e valorização do exercício profissional farmacêutico em todo o estado.',
     ctaPrimary: { label: 'Conheça nossos serviços', href: '/servicos/requerimentos' },
     ctaSecondary: { label: 'Nossa instituição', href: '/instituicao/sobre-conselho#sobre-conselho' },

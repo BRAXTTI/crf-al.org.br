@@ -45,7 +45,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-crfal-gray-50">
       <SEO
         title="Contato"
-        description="Entre em contato com o CRFAL — Conselho Regional de Farmácia de Alagoas. Fale com nossos setores por e-mail, telefone ou WhatsApp."
+        description="Entre em contato com o CRFAL — Conselho Regional de Farmácia do Estado de Alagoas. Fale com nossos setores por e-mail, telefone ou WhatsApp."
         path="/contato"
       />
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-20 overflow-hidden">

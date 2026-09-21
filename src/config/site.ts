@@ -7,6 +7,6 @@ export const SITE_URL = (
   import.meta.env.VITE_SITE_URL ?? 'https://institucional.crf-al.org.br'
 ).replace(/\/$/, '');
 
-export const SITE_NAME = 'CRFAL - Conselho Regional de Farmácia de Alagoas';
+export const SITE_NAME = 'CRFAL - Conselho Regional de Farmácia do Estado de Alagoas';
 
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/logo-crf-azul.png`;

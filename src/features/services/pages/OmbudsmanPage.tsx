@@ -140,7 +140,7 @@ export default function OmbudsmanPage() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
-            A Ouvidoria do Conselho Regional de Farmácia de Alagoas (CRF-AL) é o canal para
+            A Ouvidoria do Conselho Regional de Farmácia do Estado de Alagoas (CRF-AL) é o canal para
             registrar denúncias, reclamações, solicitações, sugestões e elogios.
           </p>
 

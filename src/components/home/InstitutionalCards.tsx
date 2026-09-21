@@ -121,7 +121,7 @@ export default function InstitutionalCards() {
             Conheça o CRFAL
           </h2>
           <p className="mx-auto max-w-2xl text-sm leading-relaxed text-crfal-gray-600  sm:text-lg">
-            Acesse os principais serviços e informações do Conselho Regional de Farmácia de Alagoas.
+            Acesse os principais serviços e informações do Conselho Regional de Farmácia do Estado de Alagoas.
           </p>
         </div>
 

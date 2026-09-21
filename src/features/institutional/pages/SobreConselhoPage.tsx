@@ -30,7 +30,7 @@ const milestones = [
     year: '1961',
     title: 'Instalação Oficial em Maceió',
     description:
-      'O Conselho Regional de Farmácia de Alagoas é oficialmente instalado em Maceió, dando início à sua atuação na defesa, fiscalização e valorização do profissional farmacêutico no estado.',
+      'O Conselho Regional de Farmácia do Estado de Alagoas é oficialmente instalado em Maceió, dando início à sua atuação na defesa, fiscalização e valorização do profissional farmacêutico no estado.',
     highlight: false,
   },
   {
@@ -234,12 +234,12 @@ export default function SobreConselhoPage() {
     <div className="min-h-screen bg-crfal-gray-50 ">
       <SEO
         title="Sobre o Conselho"
-        description="Conheça a história e a trajetória do CRFAL — Conselho Regional de Farmácia de Alagoas, suas atribuições e papel na saúde pública alagoana."
+        description="Conheça a história e a trajetória do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas, suas atribuições e papel na saúde pública alagoana."
         path="/instituicao/sobre-conselho"
       />
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <div id="sobre-conselho" className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-20 md:pt-32 md:pb-28 overflow-hidden">
+      <div id="sobre-conselho" className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 md:pt-32 md:pb-28 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden>
           <span className="absolute -bottom-4 right-0 font-bold text-white/[0.055] text-[22vw] leading-none whitespace-nowrap">
             1960
@@ -275,7 +275,7 @@ export default function SobreConselhoPage() {
       </div>
 
       {/* ── HISTÓRIA ─────────────────────────────────────────────────── */}
-      <section className="relative py-16 md:py-24 bg-white  overflow-hidden">
+      <section className="relative py-12 sm:py-16 md:py-24 bg-white  overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-end overflow-hidden pointer-events-none select-none" aria-hidden>
           <span className="font-bold text-crfal-blue/[0.04]  text-[26vw] leading-none pr-4">
             AL
@@ -303,8 +303,8 @@ export default function SobreConselhoPage() {
             </p>
           </div>
 
-          <div className="relative pl-10 sm:pl-14 md:pl-20">
-            <div className="absolute left-3 sm:left-5 md:left-8 top-3 bottom-3 w-px bg-gradient-to-b from-amber-400 via-crfal-blue/60 to-crfal-blue/10" />
+          <div className="relative pl-8 sm:pl-14 md:pl-20">
+            <div className="absolute left-2.5 sm:left-5 md:left-8 top-3 bottom-3 w-px bg-gradient-to-b from-amber-400 via-crfal-blue/60 to-crfal-blue/10" />
             <div className="space-y-7">
               {milestones.map((m, i) => (
                 <div
@@ -312,7 +312,7 @@ export default function SobreConselhoPage() {
                   className={`relative transition-all duration-700 ${histInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}
                   style={{ transitionDelay: `${280 + i * 110}ms` }}
                 >
-                  <div className={`absolute -left-[28px] sm:-left-[37px] md:-left-[48px] top-5 w-4 h-4 rounded-full border-2 z-10 ${
+                  <div className={`absolute -left-[22px] sm:-left-[37px] md:-left-[48px] top-5 w-4 h-4 rounded-full border-2 z-10 ${
                     m.highlight
                       ? 'bg-amber-400 border-amber-500 shadow-[0_0_14px_rgba(245,158,11,0.55)]'
                       : 'bg-crfal-blue  border-white '
@@ -343,7 +343,7 @@ export default function SobreConselhoPage() {
       </section>
 
       {/* ── MISSÃO, VISÃO E VALORES ──────────────────────────────────── */}
-      <section className="relative py-16 md:py-24 bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] overflow-hidden">
+      <section className="relative py-12 sm:py-16 md:py-24 bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div className="absolute top-0 right-0 w-80 h-80 bg-crfal-blue-light/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
@@ -362,7 +362,7 @@ export default function SobreConselhoPage() {
               return (
                 <div
                   key={item.id}
-                  className={`group relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6 sm:p-7 hover:bg-white/[0.15] hover:-translate-y-1 transition-all duration-500 ${
+                  className={`group relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-5 sm:p-7 hover:bg-white/[0.15] hover:-translate-y-1 transition-all duration-500 ${
                     mvvInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                   style={{ transitionDelay: `${200 + i * 140}ms` }}
@@ -382,7 +382,7 @@ export default function SobreConselhoPage() {
       </section>
 
       {/* ── ATRIBUIÇÕES ──────────────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-crfal-gray-50 ">
+      <section className="py-12 sm:py-16 md:py-24 bg-crfal-gray-50 ">
         <div ref={atribRef} className="container-crfal">
           <div className={`mb-12 transition-all duration-700 ${atribInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
             <p className="text-amber-600  text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Competências Legais</p>
@@ -420,7 +420,7 @@ export default function SobreConselhoPage() {
       </section>
 
       {/* ── HINO FARMACÊUTICO ────────────────────────────────────────── */}
-      <section className="py-16 md:py-24 bg-white  overflow-hidden">
+      <section className="py-12 sm:py-16 md:py-24 bg-white  overflow-hidden">
         <div ref={hinoRef} className="container-crfal">
           <div className={`text-center mb-12 transition-all duration-700 ${hinoInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
             <p className="text-amber-600  text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Tradição e Orgulho</p>
@@ -432,7 +432,7 @@ export default function SobreConselhoPage() {
           </div>
 
           <div className={`max-w-2xl mx-auto transition-all duration-700 delay-300 ${hinoInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="relative bg-gradient-to-br from-amber-50 via-orange-50/60 to-amber-50    border border-amber-200/70  rounded-xl p-8 sm:p-10 overflow-hidden shadow-xl">
+            <div className="relative bg-gradient-to-br from-amber-50 via-orange-50/60 to-amber-50    border border-amber-200/70  rounded-xl p-5 sm:p-10 overflow-hidden shadow-xl">
               <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.045] " aria-hidden>
                 {[18, 26, 34, 42, 50, 58, 66, 74, 82].map((top) => (
                   <div key={top} className="absolute left-0 right-0 h-px bg-amber-900 " style={{ top: `${top}%` }} />
@@ -442,9 +442,9 @@ export default function SobreConselhoPage() {
                 <Music className="w-40 h-40 text-amber-800 " />
               </div>
 
-              <div className="flex items-center gap-4 mb-8 relative">
-                <div className="w-12 h-12 bg-amber-500/20  rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Music className="w-6 h-6 text-amber-700 " />
+              <div className="flex items-center gap-4 mb-6 sm:mb-8 relative">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500/20  rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Music className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700 " />
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-amber-900 ">Hino Farmacêutico</h3>

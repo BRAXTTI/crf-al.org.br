@@ -40,11 +40,10 @@ const navItems: NavItem[] = [
     href: '/instituicao',
     columns: [
       {
-        title: 'A CRFAL',
+        title: 'O CRF AL',
         items: [
           { label: 'Sobre o Conselho', href: '/instituicao/sobre-conselho', icon: Building2 },
           { label: 'Diretoria', href: '/instituicao/diretoria', icon: Users },
-          { label: 'Missão e Visão', href: '/instituicao/missao-visao', icon: Target },
           { label: 'Estatuto', href: '/instituicao/estatuto', icon: BookOpen },
         ],
       },

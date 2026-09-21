@@ -8,8 +8,8 @@ export default function HomePage() {
   return (
     <>
       <SEO
-        title="Conselho Regional de Farmácia de Alagoas"
-        description="CRFAL — Conselho Regional de Farmácia de Alagoas. Fiscalização, registros, serviços e informações para profissionais e estabelecimentos farmacêuticos em Alagoas."
+        title="Conselho Regional de Farmácia do Estado de Alagoas"
+        description="CRFAL — Conselho Regional de Farmácia do Estado de Alagoas. Fiscalização, registros, serviços e informações para profissionais e estabelecimentos farmacêuticos em Alagoas."
         path="/"
       />
       <HeroSlider />
