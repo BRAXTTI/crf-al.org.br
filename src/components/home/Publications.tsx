@@ -103,16 +103,16 @@ export default function Publications() {
 
             <div
               ref={trackRef}
-              className="overflow-x-auto scrollbar-none scroll-smooth sm:overflow-hidden"
+              className="overflow-x-auto scrollbar-none scroll-smooth snap-x snap-mandatory overscroll-x-contain sm:overflow-hidden sm:snap-none"
             >
               <div
-                className="flex transition-transform duration-500 ease-out"
+                className="flex gap-6 transition-transform duration-500 ease-out sm:gap-0"
                 style={{ transform: `translateX(-${currentPage * 100}%)` }}
               >
                 {Array.from({ length: totalPages }).map((_, groupIndex) => {
                   const group = publications.slice(groupIndex * perView, (groupIndex + 1) * perView);
                   return (
-                    <div key={groupIndex} className="flex w-full shrink-0 gap-6">
+                    <div key={groupIndex} className="flex w-full shrink-0 snap-center snap-always gap-6">
                       {group.map((pub) => (
                         <article key={pub.id} className="w-full shrink-0 sm:w-1/2 lg:w-auto lg:flex-1">
                           <Link to={`/imprensa/noticias/${pub.id}`} className="group block text-center">
