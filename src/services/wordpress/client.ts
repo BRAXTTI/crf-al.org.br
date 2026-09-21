@@ -125,6 +125,7 @@ export async function fetchBanners(signal?: AbortSignal): Promise<CRFBanner[]> {
     ...banner,
     title: decodeHTMLEntities(banner.title),
     subtitle: decodeHTMLEntities(banner.subtitle),
+    ctaLabel: decodeHTMLEntities(banner.ctaLabel ?? ''),
   }));
 }
 

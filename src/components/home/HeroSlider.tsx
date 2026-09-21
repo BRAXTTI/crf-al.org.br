@@ -45,7 +45,7 @@ export default function HeroSlider() {
         title: banner.title,
         subtitle: banner.subtitle,
         cta: banner.url
-          ? { label: DEFAULT_CTA_LABEL, href: banner.url, target: banner.target }
+          ? { label: banner.ctaLabel.trim() || DEFAULT_CTA_LABEL, href: banner.url, target: banner.target }
           : undefined,
       }));
 

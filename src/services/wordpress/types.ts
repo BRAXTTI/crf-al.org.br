@@ -43,6 +43,8 @@ export interface CRFBanner {
   image: string | null;
   title: string;
   subtitle: string;
+  /** Rótulo do botão; definido na Caption do slide após um `|`. */
+  ctaLabel: string;
   url: string;
   target: '_blank' | '_self';
 }
