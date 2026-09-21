@@ -283,7 +283,7 @@ export default function NewsPage() {
               {filteredPublications.map((pub, index) => (
                 <RevealCard key={pub.id} index={index}>
                   <article className="group bg-white rounded-xl overflow-hidden border border-crfal-gray-200 hover:border-crfal-blue/30 hover:shadow-card transition-all duration-300 h-full">
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative aspect-video overflow-hidden">
                       <img
                         src={pub.image}
                         alt={pub.title}

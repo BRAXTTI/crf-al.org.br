@@ -124,7 +124,7 @@ export default function Publications() {
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).src = IMG_FALLBACK;
                                 }}
-                                className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-105"
                               />
                             </div>
                             <h3 className="mx-auto mt-4 max-w-md text-base font-bold leading-snug text-crfal-blue sm:text-lg">

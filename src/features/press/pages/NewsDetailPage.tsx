@@ -199,7 +199,7 @@ export default function NewsDetailPage() {
             {/* Article */}
             <main className="lg:col-span-8">
               <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
-                <div className="relative h-56 sm:h-72 md:h-80">
+                <div className="relative aspect-video">
                   <img
                     src={featuredImage}
                     alt={stripHTML(post.title.rendered)}
