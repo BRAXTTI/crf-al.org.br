@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 import {
   getPostCategory,
   getPostImage,
@@ -99,6 +100,31 @@ export default function NewsDetailPage() {
   const featuredImage = (post && getPostImage(post)) || IMG_FALLBACK;
   const categoria = (post && getPostCategory(post)) || 'Notícia';
 
+  const jsonLd = useMemo(() => {
+    if (!post) return undefined;
+    const headline = stripHTML(post.title.rendered);
+    const description = stripHTML(post.excerpt?.rendered ?? '').slice(0, 160);
+    const canonical = `${SITE_URL}/imprensa/noticias/${id}`;
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      headline,
+      description: description || undefined,
+      image: featuredImage !== IMG_FALLBACK ? [featuredImage] : undefined,
+      datePublished: post.date,
+      dateModified: post.modified ?? post.date,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+      articleSection: categoria,
+      inLanguage: 'pt-BR',
+      author: { '@type': 'Organization', name: SITE_NAME },
+      publisher: {
+        '@type': 'Organization',
+        name: SITE_NAME,
+        logo: { '@type': 'ImageObject', url: DEFAULT_OG_IMAGE },
+      },
+    };
+  }, [post, featuredImage, categoria, id]);
+
   const errorMessage = isInvalidId
     ? 'Notícia inválida.'
     : isError
@@ -120,6 +146,8 @@ export default function NewsDetailPage() {
         image={featuredImage !== IMG_FALLBACK ? featuredImage : undefined}
         type="article"
         publishedAt={post?.date}
+        modifiedAt={post?.modified}
+        jsonLd={jsonLd}
       />
       {/* Hero */}
       <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-14 md:pt-32 md:pb-16 overflow-hidden">

@@ -13,6 +13,8 @@ interface SEOProps {
   type?: 'website' | 'article';
   publishedAt?: string;
   modifiedAt?: string;
+  /** Dados estruturados (schema.org) injetados como JSON-LD. */
+  jsonLd?: Record<string, unknown>;
 }
 
 export default function SEO({
@@ -24,6 +26,7 @@ export default function SEO({
   type = 'website',
   publishedAt,
   modifiedAt,
+  jsonLd,
 }: SEOProps) {
   const canonical = `${BASE_URL}${path}`;
   const fullTitle = `${title} | CRFAL`;
@@ -51,6 +54,12 @@ export default function SEO({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
+
+      {jsonLd && (
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd).replace(/</g, '\\u003c')}
+        </script>
+      )}
     </Helmet>
   );
 }
