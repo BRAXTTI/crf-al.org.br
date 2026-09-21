@@ -199,14 +199,20 @@ export default function NewsDetailPage() {
             {/* Article */}
             <main className="lg:col-span-8">
               <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
-                <div className="relative aspect-video">
+                <div className="relative aspect-video overflow-hidden bg-crfal-gray-100">
+                  <img
+                    src={featuredImage}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
+                  />
                   <img
                     src={featuredImage}
                     alt={stripHTML(post.title.rendered)}
-                    className="w-full h-full object-cover"
+                    className="relative z-10 w-full h-full object-contain"
                     onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
                   />
-                  <span className="absolute top-4 left-4 px-3 py-1 bg-crfal-blue text-white text-xs font-semibold rounded-full">
+                  <span className="absolute top-4 left-4 z-20 px-3 py-1 bg-crfal-blue text-white text-xs font-semibold rounded-full">
                     {categoria}
                   </span>
                 </div>

@@ -116,7 +116,13 @@ export default function Publications() {
                       {group.map((pub) => (
                         <article key={pub.id} className="w-full shrink-0 sm:w-1/2 lg:w-auto lg:flex-1">
                           <Link to={`/imprensa/noticias/${pub.id}`} className="group block text-center">
-                            <div className="overflow-hidden rounded-xl">
+                            <div className="relative aspect-video overflow-hidden rounded-xl bg-crfal-gray-100">
+                              <img
+                                src={pub.image}
+                                alt=""
+                                aria-hidden="true"
+                                className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
+                              />
                               <img
                                 src={pub.image}
                                 alt={pub.title}
@@ -124,7 +130,7 @@ export default function Publications() {
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).src = IMG_FALLBACK;
                                 }}
-                                className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                className="relative z-10 h-full w-full object-contain"
                               />
                             </div>
                             <h3 className="mx-auto mt-4 max-w-md text-base font-bold leading-snug text-crfal-blue sm:text-lg">

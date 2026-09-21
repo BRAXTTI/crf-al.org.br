@@ -283,15 +283,21 @@ export default function NewsPage() {
               {filteredPublications.map((pub, index) => (
                 <RevealCard key={pub.id} index={index}>
                   <article className="group bg-white rounded-xl overflow-hidden border border-crfal-gray-200 hover:border-crfal-blue/30 hover:shadow-card transition-all duration-300 h-full">
-                    <div className="relative aspect-video overflow-hidden">
+                    <div className="relative aspect-video overflow-hidden bg-crfal-gray-100">
+                      <img
+                        src={pub.image}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
+                      />
                       <img
                         src={pub.image}
                         alt={pub.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        className="relative z-10 w-full h-full object-contain"
                         onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute top-4 left-4">
+                      <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute top-4 left-4 z-20">
                         <span className={`inline-flex items-center gap-1 px-3 py-1 ${pub.tagColor} text-white text-xs font-semibold rounded-full`}>
                           <Tag className="w-3 h-3" />
                           {pub.tag}
