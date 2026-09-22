@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import {
@@ -1094,47 +1095,49 @@ export default function RequirementsPage() {
         </DialogContent>
       </Dialog>
 
-      {showVideoModal && selectedItem && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
-          onClick={() => setShowVideoModal(false)}
-        >
+      {showVideoModal && selectedItem &&
+        createPortal(
           <div
-            className="w-full max-w-2xl animate-scale-in overflow-hidden rounded-xl bg-white"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70"
+            onClick={() => setShowVideoModal(false)}
           >
-            <div className="flex items-center justify-between border-b border-crfal-gray-200 p-4">
-              <h3 className="font-bold text-crfal-blue">Tutorial: {selectedItem.title}</h3>
-              <button
-                type="button"
-                onClick={() => setShowVideoModal(false)}
-                className="rounded-lg p-2 transition-colors hover:bg-crfal-gray-100"
-                aria-label="Fechar vídeo"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            {videoEmbedUrl ? (
-              <div className="aspect-video bg-black">
-                <iframe
-                  src={videoEmbedUrl}
-                  title={`Vídeo tutorial: ${selectedItem.title}`}
-                  className="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
+            <div
+              className="w-full max-w-2xl animate-scale-in overflow-hidden rounded-xl bg-white"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-crfal-gray-200 p-4">
+                <h3 className="font-bold text-crfal-blue">Tutorial: {selectedItem.title}</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowVideoModal(false)}
+                  className="rounded-lg p-2 transition-colors hover:bg-crfal-gray-100"
+                  aria-label="Fechar vídeo"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-            ) : (
-              <div className="flex aspect-video items-center justify-center bg-crfal-gray-100">
-                <div className="text-center">
-                  <Play className="mx-auto mb-4 h-16 w-16 text-crfal-blue" />
-                  <p className="text-crfal-gray-500">Vídeo tutorial em breve</p>
+              {videoEmbedUrl ? (
+                <div className="aspect-video bg-black">
+                  <iframe
+                    src={videoEmbedUrl}
+                    title={`Vídeo tutorial: ${selectedItem.title}`}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              ) : (
+                <div className="flex aspect-video items-center justify-center bg-crfal-gray-100">
+                  <div className="text-center">
+                    <Play className="mx-auto mb-4 h-16 w-16 text-crfal-blue" />
+                    <p className="text-crfal-gray-500">Vídeo tutorial em breve</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

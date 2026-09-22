@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
 import {
   Search,
@@ -296,42 +297,44 @@ export default function TutorialsPage() {
         </div>
       </div>
 
-      {showVideoModal && selectedTutorial && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
-          onClick={() => setShowVideoModal(false)}
-        >
+      {showVideoModal && selectedTutorial &&
+        createPortal(
           <div
-            className="bg-white rounded-xl max-w-2xl w-full overflow-hidden animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70"
+            onClick={() => setShowVideoModal(false)}
           >
-            <div className="flex items-center justify-between p-4 border-b border-crfal-gray-200">
-              <h3 className="font-bold text-crfal-blue">Tutorial: {selectedTutorial.title}</h3>
-              <button onClick={() => setShowVideoModal(false)} className="p-2 hover:bg-crfal-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            {selectedVideoEmbedUrl ? (
-              <div className="aspect-video bg-black">
-                <iframe
-                  src={selectedVideoEmbedUrl}
-                  title={`Vídeo tutorial: ${selectedTutorial.title}`}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
+            <div
+              className="bg-white rounded-xl max-w-2xl w-full overflow-hidden animate-scale-in"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-4 border-b border-crfal-gray-200">
+                <h3 className="font-bold text-crfal-blue">Tutorial: {selectedTutorial.title}</h3>
+                <button onClick={() => setShowVideoModal(false)} className="p-2 hover:bg-crfal-gray-100 rounded-lg transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-            ) : (
-              <div className="aspect-video bg-crfal-gray-100 flex items-center justify-center">
-                <div className="text-center">
-                  <Play className="w-16 h-16 text-crfal-blue mx-auto mb-4" />
-                  <p className="text-crfal-gray-500">Vídeo tutorial em breve</p>
+              {selectedVideoEmbedUrl ? (
+                <div className="aspect-video bg-black">
+                  <iframe
+                    src={selectedVideoEmbedUrl}
+                    title={`Vídeo tutorial: ${selectedTutorial.title}`}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              ) : (
+                <div className="aspect-video bg-crfal-gray-100 flex items-center justify-center">
+                  <div className="text-center">
+                    <Play className="w-16 h-16 text-crfal-blue mx-auto mb-4" />
+                    <p className="text-crfal-gray-500">Vídeo tutorial em breve</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
