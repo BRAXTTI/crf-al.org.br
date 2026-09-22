@@ -891,6 +891,12 @@ export default function RequirementsPage() {
       <Dialog open={selectedItem !== null} onOpenChange={handleOpenChange}>
         <DialogContent
           showCloseButton={false}
+          onInteractOutside={(e) => {
+            if (showVideoModal) e.preventDefault();
+          }}
+          onEscapeKeyDown={(e) => {
+            if (showVideoModal) e.preventDefault();
+          }}
           className="flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl"
         >
           {selectedItem && (
