@@ -37,28 +37,19 @@ export interface WPPostsPage {
   totalPages: number;
 }
 
-/** Slide do MetaSlider, retornado pela rota customizada `crfal/v1/banners`. */
-export interface CRFBanner {
-  id: number;
-  image: string | null;
-  /**
-   * Imagem alternativa para telas pequenas (opcional). Quando informada, é
-   * usada em vez de `image` abaixo de 1024px, evitando cortes exagerados
-   * das laterais em banners de proporção larga.
-   */
-  imageMobile?: string | null;
-  /**
-   * Ponto focal do enquadramento (opcional), no formato `background-position`
-   * (ex.: `center`, `center 30%`, `50% 20%`). Define qual parte da imagem
-   * permanece visível quando o `object-cover` precisa cortar.
-   */
-  focalPoint?: string | null;
-  title: string;
-  subtitle: string;
-  /** Rótulo do botão; definido na Caption do slide após um `|`. */
-  ctaLabel: string;
-  url: string;
-  target: '_blank' | '_self';
+/** Publicação do feed do Instagram, retornada pela rota customizada `crfal/v1/instagram`. */
+export interface CRFInstagramPost {
+  id: string;
+  /** URL da imagem exibida no card (capa, no caso de vídeo/carrossel). */
+  image: string;
+  /** Link da publicação no Instagram. */
+  permalink: string;
+  /** Legenda sem HTML (pode ser vazia). */
+  caption: string;
+  username: string;
+  type: 'image' | 'video' | 'carousel';
+  /** Data ISO do post (pode ser vazia). */
+  timestamp: string;
 }
 
 /** Evento do WP Event Manager, retornado pela rota customizada `crfal/v1/events`. */

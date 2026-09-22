@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import type { CRFBanner, CRFEvent, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
+import type { CRFEvent, CRFInstagramPost, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
 
 /**
  * WordPress "novo" (wordpress.crf-al.org.br): eventos e demais recursos.
@@ -118,15 +118,13 @@ export function decodeHTMLEntities(value: string): string {
   return textarea.value;
 }
 
-/** Lista os banners da home gerenciados pelo MetaSlider. */
-export async function fetchBanners(signal?: AbortSignal): Promise<CRFBanner[]> {
-  const banners = await wpJson<CRFBanner[]>(restUrl('/crfal/v1/banners'), signal);
-  return banners.map((banner) => ({
-    ...banner,
-    title: decodeHTMLEntities(banner.title),
-    subtitle: decodeHTMLEntities(banner.subtitle),
-    ctaLabel: decodeHTMLEntities(banner.ctaLabel ?? ''),
-  }));
+/** Lista as publicações do feed do Instagram (Smash Balloon) em formato enxuto. */
+export async function fetchInstagramFeed(signal?: AbortSignal): Promise<CRFInstagramPost[]> {
+  const posts = await wpJson<CRFInstagramPost[]>(
+    restUrl('/crfal/v1/instagram', { limit: '12' }),
+    signal
+  );
+  return Array.isArray(posts) ? posts.filter((post) => post && post.image) : [];
 }
 
 /** Lista todos os eventos (publicados e encerrados) vindos do WP Event Manager. */

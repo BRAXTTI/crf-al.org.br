@@ -1,68 +1,27 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
-import { useBanners } from '@/services/wordpress/hooks';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
+import { banners as defaultBanners, type Banner } from '@/data/banners';
 
-interface Slide {
-  image: string;
-  /** Imagem alternativa para telas menores que 1024px (opcional). */
-  imageMobile?: string;
-  /** Ponto focal do enquadramento (`object-position`), ex.: `center 30%`. */
-  focalPosition?: string;
-  title: string;
-  subtitle: string;
-  cta?: { label: string; href: string; target?: string };
+const AUTOPLAY_MS = 6000;
+
+interface HeroSliderProps {
+  /** Lista de banners. Padrão: `src/data/banners.ts`. */
+  items?: Banner[];
 }
 
-/** Rótulo do botão usado nos slides vindos do MetaSlider (que não possui campo de label). */
-const DEFAULT_CTA_LABEL = 'Saiba mais';
-
-/** Conteúdo de reserva exibido enquanto a API de banners não responde. */
-const fallbackSlides: Slide[] = [
-  {
-    image: '/images/banner1.jpg',
-    title: 'Conselho Regional de Farmácia do Estado de Alagoas',
-    subtitle: 'Fiscalização, registro e valorização do exercício profissional farmacêutico em todo o estado.',
-    cta: { label: 'Conheça nossos serviços', href: '/servicos/requerimentos' },
-  },
-  {
-    image: '/images/banner2.jpg',
-    title: 'Inscrição e regularização profissional',
-    subtitle: 'Realize sua inscrição, renove seu cadastro e mantenha-se em dia com o Conselho — tudo online.',
-    cta: { label: 'Fazer inscrição', href: '/servicos/requerimentos' },
-  },
-  {
-    image: '/images/banner3.jpg',
-    title: 'Fiscalização farmacêutica em Alagoas',
-    subtitle: 'Garantindo a qualidade e a segurança da assistência farmacêutica nos 102 municípios alagoanos.',
-    cta: { label: 'Saiba mais', href: '/fiscalizacao' },
-  },
-];
-
-export default function HeroSlider() {
-  const { data: banners } = useBanners();
-
-  const slides = useMemo<Slide[]>(() => {
-    const apiSlides = (banners ?? [])
-      .filter((banner) => banner.image)
-      .map((banner) => ({
-        image: banner.image as string,
-        imageMobile: banner.imageMobile ?? undefined,
-        focalPosition: banner.focalPoint ?? undefined,
-        title: banner.title,
-        subtitle: banner.subtitle,
-        cta: banner.url
-          ? { label: banner.ctaLabel.trim() || DEFAULT_CTA_LABEL, href: banner.url, target: banner.target }
-          : undefined,
-      }));
-
-    if (apiSlides.length > 0) return apiSlides;
-    // Enquanto a API carrega, exibe o conteúdo estático para o banner surgir
-    // imediatamente na abertura do site. Quando a API responde, os slides são
-    // trocados pelos do MetaSlider.
-    return fallbackSlides;
-  }, [banners]);
+/**
+ * Carrossel do topo da home.
+ *
+ * Proporção fixa (a arte nunca é cortada):
+ *  - < 640px  → 9:10  (arte mobile 1080×1200)
+ *  - ≥ 640px  → 2,5:1 (arte desktop 1920×768)
+ *
+ * Sem dependência do WordPress: os banners vêm de `src/data/banners.ts`.
+ */
+export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) {
+  const slides = useMemo(() => items.filter((banner) => banner.image), [items]);
 
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -71,11 +30,13 @@ export default function HeroSlider() {
   );
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const goTo = useCallback((index: number) => {
-    if (slides.length === 0) return;
-    const wrapped = ((index % slides.length) + slides.length) % slides.length;
-    setCurrent(wrapped);
-  }, [slides.length]);
+  const goTo = useCallback(
+    (index: number) => {
+      if (slides.length === 0) return;
+      setCurrent(((index % slides.length) + slides.length) % slides.length);
+    },
+    [slides.length]
+  );
 
   const next = useCallback(() => goTo(current + 1), [current, goTo]);
   const prev = useCallback(() => goTo(current - 1), [current, goTo]);
@@ -87,7 +48,7 @@ export default function HeroSlider() {
       clearInterval(intervalRef.current ?? undefined);
       return;
     }
-    intervalRef.current = setInterval(next, 6000);
+    intervalRef.current = setInterval(next, AUTOPLAY_MS);
     return () => clearInterval(intervalRef.current ?? undefined);
   }, [current, isPaused, isReducedMotion, next, slides.length]);
 
@@ -99,104 +60,99 @@ export default function HeroSlider() {
     [prev, next]
   );
 
+  if (slides.length === 0) return null;
+
   return (
     <section
-      className="relative flex min-h-[440px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark pt-28 pb-20 sm:min-h-[480px] lg:h-[clamp(560px,40vw,760px)] lg:pt-44"
+      className="relative aspect-[9/10] w-full overflow-hidden bg-crfal-blue-dark sm:aspect-[5/2]"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
       aria-roledescription="carrossel"
       aria-label="Destaques"
     >
+      {/* H1 fixo da home (as artes podem ou não ter texto). */}
+      <h1 className="sr-only">Conselho Regional de Farmácia do Estado de Alagoas</h1>
+
       {slides.map((slide, index) => {
         const isActive = index === activeIndex;
+        const hasOverlay = Boolean(slide.title || slide.subtitle || slide.ctaLabel);
+        const isExternal = Boolean(slide.href && !slide.href.startsWith('/'));
+
         return (
           <div
-            key={index}
+            key={slide.image}
             className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
             style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
             aria-hidden={!isActive}
-            {...(isActive ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` } : {})}
+            {...(isActive
+              ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` }
+              : {})}
           >
             <picture className="absolute inset-0 block">
-              {slide.imageMobile && (
-                <source media="(max-width: 1023px)" srcSet={slide.imageMobile} />
-              )}
+              {slide.imageMobile && <source media="(max-width: 639px)" srcSet={slide.imageMobile} />}
               <img
                 src={slide.image}
-                alt=""
-                aria-hidden="true"
+                alt={slide.href ? '' : slide.alt}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 fetchPriority={index === 0 ? 'high' : 'auto'}
                 decoding="async"
-                className="h-full w-full object-cover transition-transform [transition-duration:12000ms] ease-out"
-                style={{
-                  objectPosition: slide.focalPosition ?? 'center',
-                  transform: isActive ? 'scale(1.08)' : 'scale(1)',
-                }}
+                className="h-full w-full object-cover"
               />
             </picture>
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
 
-            <div className="container-crfal relative z-10 flex h-full items-center">
-              <div className="max-w-2xl">
-                <h1 className="font-display mb-3 text-[1.75rem] font-semibold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-4xl lg:text-[2.75rem]">
-                  {isActive ? (
-                    <span className="animate-slide-up inline-block">{slide.title}</span>
-                  ) : (
-                    slide.title
-                  )}
-                </h1>
+            {hasOverlay && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
+                <div className="container-crfal relative z-10 flex h-full items-center pt-20 lg:pt-0">
+                  <div className="max-w-2xl">
+                    {slide.title && (
+                      <h2 className="font-display mb-3 text-2xl font-semibold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-3xl lg:text-[2.5rem]">
+                        <span className="animate-slide-up inline-block">{slide.title}</span>
+                      </h2>
+                    )}
 
-                <p className="mb-6 max-w-xl text-sm leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:text-base">
-                  {slide.subtitle}
-                </p>
+                    {slide.subtitle && (
+                      <p className="mb-6 hidden max-w-xl text-sm leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:block sm:text-base">
+                        {slide.subtitle}
+                      </p>
+                    )}
 
-                {slide.cta && (
-                  <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-                    {slide.cta.href.startsWith('/') ? (
+                    {slide.ctaLabel && slide.href && (
                       <ArrowFillButton
-                        as={Link}
-                        to={slide.cta.href}
+                        {...(slide.href.startsWith('/')
+                          ? { as: Link, to: slide.href }
+                          : {
+                              href: slide.href,
+                              target: isExternal ? '_blank' : undefined,
+                              rel: isExternal ? 'noopener noreferrer' : undefined,
+                            })}
                         bgColor="#ffffff"
                         textColor="#003366"
                         fillBgColor="#C59B27"
                         fillTextColor="#0B192C"
                       >
-                        {slide.cta.label}
-                      </ArrowFillButton>
-                    ) : (
-                      <ArrowFillButton
-                        href={slide.cta.href}
-                        target={slide.cta.target}
-                        rel={slide.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
-                        bgColor="#ffffff"
-                        textColor="#003366"
-                        fillBgColor="#C59B27"
-                        fillTextColor="#0B192C"
-                      >
-                        {slide.cta.label}
+                        {slide.ctaLabel}
                       </ArrowFillButton>
                     )}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              </>
+            )}
+
+            {/* Arte sem texto: o banner inteiro vira link. */}
+            {!hasOverlay && slide.href && (
+              <a
+                href={slide.href}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noopener noreferrer' : undefined}
+                aria-label={slide.alt}
+                className="absolute inset-0 z-10"
+              />
+            )}
           </div>
         );
       })}
-
-      {slides.length === 0 && (
-        <div className="absolute inset-0 z-10 flex items-center" aria-hidden="true">
-          <div className="container-crfal">
-            <div className="max-w-2xl animate-pulse space-y-4">
-              <div className="h-8 w-4/5 rounded bg-white/10 sm:h-10 lg:h-12" />
-              <div className="h-4 w-3/5 rounded bg-white/10" />
-              <div className="h-11 w-44 rounded-full bg-white/10" />
-            </div>
-          </div>
-        </div>
-      )}
 
       {slides.length > 1 && (
         <>
@@ -215,34 +171,30 @@ export default function HeroSlider() {
           >
             <ChevronRight className="h-5 w-5" />
           </button>
-        </>
-      )}
 
-      {slides.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goTo(index)}
-                className={`rounded-full transition-all duration-300 ${
-                  index === activeIndex
-                    ? 'h-2.5 w-8 bg-white shadow-card'
-                    : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
-                }`}
-                aria-label={`Ir para slide ${index + 1}`}
-              />
-            ))}
+          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 sm:bottom-6">
+            <div className="flex items-center gap-2.5">
+              {slides.map((slide, index) => (
+                <button
+                  key={slide.image}
+                  onClick={() => goTo(index)}
+                  className={`rounded-full transition-all duration-300 ${
+                    index === activeIndex ? 'h-2.5 w-8 bg-white shadow-card' : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
+                  }`}
+                  aria-label={`Ir para slide ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={() => setIsPaused(!isPaused)}
+              className="ml-2 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white/90"
+              aria-label={isPaused ? 'Retomar reprodução' : 'Pausar reprodução'}
+            >
+              {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
+            </button>
           </div>
-
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className="ml-2 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white/90"
-            aria-label={isPaused ? 'Retomar reprodução' : 'Pausar reprodução'}
-          >
-            {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
-          </button>
-        </div>
+        </>
       )}
     </section>
   );
