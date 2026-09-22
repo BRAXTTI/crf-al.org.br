@@ -1,0 +1,84 @@
+---
+description: Visão do site institucional CRFAL — stack, pastas, como rodar e convenções.
+alwaysApply: true
+---
+
+# Projeto CRFAL (site institucional)
+
+SPA do Conselho Regional de Farmácia de Alagoas. Conteúdo dinâmico (notícias, banners, eventos) vem de WordPress; páginas institucionais são React. Idioma da UI e do código de domínio: **pt-BR**.
+
+## Stack
+
+- **Vite 7** + **React 19** + **TypeScript** (strict, `verbatimModuleSyntax`, alias `@/` → `src/`)
+- **react-router-dom** 7 (`BrowserRouter` em `src/router/app-router.tsx`)
+- **TanStack Query** (cache 5 min, `retry: 2`, sem refetch no foco)
+- **Tailwind 3** + tokens `crfal.*` / `primary` (`#003366`) / `secondary` (`#00875A`)
+- **shadcn/ui** (estilo New York, sem RSC) em `src/components/ui` + `cn()` em `@/lib/utils`
+- **lucide-react**, **Radix Dialog**, **DOMPurify**, **react-helmet-async**
+- Sem Next.js, sem backend próprio, sem test runner no `package.json`
+- Deploy: SPA estática (`dist/`); `public/_redirects` (Cloudflare/Netlify) e `dist/200.html` (Surge). `surge` está em **devDependencies** — use `npx surge`, não o binário global.
+
+## Como rodar
+
+```bash
+npm install
+cp .env.example .env   # opcional; defaults já apontam para produção
+npm run dev            # Vite, tipicamente http://localhost:5173
+npm run lint
+npm run build          # tsc -b && vite build && sitemaps && copia 200.html
+npm run preview        # preview do dist
+```
+
+Variáveis (`VITE_*`, ver `.env.example`): `VITE_SITE_URL`, `VITE_WP_SITE_URL` (eventos/banners), `VITE_WP_NEWS_SITE_URL` (notícias no WP legado), `VITE_INSTAGRAM_FEED_URL`. Sem `.env`, os defaults de produção valem.
+
+## Estrutura
+
+```
+src/main.tsx                 # QueryClient + HelmetProvider
+src/App.tsx                  # ErrorBoundary + AppRouter
+src/router/app-router.tsx    # rotas (edite aqui ao criar página)
+src/config/site.ts           # URL canônica, OG, Instagram
+src/features/<domínio>/pages # páginas por área (export default)
+src/components/layout        # Header, Footer, Layout (Outlet)
+src/components/home          # blocos só da home
+src/components/ui            # primitivos shadcn
+src/services/wordpress       # client.ts, hooks.ts, types.ts
+src/data                     # conteúdo estático (ex.: servicos.ts)
+src/lib                      # cn, youtube embed
+public/                      # fontes Rawline, imagens, robots, CSP/_headers
+scripts/generate-sitemaps.mjs
+```
+
+Features atuais: `home`, `institutional`, `services`, `press`, `publications`, `contact`, `fiscalizacao`, `events`.
+
+## Convenções
+
+**Rotas e páginas**
+
+- URLs em português kebab-case (`/instituicao/sobre-conselho`, `/imprensa/noticias/:id`).
+- Página nova: `src/features/<domínio>/pages/NomePage.tsx` + rota em `app-router.tsx` + item no `Header` se for navegável.
+- `export default function NomePage`. Inclua `<SEO title description path />` (`path` = pathname, sem domínio).
+- Layout compartilhado: `Layout` com `Outlet`. Subseções de fiscalização usam `FiscalizacaoPageShell`.
+- Redirecionamentos com `<Navigate replace />`. Links externos: `external` no nav, `target="_blank"` + `rel="noopener noreferrer"`.
+
+**Imports e componentes**
+
+- Sempre `@/` (`@/components/SEO`, `@/services/wordpress/hooks`). Não use barrels novos.
+- Componentes funcionais. Não declare componentes dentro de componentes.
+- Classes: Tailwind + `cn(...)`. Cores institucionais: `bg-primary`, `text-crfal-blue`, `bg-crfal-gray`. Fonte: Rawline (self-hosted).
+- Ícones: `lucide-react`. YouTube: só `getYouTubeEmbedUrl` → `youtube-nocookie.com` (CSP).
+
+**Dados**
+
+- WordPress **novo** (`wordpress.crf-al.org.br`): `index.php?rest_route=` — banners `/crfal/v1/banners`, eventos `/crfal/v1/events`.
+- WordPress **legado** (`www.crf-al.org.br`): `/wp-json/wp/v2` — só notícias/mídia.
+- UI: hooks `usePosts`, `useBanners`, `useEvents`, etc. Fetch: `client.ts` (timeout 15s, `_fields` enxutos).
+- HTML do WP: `sanitizeWP` antes de `dangerouslySetInnerHTML`; texto: `stripHTML` / `decodeHTMLEntities`.
+- Conteúdo que não vem da API fica em `src/data` ou na própria page.
+
+**SEO, segurança, copy**
+
+- Título da aba: `{title} | CRFAL`. Canonical = `SITE_URL + path`.
+- CSP em `public/_headers`: ao adicionar origem (API, img, iframe), atualize a policy.
+- Copy e datas: pt-BR (`toLocaleDateString('pt-BR', …)`). Não invente valores de taxas; use o texto institucional existente.
+- Build de sitemap é best-effort: falha na API de notícias não deve quebrar o restante do `npm run build`.

@@ -18,6 +18,9 @@
     <link rel="preconnect" href="https://wordpress.crf-al.org.br" />
     <link rel="preconnect" href="https://wordpress.crf-al.org.br" crossorigin />
 
+    <!-- Banner fallback da home: pré-carregado para aparecer na primeira renderização -->
+    <link rel="preload" href="/images/banner1.jpg" as="image" fetchpriority="high" />
+
     <!-- SEO base — sobrescrito por react-helmet-async em cada página -->
     <title>CRFAL - Conselho Regional de Farmácia do Estado de Alagoas</title>
     <meta name="description" content="CRFAL — Conselho Regional de Farmácia do Estado de Alagoas. Fiscalização, registros, serviços e informações para profissionais de farmácia em Alagoas." />

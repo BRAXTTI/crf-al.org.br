@@ -35,7 +35,7 @@ const fallbackSlides: Slide[] = [
 ];
 
 export default function HeroSlider() {
-  const { data: banners, isPending } = useBanners();
+  const { data: banners } = useBanners();
 
   const slides = useMemo<Slide[]>(() => {
     const apiSlides = (banners ?? [])
@@ -50,12 +50,11 @@ export default function HeroSlider() {
       }));
 
     if (apiSlides.length > 0) return apiSlides;
-    // Enquanto a API carrega, não exibe o conteúdo estático: evita o "flash"
-    // dos banners antigos sendo trocados pelos do MetaSlider.
-    if (isPending) return [];
-    // Fallback estático apenas quando a API falha ou não retorna banners.
+    // Enquanto a API carrega, exibe o conteúdo estático para o banner surgir
+    // imediatamente na abertura do site. Quando a API responde, os slides são
+    // trocados pelos do MetaSlider.
     return fallbackSlides;
-  }, [banners, isPending]);
+  }, [banners]);
 
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);

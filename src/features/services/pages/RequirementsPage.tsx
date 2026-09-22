@@ -944,7 +944,7 @@ export default function RequirementsPage() {
                       Ver fluxograma
                     </button>
                   )}
-                  {selectedItem.videoUrl && (
+                  {(
                     <button
                       type="button"
                       onClick={() => setShowVideoModal(true)}
