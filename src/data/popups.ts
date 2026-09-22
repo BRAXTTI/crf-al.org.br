@@ -50,7 +50,7 @@ export const popups: Popup[] = [
   {
     id: 'exemplo-2026-01',
     // Exemplo usando uma arte existente. Troque por `image`/`imageMobile` do popup.
-    image: '/images/popups/Farmacia_Feed_Inscreva-se.png',
+    image: '/images/popups/Farmacia_Feed_Inscreva-se.webp',
     alt: 'Simposio Internacional - Albert Eistein CRFAL',
     href: 'https://ensino.einstein.br/evento_simposio_internacional_farmacia_p0961/p',
     title: '',
@@ -58,5 +58,6 @@ export const popups: Popup[] = [
     ctaLabel: '',
     active: true,
     external: true,
+    dismissDays: 1,
   },
 ];

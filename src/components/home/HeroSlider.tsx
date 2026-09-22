@@ -113,7 +113,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                     )}
 
                     {slide.subtitle && (
-                      <p className="mb-6 hidden max-w-xl text-sm leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:block sm:text-base">
+                      <p className="mb-6 max-w-xl text-sm leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:text-base">
                         {slide.subtitle}
                       </p>
                     )}
