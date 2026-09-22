@@ -2,7 +2,7 @@ import SEO from '@/components/SEO';
 
 export default function StatutePage() {
   return (
-    <div className="pt-20 md:pt-24 pb-16">
+    <div className="pt-28 lg:pt-44 pb-16">
       <SEO
         title="Estatuto"
         description="Acesse o estatuto do Conselho Regional de Farmácia do Estado de Alagoas (CRFAL) — normas, regimentos e regulamentos internos."

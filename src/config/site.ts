@@ -17,3 +17,22 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/logo-crf-azul.png`;
  */
 export const INSTAGRAM_FEED_URL =
   import.meta.env.VITE_INSTAGRAM_FEED_URL ?? 'https://wordpress.crf-al.org.br/instagram/';
+
+/** Link de acesso ao sistema CRF AL em Casa (autenticação do profissional). */
+export const CRF_EM_CASA_URL =
+  'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf';
+
+/** Portal de transparência (Implanta), usado em várias seções do site. */
+export const TRANSPARENCIA_URL =
+  'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio';
+
+/**
+ * Redes sociais oficiais do CRF-AL — todas sob o identificador `crfal`.
+ * Fonte única para o cabeçalho e o rodapé.
+ */
+export const SOCIAL_LINKS = [
+  { label: 'Instagram', href: 'https://www.instagram.com/crfal' },
+  { label: 'YouTube', href: 'https://www.youtube.com/@crfal' },
+  { label: 'Facebook', href: 'https://www.facebook.com/crfal' },
+  { label: 'X', href: 'https://x.com/crfal' },
+] as const;

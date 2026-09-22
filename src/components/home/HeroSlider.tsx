@@ -93,7 +93,7 @@ export default function HeroSlider() {
 
   return (
     <section
-      className="relative flex min-h-[420px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark pt-28 pb-20 sm:min-h-[460px] md:pt-32 lg:min-h-[520px]"
+      className="relative flex min-h-[440px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark pt-28 pb-20 sm:min-h-[480px] lg:min-h-[560px] lg:pt-44"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"

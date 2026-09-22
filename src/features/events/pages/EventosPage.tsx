@@ -383,7 +383,7 @@ export default function EventosPage() {
           <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
         </div>
 
-        <div className="container-crfal relative z-10 pb-14 pt-28 md:pb-20 md:pt-36">
+        <div className="container-crfal relative z-10 pb-14 pt-28 md:pb-20 lg:pt-44">
           <nav aria-label="Trilha de navegação" className="mb-6 flex items-center gap-2 text-sm text-white/60">
             <Link to="/" className="transition-colors hover:text-white">Início</Link>
             <ChevronRight className="h-4 w-4" />
@@ -554,7 +554,7 @@ export default function EventosPage() {
             )}
 
             {/* Barra de filtros */}
-            <div className="sticky top-[72px] z-30 rounded-2xl border border-crfal-gray-200/80 bg-white/85 p-3 shadow-card backdrop-blur-lg   sm:p-4">
+            <div className="sticky top-[var(--header-offset)] z-30 rounded-2xl border border-crfal-gray-200/80 bg-white/85 p-3 shadow-card backdrop-blur-lg   sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative lg:max-w-xs lg:flex-1">
                   <label htmlFor="busca-evento" className="sr-only">Buscar evento</label>

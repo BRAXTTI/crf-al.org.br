@@ -118,7 +118,7 @@ export default function OmbudsmanPage() {
           <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
         </div>
 
-        <div className="container-crfal relative z-10 pb-14 pt-28 md:pb-20 md:pt-36">
+        <div className="container-crfal relative z-10 pb-14 pt-28 md:pb-20 lg:pt-44">
           <nav aria-label="Trilha de navegação" className="mb-6 flex items-center gap-2 text-sm text-white/60">
             <a href="/" className="transition-colors hover:text-white">Início</a>
             <ChevronRight className="h-4 w-4" />

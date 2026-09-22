@@ -31,7 +31,7 @@ export default function FiscalizacaoPageShell({ title, description, children }: 
         <SEO title={title} description={description} path={location.pathname} />
       )}
 
-      <div className="relative overflow-hidden bg-crfal-blue-dark pb-14 pt-24 md:pb-18 md:pt-32">
+      <div className="relative overflow-hidden bg-crfal-blue-dark pb-14 pt-28 md:pb-18 lg:pt-44">
         <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
         <div
           className="absolute inset-0 opacity-[0.06]"
@@ -128,7 +128,7 @@ export default function FiscalizacaoPageShell({ title, description, children }: 
             </article>
 
             <aside className="hidden lg:col-span-4 lg:block">
-              <div className="sticky top-28 space-y-5">
+              <div className="sticky top-36 space-y-5">
                 <nav className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm  ">
                   <h2 className="mb-4 text-lg font-semibold text-neutral-900 ">
                     Menu da Fiscalização

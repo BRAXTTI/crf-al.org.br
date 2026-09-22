@@ -22,6 +22,8 @@ import {
   ExternalLink,
   Calendar,
 } from 'lucide-react';
+import { CRF_EM_CASA_URL, SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
+import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
 
 
 type SubItem = { label: string; href: string; icon: React.ElementType; external?: boolean };
@@ -33,6 +35,13 @@ interface NavItem {
   columns?: Column[];
   directIcon?: React.ElementType;
 }
+
+const SOCIAL_ICONS: Record<string, React.ElementType> = {
+  Instagram: InstagramIcon,
+  Facebook: FacebookIcon,
+  YouTube: YouTubeIcon,
+  X: XIcon,
+};
 
 const navItems: NavItem[] = [
   {
@@ -162,42 +171,121 @@ export default function Header() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // The institutional header keeps a stable navy background for readability on every page.
-  const isOverHero = false;
-
   const isExternalLink = (href: string) => href.startsWith('http');
 
   const navLinkBase =
-    'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium transition-all duration-200 rounded-lg';
+    'flex items-center gap-1.5 rounded-md px-3 py-2 text-[15px] font-medium tracking-[0.02em] transition-all duration-200';
+
+  const renderSocial = (itemClassName: string, iconClassName: string) => (
+    <ul className="flex items-center gap-1">
+      {SOCIAL_LINKS.map((social) => {
+        const Icon = SOCIAL_ICONS[social.label] ?? ExternalLink;
+        return (
+          <li key={social.label}>
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={social.label}
+              className={itemClassName}
+            >
+              <Icon className={iconClassName} />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        'bg-[#003366] shadow-header py-2'
-      }`}
-    >
-      <div className="container-crfal">
-        <div className="flex items-center justify-between gap-3 min-h-[52px]">
-          <Link
-            to="/"
-            onClick={handleLogoClick}
-            className="flex items-center gap-3 group shrink-0"
-          >
-            <img
-              src="/images/logo-crf-azul.png"
-              alt="CRFAL"
-              className="h-11 w-auto object-contain brightness-0 invert transition-all duration-300 group-hover:scale-105"
-            />
-            <div className="hidden xl:block text-white">
-              <p className="text-[11px] font-medium uppercase tracking-wider leading-none opacity-80">
-                Conselho Regional de Farmácia
-              </p>
-              <p className="text-sm font-bold leading-tight">Estado de Alagoas</p>
-            </div>
-          </Link>
+    <header className="fixed top-0 left-0 right-0 z-50">
+      {/* Barra de identidade — logo, nome da entidade, redes sociais e acesso do profissional */}
+      <div className="border-b border-crfal-gray-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+        <div className="container-crfal">
+          <div className="flex h-16 items-center justify-between gap-2 lg:h-[76px] lg:gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-crfal-blue transition-colors hover:bg-crfal-blue-lighter lg:hidden"
+              aria-label="Menu"
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
 
-          <div className="hidden lg:flex items-center flex-1 justify-end gap-1">
-            <nav className="flex items-center">
+            <Link
+              to="/"
+              onClick={handleLogoClick}
+              className="group flex min-w-0 items-center gap-2.5 lg:gap-3"
+            >
+              <img
+                src="/images/logo-crf-azul.png"
+                alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
+                className="h-10 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-12"
+              />
+              <span className="min-w-0 border-l border-crfal-gray-200 pl-2.5 leading-tight lg:pl-3">
+                <span className="hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-crfal-blue sm:block lg:text-[11px]">
+                  Conselho Regional de Farmácia
+                </span>
+                <span className="block truncate text-sm font-bold text-crfal-blue-dark lg:text-base">
+                  <span className="hidden sm:inline">Estado de Alagoas</span>
+                  <span className="sm:hidden">CRF-AL</span>
+                </span>
+              </span>
+            </Link>
+
+            <div className="hidden items-center gap-2 lg:flex">
+              <a
+                href={TRANSPARENCIA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Acesso à Informação — Portal da Transparência do CRF-AL"
+                title="Acesso à Informação — Portal da Transparência"
+                className="mr-1 flex h-11 items-center rounded-lg px-1 transition-opacity hover:opacity-80"
+              >
+                <img
+                  src="/images/logo-acesso-a-Informacao-colorido.png"
+                  alt="Acesso à Informação"
+                  className="h-8 w-auto object-contain"
+                />
+              </a>
+
+              <span aria-hidden className="h-6 w-px bg-crfal-gray-200" />
+
+              {renderSocial(
+                'flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-crfal-blue-lighter hover:text-crfal-blue',
+                'h-[18px] w-[18px]'
+              )}
+
+              <span aria-hidden className="mx-1 h-6 w-px bg-crfal-gray-200" />
+
+              <a
+                href={CRF_EM_CASA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 whitespace-nowrap rounded-lg border-2 border-crfal-blue px-4 py-2 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white"
+              >
+                <User className="h-4 w-4" />
+                CRF AL em Casa
+              </a>
+            </div>
+
+            <button
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-crfal-blue transition-colors hover:bg-crfal-blue-lighter lg:hidden"
+              aria-label="Buscar"
+              aria-expanded={isSearchOpen}
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Barra de menu — navegação principal (desktop) */}
+      <div className="hidden bg-[#003366] lg:block">
+        <div className="container-crfal">
+          <div className="flex h-14 items-center justify-between gap-3">
+            <nav className="-ml-3 flex items-center">
               {navItems.map((item) => (
                 <div
                   key={item.label}
@@ -209,13 +297,9 @@ export default function Header() {
                     <button
                       type="button"
                       className={`${navLinkBase} ${
-                        isOverHero
-                          ? activeDropdown === item.label
-                            ? 'text-white bg-white/15'
-                            : 'text-white/90 hover:text-white hover:bg-white/10'
-                           : activeDropdown === item.label
-                             ? 'text-white bg-white/15'
-                             : 'text-white/90 hover:text-white hover:bg-white/10'
+                        activeDropdown === item.label
+                          ? 'bg-white/15 text-white'
+                          : 'text-white/90 hover:bg-white/10 hover:text-white'
                       }`}
                       onClick={() =>
                         setActiveDropdown(activeDropdown === item.label ? null : item.label)
@@ -223,7 +307,7 @@ export default function Header() {
                     >
                       {item.label}
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
+                        className={`h-4 w-4 transition-transform duration-200 ${
                           activeDropdown === item.label ? 'rotate-180' : ''
                         }`}
                       />
@@ -231,13 +315,9 @@ export default function Header() {
                   ) : item.href.startsWith('/') ? (
                     <Link
                       to={item.href}
-                      className={`${navLinkBase} ${
-                        isOverHero
-                          ? 'text-white/90 hover:text-white hover:bg-white/10'
-                           : 'text-white/90 hover:text-white hover:bg-white/10'
-                      }`}
+                      className={`${navLinkBase} text-white/90 hover:bg-white/10 hover:text-white`}
                     >
-                      {item.directIcon && <item.directIcon className="w-3.5 h-3.5" />}
+                      {item.directIcon && <item.directIcon className="h-3.5 w-3.5" />}
                       {item.label}
                     </Link>
                   ) : (
@@ -245,32 +325,25 @@ export default function Header() {
                       href={item.href}
                       target={isExternalLink(item.href) ? '_blank' : undefined}
                       rel={isExternalLink(item.href) ? 'noopener noreferrer' : undefined}
-                      className={`${navLinkBase} ${
-                        isOverHero
-                          ? 'text-white/90 hover:text-white hover:bg-white/10'
-                           : 'text-white/90 hover:text-white hover:bg-white/10'
-                      }`}
+                      className={`${navLinkBase} text-white/90 hover:bg-white/10 hover:text-white`}
                     >
-                      {item.directIcon && <item.directIcon className="w-3.5 h-3.5" />}
+                      {item.directIcon && <item.directIcon className="h-3.5 w-3.5" />}
                       {item.label}
                     </a>
                   )}
 
                   {item.columns && activeDropdown === item.label && (
                     <>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 h-4 w-[720px]" aria-hidden />
-                      <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 z-50 w-[720px]">
-                        <div
-                          className={`overflow-hidden rounded-xl border shadow-2xl animate-scale-in origin-top ${
-                            isOverHero
-                              ? 'bg-white  border-white/20 '
-                              : 'bg-white  border-crfal-gray-200 '
-                          }`}
-                        >
+                      <div
+                        className="absolute left-0 top-full h-4 w-[640px] max-w-[calc(100vw-2rem)]"
+                        aria-hidden
+                      />
+                      <div className="absolute left-0 top-[calc(100%+12px)] z-50 w-[640px] max-w-[calc(100vw-2rem)]">
+                        <div className="origin-top overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-2xl animate-scale-in">
                           <div className="grid grid-cols-2 gap-8 p-6">
                             {item.columns.map((column) => (
                               <div key={column.title}>
-                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-crfal-gray-400 ">
+                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-crfal-gray-400">
                                   {column.title}
                                 </h4>
                                 <ul className="space-y-1">
@@ -278,15 +351,15 @@ export default function Header() {
                                     const Icon = subItem.icon;
                                     const content = (
                                       <>
-                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors duration-200 group-hover:bg-crfal-blue group-hover:text-white    ">
+                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors duration-200 group-hover:bg-crfal-blue group-hover:text-white">
                                           <Icon className="h-4.5 w-4.5" />
                                         </span>
                                         <span className="flex-1">
-                                          <span className="block text-sm font-semibold text-neutral-700 transition-colors duration-200 group-hover:text-crfal-blue  ">
+                                          <span className="block text-sm font-semibold text-neutral-700 transition-colors duration-200 group-hover:text-crfal-blue">
                                             {subItem.label}
                                           </span>
                                           {subItem.external && (
-                                            <span className="block text-[10px] uppercase tracking-wider text-crfal-gray-400 ">
+                                            <span className="block text-[10px] uppercase tracking-wider text-crfal-gray-400">
                                               Link externo
                                             </span>
                                           )}
@@ -298,7 +371,7 @@ export default function Header() {
                                         {subItem.href.startsWith('/') ? (
                                           <Link
                                             to={subItem.href}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 "
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50"
                                           >
                                             {content}
                                           </Link>
@@ -307,7 +380,7 @@ export default function Header() {
                                             href={subItem.href}
                                             target={subItem.external ? '_blank' : undefined}
                                             rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50 "
+                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50"
                                           >
                                             {content}
                                           </a>
@@ -329,77 +402,40 @@ export default function Header() {
 
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2.5 rounded-lg text-white/90 hover:bg-white/10 transition-all"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-white/90 transition-all hover:bg-white/10"
               aria-label="Buscar"
+              aria-expanded={isSearchOpen}
             >
-              <Search className="w-4 h-4" />
-            </button>
-
-            <a
-              href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`ml-2 flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full transition-all shrink-0 ${
-                isOverHero
-                  ? 'bg-white text-crfal-blue hover:bg-white/95'
-                  : 'bg-[#00875A] text-white hover:bg-[#006b47]'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span className="whitespace-nowrap">CRF AL em Casa</span>
-            </a>
-          </div>
-
-          <div className="flex lg:hidden items-center gap-1 shrink-0">
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-white/90 hover:bg-white/10 transition-all"
-              aria-label="Buscar"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            <a
-              href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-full text-sm font-medium ${
-                'bg-[#00875A] text-white hover:bg-[#006b47]'
-              }`}
-            >
-              <User className="w-4 h-4" />
-              <span className="hidden xs:inline">CRF AL em Casa</span>
-            </a>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-white hover:bg-white/10 transition-all"
-              aria-label="Menu"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Search className="h-5 w-5" />
             </button>
           </div>
         </div>
+      </div>
 
-        {isSearchOpen && (
-          <div className="mt-3 animate-slide-down">
+      {/* Busca — comum a desktop e mobile */}
+      {isSearchOpen && (
+        <div className="border-b border-crfal-gray-200 bg-white shadow-card">
+          <div className="container-crfal py-3">
             <div className="relative">
               <input
                 type="text"
                 placeholder="Buscar no site..."
-                className="w-full px-4 py-3 pr-12 bg-white  border border-crfal-gray-200  rounded-xl shadow-card focus:outline-none focus:ring-2 focus:ring-crfal-blue/20 focus:border-crfal-blue text-neutral-800 "
+                className="w-full rounded-xl border border-crfal-gray-200 bg-white px-4 py-3 pr-12 text-neutral-800 shadow-card focus:border-crfal-blue focus:outline-none focus:ring-2 focus:ring-crfal-blue/20"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-crfal-gray-500 hover:text-crfal-blue rounded-lg transition-colors">
-                <Search className="w-5 h-5" />
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-crfal-gray-500 transition-colors hover:text-crfal-blue">
+                <Search className="h-5 w-5" />
               </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
+      {/* Menu mobile */}
       {isMobileMenuOpen &&
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            className="lg:hidden fixed left-0 right-0 bottom-0 top-[72px] z-[9999] bg-[#F8FAFC] overflow-y-auto"
+            className="fixed left-0 right-0 bottom-0 top-[var(--header-offset)] z-[9999] overflow-y-auto bg-[#F8FAFC] lg:hidden"
             style={{ WebkitOverflowScrolling: 'touch' }}
             aria-modal
             role="dialog"
@@ -407,17 +443,17 @@ export default function Header() {
           >
             <nav className="min-h-full pb-24">
               <div className="container-crfal py-6">
-                <div className="bg-crfal-gray-50  rounded-xl border border-crfal-gray-200  overflow-hidden">
+                <div className="overflow-hidden rounded-xl border border-crfal-gray-200 bg-white">
                   {navItems.map((item) => {
                     const ItemIcon = item.directIcon;
                     return (
-                      <div key={item.label} className="border-b border-crfal-gray-200 last:border-0 ">
+                      <div key={item.label} className="border-b border-crfal-gray-200 last:border-0">
                         <button
                           onClick={() => item.columns && toggleMobileItem(item.label)}
-                          className="w-full flex items-center justify-between py-4 px-4 text-neutral-800  hover:bg-crfal-gray-100  font-medium text-left transition-colors min-h-[48px]"
+                          className="flex min-h-[48px] w-full items-center justify-between px-4 py-4 text-left font-medium text-neutral-800 transition-colors hover:bg-crfal-gray-100"
                         >
                           <span className="flex items-center gap-2">
-                            {ItemIcon && <ItemIcon className="w-4 h-4" />}
+                            {ItemIcon && <ItemIcon className="h-4 w-4" />}
                             {item.columns ? (
                               <span>{item.label}</span>
                             ) : item.href.startsWith('/') ? (
@@ -442,7 +478,7 @@ export default function Header() {
                           </span>
                           {item.columns && (
                             <ChevronDown
-                              className={`w-5 h-5 transition-transform duration-300 ${
+                              className={`h-5 w-5 transition-transform duration-300 ${
                                 expandedMobileItems.includes(item.label) ? 'rotate-180' : ''
                               }`}
                             />
@@ -457,10 +493,10 @@ export default function Header() {
                                 : 'max-h-0 opacity-0'
                             }`}
                           >
-                            <div className="pb-3 pl-4 pr-4 space-y-4 bg-crfal-gray-100/50 ">
+                            <div className="space-y-4 bg-crfal-gray-100/60 pb-3 pl-4 pr-4">
                               {item.columns.map((column) => (
                                 <div key={column.title}>
-                                  <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400 ">
+                                  <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400">
                                     {column.title}
                                   </p>
                                   <div className="space-y-1">
@@ -470,10 +506,10 @@ export default function Header() {
                                         <Link
                                           key={subItem.label}
                                           to={subItem.href}
-                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700  hover:bg-neutral-200/70  hover:text-crfal-blue  transition-colors"
+                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-200/70 hover:text-crfal-blue"
                                           onClick={() => setIsMobileMenuOpen(false)}
                                         >
-                                          <SubIcon className="w-4 h-4 shrink-0" />
+                                          <SubIcon className="h-4 w-4 shrink-0" />
                                           {subItem.label}
                                         </Link>
                                       ) : (
@@ -482,10 +518,10 @@ export default function Header() {
                                           href={subItem.href}
                                           target={subItem.external ? '_blank' : undefined}
                                           rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700  hover:bg-neutral-200/70  hover:text-crfal-blue  transition-colors"
+                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-200/70 hover:text-crfal-blue"
                                           onClick={() => setIsMobileMenuOpen(false)}
                                         >
-                                          <SubIcon className="w-4 h-4 shrink-0" />
+                                          <SubIcon className="h-4 w-4 shrink-0" />
                                           {subItem.label}
                                         </a>
                                       );
@@ -502,13 +538,37 @@ export default function Header() {
                 </div>
 
                 <a
-                  href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
+                  href={TRANSPARENCIA_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 mt-6 px-4 py-4 bg-crfal-blue text-white font-semibold rounded-full w-full hover:bg-crfal-blue-dark transition-colors min-h-[48px]"
+                  aria-label="Acesso à Informação — Portal da Transparência do CRF-AL"
+                  className="mt-5 flex items-center justify-center rounded-xl border border-crfal-gray-200 bg-white px-4 py-3.5 transition-colors hover:bg-crfal-gray-50"
+                >
+                  <img
+                    src="/images/logo-acesso-a-Informacao-colorido.png"
+                    alt="Acesso à Informação"
+                    className="h-9 w-auto object-contain"
+                  />
+                </a>
+
+                <div className="mt-4 rounded-xl border border-crfal-gray-200 bg-white p-4">
+                  <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400">
+                    Redes sociais
+                  </p>
+                  {renderSocial(
+                    'flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white',
+                    'h-[18px] w-[18px]'
+                  )}
+                </div>
+
+                <a
+                  href={CRF_EM_CASA_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-4 py-4 font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <User className="w-5 h-5" />
+                  <User className="h-5 w-5" />
                   CRF AL em Casa
                 </a>
               </div>

@@ -112,6 +112,16 @@
     --crfal-gray-medium: #e2e8f0;
     --crfal-gray-dark: #1e293b;
     --crfal-text-gray: #64748b;
+
+    /* Altura total do cabeçalho (barra de identidade + barra de menu).
+       Usada para deslocar o conteúdo e elementos fixos/sticky. */
+    --header-offset: 64px;
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --header-offset: 132px;
+    }
   }
 }
 
@@ -130,13 +140,15 @@
     @apply bg-background text-foreground antialiased;
     font-family: 'Rawline', ui-sans-serif, system-ui, sans-serif;
     line-height: 1.55;
-    overflow-x: hidden;
+    /* `clip` evita rolagem horizontal sem criar um container de rolagem,
+       que quebraria `position: sticky` nos painéis fixos das listagens. */
+    overflow-x: clip;
     background: #f8fafc;
   }
 
   #root {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   h1, h2, h3, h4, h5, h6 {

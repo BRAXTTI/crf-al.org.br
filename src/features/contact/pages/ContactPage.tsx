@@ -81,7 +81,7 @@ export default function ContactPage() {
       />
 
       {/* Hero — sobrio, institucional */}
-      <div className="relative bg-crfal-blue pt-28 pb-14 md:pt-32 md:pb-16 overflow-hidden">
+      <div className="relative bg-crfal-blue pt-28 pb-14 lg:pt-44 md:pb-16 overflow-hidden">
         <div
           className="absolute inset-0 opacity-[0.07] pointer-events-none"
           aria-hidden="true"

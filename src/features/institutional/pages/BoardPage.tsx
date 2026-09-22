@@ -293,7 +293,7 @@ export default function BoardPage() {
         path="/instituicao/diretoria"
       />
 
-      <div className="relative overflow-hidden bg-crfal-blue-dark pb-16 pt-28 md:pb-20 md:pt-36">
+      <div className="relative overflow-hidden bg-crfal-blue-dark pb-16 pt-28 md:pb-20 lg:pt-44">
         <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
         <div className="absolute inset-0 opacity-[0.06]" style={{
           backgroundImage: 'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)',

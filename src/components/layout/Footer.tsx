@@ -2,13 +2,11 @@ import {
   MapPin,
   Phone,
   Clock,
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
   ChevronRight,
   ExternalLink,
 } from 'lucide-react';
+import { SOCIAL_LINKS } from '@/config/site';
+import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
 
 const quickLinks = [
   { label: 'Instituição', href: '/instituicao/sobre-conselho' },
@@ -25,12 +23,17 @@ const serviceLinks = [
   { label: 'Validar Documentos', href: '/servicos/tutoriais' },
 ];
 
-const socialLinks = [
-  { icon: Facebook, href: '#facebook', label: 'Facebook' },
-  { icon: Instagram, href: '#instagram', label: 'Instagram' },
-  { icon: Twitter, href: '#twitter', label: 'Twitter' },
-  { icon: Youtube, href: '#youtube', label: 'YouTube' },
-];
+const SOCIAL_ICONS: Record<string, React.ElementType> = {
+  Instagram: InstagramIcon,
+  Facebook: FacebookIcon,
+  YouTube: YouTubeIcon,
+  X: XIcon,
+};
+
+const socialLinks = SOCIAL_LINKS.map((social) => ({
+  ...social,
+  icon: SOCIAL_ICONS[social.label] ?? XIcon,
+}));
 
 export default function Footer() {
   return (
@@ -153,6 +156,8 @@ export default function Footer() {
                     <a
                       key={social.label}
                       href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       aria-label={social.label}
                       className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:scale-110"
                     >
