@@ -6,23 +6,22 @@ interface InstagramFeedProps {
   title?: string;
   /** Texto de apoio abaixo do título. */
   description?: string;
-  /** Altura do iframe (px). */
-  height?: number;
 }
 
 /**
  * Exibe o feed do Instagram (Smash Balloon, hospedado no WordPress) via iframe.
  * O shortcode `[instagram-feed feed=1]` só roda no WordPress, por isso o embed.
+ * Para mostrar apenas as fotos (sem cabeçalho/bio), desligue o "Header" nas
+ * configurações do feed no WordPress.
  */
 export default function InstagramFeed({
   title = 'Acompanhe no Instagram',
   description = 'Novidades, eventos e ações do CRF-AL no dia a dia da profissão farmacêutica.',
-  height = 640,
 }: InstagramFeedProps) {
   return (
-    <section className="py-12 sm:py-16 md:py-24 bg-white" aria-labelledby="instagram-title">
+    <section className="bg-white py-10 sm:py-14 md:py-20" aria-labelledby="instagram-title">
       <div className="container-crfal">
-        <div className="mb-8 text-center">
+        <div className="mb-6 text-center sm:mb-8">
           <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-crfal-blue-lighter px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-crfal-blue">
             <Instagram className="h-3.5 w-3.5" />
             Redes sociais
@@ -38,13 +37,12 @@ export default function InstagramFeed({
           </p>
         </div>
 
-        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-crfal-gray-200 shadow-card">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-crfal-gray-200">
           <iframe
             src={INSTAGRAM_FEED_URL}
             title="Feed do Instagram do CRF-AL"
             loading="lazy"
-            className="w-full border-0"
-            style={{ height }}
+            className="block h-[360px] w-full border-0 sm:h-[440px] lg:h-[520px]"
           />
         </div>
       </div>
