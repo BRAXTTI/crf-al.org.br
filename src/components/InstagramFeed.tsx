@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, Instagram, Layers, Play } from 'lucide-react';
 import { INSTAGRAM_FEED_URL, SOCIAL_LINKS } from '@/config/site';
 import { useInstagramFeed } from '@/services/wordpress/hooks';
@@ -28,8 +28,15 @@ export default function InstagramFeed({
 }: InstagramFeedProps) {
   const { data: posts, isPending } = useInstagramFeed();
 
-  const items = posts ?? [];
-  const hasPosts = items.length > 0;
+  // Imagens que falharam ao carregar (ex.: URL do CDN do Instagram expirada)
+  // saem do carrossel; se todas falharem, a seção cai no iframe do feed.
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const visibleItems = useMemo(
+    () => (posts ?? []).filter((post) => !failedImages.has(post.id)),
+    [posts, failedImages]
+  );
+
+  const hasPosts = visibleItems.length > 0;
   const showIframeFallback = !hasPosts && !isPending;
 
   return (
@@ -51,7 +58,12 @@ export default function InstagramFeed({
           </p>
         </div>
 
-        {hasPosts && <PostsCarousel posts={items} />}
+        {hasPosts && (
+          <PostsCarousel
+            posts={visibleItems}
+            onImageError={(id) => setFailedImages((prev) => new Set(prev).add(id))}
+          />
+        )}
 
         {isPending && !hasPosts && (
           <div className="mx-auto flex max-w-5xl gap-4 overflow-hidden" aria-hidden="true">
@@ -96,7 +108,13 @@ const TYPE_LABELS = {
   carousel: 'Carrossel',
 } as const;
 
-function PostsCarousel({ posts }: { posts: CRFInstagramPost[] }) {
+function PostsCarousel({
+  posts,
+  onImageError,
+}: {
+  posts: CRFInstagramPost[];
+  onImageError: (id: string) => void;
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -173,6 +191,7 @@ function PostsCarousel({ posts }: { posts: CRFInstagramPost[] }) {
                   alt={post.caption ? post.caption.slice(0, 120) : 'Publicação do CRF-AL no Instagram'}
                   loading={index < 3 ? 'eager' : 'lazy'}
                   decoding="async"
+                  onError={() => onImageError(post.id)}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
