@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
+import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import {
   LEGACY_WP_UPLOADS_URL,
@@ -36,7 +37,6 @@ import {
   Search,
   Clock,
   ListChecks,
-  ExternalLink,
   Play,
 } from 'lucide-react';
 
@@ -1068,15 +1068,13 @@ export default function RequirementsPage() {
                   </div>
 
                   <div className="flex shrink-0 flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-5   sm:p-6">
-                    <a
+                    <ArrowFillButton
                       href="https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark active:scale-95"
                     >
-                      <ExternalLink className="h-4 w-4" />
                       Acessar CRF AL em Casa
-                    </a>
+                    </ArrowFillButton>
                     {selectedItem.downloadUrl ? (
                       <a
                         href={selectedItem.downloadUrl}

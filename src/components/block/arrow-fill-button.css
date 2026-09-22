@@ -1,0 +1,107 @@
+.crfal-arrow-fill-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  padding: 0 3.5rem 0 1.5rem;
+  border-radius: 1000px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.crfal-arrow-fill-btn__label {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * Camada de preenchimento. Fica exatamente sobreposta ao botão (inset: 0) e
+ * repete a legenda no mesmo lugar, para o texto assumir a cor de preenchimento
+ * apenas dentro do recorte animado. `inset: 0` + `padding: inherit` garantem
+ * que a legenda de baixo e a de cima tenham a mesma métrica (sem fantasma).
+ */
+.crfal-arrow-fill-btn__fill {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: inherit;
+  border-radius: inherit;
+  background-color: var(--btn-fill-bg);
+  color: var(--btn-fill-text);
+  clip-path: inset(0.4rem 0.4rem 0.4rem calc(100% - 2.5rem) round 999px);
+  /* Só o recorte anima: mudar background/color aqui faria a cor "desbotar"
+     por baixo da máscara em movimento. */
+  transition: clip-path 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  will-change: clip-path;
+}
+
+.crfal-arrow-fill-btn__arrow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: auto 0;
+  overflow: hidden;
+  color: var(--btn-arrow);
+  transition: color 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.crfal-arrow-fill-btn:is(:hover, :focus-visible):not(:disabled) .crfal-arrow-fill-btn__arrow {
+  color: var(--btn-arrow-hover);
+}
+
+.crfal-arrow-fill-btn__path {
+  transition: transform 0.45s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+  transform-origin: center center;
+  fill: currentColor;
+}
+
+.crfal-arrow-fill-btn__path:first-child {
+  transform: translateX(-120%) scale(0);
+}
+
+.crfal-arrow-fill-btn:is(:hover, :focus-visible):not(:disabled) .crfal-arrow-fill-btn__path:first-child {
+  transform: translateX(0) scale(1);
+}
+
+.crfal-arrow-fill-btn:is(:hover, :focus-visible):not(:disabled) .crfal-arrow-fill-btn__path:last-child {
+  transform: translateX(120%) scale(0);
+}
+
+.crfal-arrow-fill-btn:is(:hover, :focus-visible):not(:disabled) .crfal-arrow-fill-btn__fill {
+  clip-path: inset(0 round 999px);
+  background-color: var(--btn-fill-bg-hover);
+  color: var(--btn-fill-text-hover);
+}
+
+.crfal-arrow-fill-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crfal-arrow-fill-btn__fill,
+  .crfal-arrow-fill-btn__arrow,
+  .crfal-arrow-fill-btn__path {
+    transition: none;
+  }
+}

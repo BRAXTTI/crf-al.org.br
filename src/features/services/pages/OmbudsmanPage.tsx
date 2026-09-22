@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import SEO from '@/components/SEO';
+import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import {
   ChevronRight,
   MessageSquare,
@@ -211,15 +212,14 @@ export default function OmbudsmanPage() {
               Todo o atendimento da Ouvidoria é feito exclusivamente por essa plataforma. Registre
               sua manifestação e acompanhe o andamento pelo número de protocolo.
             </p>
-            <a
+            <ArrowFillButton
               href={PORTAL_TRANSPARENCIA_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-6 font-semibold text-white transition-all hover:bg-crfal-blue-dark active:scale-[0.98] sm:w-auto"
+              className="w-full sm:w-auto"
             >
               Acessar a plataforma
-              <ExternalLink className="h-4 w-4" />
-            </a>
+            </ArrowFillButton>
           </div>
         </section>
 

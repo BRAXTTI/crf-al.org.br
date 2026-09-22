@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight, Pause, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useBanners } from '@/services/wordpress/hooks';
+import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 
 interface Slide {
   image: string;
@@ -152,15 +154,30 @@ export default function HeroSlider() {
 
                 {slide.cta && (
                   <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-                    <a
-                      href={slide.cta.href}
-                      target={slide.cta.target}
-                      rel={slide.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
-                      className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#ffffff] px-6 py-3 text-sm font-semibold text-crfal-blue transition-all duration-300 hover:bg-crfal-blue-lighter active:scale-[0.98] sm:text-base"
-                    >
-                      {slide.cta.label}
-                      <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                    </a>
+                    {slide.cta.href.startsWith('/') ? (
+                      <ArrowFillButton
+                        as={Link}
+                        to={slide.cta.href}
+                        bgColor="#ffffff"
+                        textColor="#003366"
+                        fillBgColor="#C59B27"
+                        fillTextColor="#0B192C"
+                      >
+                        {slide.cta.label}
+                      </ArrowFillButton>
+                    ) : (
+                      <ArrowFillButton
+                        href={slide.cta.href}
+                        target={slide.cta.target}
+                        rel={slide.cta.target === '_blank' ? 'noopener noreferrer' : undefined}
+                        bgColor="#ffffff"
+                        textColor="#003366"
+                        fillBgColor="#C59B27"
+                        fillTextColor="#0B192C"
+                      >
+                        {slide.cta.label}
+                      </ArrowFillButton>
+                    )}
                   </div>
                 )}
               </div>
