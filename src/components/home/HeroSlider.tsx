@@ -4,6 +4,10 @@ import { useBanners } from '@/services/wordpress/hooks';
 
 interface Slide {
   image: string;
+  /** Imagem alternativa para telas menores que 1024px (opcional). */
+  imageMobile?: string;
+  /** Ponto focal do enquadramento (`object-position`), ex.: `center 30%`. */
+  focalPosition?: string;
   title: string;
   subtitle: string;
   cta?: { label: string; href: string; target?: string };
@@ -42,6 +46,8 @@ export default function HeroSlider() {
       .filter((banner) => banner.image)
       .map((banner) => ({
         image: banner.image as string,
+        imageMobile: banner.imageMobile ?? undefined,
+        focalPosition: banner.focalPoint ?? undefined,
         title: banner.title,
         subtitle: banner.subtitle,
         cta: banner.url
@@ -93,7 +99,7 @@ export default function HeroSlider() {
 
   return (
     <section
-      className="relative flex min-h-[440px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark pt-28 pb-20 sm:min-h-[480px] lg:min-h-[560px] lg:pt-44"
+      className="relative flex min-h-[440px] flex-col items-center justify-center overflow-hidden bg-crfal-blue-dark pt-28 pb-20 sm:min-h-[480px] lg:h-[clamp(560px,40vw,760px)] lg:pt-44"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
@@ -110,13 +116,24 @@ export default function HeroSlider() {
             aria-hidden={!isActive}
             {...(isActive ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` } : {})}
           >
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform [transition-duration:12000ms] ease-out"
-              style={{
-                backgroundImage: `url(${slide.image})`,
-                transform: isActive ? 'scale(1.08)' : 'scale(1)',
-              }}
-            />
+            <picture className="absolute inset-0 block">
+              {slide.imageMobile && (
+                <source media="(max-width: 1023px)" srcSet={slide.imageMobile} />
+              )}
+              <img
+                src={slide.image}
+                alt=""
+                aria-hidden="true"
+                loading={index === 0 ? 'eager' : 'lazy'}
+                fetchPriority={index === 0 ? 'high' : 'auto'}
+                decoding="async"
+                className="h-full w-full object-cover transition-transform [transition-duration:12000ms] ease-out"
+                style={{
+                  objectPosition: slide.focalPosition ?? 'center',
+                  transform: isActive ? 'scale(1.08)' : 'scale(1)',
+                }}
+              />
+            </picture>
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
 
             <div className="container-crfal relative z-10 flex h-full items-center">
