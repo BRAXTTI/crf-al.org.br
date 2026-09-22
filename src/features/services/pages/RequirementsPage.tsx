@@ -897,7 +897,7 @@ export default function RequirementsPage() {
           onEscapeKeyDown={(e) => {
             if (showVideoModal) e.preventDefault();
           }}
-          className="flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl"
+          className="flex max-h-[calc(100dvh-var(--header-offset)-1.5rem)] w-full flex-col gap-0 overflow-hidden rounded-2xl p-0 top-[calc(var(--header-offset)+0.75rem)] translate-y-0 sm:max-w-2xl lg:top-[50%] lg:max-h-[90vh] lg:translate-y-[-50%]"
         >
           {selectedItem && (
             <>
