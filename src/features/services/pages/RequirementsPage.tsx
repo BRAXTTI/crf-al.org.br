@@ -1098,7 +1098,7 @@ export default function RequirementsPage() {
       {showVideoModal && selectedItem &&
         createPortal(
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70"
+            className="pointer-events-auto fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70"
             onClick={() => setShowVideoModal(false)}
           >
             <div
