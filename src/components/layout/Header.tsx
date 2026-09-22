@@ -176,8 +176,12 @@ export default function Header() {
   const navLinkBase =
     'flex items-center gap-1.5 rounded-md px-3 py-2 text-[15px] font-medium tracking-[0.02em] transition-all duration-200';
 
-  const renderSocial = (itemClassName: string, iconClassName: string) => (
-    <ul className="flex items-center gap-1">
+  const renderSocial = (
+    itemClassName: string,
+    iconClassName: string,
+    listClassName = 'flex items-center gap-1'
+  ) => (
+    <ul className={listClassName}>
       {SOCIAL_LINKS.map((social) => {
         const Icon = SOCIAL_ICONS[social.label] ?? ExternalLink;
         return (
@@ -222,13 +226,12 @@ export default function Header() {
                 alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
                 className="h-10 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-12"
               />
-              <span className="min-w-0 border-l border-crfal-gray-200 pl-2.5 leading-tight lg:pl-3">
-                <span className="hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-crfal-blue sm:block lg:text-[11px]">
+              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-2.5 leading-tight sm:block lg:pl-3">
+                <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-crfal-blue lg:text-[11px]">
                   Conselho Regional de Farmácia
                 </span>
                 <span className="block truncate text-sm font-bold text-crfal-blue-dark lg:text-base">
-                  <span className="hidden sm:inline">Estado de Alagoas</span>
-                  <span className="sm:hidden">CRF-AL</span>
+                  Estado de Alagoas
                 </span>
               </span>
             </Link>
@@ -284,9 +287,9 @@ export default function Header() {
       {/* Barra de menu — navegação principal (desktop) */}
       <div className="hidden bg-[#003366] lg:block">
         <div className="container-crfal">
-          <div className="flex h-14 items-center justify-between gap-3">
-            <nav className="-ml-3 flex items-center">
-              {navItems.map((item) => (
+          <div className="relative flex h-14 items-center justify-center">
+            <nav className="flex items-center">
+              {navItems.map((item, index) => (
                 <div
                   key={item.label}
                   className="relative"
@@ -335,10 +338,16 @@ export default function Header() {
                   {item.columns && activeDropdown === item.label && (
                     <>
                       <div
-                        className="absolute left-0 top-full h-4 w-[640px] max-w-[calc(100vw-2rem)]"
+                        className={`absolute top-full h-4 w-[640px] max-w-[calc(100vw-2rem)] ${
+                          index === 0 ? 'left-0' : 'left-1/2 -translate-x-1/2'
+                        }`}
                         aria-hidden
                       />
-                      <div className="absolute left-0 top-[calc(100%+12px)] z-50 w-[640px] max-w-[calc(100vw-2rem)]">
+                      <div
+                        className={`absolute top-[calc(100%+12px)] z-50 w-[640px] max-w-[calc(100vw-2rem)] ${
+                          index === 0 ? 'left-0' : 'left-1/2 -translate-x-1/2'
+                        }`}
+                      >
                         <div className="origin-top overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-2xl animate-scale-in">
                           <div className="grid grid-cols-2 gap-8 p-6">
                             {item.columns.map((column) => (
@@ -402,7 +411,7 @@ export default function Header() {
 
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-white/90 transition-all hover:bg-white/10"
+              className="absolute right-0 flex h-10 w-10 items-center justify-center rounded-lg text-white/90 transition-all hover:bg-white/10"
               aria-label="Buscar"
               aria-expanded={isSearchOpen}
             >
@@ -552,12 +561,13 @@ export default function Header() {
                 </a>
 
                 <div className="mt-4 rounded-xl border border-crfal-gray-200 bg-white p-4">
-                  <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400">
+                  <p className="mb-3 text-center text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400">
                     Redes sociais
                   </p>
                   {renderSocial(
                     'flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white',
-                    'h-[18px] w-[18px]'
+                    'h-[18px] w-[18px]',
+                    'flex items-center justify-center gap-2'
                   )}
                 </div>
 
