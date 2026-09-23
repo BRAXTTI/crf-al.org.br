@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink, Instagram, Layers, Play } from 'lucide-react';
-import { INSTAGRAM_FEED_URL, SOCIAL_LINKS } from '@/config/site';
-import { useInstagramFeed } from '@/services/wordpress/hooks';
-import type { CRFInstagramPost } from '@/services/wordpress/types';
+import { useQuery } from '@tanstack/react-query';
+import { Instagram } from 'lucide-react';
+import { INSTAGRAM_FEED_URL } from '@/config/site';
+
+interface InstagramItem {
+  link: string;
+  image: string;
+}
 
 interface InstagramFeedProps {
   /** Título da seção. */
@@ -11,33 +14,31 @@ interface InstagramFeedProps {
   description?: string;
 }
 
-const INSTAGRAM_PROFILE_URL =
-  SOCIAL_LINKS.find((social) => social.label === 'Instagram')?.href ??
-  'https://www.instagram.com/crfal';
+async function fetchInstagram(): Promise<InstagramItem[]> {
+  const res = await fetch('/api/instagram');
+  if (!res.ok) throw new Error('Falha ao carregar o Instagram');
+  const data = (await res.json()) as { items?: InstagramItem[] };
+  return Array.isArray(data.items) ? data.items : [];
+}
 
 /**
- * Carrossel das publicações do Instagram.
- *
- * Os posts vêm da rota `crfal/v1/instagram` (que lê o cache do Smash Balloon no
- * WordPress). Se a rota ainda não existir ou falhar, a seção cai no iframe do
- * feed hospedado no WordPress — assim o site nunca fica sem a seção.
+ * Carrossel nativo do Instagram (rolagem horizontal), alimentado pela Pages
+ * Function `/api/instagram` que lê o feed do Smash Balloon no WordPress.
+ * Se a API falhar, cai no iframe como fallback.
  */
 export default function InstagramFeed({
   title = 'Acompanhe no Instagram',
   description = 'Novidades, eventos e ações do CRF-AL no dia a dia da profissão farmacêutica.',
 }: InstagramFeedProps) {
-  const { data: posts, isPending } = useInstagramFeed();
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['instagram-feed'],
+    queryFn: fetchInstagram,
+    staleTime: 10 * 60 * 1000,
+    retry: 1,
+  });
 
-  // Imagens que falharam ao carregar (ex.: URL do CDN do Instagram expirada)
-  // saem do carrossel; se todas falharem, a seção cai no iframe do feed.
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
-  const visibleItems = useMemo(
-    () => (posts ?? []).filter((post) => !failedImages.has(post.id)),
-    [posts, failedImages]
-  );
-
-  const hasPosts = visibleItems.length > 0;
-  const showIframeFallback = !hasPosts && !isPending;
+  const items = data ?? [];
+  const showCarousel = !isError && items.length > 0;
 
   return (
     <section className="bg-white py-10 sm:py-14 md:py-20" aria-labelledby="instagram-title">
@@ -58,25 +59,42 @@ export default function InstagramFeed({
           </p>
         </div>
 
-        {hasPosts && (
-          <PostsCarousel
-            posts={visibleItems}
-            onImageError={(id) => setFailedImages((prev) => new Set(prev).add(id))}
-          />
-        )}
-
-        {isPending && !hasPosts && (
-          <div className="mx-auto flex max-w-5xl gap-4 overflow-hidden" aria-hidden="true">
-            {Array.from({ length: 4 }).map((_, index) => (
+        {isLoading ? (
+          <div className="mx-auto flex max-w-5xl gap-4 overflow-hidden" aria-hidden>
+            {Array.from({ length: 4 }).map((_, i) => (
               <div
-                key={index}
-                className="hidden aspect-square w-[78%] shrink-0 animate-pulse rounded-2xl bg-crfal-gray-100 sm:block sm:w-[300px]"
+                key={i}
+                className="aspect-square w-[72%] shrink-0 animate-pulse rounded-xl bg-crfal-gray-100 sm:w-[42%] lg:w-[23%]"
               />
             ))}
           </div>
-        )}
-
-        {showIframeFallback && (
+        ) : showCarousel ? (
+          <div
+            className="scrollbar-hide mx-auto flex max-w-5xl snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
+            role="region"
+            aria-label="Publicações do Instagram do CRF-AL"
+          >
+            {items.map((item) => (
+              <a
+                key={item.link}
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-square w-[72%] shrink-0 snap-start overflow-hidden rounded-xl border border-crfal-gray-200 sm:w-[42%] lg:w-[23%]"
+              >
+                <img
+                  src={item.image}
+                  alt="Publicação do Instagram do CRF-AL"
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <span className="absolute inset-0 flex items-center justify-center bg-crfal-blue/0 opacity-0 transition-all duration-300 group-hover:bg-crfal-blue/40 group-hover:opacity-100">
+                  <Instagram className="h-6 w-6 text-white" />
+                </span>
+              </a>
+            ))}
+          </div>
+        ) : (
           <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-crfal-gray-200">
             <iframe
               src={INSTAGRAM_FEED_URL}
@@ -86,132 +104,7 @@ export default function InstagramFeed({
             />
           </div>
         )}
-
-        <div className="mt-8 text-center">
-          <a
-            href={INSTAGRAM_PROFILE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-light"
-          >
-            Ver mais no Instagram
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        </div>
       </div>
     </section>
-  );
-}
-
-const TYPE_LABELS = {
-  video: 'Vídeo',
-  carousel: 'Carrossel',
-} as const;
-
-function PostsCarousel({
-  posts,
-  onImageError,
-}: {
-  posts: CRFInstagramPost[];
-  onImageError: (id: string) => void;
-}) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(false);
-  const [reduceMotion] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-
-  const updateEdges = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const maxScroll = track.scrollWidth - track.clientWidth;
-    setAtStart(track.scrollLeft <= 2);
-    setAtEnd(track.scrollLeft >= maxScroll - 2);
-  }, []);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    updateEdges();
-    track.addEventListener('scroll', updateEdges, { passive: true });
-    window.addEventListener('resize', updateEdges);
-    return () => {
-      track.removeEventListener('scroll', updateEdges);
-      window.removeEventListener('resize', updateEdges);
-    };
-  }, [updateEdges]);
-
-  const scrollByCard = useCallback(
-    (direction: 1 | -1) => {
-      const track = trackRef.current;
-      if (!track) return;
-      const card = track.firstElementChild as HTMLElement | null;
-      const gap = 16;
-      const amount = card ? card.offsetWidth + gap : track.clientWidth * 0.8;
-      track.scrollBy({ left: amount * direction, behavior: reduceMotion ? 'auto' : 'smooth' });
-    },
-    [reduceMotion]
-  );
-
-  const arrowClass =
-    'flex h-11 w-11 items-center justify-center rounded-full border border-crfal-gray-200 bg-white text-crfal-blue shadow-card transition-all hover:bg-crfal-blue hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-crfal-blue';
-
-  return (
-    <div className="relative">
-      <div className="mb-4 flex justify-end gap-2 sm:mb-5">
-        <button type="button" onClick={() => scrollByCard(-1)} disabled={atStart} className={arrowClass} aria-label="Publicações anteriores">
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-        <button type="button" onClick={() => scrollByCard(1)} disabled={atEnd} className={arrowClass} aria-label="Próximas publicações">
-          <ChevronRight className="h-5 w-5" />
-        </button>
-      </div>
-
-      <div
-        ref={trackRef}
-        tabIndex={0}
-        role="region"
-        aria-label="Publicações do Instagram"
-        className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light"
-      >
-        {posts.map((post, index) => {
-          const typeLabel = post.type !== 'image' ? TYPE_LABELS[post.type] : null;
-          return (
-            <a
-              key={post.id || index}
-              href={post.permalink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-50 sm:w-[300px]"
-            >
-              <div className="aspect-square overflow-hidden">
-                <img
-                  src={post.image}
-                  alt={post.caption ? post.caption.slice(0, 120) : 'Publicação do CRF-AL no Instagram'}
-                  loading={index < 3 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  onError={() => onImageError(post.id)}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-
-              {typeLabel && (
-                <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-                  {post.type === 'video' ? <Play className="h-3 w-3" /> : <Layers className="h-3 w-3" />}
-                  {typeLabel}
-                </span>
-              )}
-
-              {post.caption && (
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-3 text-xs leading-snug text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-                  <span className="line-clamp-2">{post.caption}</span>
-                </span>
-              )}
-            </a>
-          );
-        })}
-      </div>
-    </div>
   );
 }
