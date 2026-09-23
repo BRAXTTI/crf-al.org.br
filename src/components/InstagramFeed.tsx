@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Instagram } from 'lucide-react';
-import { INSTAGRAM_FEED_URL } from '@/config/site';
+import { INSTAGRAM_PROFILE_URL } from '@/config/site';
 
 interface InstagramItem {
   link: string;
@@ -23,8 +23,8 @@ async function fetchInstagram(): Promise<InstagramItem[]> {
 
 /**
  * Carrossel nativo do Instagram (rolagem horizontal), alimentado pela Pages
- * Function `/api/instagram` que lê o feed do Smash Balloon no WordPress.
- * Se a API falhar, cai no iframe como fallback.
+ * Function `/api/instagram` (que lê o feed do Smash Balloon no WordPress).
+ * Se a API falhar, mostra um botão para o perfil — nunca uma grade quebrada.
  */
 export default function InstagramFeed({
   title = 'Acompanhe no Instagram',
@@ -86,22 +86,25 @@ export default function InstagramFeed({
                   src={item.image}
                   alt="Publicação do Instagram do CRF-AL"
                   loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="h-full w-full object-cover"
                 />
-                <span className="absolute inset-0 flex items-center justify-center bg-crfal-blue/0 opacity-0 transition-all duration-300 group-hover:bg-crfal-blue/40 group-hover:opacity-100">
+                <span className="absolute inset-0 flex items-center justify-center bg-crfal-blue/0 opacity-0 transition-all duration-300 [@media(hover:hover)]:group-hover:bg-crfal-blue/40 [@media(hover:hover)]:group-hover:opacity-100">
                   <Instagram className="h-6 w-6 text-white" />
                 </span>
               </a>
             ))}
           </div>
         ) : (
-          <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-crfal-gray-200">
-            <iframe
-              src={INSTAGRAM_FEED_URL}
-              title="Feed do Instagram do CRF-AL"
-              loading="lazy"
-              className="block h-[360px] w-full border-0 sm:h-[440px] lg:h-[520px]"
-            />
+          <div className="text-center">
+            <a
+              href={INSTAGRAM_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
+            >
+              <Instagram className="h-4 w-4" />
+              Ver no Instagram
+            </a>
           </div>
         )}
       </div>
