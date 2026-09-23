@@ -3,9 +3,14 @@
  * Usada pela Pages Function (/api/instagram) e pelo middleware de dev do Vite.
  */
 
+export interface InstagramFeedItem {
+  link: string;
+  image: string;
+}
+
 export const DEFAULT_FEED_URL = 'https://wordpress.crf-al.org.br/instagram/';
 
-export function decodeEntities(value) {
+export function decodeEntities(value: string): string {
   return value
     .replace(/&#0?38;/g, '&')
     .replace(/&amp;/g, '&')
@@ -15,9 +20,9 @@ export function decodeEntities(value) {
     .replace(/&gt;/g, '>');
 }
 
-export function parseItems(html) {
-  const items = [];
-  const seen = new Set();
+export function parseItems(html: string): InstagramFeedItem[] {
+  const items: InstagramFeedItem[] = [];
+  const seen = new Set<string>();
   const anchorRe = /<a[^>]*class="[^"]*sbi_photo[^"]*"[^>]*>/g;
   for (const match of html.matchAll(anchorRe)) {
     const tag = match[0];
@@ -27,7 +32,7 @@ export function parseItems(html) {
       const set = tag.match(/data-img-src-set="([^"]+)"/)?.[1];
       if (set) {
         try {
-          const parsed = JSON.parse(decodeEntities(set));
+          const parsed = JSON.parse(decodeEntities(set)) as { d?: string; h?: string; m?: string };
           img = parsed.d || parsed.h || parsed.m;
         } catch {
           /* ignora */
@@ -44,7 +49,7 @@ export function parseItems(html) {
   return items;
 }
 
-export async function getInstagramItems(feedUrl = DEFAULT_FEED_URL) {
+export async function getInstagramItems(feedUrl: string = DEFAULT_FEED_URL): Promise<InstagramFeedItem[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 10000);
   try {

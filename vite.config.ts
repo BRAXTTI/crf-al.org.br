@@ -1,7 +1,7 @@
 import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig, type Plugin } from "vite"
-import { getInstagramItems } from "./functions/api/_parse.js"
+import { getInstagramItems } from "./functions/api/_parse"
 
 /**
  * Em dev, o Vite não executa as Pages Functions. Este middleware replica

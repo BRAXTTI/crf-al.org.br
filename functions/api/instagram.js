@@ -7,7 +7,7 @@
  *
  * Cache na borda por 15 min (acompanha o cache do próprio plugin).
  */
-import { DEFAULT_FEED_URL, getInstagramItems } from './_parse.js';
+import { DEFAULT_FEED_URL, getInstagramItems } from './_parse';
 
 const CACHE_TTL_SECONDS = 900;
 
