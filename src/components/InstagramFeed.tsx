@@ -44,13 +44,26 @@ export default function InstagramFeed({
   const trackRef = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const getStep = useCallback(() => {
+    const el = trackRef.current;
+    const first = el?.querySelector('a');
+    if (!el || !first) return 0;
+    return first.getBoundingClientRect().width + 16;
+  }, []);
 
   const updateArrows = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
     setCanPrev(el.scrollLeft > 4);
     setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
+    const step = getStep();
+    if (step > 0) {
+      const index = Math.round(el.scrollLeft / step);
+      setActiveIndex(Math.max(0, Math.min(items.length - 1, index)));
+    }
+  }, [getStep, items.length]);
 
   useEffect(() => {
     const el = trackRef.current;
@@ -62,15 +75,21 @@ export default function InstagramFeed({
       el.removeEventListener('scroll', updateArrows);
       window.removeEventListener('resize', updateArrows);
     };
-  }, [updateArrows, items.length]);
+  }, [updateArrows]);
 
   const scrollByCard = (direction: 1 | -1) => {
     const el = trackRef.current;
     if (!el) return;
-    const first = el.querySelector('a');
-    const gap = 16;
-    const step = first ? first.getBoundingClientRect().width + gap : el.clientWidth * 0.8;
+    const step = getStep() || el.clientWidth * 0.8;
     el.scrollBy({ left: direction * step, behavior: 'smooth' });
+  };
+
+  const scrollToIndex = (index: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const step = getStep();
+    if (step <= 0) return;
+    el.scrollTo({ left: index * step, behavior: 'smooth' });
   };
 
   const arrowClass =
@@ -152,6 +171,23 @@ export default function InstagramFeed({
             >
               <ChevronRight className="h-5 w-5" />
             </button>
+
+            <div className="mt-6 flex justify-center gap-2" role="tablist" aria-label="Navegação das publicações">
+              {items.map((item, index) => (
+                <button
+                  key={item.link}
+                  type="button"
+                  onClick={() => scrollToIndex(index)}
+                  aria-label={`Ir para a publicação ${index + 1}`}
+                  aria-current={index === activeIndex}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    index === activeIndex
+                      ? 'w-6 bg-crfal-blue'
+                      : 'w-2.5 bg-crfal-gray-300 hover:bg-crfal-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="text-center">
