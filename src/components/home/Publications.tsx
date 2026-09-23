@@ -106,7 +106,7 @@ export default function Publications() {
                 <Link
                   key={pub.id}
                   to={`/imprensa/noticias/${pub.id}`}
-                  className="group block w-[72%] shrink-0 snap-start text-center sm:w-[42%] lg:w-[23%]"
+                  className="group flex w-[78%] shrink-0 snap-start flex-col text-center sm:w-[46%] lg:w-[31%]"
                 >
                   <div className="relative aspect-video overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-100">
                     <img
@@ -125,10 +125,10 @@ export default function Publications() {
                       className="relative z-10 h-full w-full object-contain transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:scale-105"
                     />
                   </div>
-                  <h3 className="mx-auto mt-4 max-w-md text-base font-bold leading-snug text-crfal-blue sm:text-lg">
+                  <h3 className="mx-auto mb-4 mt-4 line-clamp-2 max-w-md text-base font-bold leading-snug text-crfal-blue sm:text-lg">
                     {pub.title}
                   </h3>
-                  <span className="mt-3 inline-block rounded-md bg-primary px-6 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
+                  <span className="mt-auto inline-flex min-h-[44px] items-center justify-center self-center rounded-md bg-primary px-6 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
                     Leia mais
                   </span>
                 </Link>
