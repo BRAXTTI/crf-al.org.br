@@ -1,5 +1,6 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Instagram } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
 import { INSTAGRAM_PROFILE_URL } from '@/config/site';
 
 interface InstagramItem {
@@ -40,6 +41,41 @@ export default function InstagramFeed({
   const items = data ?? [];
   const showCarousel = !isError && items.length > 0;
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    setCanPrev(el.scrollLeft > 4);
+    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    updateArrows();
+    el.addEventListener('scroll', updateArrows, { passive: true });
+    window.addEventListener('resize', updateArrows);
+    return () => {
+      el.removeEventListener('scroll', updateArrows);
+      window.removeEventListener('resize', updateArrows);
+    };
+  }, [updateArrows, items.length]);
+
+  const scrollByCard = (direction: 1 | -1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const first = el.querySelector('a');
+    const gap = 16;
+    const step = first ? first.getBoundingClientRect().width + gap : el.clientWidth * 0.8;
+    el.scrollBy({ left: direction * step, behavior: 'smooth' });
+  };
+
+  const arrowClass =
+    'absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-crfal-gray-200 bg-white/95 text-crfal-blue shadow-card transition-all hover:bg-white hover:scale-105 disabled:pointer-events-none disabled:opacity-0 sm:flex';
+
   return (
     <section className="bg-white py-10 sm:py-14 md:py-20" aria-labelledby="instagram-title">
       <div className="container-crfal">
@@ -69,30 +105,53 @@ export default function InstagramFeed({
             ))}
           </div>
         ) : showCarousel ? (
-          <div
-            className="scrollbar-hide mx-auto flex max-w-5xl snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
-            role="region"
-            aria-label="Publicações do Instagram do CRF-AL"
-          >
-            {items.map((item) => (
-              <a
-                key={item.link}
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative aspect-square w-[72%] shrink-0 snap-start overflow-hidden rounded-xl border border-crfal-gray-200 sm:w-[42%] lg:w-[23%]"
-              >
-                <img
-                  src={item.image}
-                  alt="Publicação do Instagram do CRF-AL"
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
-                <span className="absolute inset-0 flex items-center justify-center bg-crfal-blue/0 opacity-0 transition-all duration-300 [@media(hover:hover)]:group-hover:bg-crfal-blue/40 [@media(hover:hover)]:group-hover:opacity-100">
-                  <Instagram className="h-6 w-6 text-white" />
-                </span>
-              </a>
-            ))}
+          <div className="relative mx-auto max-w-5xl">
+            <button
+              type="button"
+              onClick={() => scrollByCard(-1)}
+              disabled={!canPrev}
+              aria-label="Publicações anteriores"
+              className={`${arrowClass} left-0 lg:-left-4`}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+
+            <div
+              ref={trackRef}
+              className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
+              role="region"
+              aria-label="Publicações do Instagram do CRF-AL"
+            >
+              {items.map((item) => (
+                <a
+                  key={item.link}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative aspect-square w-[72%] shrink-0 snap-start overflow-hidden rounded-xl border border-crfal-gray-200 sm:w-[42%] lg:w-[23%]"
+                >
+                  <img
+                    src={item.image}
+                    alt="Publicação do Instagram do CRF-AL"
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center bg-crfal-blue/0 opacity-0 transition-all duration-300 [@media(hover:hover)]:group-hover:bg-crfal-blue/40 [@media(hover:hover)]:group-hover:opacity-100">
+                    <Instagram className="h-6 w-6 text-white" />
+                  </span>
+                </a>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollByCard(1)}
+              disabled={!canNext}
+              aria-label="Próximas publicações"
+              className={`${arrowClass} right-0 lg:-right-4`}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
           </div>
         ) : (
           <div className="text-center">
