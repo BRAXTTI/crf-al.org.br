@@ -10,13 +10,13 @@ SPA do Conselho Regional de Farmácia de Alagoas. Conteúdo dinâmico (notícias
 ## Stack
 
 - **Vite 7** + **React 19** + **TypeScript** (strict, `verbatimModuleSyntax`, alias `@/` → `src/`)
-- **react-router-dom** 7 (`BrowserRouter` em `src/router/app-router.tsx`)
+- **react-router-dom** 7 (`createBrowserRouter`/`RouterProvider` em `src/router/app-router.tsx`; rota catch-all `*` → `NotFoundPage`)
 - **TanStack Query** (cache 5 min, `retry: 2`, sem refetch no foco)
 - **Tailwind 3** + tokens `crfal.*` / `primary` (`#003366`) / `secondary` (`#00875A`)
 - **shadcn/ui** (estilo New York, sem RSC) em `src/components/ui` + `cn()` em `@/lib/utils`
 - **lucide-react**, **Radix Dialog**, **DOMPurify**, **react-helmet-async**
 - Sem Next.js, sem backend próprio, sem test runner no `package.json`
-- Deploy: SPA estática (`dist/`); `public/_redirects` (Cloudflare/Netlify) e `dist/200.html` (Surge). `surge` está em **devDependencies** — use `npx surge`, não o binário global.
+- Deploy: SPA estática (`dist/`) no Cloudflare Pages. **Sem `_redirects`/`200.html`**: o fallback de SPA é automático na plataforma (não criar `404.html` na raiz). `_headers` é mantido (HSTS, CSP, cache).
 
 ## Como rodar
 
@@ -25,7 +25,7 @@ npm install
 cp .env.example .env   # opcional; defaults já apontam para produção
 npm run dev            # Vite, tipicamente http://localhost:5173
 npm run lint
-npm run build          # tsc -b && vite build && sitemaps && copia 200.html
+npm run build          # tsc -b && vite build && gera sitemaps
 npm run preview        # preview do dist
 ```
 
