@@ -74,7 +74,7 @@ export default function InstagramFeed({
   };
 
   const arrowClass =
-    'absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-crfal-gray-200 bg-white/95 text-crfal-blue shadow-card transition-all hover:bg-white hover:scale-105 disabled:pointer-events-none disabled:opacity-0 sm:flex';
+    'absolute top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-crfal-gray-200 bg-white/95 text-crfal-blue shadow-card transition-all hover:bg-white hover:scale-105 disabled:pointer-events-none disabled:opacity-0 sm:flex';
 
   return (
     <section className="bg-white py-10 sm:py-14 md:py-20" aria-labelledby="instagram-title">
