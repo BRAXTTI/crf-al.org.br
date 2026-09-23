@@ -181,10 +181,6 @@ export default function NewsPage() {
   const totalPages = data?.totalPages ?? 1;
   const totalPosts = data?.total ?? 0;
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
     setActiveTag('all');

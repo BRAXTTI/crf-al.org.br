@@ -46,9 +46,19 @@ function newsUrl(route: string, params: Record<string, string> = {}): string {
 
 async function wpRequest(url: string, signal?: AbortSignal): Promise<Response> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+  let timedOut = false;
+
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, DEFAULT_TIMEOUT_MS);
+
   const onAbort = () => controller.abort();
-  signal?.addEventListener('abort', onAbort, { once: true });
+  if (signal?.aborted) {
+    controller.abort();
+  } else {
+    signal?.addEventListener('abort', onAbort, { once: true });
+  }
 
   try {
     const response = await fetch(url, { signal: controller.signal });
@@ -57,7 +67,10 @@ async function wpRequest(url: string, signal?: AbortSignal): Promise<Response> {
     }
     return response;
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    // Cancelamento do chamador (ex.: TanStack Query abortou a query): propaga o
+    // AbortError original em vez de mascará-lo como timeout.
+    if (signal?.aborted) throw error;
+    if (timedOut) {
       throw new Error('A requisição ao WordPress excedeu o tempo limite.');
     }
     throw error;
@@ -162,7 +175,14 @@ export function sanitizeWP(html: string): string {
   return DOMPurify.sanitize(html);
 }
 
-/** Remove tags HTML e retorna texto puro. */
+/**
+ * Remove tags HTML e decodifica entidades (ex.: `&ccedil;` -> `ç`) em texto puro.
+ * Também descarta o bloco "Ver mais" que o tema do WordPress legado anexa ao excerpt.
+ */
 export function stripHTML(html: string): string {
-  return html.replace(/<[^>]*>?/gm, '').trim();
+  const semReadMore = html.replace(
+    /<div[^>]*\bclass="[^"]*read-more-wrapper[^"]*"[^>]*>[\s\S]*?<\/div>/gi,
+    ''
+  );
+  return decodeHTMLEntities(semReadMore.replace(/<[^>]*>?/gm, '')).trim();
 }

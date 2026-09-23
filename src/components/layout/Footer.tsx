@@ -3,7 +3,6 @@ import {
   Phone,
   Clock,
   ChevronRight,
-  ExternalLink,
 } from 'lucide-react';
 import { SOCIAL_LINKS } from '@/config/site';
 import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
@@ -166,23 +165,6 @@ export default function Footer() {
                   );
                 })}
               </div>
-
-              <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="font-semibold text-sm mb-2">Assine nossa newsletter</h4>
-                <p className="text-xs text-white/70 mb-3">
-                  Receba as últimas notícias e atualizações
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="Seu e-mail"
-                    className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-sm placeholder:text-white/50 focus:outline-none focus:border-crfal-blue-light"
-                  />
-                  <button className="px-3 py-2 bg-[#C59B27] hover:bg-[#A9821F] text-white rounded-lg transition-colors">
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -201,10 +183,6 @@ export default function Footer() {
                 <span className="text-white/30">|</span>
                 <a href="/termos-de-uso" className="hover:text-white transition-colors">
                   Termos de Uso
-                </a>
-                <span className="text-white/30">|</span>
-                <a href="#acessibilidade" className="hover:text-white transition-colors">
-                  Acessibilidade
                 </a>
               </div>
             </div>

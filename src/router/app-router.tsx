@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import HomePage from '@/features/home/pages/HomePage';
 import InstitutionalPage from '@/features/institutional/pages/InstitutionalPage';
@@ -24,39 +24,43 @@ import AfastamentoProvisorioPage from '@/features/fiscalizacao/pages/Afastamento
 import LegislacaoPage from '@/features/fiscalizacao/pages/LegislacaoPage';
 import EventosPage from '@/features/events/pages/EventosPage';
 import EventoDetailPage from '@/features/events/pages/EventoDetailPage';
+import NotFoundPage from '@/features/not-found/pages/NotFoundPage';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: 'instituicao', element: <InstitutionalPage /> },
+      { path: 'instituicao/sobre-conselho', element: <SobreConselhoPage /> },
+      { path: 'instituicao/missao-visao', element: <Navigate to="/instituicao/sobre-conselho" replace /> },
+      { path: 'instituicao/diretoria', element: <BoardPage /> },
+      { path: 'instituicao/estatuto', element: <StatutePage /> },
+      { path: 'politica-de-privacidade', element: <PrivacyPolicyPage /> },
+      { path: 'termos-de-uso', element: <TermsOfUsePage /> },
+      { path: 'servicos/requerimentos', element: <RequirementsPage /> },
+      { path: 'servicos/tutoriais', element: <TutorialsPage /> },
+      { path: 'servicos/ouvidoria', element: <OmbudsmanPage /> },
+      { path: 'imprensa/noticias', element: <NewsPage /> },
+      { path: 'imprensa/noticias/:id', element: <NewsDetailPage /> },
+      { path: 'contato', element: <ContactPage /> },
+      { path: 'publicacao/:slug', element: <PublicationDetailPage /> },
+      { path: 'fiscalizacao', element: <FiscalizacaoPage /> },
+      { path: 'fiscalizacao/papel-da-fiscalizacao', element: <PapelFiscalizacaoPage /> },
+      { path: 'fiscalizacao/instrumentos-da-fiscalizacao', element: <InstrumentosFiscalizacaoPage /> },
+      { path: 'fiscalizacao/plano-de-fiscalizacao-anual', element: <PlanoFiscalizacaoAnualPage /> },
+      { path: 'fiscalizacao/relatorios', element: <RelatoriosFiscalizacaoPage /> },
+      { path: 'fiscalizacao/processo-administrativo-fiscal', element: <ProcessoAdministrativoFiscalPage /> },
+      { path: 'fiscalizacao/afastamento-provisorio', element: <AfastamentoProvisorioPage /> },
+      { path: 'legislacao', element: <LegislacaoPage /> },
+      { path: 'eventos', element: <EventosPage /> },
+      { path: 'eventos/:slug', element: <EventoDetailPage /> },
+      { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+]);
 
 export default function AppRouter() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<HomePage />} />
-          <Route path="instituicao" element={<InstitutionalPage />} />
-          <Route path="instituicao/sobre-conselho" element={<SobreConselhoPage />} />
-          <Route path="instituicao/missao-visao" element={<Navigate to="/instituicao/sobre-conselho" replace />} />
-          <Route path="instituicao/diretoria" element={<BoardPage />} />
-          <Route path="instituicao/estatuto" element={<StatutePage />} />
-          <Route path="politica-de-privacidade" element={<PrivacyPolicyPage />} />
-          <Route path="termos-de-uso" element={<TermsOfUsePage />} />
-          <Route path="servicos/requerimentos" element={<RequirementsPage />} />
-          <Route path="servicos/tutoriais" element={<TutorialsPage />} />
-          <Route path="servicos/ouvidoria" element={<OmbudsmanPage />} />
-          <Route path="imprensa/noticias" element={<NewsPage />} />
-          <Route path="imprensa/noticias/:id" element={<NewsDetailPage />} />
-          <Route path="contato" element={<ContactPage />} />
-          <Route path="publicacao/:slug" element={<PublicationDetailPage />} />
-          <Route path="fiscalizacao" element={<FiscalizacaoPage />} />
-          <Route path="fiscalizacao/papel-da-fiscalizacao" element={<PapelFiscalizacaoPage />} />
-          <Route path="fiscalizacao/instrumentos-da-fiscalizacao" element={<InstrumentosFiscalizacaoPage />} />
-          <Route path="fiscalizacao/plano-de-fiscalizacao-anual" element={<PlanoFiscalizacaoAnualPage />} />
-          <Route path="fiscalizacao/relatorios" element={<RelatoriosFiscalizacaoPage />} />
-          <Route path="fiscalizacao/processo-administrativo-fiscal" element={<ProcessoAdministrativoFiscalPage />} />
-          <Route path="fiscalizacao/afastamento-provisorio" element={<AfastamentoProvisorioPage />} />
-          <Route path="legislacao" element={<LegislacaoPage />} />
-          <Route path="eventos" element={<EventosPage />} />
-          <Route path="eventos/:slug" element={<EventoDetailPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
+  return <RouterProvider router={router} />;
 }

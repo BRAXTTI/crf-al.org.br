@@ -52,7 +52,7 @@ const cards: CardItem[] = [
   {
     title: 'Publicações',
     description: 'Notícias, comunicados, publicações oficiais e conteúdo institucional do Conselho.',
-    href: '#publicacoes',
+    href: '/imprensa/noticias',
     icon: FileText,
   },
 ];

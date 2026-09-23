@@ -9,7 +9,6 @@ import {
   BookOpen,
   Clock,
   Filter,
-  Download,
 } from 'lucide-react';
 import { servicesData, type ServiceItem } from '@/data/servicos';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
@@ -273,10 +272,6 @@ export default function TutorialsPage() {
                             >
                               Acessar Serviço
                             </a>
-                            <button className="btn-outline text-sm flex items-center gap-2">
-                              <Download className="w-4 h-4" />
-                              Baixar Tutorial
-                            </button>
                           </div>
                         </div>
                       </div>

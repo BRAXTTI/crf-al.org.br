@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
@@ -85,10 +85,6 @@ export default function NewsDetailPage() {
 
   const { data: post, isLoading, isError, error, refetch } = usePost(postId);
   const { data: relatedPosts } = useRelatedPosts(postId, 3);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [id]);
 
   const related: RelatedItem[] =
     relatedPosts?.map((item) => ({

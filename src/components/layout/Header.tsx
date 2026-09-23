@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
-  Search,
   Menu,
   X,
   User,
@@ -136,7 +135,6 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [expandedMobileItems, setExpandedMobileItems] = useState<string[]>([]);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -166,7 +164,6 @@ export default function Header() {
     event.preventDefault();
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
-    setIsSearchOpen(false);
     navigate('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -271,15 +268,6 @@ export default function Header() {
                 CRF AL em Casa
               </a>
             </div>
-
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-crfal-blue transition-colors hover:bg-crfal-blue-lighter lg:hidden"
-              aria-label="Buscar"
-              aria-expanded={isSearchOpen}
-            >
-              <Search className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>
@@ -408,36 +396,9 @@ export default function Header() {
                 </div>
               ))}
             </nav>
-
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="absolute right-0 flex h-10 w-10 items-center justify-center rounded-lg text-white/90 transition-all hover:bg-white/10"
-              aria-label="Buscar"
-              aria-expanded={isSearchOpen}
-            >
-              <Search className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>
-
-      {/* Busca — comum a desktop e mobile */}
-      {isSearchOpen && (
-        <div className="border-b border-crfal-gray-200 bg-white shadow-card">
-          <div className="container-crfal py-3">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar no site..."
-                className="w-full rounded-xl border border-crfal-gray-200 bg-white px-4 py-3 pr-12 text-neutral-800 shadow-card focus:border-crfal-blue focus:outline-none focus:ring-2 focus:ring-crfal-blue/20"
-              />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-crfal-gray-500 transition-colors hover:text-crfal-blue">
-                <Search className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Menu mobile */}
       {isMobileMenuOpen &&
