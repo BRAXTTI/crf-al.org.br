@@ -10,6 +10,12 @@ dist/
 crf-al.WordPress.*.xml
 *.log
 
+# Exportações do Google Search Console (dados de propriedade, não versionar)
+*-Performance-on-Search-*/
+*-Performance-on-Search-*.zip
+*-Coverage-*/
+*-Coverage-*.zip
+
 # Sistema operacional / editor
 .DS_Store
 .idea/
