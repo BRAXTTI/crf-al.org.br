@@ -111,7 +111,7 @@ export default function PageHero({
 
       {decoration ?? DEFAULT_DECORATION}
 
-      <div className="container-crfal relative z-10">
+      <div className="container-crfal relative z-10 w-full">
         {breadcrumb && breadcrumb.length > 0 && (
           <nav
             aria-label="Breadcrumb"
