@@ -51,6 +51,9 @@ export interface PageHeroProps {
 const TITLE_CLASSES =
   'font-display text-3xl font-semibold leading-[1.1] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl';
 
+/** Imagem de fundo padrão do hero (desktop). Ver proporção no topo do arquivo. */
+const DEFAULT_BACKGROUND_IMAGE = '/images/page-hero.jpg';
+
 const DEFAULT_DECORATION = (
   <div className="absolute inset-0 opacity-10" aria-hidden>
     <div className="absolute left-10 top-10 h-72 w-72 rounded-full bg-white blur-3xl" />
@@ -67,7 +70,7 @@ export default function PageHero({
   eyebrowIcon,
   children,
   aside,
-  backgroundImage,
+  backgroundImage = DEFAULT_BACKGROUND_IMAGE,
   backgroundImageMobile,
   decoration,
   className,
@@ -80,9 +83,11 @@ export default function PageHero({
       id={id}
       className={`relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pb-14 pt-28 md:pb-20 lg:pt-44 ${className ?? ''}`}
     >
-      {backgroundImage ? (
+      {backgroundImage && (
         <>
-          <picture className="absolute inset-0 block">
+          <picture
+            className={`absolute inset-0 ${backgroundImageMobile ? 'block' : 'hidden md:block'}`}
+          >
             {backgroundImageMobile && (
               <source media="(max-width: 767px)" srcSet={backgroundImageMobile} />
             )}
@@ -93,16 +98,12 @@ export default function PageHero({
               className="h-full w-full object-cover"
             />
           </picture>
+          {/* Overlay: escurece a esquerda (texto) e revela a arte à direita. */}
           <div
-            className="absolute inset-0 bg-gradient-to-br from-crfal-blue/92 via-crfal-blue-dark/92 to-[#002a4a]/95"
+            className="absolute inset-0 bg-gradient-to-r from-crfal-blue-dark/95 via-crfal-blue-dark/85 to-crfal-blue-dark/35"
             aria-hidden
           />
         </>
-      ) : (
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a]"
-          aria-hidden
-        />
       )}
 
       {decoration ?? DEFAULT_DECORATION}
