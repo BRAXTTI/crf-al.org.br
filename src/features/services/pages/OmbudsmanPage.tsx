@@ -136,8 +136,8 @@ export default function OmbudsmanPage() {
             <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
           </div>
         }
-      >
-        <dl className="grid max-w-lg grid-cols-3 gap-3">
+        aside={
+          <dl className="grid w-full max-w-lg grid-cols-3 gap-3">
           {[
             { valor: '30', rotulo: 'Dias p/ resposta' },
             { valor: '5', rotulo: 'Tipos de manifestação' },
@@ -153,8 +153,9 @@ export default function OmbudsmanPage() {
               </dt>
             </div>
           ))}
-        </dl>
-      </PageHero>
+          </dl>
+        }
+      />
 
       <main className="container-crfal py-10 md:py-14">
         {/* Introdução + plataforma */}

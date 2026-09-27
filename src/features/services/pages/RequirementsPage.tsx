@@ -658,8 +658,8 @@ export default function RequirementsPage() {
             <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
           </div>
         }
-      >
-        <dl className="grid max-w-lg grid-cols-3 gap-3">
+        aside={
+          <dl className="grid w-full max-w-lg grid-cols-3 gap-3">
           {[
             { valor: ESTATISTICAS.servicos, rotulo: 'Serviços' },
             { valor: ESTATISTICAS.formularios, rotulo: 'Formulários' },
@@ -675,8 +675,9 @@ export default function RequirementsPage() {
               </dt>
             </div>
           ))}
-        </dl>
-      </PageHero>
+          </dl>
+        }
+      />
 
       <main className="container-crfal py-8 md:py-12">
         {/* Toolbar sticky */}

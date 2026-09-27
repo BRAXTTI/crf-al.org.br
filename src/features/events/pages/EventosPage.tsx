@@ -397,8 +397,8 @@ export default function EventosPage() {
             <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
           </div>
         }
-      >
-        <dl className="grid max-w-lg grid-cols-3 gap-3">
+        aside={
+          <dl className="grid w-full max-w-lg grid-cols-3 gap-3">
           {[
             { valor: ativos.length, rotulo: 'Próximos' },
             { valor: ativos.filter((e) => e.modalidade === 'online').length, rotulo: 'Online' },
@@ -417,8 +417,9 @@ export default function EventosPage() {
               </dt>
             </div>
           ))}
-        </dl>
-      </PageHero>
+          </dl>
+        }
+      />
 
       <main className="container-crfal py-8 md:py-12">
         {isLoading ? (

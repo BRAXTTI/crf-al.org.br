@@ -10,12 +10,15 @@ import { Link } from 'react-router-dom';
  * padronizados no mobile e no desktop. Cada página injeta seus extras
  * (estatísticas, badges, cards) via `children` ou `aside`.
  *
- * Proporção da imagem de fundo (`backgroundImage` / `backgroundImageMobile`):
- *  - Desktop (≥ 768px): 2,5:1 a 3:1 — recomendado ~2,67:1 (ex.: 1920×720 px)
- *  - Mobile  (< 768px): 0,8:1 a 1:1 — recomendado ~0,9:1  (ex.: 1080×1200 px)
- *  - A altura varia com o conteúdo (título/descrição/estatísticas), então a
- *    imagem entra com `object-cover` + overlay azul. Mantenha o essencial no
- *    centro (~70% da largura / 60% da altura) e sem texto junto às bordas.
+ * Fundo e proporção (para a arte NÃO dar zoom):
+ *  - Desktop (≥ 1280px / `xl`): a seção tem proporção FIXA de 8:3 (2,667:1) e a
+ *    arte entra com `object-cover` sem corte. Exporte em 1920×720 px (múltiplos:
+ *    2400×900, 2560×960). A 1920px de tela a arte renderiza 1:1 (tamanho real).
+ *  - < 1280px: a arte não é exibida; mantém-se o fundo azul em gradiente.
+ *  - `backgroundImageMobile`: opcional (ex.: 1080×1200, 0,9:1). Se informado, a
+ *    arte passa a ser exibida também no mobile (troca no breakpoint de 768px).
+ *  - Overlay em gradiente horizontal: escurece a esquerda (texto) e revela a
+ *    arte à direita.
  */
 
 export interface PageHeroBreadcrumb {
@@ -81,12 +84,12 @@ export default function PageHero({
   return (
     <section
       id={id}
-      className={`relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pb-14 pt-28 md:pb-20 lg:pt-44 ${className ?? ''}`}
+      className={`relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pb-14 pt-28 md:pb-20 lg:pt-44 xl:flex xl:aspect-[8/3] xl:flex-col xl:justify-center ${className ?? ''}`}
     >
       {backgroundImage && (
         <>
           <picture
-            className={`absolute inset-0 ${backgroundImageMobile ? 'block' : 'hidden md:block'}`}
+            className={`absolute inset-0 ${backgroundImageMobile ? 'block' : 'hidden xl:block'}`}
           >
             {backgroundImageMobile && (
               <source media="(max-width: 767px)" srcSet={backgroundImageMobile} />
@@ -149,7 +152,7 @@ export default function PageHero({
             {children && <div className="mt-8">{children}</div>}
           </div>
 
-          {aside && <div className="hidden md:flex md:justify-end">{aside}</div>}
+          {aside && <div className="md:flex md:justify-end">{aside}</div>}
         </div>
       </div>
     </section>
