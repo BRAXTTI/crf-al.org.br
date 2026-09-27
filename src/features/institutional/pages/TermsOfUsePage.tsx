@@ -1,5 +1,5 @@
-import { ChevronRight } from 'lucide-react';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 
 export default function TermsOfUsePage() {
   return (
@@ -10,23 +10,11 @@ export default function TermsOfUsePage() {
         path="/termos-de-uso"
         noindex
       />
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 lg:pt-44 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 right-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
-        </div>
-        <div className="container-crfal relative z-10">
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-4">
-            <a href="/" className="hover:text-white transition-colors">Início</a>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-white">Termos de Uso</span>
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Termos de Uso</h1>
-          <p className="text-white/80 text-lg max-w-3xl">
-            Estes termos regulam o acesso e o uso dos serviços e conteúdos disponibilizados no site do CRF-AL.
-          </p>
-        </div>
-      </div>
+      <PageHero
+        breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Termos de Uso' }]}
+        title="Termos de Uso"
+        description="Estes termos regulam o acesso e o uso dos serviços e conteúdos disponibilizados no site do CRF-AL."
+      />
 
       <div className="container-crfal py-10 md:py-16">
         <div className="bg-white rounded-xl border border-crfal-gray-200 p-6 md:p-10 space-y-8 text-neutral-700">

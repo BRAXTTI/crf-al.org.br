@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 import {
   ChevronRight,
   Users,
@@ -293,52 +294,34 @@ export default function BoardPage() {
         path="/instituicao/diretoria"
       />
 
-      <div className="relative overflow-hidden bg-crfal-blue-dark pb-16 pt-28 md:pb-20 lg:pt-44">
-        <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
-        <div className="absolute inset-0 opacity-[0.06]" style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)',
-          backgroundSize: '56px 56px',
-        }} aria-hidden />
-
-        <div className="container-crfal relative z-10">
-          <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm" aria-label="Breadcrumb">
-            <a href="/" className="transition-colors hover:text-white">Início</a>
-            <ChevronRight className="h-4 w-4" />
-            <span>Instituição</span>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-white">Diretoria</span>
-          </nav>
-
-          <div className="grid items-end gap-8 md:grid-cols-2">
-            <div>
-              <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
-                Governança
+      <PageHero
+        breadcrumb={[
+          { label: 'Início', href: '/' },
+          { label: 'Instituição' },
+          { label: 'Diretoria' },
+        ]}
+        eyebrow="Governança"
+        title="Diretoria e Conselho"
+        description="Conheça os membros da diretoria executiva e os conselheiros que compõem o Conselho Regional de Farmácia do Estado de Alagoas."
+        aside={
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+              <Briefcase className="mb-2 h-7 w-7 text-white" />
+              <span className="block font-display text-3xl font-light text-white">
+                {secoes[0].membros.length}
               </span>
-              <h1 className="mb-4 text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl">
-                Diretoria e Conselho
-              </h1>
-              <p className="max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
-                Conheça os membros da diretoria executiva e os conselheiros que compõem o Conselho Regional de Farmácia do Estado de Alagoas.
-              </p>
+              <span className="text-xs uppercase tracking-wider text-white/70">Diretores</span>
             </div>
-
-            <div className="hidden justify-end md:flex">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-                  <Briefcase className="mb-2 h-7 w-7 text-white" />
-                  <span className="block font-display text-3xl font-light text-white">{secoes[0].membros.length}</span>
-                  <span className="text-xs uppercase tracking-wider text-white/70">Diretores</span>
-                </div>
-                <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-                  <Users className="mb-2 h-7 w-7 text-white" />
-                  <span className="block font-display text-3xl font-light text-white">{secoes[1].membros.length + secoes[2].membros.length}</span>
-                  <span className="text-xs uppercase tracking-wider text-white/70">Conselheiros</span>
-                </div>
-              </div>
+            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+              <Users className="mb-2 h-7 w-7 text-white" />
+              <span className="block font-display text-3xl font-light text-white">
+                {secoes[1].membros.length + secoes[2].membros.length}
+              </span>
+              <span className="text-xs uppercase tracking-wider text-white/70">Conselheiros</span>
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="container-crfal py-10 md:py-16" ref={sectionRef}>
         <div className={`mb-10 flex flex-wrap gap-2.5 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>

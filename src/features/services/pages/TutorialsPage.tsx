@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 import {
   Search,
   ChevronRight,
@@ -63,44 +64,29 @@ export default function TutorialsPage() {
         description="Tutoriais e guias passo a passo para os serviços do CRFAL — aprenda como realizar seus registros, renovações e demais serviços online de forma simples."
         path="/servicos/tutoriais"
       />
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 lg:pt-44 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
-        </div>
-        <div className="container-crfal relative z-10">
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-4">
-            <a href="/" className="hover:text-white transition-colors">Início</a>
-            <ChevronRight className="w-4 h-4" />
-            <span>Serviços</span>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-white">Tutoriais</span>
-          </div>
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Tutoriais</h1>
-              <p className="text-white/80 text-lg">
-                Aprenda a utilizar todos os serviços do CRFAL com nossos
-                tutoriais passo a passo. Simples, rápido e direto ao ponto.
-              </p>
+      <PageHero
+        breadcrumb={[
+          { label: 'Início', href: '/' },
+          { label: 'Serviços' },
+          { label: 'Tutoriais' },
+        ]}
+        title="Tutoriais"
+        description="Aprenda a utilizar todos os serviços do CRFAL com nossos tutoriais passo a passo. Simples, rápido e direto ao ponto."
+        aside={
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
+              <BookOpen className="mb-2 h-8 w-8 text-white" />
+              <span className="block text-2xl font-bold text-white">{tutorials.length}</span>
+              <span className="text-sm text-white/70">Tutoriais</span>
             </div>
-            <div className="hidden md:flex justify-end">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10">
-                  <BookOpen className="w-8 h-8 text-white mb-2" />
-                  <span className="text-2xl font-bold text-white block">{tutorials.length}</span>
-                  <span className="text-sm text-white/70">Tutoriais</span>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/10">
-                  <Clock className="w-8 h-8 text-white mb-2" />
-                  <span className="text-2xl font-bold text-white block">2-5</span>
-                  <span className="text-sm text-white/70">Min. cada</span>
-                </div>
-              </div>
+            <div className="rounded-xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
+              <Clock className="mb-2 h-8 w-8 text-white" />
+              <span className="block text-2xl font-bold text-white">2-5</span>
+              <span className="text-sm text-white/70">Min. cada</span>
             </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="container-crfal py-10 md:py-16" ref={sectionRef}>
         <div

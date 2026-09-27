@@ -15,6 +15,7 @@ import {
   Video,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 import { getPostImage, sanitizeWP, stripHTML } from '@/services/wordpress/client';
 import { useEventById, useEvents } from '@/services/wordpress/hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
@@ -169,62 +170,49 @@ export default function EventoDetailPage() {
         path={`/eventos/${evento.slug}`}
       />
 
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 lg:pt-44 md:pb-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
+      <PageHero
+        breadcrumb={[
+          { label: 'Início', href: '/' },
+          { label: 'Eventos', href: '/eventos' },
+          { label: evento.titulo },
+        ]}
+        eyebrow="Detalhes do evento"
+        title={evento.titulo}
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
+            <StatusIcon className="w-3 h-3" />
+            {STATUS_LABELS[evento.status]}
+          </span>
+          {evento.status === 'cancelado' && (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50  text-red-600 ">
+              <Ban className="w-3 h-3" />
+              Não será realizado
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/10 text-white border border-white/20">
+            <ModalidadeIcon className="w-3 h-3" />
+            {MODALIDADE_LABELS[evento.modalidade]}
+          </span>
         </div>
-        <div className="container-crfal relative z-10">
-          <div className="flex items-center gap-2 text-white/60 text-sm mb-4">
-            <Link to="/" className="hover:text-white transition-colors">Início</Link>
-            <ChevronRight className="w-4 h-4" />
-            <Link to="/eventos" className="hover:text-white transition-colors">Eventos</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-white truncate max-w-[200px] md:max-w-sm">{evento.titulo}</span>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
-              <StatusIcon className="w-3 h-3" />
-              {STATUS_LABELS[evento.status]}
-            </span>
-            {evento.status === 'cancelado' && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50  text-red-600 ">
-                <Ban className="w-3 h-3" />
-                Não será realizado
-              </span>
-            )}
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/10 text-white border border-white/20">
-              <ModalidadeIcon className="w-3 h-3" />
-              {MODALIDADE_LABELS[evento.modalidade]}
-            </span>
-          </div>
-
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
-            Detalhes do evento
-          </p>
-          <h1 className="mb-4 max-w-4xl font-display text-3xl font-semibold leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
-            {evento.titulo}
-          </h1>
-
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/80 text-sm">
+        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar className="w-4 h-4" />
+            {formatarData(evento.data, evento.dataFim)}
+          </span>
+          {evento.local && (
             <span className="inline-flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              {formatarData(evento.data, evento.dataFim)}
+              {evento.modalidade === 'online' ? (
+                <Monitor className="w-4 h-4" />
+              ) : (
+                <MapPin className="w-4 h-4" />
+              )}
+              {evento.local}
             </span>
-            {evento.local && (
-              <span className="inline-flex items-center gap-1.5">
-                {evento.modalidade === 'online' ? (
-                  <Monitor className="w-4 h-4" />
-                ) : (
-                  <MapPin className="w-4 h-4" />
-                )}
-                {evento.local}
-              </span>
-            )}
-          </div>
+          )}
         </div>
-      </div>
+      </PageHero>
 
       <div className="container-crfal py-10 md:py-16">
         {evento.banner && (

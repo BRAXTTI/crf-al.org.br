@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  ChevronRight,
   Mail,
   Phone,
   User,
@@ -11,6 +10,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 
 interface ContactInfo {
   id: number;
@@ -81,36 +81,24 @@ export default function ContactPage() {
       />
 
       {/* Hero — sobrio, institucional */}
-      <div className="relative bg-crfal-blue pt-28 pb-14 lg:pt-44 md:pb-16 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.07] pointer-events-none"
-          aria-hidden="true"
-        >
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-white rounded-full blur-3xl" />
-        </div>
-        <div className="container-crfal relative z-10">
-          <nav className="flex items-center gap-2 text-white/60 text-sm mb-4" aria-label="Navegação estrutural">
-            <a href="/" className="hover:text-white transition-colors">
-              Início
-            </a>
-            <ChevronRight className="w-4 h-4" aria-hidden="true" />
-            <span className="text-white" aria-current="page">
-              Fale Conosco
-            </span>
-          </nav>
-          <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight">
-              Fale Conosco
-            </h1>
-            <p className="text-white/80 text-base md:text-lg leading-relaxed">
-              Canais oficiais de comunicação do CRFAL. Escolha o setor, toque
-              para ligar, enviar mensagem por WhatsApp ou e-mail.
-            </p>
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-crfal-blue-light via-white/40 to-transparent" aria-hidden="true" />
-      </div>
+      <PageHero
+        breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Fale Conosco' }]}
+        eyebrow="Atendimento"
+        title="Fale Conosco"
+        description="Canais oficiais de comunicação do CRFAL. Escolha o setor, toque para ligar, enviar mensagem por WhatsApp ou e-mail."
+        decoration={
+          <>
+            <div className="pointer-events-none absolute inset-0 opacity-[0.07]" aria-hidden>
+              <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white blur-3xl" />
+              <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-white blur-3xl" />
+            </div>
+            <div
+              className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-crfal-blue-light via-white/40 to-transparent"
+              aria-hidden
+            />
+          </>
+        }
+      />
 
       <div className="container-crfal py-8 md:py-14" ref={sectionRef}>
         {/* Canais rápidos — cards clicáveis */}

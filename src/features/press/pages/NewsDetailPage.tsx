@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 import { LOGO_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 import {
   getPostCategory,
@@ -14,7 +15,6 @@ import {
   ArrowRight,
   Building2,
   Calendar,
-  ChevronRight,
   ExternalLink,
   FileText,
   MessageSquare,
@@ -146,27 +146,22 @@ export default function NewsDetailPage() {
         jsonLd={jsonLd}
       />
       {/* Hero */}
-      <div className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-14 lg:pt-44 md:pb-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-20 w-96 h-96 bg-crfal-blue-light rounded-full blur-3xl" />
-        </div>
-        <div className="container-crfal relative z-10">
-          <div className="flex flex-wrap items-center gap-2 text-white/60 text-xs sm:text-sm mb-4">
-            <Link to="/" className="hover:text-white transition-colors">Início</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span>Imprensa</span>
-            <ChevronRight className="w-4 h-4" />
-            <Link to="/imprensa/noticias" className="hover:text-white transition-colors">Notícias</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-white">Matéria</span>
-          </div>
-          <Link to="/imprensa/noticias" className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm">
-            <ArrowLeft className="w-4 h-4" />
-            Voltar para notícias
-          </Link>
-        </div>
-      </div>
+      <PageHero
+        breadcrumb={[
+          { label: 'Início', href: '/' },
+          { label: 'Imprensa' },
+          { label: 'Notícias', href: '/imprensa/noticias' },
+          { label: 'Matéria' },
+        ]}
+      >
+        <Link
+          to="/imprensa/noticias"
+          className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar para notícias
+        </Link>
+      </PageHero>
 
       <div className="container-crfal py-8 md:py-12">
         {isLoading && (

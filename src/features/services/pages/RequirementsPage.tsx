@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
+import PageHero from '@/components/block/page-hero';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import {
   LEGACY_WP_UPLOADS_URL,
@@ -632,59 +633,50 @@ export default function RequirementsPage() {
       />
 
       {/* Hero */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a]">
-        <div aria-hidden className="absolute inset-0">
-          <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:26px_26px]" />
-          <div className="absolute -left-24 -top-24 h-96 w-96 animate-float rounded-full bg-crfal-blue-light/25 blur-3xl" />
-          <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
-          <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
-        </div>
-
-        <div className="container-crfal relative z-10 pb-14 pt-28 md:pb-20 lg:pt-44">
-          <nav aria-label="Trilha de navegação" className="mb-6 flex items-center gap-2 text-sm text-white/60">
-            <a href="/" className="transition-colors hover:text-white">Início</a>
-            <ChevronRight className="h-4 w-4" />
-            <span>Serviços</span>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-white">Requerimentos</span>
-          </nav>
-
-          <p className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
-            <ClipboardList className="h-4 w-4 text-crfal-gold" />
-            Atendimento digital · CRF-AL
-          </p>
-
-          <h1 className="max-w-3xl font-display text-[2.25rem] font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+      <PageHero
+        breadcrumb={[
+          { label: 'Início', href: '/' },
+          { label: 'Serviços' },
+          { label: 'Requerimentos' },
+        ]}
+        eyebrow="Atendimento digital · CRF-AL"
+        eyebrowIcon={ClipboardList}
+        title={
+          <>
             Central de{' '}
             <span className="bg-gradient-to-r from-[#8FC1F2] to-crfal-gold bg-clip-text text-transparent">
               Requerimentos
             </span>
-          </h1>
-
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/80 md:text-lg">
-            Escolha o perfil, encontre o serviço e acompanhe documentos e
-            instruções passo a passo — tudo em um só lugar.
-          </p>
-
-          <dl className="mt-9 grid max-w-lg grid-cols-3 gap-3">
-            {[
-              { valor: ESTATISTICAS.servicos, rotulo: 'Serviços' },
-              { valor: ESTATISTICAS.formularios, rotulo: 'Formulários' },
-              { valor: ESTATISTICAS.categorias, rotulo: 'Categorias' },
-            ].map((item) => (
-              <div
-                key={item.rotulo}
-                className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
-              >
-                <dd className="font-display text-2xl font-bold text-white sm:text-3xl">{item.valor}</dd>
-                <dt className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
-                  {item.rotulo}
-                </dt>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </header>
+          </>
+        }
+        description="Escolha o perfil, encontre o serviço e acompanhe documentos e instruções passo a passo — tudo em um só lugar."
+        decoration={
+          <div className="absolute inset-0" aria-hidden>
+            <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:26px_26px]" />
+            <div className="absolute -left-24 -top-24 h-96 w-96 animate-float rounded-full bg-crfal-blue-light/25 blur-3xl" />
+            <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
+            <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
+          </div>
+        }
+      >
+        <dl className="grid max-w-lg grid-cols-3 gap-3">
+          {[
+            { valor: ESTATISTICAS.servicos, rotulo: 'Serviços' },
+            { valor: ESTATISTICAS.formularios, rotulo: 'Formulários' },
+            { valor: ESTATISTICAS.categorias, rotulo: 'Categorias' },
+          ].map((item) => (
+            <div
+              key={item.rotulo}
+              className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
+            >
+              <dd className="font-display text-2xl font-bold text-white sm:text-3xl">{item.valor}</dd>
+              <dt className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
+                {item.rotulo}
+              </dt>
+            </div>
+          ))}
+        </dl>
+      </PageHero>
 
       <main className="container-crfal py-8 md:py-12">
         {/* Toolbar sticky */}

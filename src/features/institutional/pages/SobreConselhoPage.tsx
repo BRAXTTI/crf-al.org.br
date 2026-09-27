@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 import {
-  ChevronRight,
   Target,
   Eye,
   Heart,
@@ -239,40 +239,35 @@ export default function SobreConselhoPage() {
       />
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <div id="sobre-conselho" className="relative bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pt-28 pb-16 lg:pt-44 md:pb-28 overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden>
-          <span className="absolute -bottom-4 right-0 font-bold text-white/[0.055] text-[22vw] leading-none whitespace-nowrap">
-            1960
-          </span>
-        </div>
-        <div className="absolute inset-0 pointer-events-none" aria-hidden>
-          <div className="absolute top-8 left-8 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-16 w-96 h-96 bg-crfal-blue-light/10 rounded-full blur-3xl" />
-        </div>
-
-        <div className="container-crfal relative z-10">
-          <nav className="flex flex-wrap items-center gap-2 text-white/55 text-xs sm:text-sm mb-6" aria-label="Breadcrumb">
-            <a href="/" className="hover:text-white transition-colors">Início</a>
-            <ChevronRight className="w-4 h-4" />
-            <span>Instituição</span>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-white">Sobre o Conselho</span>
-          </nav>
-
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-white/80 text-[11px] font-bold tracking-[0.18em] uppercase mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
-              Desde 1960
+      <PageHero
+        id="sobre-conselho"
+        breadcrumb={[
+          { label: 'Início', href: '/' },
+          { label: 'Instituição' },
+          { label: 'Sobre o Conselho' },
+        ]}
+        eyebrow="Desde 1960"
+        title={
+          <>
+            Sobre o
+            <br className="hidden sm:block" /> Conselho
+          </>
+        }
+        description="Conheça a história, a missão e os valores do Conselho Regional de Farmácia do Estado de Alagoas — guardião da profissão farmacêutica alagoana há mais de seis décadas."
+        decoration={
+          <>
+            <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden>
+              <span className="absolute -bottom-4 right-0 whitespace-nowrap text-[22vw] font-bold leading-none text-white/[0.055]">
+                1960
+              </span>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-5 leading-[1.1]">
-              Sobre o<br className="hidden sm:block" /> Conselho
-            </h1>
-            <p className="text-white/75 text-base sm:text-lg max-w-2xl leading-relaxed">
-              Conheça a história, a missão e os valores do Conselho Regional de Farmácia do Estado de Alagoas — guardião da profissão farmacêutica alagoana há mais de seis décadas.
-            </p>
-          </div>
-        </div>
-      </div>
+            <div className="pointer-events-none absolute inset-0" aria-hidden>
+              <div className="absolute left-8 top-8 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+              <div className="absolute bottom-0 right-16 h-96 w-96 rounded-full bg-crfal-blue-light/10 blur-3xl" />
+            </div>
+          </>
+        }
+      />
 
       {/* ── HISTÓRIA ─────────────────────────────────────────────────── */}
       <section className="relative py-12 sm:py-16 md:py-24 bg-white  overflow-hidden">

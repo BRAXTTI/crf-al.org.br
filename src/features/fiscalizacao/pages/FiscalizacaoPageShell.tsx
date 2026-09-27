@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ExternalLink, ShieldCheck, ChevronDown, Mail, ChevronRight } from 'lucide-react';
+import { ExternalLink, ShieldCheck, ChevronDown, Mail } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import PageHero from '@/components/block/page-hero';
 
 interface FiscalizacaoPageShellProps {
   title: string;
@@ -31,39 +32,13 @@ export default function FiscalizacaoPageShell({ title, description, children }: 
         <SEO title={title} description={description} path={location.pathname} />
       )}
 
-      <div className="relative overflow-hidden bg-crfal-blue-dark pb-14 pt-28 md:pb-18 lg:pt-44">
-        <div className="absolute inset-0 bg-gradient-to-br from-crfal-blue-dark via-crfal-blue/90 to-crfal-blue-dark" />
-        <div
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)',
-            backgroundSize: '56px 56px',
-          }}
-          aria-hidden
-        />
-
-        <div className="container-crfal relative z-10">
-          <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm" aria-label="Breadcrumb">
-            <a href="/" className="transition-colors hover:text-white">Início</a>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-white">Fiscalização</span>
-          </nav>
-
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Fiscalização
-          </span>
-
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl">
-            {title}
-          </h1>
-
-          <p className="mt-4 max-w-3xl text-base leading-relaxed text-white/80 sm:text-lg">
-            Conteúdo institucional da fiscalização farmacêutica no CRFAL com foco em clareza de procedimentos, atribuições legais e orientação aos profissionais e estabelecimentos.
-          </p>
-        </div>
-      </div>
+      <PageHero
+        breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Fiscalização' }]}
+        eyebrow="Fiscalização"
+        eyebrowIcon={ShieldCheck}
+        title={title}
+        description="Conteúdo institucional da fiscalização farmacêutica no CRFAL com foco em clareza de procedimentos, atribuições legais e orientação aos profissionais e estabelecimentos."
+      />
 
       <div className="bg-crfal-gray-50 pb-16  md:pb-24">
         <div className="container-crfal py-8 md:py-10">
