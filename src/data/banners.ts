@@ -1,3 +1,5 @@
+import { CRF_EM_CASA_URL } from '@/config/site';
+
 /**
  * Banners do topo da home (hero).
  *
@@ -41,5 +43,12 @@ export const banners: Banner[] = [
     imageMobile: '/images/banners/banner4-mobile.jpg',
     alt: 'Há mais de seis décadas na defesa do âmbito profissional dos farmacêuticos alagoanos. Vantagens de ser inscrito no Conselho Regional de Farmácia: garantia do exercício legal, capacitações gratuitas com certificação, orientação técnica e eventos.',
     href: '/instituicao/sobre-conselho',
+  },
+  {
+    image: '/images/banners/banner5.jpg',
+    imageMobile: '/images/banners/banner5-mobile.jpg',
+    alt: 'Seus requerimentos no CRF/AL em Casa de forma simples, rápida e 100% online: primeira inscrição, renovação de registro, alteração de dados cadastrais, certidões e declarações e cancelamento de registro.',
+    href: CRF_EM_CASA_URL,
+    external: true,
   },
 ];
