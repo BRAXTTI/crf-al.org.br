@@ -63,6 +63,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   if (slides.length === 0) return null;
 
   return (
+    <div className="pt-16 lg:pt-[var(--header-offset)]">
     <section
       className="relative aspect-[4/5] w-full overflow-hidden bg-crfal-blue-dark md:aspect-[5/2]"
       onKeyDown={handleKeyDown}
@@ -104,7 +105,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
             {hasOverlay && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
-                <div className="container-crfal relative z-10 flex h-full items-center pt-20 lg:pt-0">
+                <div className="container-crfal relative z-10 flex h-full items-center">
                   <div className="max-w-2xl">
                     {slide.title && (
                       <h2 className="font-display mb-3 text-2xl font-semibold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-3xl lg:text-[2.5rem]">
@@ -197,5 +198,6 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
         </>
       )}
     </section>
+    </div>
   );
 }

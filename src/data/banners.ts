@@ -37,36 +37,6 @@ export interface Banner {
 
 export const banners: Banner[] = [
   {
-    image: '/images/banners/banner1.jpg',
-    imageMobile: '/images/banners/banner1-mobile.jpg',
-    alt: 'Conselho Regional de Farmácia do Estado de Alagoas',
-    href: '/servicos/requerimentos',
-    title: 'Conselho Regional de Farmácia do Estado de Alagoas',
-    subtitle:
-      'Fiscalização, registro e valorização do exercício profissional farmacêutico em todo o estado.',
-    ctaLabel: 'Conheça nossos serviços',
-  },
-  {
-    image: '/images/banners/banner2.jpg',
-    imageMobile: '/images/banners/banner2-mobile.jpg',
-    alt: 'Inscrição e regularização profissional',
-    href: '/servicos/requerimentos',
-    title: 'Inscrição e regularização profissional',
-    subtitle:
-      'Realize sua inscrição, renove seu cadastro e mantenha-se em dia com o Conselho — tudo online.',
-    ctaLabel: 'Fazer inscrição',
-  },
-  {
-    image: '/images/banners/banner3.jpg',
-    imageMobile: '/images/banners/banner3-mobile.jpg',
-    alt: 'Fiscalização farmacêutica em Alagoas',
-    href: '/fiscalizacao',
-    title: 'Fiscalização farmacêutica em Alagoas',
-    subtitle:
-      'Garantindo a qualidade e a segurança da assistência farmacêutica nos 102 municípios alagoanos.',
-    ctaLabel: 'Saiba mais',
-  },
-  {
     image: '/images/banners/banner4.jpg',
     imageMobile: '/images/banners/banner4-mobile.jpg',
     alt: 'Há mais de seis décadas na defesa do âmbito profissional dos farmacêuticos alagoanos. Vantagens de ser inscrito no Conselho Regional de Farmácia: garantia do exercício legal, capacitações gratuitas com certificação, orientação técnica e eventos.',
