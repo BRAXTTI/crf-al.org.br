@@ -23,6 +23,10 @@ export const CRF_EM_CASA_URL =
 export const TRANSPARENCIA_URL =
   'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio';
 
+/** Portal da Ouvidoria (Implanta) — canal de manifestações do CRF-AL. */
+export const OUVIDORIA_URL =
+  'https://crf-al.implanta.net.br/portaltransparencia/#ouv/home';
+
 /**
  * Redes sociais oficiais do CRF-AL — todas sob o identificador `crfal`.
  * Fonte única para o cabeçalho e o rodapé.
