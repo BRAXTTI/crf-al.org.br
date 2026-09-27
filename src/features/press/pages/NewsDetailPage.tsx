@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
+import { LOGO_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 import {
   getPostCategory,
   getPostImage,
@@ -116,7 +116,7 @@ export default function NewsDetailPage() {
       publisher: {
         '@type': 'Organization',
         name: SITE_NAME,
-        logo: { '@type': 'ImageObject', url: DEFAULT_OG_IMAGE },
+        logo: { '@type': 'ImageObject', url: LOGO_IMAGE },
       },
     };
   }, [post, featuredImage, categoria, id]);

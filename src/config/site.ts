@@ -9,7 +9,11 @@ export const SITE_URL = (
 
 export const SITE_NAME = 'CRFAL - Conselho Regional de Farmácia do Estado de Alagoas';
 
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/logo-crf-azul.png`;
+/** Logo institucional (usado em dados estruturados, ex.: publisher.logo). */
+export const LOGO_IMAGE = `${SITE_URL}/images/logo-crf-azul.png`;
+
+/** Imagem de compartilhamento (Open Graph / Twitter Card): 1200×630 (1,91:1). */
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.jpg`;
 
 /** Perfil do Instagram (usado no botão de fallback do carrossel). */
 export const INSTAGRAM_PROFILE_URL =
