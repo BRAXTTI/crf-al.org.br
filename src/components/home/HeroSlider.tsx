@@ -15,8 +15,8 @@ interface HeroSliderProps {
  * Carrossel do topo da home.
  *
  * Proporção fixa (a arte nunca é cortada):
- *  - < 640px  → 9:10  (arte mobile 1080×1200)
- *  - ≥ 640px  → 2,5:1 (arte desktop 1920×768)
+ *  - < 768px  → 4:5   (arte mobile 1080×1350)
+ *  - ≥ 768px  → 2,5:1 (arte desktop 1920×768)
  *
  * Sem dependência do WordPress: os banners vêm de `src/data/banners.ts`.
  */
@@ -64,7 +64,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
 
   return (
     <section
-      className="relative aspect-[9/10] w-full overflow-hidden bg-crfal-blue-dark sm:aspect-[5/2]"
+      className="relative aspect-[4/5] w-full overflow-hidden bg-crfal-blue-dark md:aspect-[5/2]"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
@@ -90,7 +90,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
               : {})}
           >
             <picture className="absolute inset-0 block">
-              {slide.imageMobile && <source media="(max-width: 639px)" srcSet={slide.imageMobile} />}
+              {slide.imageMobile && <source media="(max-width: 767px)" srcSet={slide.imageMobile} />}
               <img
                 src={slide.image}
                 alt={slide.href ? '' : slide.alt}

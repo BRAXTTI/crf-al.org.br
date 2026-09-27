@@ -7,8 +7,8 @@
  *  3. Commit/push — o deploy cuida do resto.
  *
  * Formato das artes (obrigatório, para não cortar):
- *  - `image`       → 2,5:1 paisagem — 1920×768 px (exibido em telas ≥ 640px)
- *  - `imageMobile` → 9:10 retrato  — 1080×1200 px (exibido em telas < 640px)
+ *  - `image`       → 2,5:1 paisagem — 1920×768 px (exibido em telas ≥ 768px)
+ *  - `imageMobile` → 4:5 retrato   — 1080×1350 px (exibido em telas < 768px)
  *
  * Regras:
  *  - Mantenha o conteúdo importante no centro (~70% da largura / 60% da altura).
@@ -21,7 +21,7 @@
 export interface Banner {
   /** Arte desktop 2,5:1 (1920×768). Caminho em /public. */
   image: string;
-  /** Arte mobile 9:10 (1080×1200). Opcional, mas recomendada. */
+  /** Arte mobile 4:5 (1080×1350). Opcional, mas recomendada. */
   imageMobile?: string;
   /** Descrição acessível da arte. */
   alt: string;
@@ -38,6 +38,7 @@ export interface Banner {
 export const banners: Banner[] = [
   {
     image: '/images/banners/banner1.jpg',
+    imageMobile: '/images/banners/banner1-mobile.jpg',
     alt: 'Conselho Regional de Farmácia do Estado de Alagoas',
     href: '/servicos/requerimentos',
     title: 'Conselho Regional de Farmácia do Estado de Alagoas',
@@ -47,6 +48,7 @@ export const banners: Banner[] = [
   },
   {
     image: '/images/banners/banner2.jpg',
+    imageMobile: '/images/banners/banner2-mobile.jpg',
     alt: 'Inscrição e regularização profissional',
     href: '/servicos/requerimentos',
     title: 'Inscrição e regularização profissional',
@@ -56,6 +58,7 @@ export const banners: Banner[] = [
   },
   {
     image: '/images/banners/banner3.jpg',
+    imageMobile: '/images/banners/banner3-mobile.jpg',
     alt: 'Fiscalização farmacêutica em Alagoas',
     href: '/fiscalizacao',
     title: 'Fiscalização farmacêutica em Alagoas',
