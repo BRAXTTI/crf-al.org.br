@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
 import { LOGO_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 import {
   getPostCategory,
@@ -15,6 +14,7 @@ import {
   ArrowRight,
   Building2,
   Calendar,
+  ChevronRight,
   ExternalLink,
   FileText,
   MessageSquare,
@@ -145,23 +145,31 @@ export default function NewsDetailPage() {
         modifiedAt={post?.modified}
         jsonLd={jsonLd}
       />
-      {/* Hero */}
-      <PageHero
-        breadcrumb={[
-          { label: 'Início', href: '/' },
-          { label: 'Imprensa' },
-          { label: 'Notícias', href: '/imprensa/noticias' },
-          { label: 'Matéria' },
-        ]}
-      >
-        <Link
-          to="/imprensa/noticias"
-          className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar para notícias
-        </Link>
-      </PageHero>
+      {/* Cabeçalho compacto (breadcrumb + voltar) — sem hero, conteúdo perto da navbar */}
+      <div className="pt-24 lg:pt-40">
+        <div className="container-crfal flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <nav
+            aria-label="Breadcrumb"
+            className="flex flex-wrap items-center gap-2 text-xs text-crfal-gray-500 sm:text-sm"
+          >
+            <Link to="/" className="transition-colors hover:text-crfal-blue">Início</Link>
+            <ChevronRight className="h-4 w-4" />
+            <span>Imprensa</span>
+            <ChevronRight className="h-4 w-4" />
+            <Link to="/imprensa/noticias" className="transition-colors hover:text-crfal-blue">Notícias</Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-crfal-blue-dark">Matéria</span>
+          </nav>
+
+          <Link
+            to="/imprensa/noticias"
+            className="inline-flex items-center gap-2 text-sm font-medium text-crfal-blue transition-colors hover:text-crfal-blue-dark"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar para notícias
+          </Link>
+        </div>
+      </div>
 
       <div className="container-crfal py-8 md:py-12">
         {isLoading && (
