@@ -16,6 +16,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 
 interface Membro {
@@ -108,16 +109,19 @@ function BioModal({
   membro,
   open,
   onOpenChange,
+  children,
 }: {
   membro: Membro;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl">
-        <DialogHeader className="border-b border-crfal-gray-200 p-5 pr-12 text-left sm:p-6 sm:pr-14">
-          <span className="mb-2 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600  ">
+      {children}
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl [&>[data-slot=dialog-close]]:flex [&>[data-slot=dialog-close]]:h-11 [&>[data-slot=dialog-close]]:w-11 [&>[data-slot=dialog-close]]:items-center [&>[data-slot=dialog-close]]:justify-center">
+        <DialogHeader className="shrink-0 border-b border-crfal-gray-200 p-5 pr-16 text-left sm:p-6 sm:pr-16">
+          <span className="mb-2 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-700 lg:text-red-600">
             {membro.cargo}
           </span>
           <DialogTitle className="font-display text-lg font-bold uppercase leading-tight text-crfal-blue-dark  sm:text-xl">
@@ -127,7 +131,7 @@ function BioModal({
             Minicurrículo de {membro.nome}
           </DialogDescription>
         </DialogHeader>
-        <div className="overflow-y-auto p-5 sm:p-6">
+        <div className="min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6">
           <p className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-600  sm:text-[15px]">
             {membro.bio}
           </p>
@@ -153,16 +157,16 @@ function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
   }, [membro.bio]);
 
   return (
-    <>
-      <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-card transition-shadow duration-300 hover:shadow-card-hover ">
+    <BioModal membro={membro} open={isOpen} onOpenChange={setIsOpen}>
+      <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-white shadow-card transition-shadow duration-300 hover:shadow-card-hover max-lg:border max-lg:border-crfal-gray-200">
         <div
-          className={`absolute inset-y-0 z-10 hidden w-1.5 bg-gradient-to-b from-red-600 via-crfal-blue to-crfal-blue-dark sm:block ${
+          className={`absolute inset-y-0 z-10 hidden w-1.5 bg-gradient-to-b from-red-600 via-crfal-blue to-crfal-blue-dark lg:block ${
             flip ? 'right-0' : 'left-0'
           }`}
           aria-hidden
         />
-        <div className={`flex flex-1 flex-col sm:flex-row ${flip ? 'sm:flex-row-reverse' : ''}`}>
-          <div className="relative aspect-[4/4.4] w-full shrink-0 bg-gradient-to-br from-crfal-blue to-crfal-blue-dark sm:aspect-auto sm:h-auto sm:min-h-[240px] sm:w-[190px] lg:w-[210px]">
+        <div className={`grid flex-1 grid-cols-[80px_minmax(0,1fr)] items-start gap-x-4 gap-y-4 p-4 lg:flex lg:items-stretch lg:gap-0 lg:p-0 ${flip ? 'lg:flex-row-reverse' : ''}`}>
+          <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-crfal-blue to-crfal-blue-dark lg:aspect-auto lg:min-h-[240px] lg:w-[210px] lg:rounded-none">
             {membro.foto ? (
               <img
                 src={membro.foto}
@@ -176,47 +180,50 @@ function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
             )}
           </div>
 
-          <div className="flex flex-1 flex-col p-5 sm:p-7">
-            <span className="mb-3 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600  ">
-              {membro.cargo}
-            </span>
-            <h3 className="mb-3 font-display text-xl font-bold uppercase leading-tight text-crfal-blue-dark  sm:text-2xl">
-              {membro.nome}
-            </h3>
+          <div className="contents lg:flex lg:min-w-0 lg:flex-1 lg:flex-col lg:p-7">
+            <div className="min-w-0 self-center lg:contents">
+              <span className="mb-2 inline-flex w-fit items-center rounded-md bg-red-50 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-red-700 lg:mb-3 lg:px-3 lg:py-1.5 lg:tracking-wider lg:text-red-600">
+                {membro.cargo}
+              </span>
+              <h3 className="font-display text-base font-bold uppercase leading-snug text-crfal-blue-dark lg:mb-3 lg:text-2xl lg:leading-tight">
+                {membro.nome}
+              </h3>
+            </div>
             {membro.bio && (
               <>
                 <p
                   ref={bioRef}
-                  className="line-clamp-4 text-sm leading-relaxed text-crfal-gray-600  sm:text-[15px]"
+                  className="col-span-2 line-clamp-3 text-sm leading-relaxed text-crfal-gray-600 lg:line-clamp-4 lg:text-[15px]"
                 >
                   {membro.bio}
                 </p>
                 {isClamped && (
-                  <button
-                    type="button"
-                    onClick={() => setIsOpen(true)}
-                    className="mt-3 inline-flex w-fit items-center gap-1 text-sm font-semibold text-crfal-blue transition-colors duration-300 hover:text-crfal-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2  "
-                  >
-                    Ler mais
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={`Ler mais sobre ${membro.nome}`}
+                      className="col-span-2 -my-2 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-sm font-semibold text-crfal-blue transition-colors duration-300 hover:text-crfal-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 lg:my-0 lg:mt-3"
+                    >
+                      Ler mais
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </DialogTrigger>
                 )}
               </>
             )}
             {membro.email && (
               <a
                 href={`mailto:${membro.email}`}
-                className="mt-auto inline-flex w-fit items-center gap-2 pt-4 text-sm text-crfal-gray-500 transition-colors duration-300 hover:text-crfal-blue  "
+                className="col-span-2 mt-auto inline-flex min-h-11 min-w-0 items-center gap-2 rounded-lg bg-crfal-blue-lighter/60 px-3 py-2.5 text-sm font-medium text-crfal-blue transition-colors duration-300 hover:bg-crfal-blue-lighter focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 lg:w-fit lg:rounded-none lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-4 lg:font-normal lg:text-crfal-gray-500 lg:hover:bg-transparent lg:hover:text-crfal-blue"
               >
                 <Mail className="h-4 w-4 shrink-0" />
-                <span className="truncate">{membro.email}</span>
+                <span className="min-w-0 break-words">{membro.email}</span>
               </a>
             )}
           </div>
         </div>
       </article>
-      <BioModal membro={membro} open={isOpen} onOpenChange={setIsOpen} />
-    </>
+    </BioModal>
   );
 }
 
@@ -323,8 +330,8 @@ export default function BoardPage() {
         }
       />
 
-      <div className="container-crfal py-10 md:py-16" ref={sectionRef}>
-        <div className={`mb-10 flex flex-wrap gap-2.5 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+      <div className="container-crfal py-6 lg:py-16" ref={sectionRef}>
+        <div role="group" aria-label="Seções da Diretoria e Conselho" className={`mb-6 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap lg:mb-10 lg:gap-2.5 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
           {secoes.map((secao) => {
             const Icon = secao.icon;
             const isDisabled = secoesDesativadas.includes(secao.id);
@@ -335,22 +342,23 @@ export default function BoardPage() {
                 disabled={isDisabled}
                 onClick={() => setSecaoAtiva(secao.id)}
                 aria-disabled={isDisabled}
-                className={`flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 active:scale-95 ${
+                aria-pressed={secaoAtiva === secao.id}
+                className={`flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-medium transition-colors duration-300 lg:rounded-full lg:px-5 lg:text-sm ${
                   isDisabled
-                    ? 'cursor-not-allowed bg-crfal-gray-100 text-crfal-gray-400 opacity-60  '
+                    ? 'cursor-not-allowed bg-crfal-gray-100 text-crfal-gray-600 lg:text-crfal-gray-400 lg:opacity-60'
                     : secaoAtiva === secao.id
-                      ? 'bg-crfal-blue text-white shadow-sm'
+                      ? 'col-span-2 bg-crfal-blue text-white shadow-sm'
                       : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-neutral-200   '
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 shrink-0" aria-hidden />
                 {secao.titulo}
               </button>
             );
           })}
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+        <div className="grid gap-6 lg:grid-cols-12 lg:gap-12">
           <div className={isDiretoria ? 'lg:col-span-12' : 'lg:col-span-4'}>
             <div className="lg:sticky lg:top-28">
               <div className={`transition-all duration-700 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'}`}>
@@ -366,23 +374,23 @@ export default function BoardPage() {
               </div>
 
               <div
-                className={`mt-8 grid grid-cols-2 gap-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+                className={`mt-5 grid grid-cols-2 gap-3 lg:mt-8 lg:gap-4 transition-all duration-700 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                 style={{ transitionDelay: '200ms' }}
               >
-                <div className="rounded-xl border border-crfal-gray-200 bg-white p-4  ">
+                <div className="flex items-center gap-2.5 rounded-xl border border-crfal-gray-200 bg-white px-3 py-2.5 lg:block lg:p-4">
                   <span className="font-display text-3xl font-light text-crfal-blue ">{secaoSelecionada.membros.length}</span>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-crfal-gray-500 ">Membros</p>
+                  <p className="text-xs uppercase tracking-wider text-crfal-gray-600 lg:mt-1 lg:text-crfal-gray-500">Membros</p>
                 </div>
-                <div className="rounded-xl border border-crfal-gray-200 bg-white p-4  ">
+                <div className="flex items-center gap-2.5 rounded-xl border border-crfal-gray-200 bg-white px-3 py-2.5 lg:block lg:p-4">
                   <span className="font-display text-3xl font-light text-crfal-blue ">{secoes.reduce((acc, s) => acc + s.membros.length, 0)}</span>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-crfal-gray-500 ">Total Geral</p>
+                  <p className="text-xs uppercase tracking-wider text-crfal-gray-600 lg:mt-1 lg:text-crfal-gray-500">Total Geral</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div className={isDiretoria ? 'lg:col-span-12' : 'lg:col-span-8'}>
-            <div className={`grid gap-6 ${isDiretoria ? 'md:grid-cols-2' : ''}`}>
+            <div className={`grid gap-4 lg:gap-6 ${isDiretoria ? 'md:grid-cols-2' : ''}`}>
               {secaoSelecionada.membros.map((membro, index) =>
                 membro.bio ? (
                   <div
@@ -403,12 +411,12 @@ export default function BoardPage() {
             </div>
 
             <div
-              className={`mt-8 rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/60 p-6 transition-all duration-700   ${
+              className={`mt-6 rounded-xl border border-crfal-blue/15 bg-crfal-blue-lighter/60 p-4 lg:mt-8 lg:p-6 transition-all duration-700 ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
               }`}
               style={{ transitionDelay: '400ms' }}
             >
-              <div className="flex items-start gap-4">
+              <div className="flex flex-col items-start gap-3 lg:flex-row lg:gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-crfal-blue text-white  ">
                   <Award className="h-5 w-5" />
                 </div>
@@ -416,9 +424,9 @@ export default function BoardPage() {
                   <h4 className="mb-1 font-bold text-neutral-800 ">
                     Gestão {new Date().getFullYear()}
                   </h4>
-                  <p className="text-sm leading-relaxed text-crfal-gray-600 ">
+                  <p className="text-sm leading-relaxed text-crfal-gray-700 lg:text-crfal-gray-600">
                     A diretoria e os conselheiros do CRFAL são eleitos pelos profissionais farmacêuticos do estado de Alagoas para mandatos conforme previsto no estatuto do Conselho. Saiba mais consultando o{' '}
-                    <a href="/instituicao/estatuto" className="font-semibold text-crfal-blue transition-colors hover:underline ">
+                    <a href="/instituicao/estatuto" className="inline-flex min-h-11 items-center font-semibold text-crfal-blue transition-colors hover:underline lg:inline">
                       Estatuto do CRFAL
                     </a>.
                   </p>
