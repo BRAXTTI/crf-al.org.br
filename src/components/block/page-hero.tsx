@@ -10,13 +10,14 @@ import { Link } from 'react-router-dom';
  * padronizados no mobile e no desktop. Cada página injeta seus extras
  * (estatísticas, badges, cards) via `children` ou `aside`.
  *
- * Fundo e proporção (para a arte NÃO dar zoom):
+ * Fundo e proporção:
  *  - Desktop (≥ 1280px / `xl`): a seção tem proporção FIXA de 8:3 (2,667:1) e a
- *    arte entra com `object-cover` sem corte. Exporte em 1920×720 px (múltiplos:
- *    2400×900, 2560×960). A 1920px de tela a arte renderiza 1:1 (tamanho real).
- *  - < 1280px: a arte não é exibida; mantém-se o fundo azul em gradiente.
- *  - `backgroundImageMobile`: opcional (ex.: 1080×1200, 0,9:1). Se informado, a
- *    arte passa a ser exibida também no mobile (troca no breakpoint de 768px).
+ *    arte entra sem corte. Exporte em 1920×720 px (múltiplos: 2400×900,
+ *    2560×960).
+ *  - No mobile, a arte ocupa um quadro fixo de 9:10 (ex.: 1080×1200). A seção
+ *    tem essa altura mínima, mas pode crescer para acomodar conteúdo longo sem
+ *    cortá-lo; nesse caso, o fundo em gradiente continua abaixo do quadro.
+ *  - Entre 768px e 1279px, mantém-se o fundo azul em gradiente.
  *  - Overlay em gradiente horizontal: escurece a esquerda (texto) e revela a
  *    arte à direita.
  */
@@ -43,7 +44,7 @@ export interface PageHeroProps {
   aside?: ReactNode;
   /** Imagem de fundo (desktop). */
   backgroundImage?: string;
-  /** Imagem de fundo (mobile). Se ausente, usa `backgroundImage`. */
+  /** Imagem de fundo (mobile). Padrão: `/images/page-hero-mobile.webp`. */
   backgroundImageMobile?: string;
   /** Substitui a decoração padrão (círculos desfocados). */
   decoration?: ReactNode;
@@ -56,6 +57,7 @@ const TITLE_CLASSES =
 
 /** Imagem de fundo padrão do hero (desktop). Ver proporção no topo do arquivo. */
 const DEFAULT_BACKGROUND_IMAGE = '/images/page-hero.jpg';
+const DEFAULT_BACKGROUND_IMAGE_MOBILE = '/images/page-hero-mobile.webp';
 
 const DEFAULT_DECORATION = (
   <div className="absolute inset-0 opacity-10" aria-hidden>
@@ -74,7 +76,7 @@ export default function PageHero({
   children,
   aside,
   backgroundImage = DEFAULT_BACKGROUND_IMAGE,
-  backgroundImageMobile,
+  backgroundImageMobile = DEFAULT_BACKGROUND_IMAGE_MOBILE,
   decoration,
   className,
 }: PageHeroProps) {
@@ -84,12 +86,16 @@ export default function PageHero({
   return (
     <section
       id={id}
-      className={`relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pb-14 pt-28 md:pb-20 lg:pt-44 xl:flex xl:aspect-[8/3] xl:flex-col xl:justify-center ${className ?? ''}`}
+      className={`relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pb-14 pt-28 md:pb-20 lg:pt-44 xl:flex xl:aspect-[8/3] xl:flex-col xl:justify-center ${backgroundImageMobile ? 'min-h-[111.111vw] md:min-h-0' : ''} ${className ?? ''}`}
     >
       {backgroundImage && (
         <>
           <picture
-            className={`absolute inset-0 ${backgroundImageMobile ? 'block' : 'hidden xl:block'}`}
+            className={
+              backgroundImageMobile
+                ? 'absolute inset-x-0 top-0 block aspect-[9/10] overflow-hidden md:hidden xl:inset-0 xl:aspect-auto xl:block'
+                : 'absolute inset-0 hidden xl:block'
+            }
           >
             {backgroundImageMobile && (
               <source media="(max-width: 767px)" srcSet={backgroundImageMobile} />
