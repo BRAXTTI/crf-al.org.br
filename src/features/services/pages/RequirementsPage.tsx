@@ -352,8 +352,7 @@ const corporateMenu: MenuCategory[] = [
         title: 'Contratação de Responsável Técnico - Pessoa Jurídica',
         description: 'Contratação de farmacêutico responsável técnico para empresa privada.',
         documentos: [
-          'Requerimento de RT e Declaração de Outras Atividades (DOA) [01 via]',
-          'Carteira de Trabalho do farmacêutico (original e cópia)',
+          'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
           'Acesse o CRF em Casa como Pessoa Jurídica.',
@@ -371,8 +370,7 @@ const corporateMenu: MenuCategory[] = [
         title: 'Contratação de Responsável Técnico - Serviço Público',
         description: 'Contratação de responsável técnico para estabelecimento público.',
         documentos: [
-          'Requerimento de RT e DOA [01 via]',
-          'Vínculo empregatício: portaria, CNES ou declaração do RH',
+          'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
           'Acesse o CRF em Casa como Pessoa Jurídica.',
@@ -390,9 +388,7 @@ const corporateMenu: MenuCategory[] = [
         title: 'Contratação de RT Plantonista 12x36 + DOA',
         description: 'Contratação de RT no regime de plantão 12x36.',
         documentos: [
-          'Requerimento específico de RT Plantonista 12x36',
-          'Declaração de Outras Atividades (DOA)',
-          'Comprovação de vínculo profissional',
+          'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
           'Acesse o CRF em Casa como Pessoa Jurídica.',
