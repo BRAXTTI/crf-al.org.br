@@ -9,10 +9,12 @@ import { CRF_EM_CASA_URL, OUVIDORIA_URL } from '@/config/site';
  *  3. Commit/push — o deploy cuida do resto.
  *
  * Formato das artes (obrigatório, para não cortar):
- *  - `image`       → 2,5:1 paisagem — 1920×768 px (exibido em telas ≥ 768px)
+ *  - `image`       → 16:5 paisagem — 1920×600 px (exibido em telas ≥ 768px)
  *  - `imageMobile` → 4:5 retrato   — 1080×1350 px (exibido em telas < 768px)
  *
  * Regras:
+ *  - Artes desktop antigas são exibidas inteiras, com faixas laterais de fundo.
+ *    Use a nova proporção 16:5 para preencher toda a largura.
  *  - Mantenha o conteúdo importante no centro (~70% da largura / 60% da altura).
  *  - Se a arte já tem texto, NÃO preencha `title`/`subtitle`/`ctaLabel`.
  *  - Se quiser texto sobreposto pelo site, preencha `title` (e opcionalmente
@@ -21,7 +23,7 @@ import { CRF_EM_CASA_URL, OUVIDORIA_URL } from '@/config/site';
  */
 
 export interface Banner {
-  /** Arte desktop 2,5:1 (1920×768). Caminho em /public. */
+  /** Arte desktop 16:5 (1920×600). Caminho em /public. */
   image: string;
   /** Arte mobile 4:5 (1080×1350). Opcional, mas recomendada. */
   imageMobile?: string;

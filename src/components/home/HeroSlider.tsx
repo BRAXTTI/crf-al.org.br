@@ -14,9 +14,9 @@ interface HeroSliderProps {
 /**
  * Carrossel do topo da home.
  *
- * Proporção fixa (a arte nunca é cortada):
+ * Proporção fixa (no desktop, a arte inteira é preservada):
  *  - < 768px  → 4:5   (arte mobile 1080×1350)
- *  - ≥ 768px  → 2,5:1 (arte desktop 1920×768)
+ *  - ≥ 768px  → 16:5 (arte desktop 1920×600)
  *
  * Sem dependência do WordPress: os banners vêm de `src/data/banners.ts`.
  */
@@ -65,7 +65,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   return (
     <div className="pt-16 lg:pt-[var(--header-offset)]">
     <section
-      className="relative aspect-[4/5] w-full overflow-hidden bg-crfal-blue-dark md:aspect-[5/2]"
+      className="relative aspect-[4/5] w-full overflow-hidden bg-crfal-blue-dark md:aspect-[16/5]"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
@@ -98,7 +98,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                 loading={index === 0 ? 'eager' : 'lazy'}
                 fetchPriority={index === 0 ? 'high' : 'auto'}
                 decoding="async"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover md:object-contain"
               />
             </picture>
 
