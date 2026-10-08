@@ -27,7 +27,7 @@ const cards: CardItem[] = [
   {
     title: 'Transparência',
     description: 'Acesso às informações, prestação de contas e portal da transparência do CRFAL.',
-    href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio',
+    href: 'https://crf-al.implanta.net.br/portaltransparencia/',
     icon: Building2,
     external: true,
   },

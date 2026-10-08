@@ -19,7 +19,7 @@ const quickLinks = [
   { label: 'Processo Administrativo', href: '/fiscalizacao/processo-administrativo-fiscal' },
   { label: 'Afastamento Provisório', href: '/fiscalizacao/afastamento-provisorio' },
   { label: 'Legislação', href: '/legislacao' },
-  { label: 'Custos da fiscalização', href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio', external: true },
+  { label: 'Custos da fiscalização', href: 'https://crf-al.implanta.net.br/portaltransparencia/', external: true },
 ];
 
 export default function FiscalizacaoPageShell({ title, description, children }: FiscalizacaoPageShellProps) {

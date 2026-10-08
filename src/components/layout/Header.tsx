@@ -59,7 +59,7 @@ const navItems: NavItem[] = [
         title: 'Normas e Controle',
         items: [
           { label: 'Legislação', href: '/legislacao', icon: Gavel },
-          { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio', icon: BarChart3, external: true },
+          { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/', icon: BarChart3, external: true },
         ],
       },
     ],
@@ -102,7 +102,7 @@ const navItems: NavItem[] = [
           { label: 'Relatórios', href: '/fiscalizacao/relatorios', icon: BarChart3 },
           { label: 'Processo Administrativo', href: '/fiscalizacao/processo-administrativo-fiscal', icon: FileText },
           { label: 'Afastamento Provisório', href: '/fiscalizacao/afastamento-provisorio', icon: Users },
-          { label: 'Custos da Fiscalização', href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio', icon: Scale, external: true },
+          { label: 'Custos da Fiscalização', href: 'https://crf-al.implanta.net.br/portaltransparencia/', icon: Scale, external: true },
         ],
       },
     ],
@@ -122,7 +122,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Transparência',
-    href: 'https://crf-al.implanta.net.br/portalTransparencia/#publico/inicio',
+    href: 'https://crf-al.implanta.net.br/portaltransparencia/',
     directIcon: ExternalLink,
   },
   {

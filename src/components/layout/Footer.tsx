@@ -12,7 +12,7 @@ const quickLinks = [
   { label: 'Serviços', href: '/servicos/requerimentos' },
   { label: 'Legislação', href: '/legislacao' },
   { label: 'Eventos', href: '/eventos' },
-  { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/#publico/inicio' },
+  { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/' },
 ];
 
 const serviceLinks = [
