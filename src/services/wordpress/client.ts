@@ -27,8 +27,12 @@ const DEFAULT_TIMEOUT_MS = 15_000;
  * `_links` é obrigatório para que o WP consiga resolver o `_embedded`.
  */
 const NEWS_LIST_FIELDS = 'id,date,slug,link,title,excerpt,_links,_embedded';
-/** Campos para a matéria individual (inclui o corpo completo). */
-const NEWS_DETAIL_FIELDS = 'id,date,modified,slug,link,title,excerpt,content,_embedded';
+/**
+ * Campos para a matéria individual (inclui o corpo completo).
+ * `_links` é obrigatório: sem ele o WP legado não resolve o `_embed` na
+ * consulta por slug (`/wp/v2/posts?slug=...`) e a imagem destacada some.
+ */
+const NEWS_DETAIL_FIELDS = 'id,date,modified,slug,link,title,excerpt,content,_links,_embedded';
 /** Limita o `_embed` à mídia destacada e aos termos, reduzindo muito a resposta. */
 const NEWS_EMBED = 'wp:featuredmedia,wp:term';
 
