@@ -3,17 +3,18 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { LOGO_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 import {
+  getPostAuthor,
   getPostCategory,
   getPostImage,
   sanitizeWP,
   stripHTML,
 } from '@/services/wordpress/client';
 import { usePost, usePostBySlug, useRelatedPosts } from '@/services/wordpress/hooks';
+import ShareButtons from '../components/ShareButtons';
 import {
   ArrowLeft,
   ArrowRight,
   Building2,
-  Calendar,
   ChevronRight,
   ExternalLink,
   FileText,
@@ -79,6 +80,13 @@ function formatarData(dataISO: string) {
   });
 }
 
+/** "YYYY-MM-DDTHH:mm:ss" (hora local do WP) → "DD/MM/YYYY - HH:mm". */
+function formatarDataHoraPublicacao(dataISO: string) {
+  const dia = dataISO.slice(0, 10).split('-').reverse().join('/');
+  const hora = dataISO.slice(11, 16);
+  return hora ? `${dia} - ${hora}` : dia;
+}
+
 export default function NewsDetailPage() {
   const { slug } = useParams();
   // Links antigos por ID (/imprensa/noticias/16193) são redirecionados para a
@@ -117,8 +125,12 @@ export default function NewsDetailPage() {
       date: formatarData(item.date),
     })) ?? [];
 
-  const featuredImage = (post && getPostImage(post)) || IMG_FALLBACK;
+  const postImage = post ? getPostImage(post) : undefined;
+  const hasFeaturedImage = Boolean(postImage);
+  const featuredImage = postImage || IMG_FALLBACK;
   const categoria = (post && getPostCategory(post)) || 'Notícia';
+  const autor = post ? getPostAuthor(post) : undefined;
+  const canonicalUrl = `${SITE_URL}/imprensa/noticias/${post?.slug ?? slug ?? ''}`;
 
   const jsonLd = useMemo(() => {
     if (!post) return undefined;
@@ -221,45 +233,72 @@ export default function NewsDetailPage() {
           </div>
         )}
 
-        {!isLoading && !errorMessage && post && (
-          <div className="grid lg:grid-cols-12 gap-8">
-            {/* Article */}
-            <main className="lg:col-span-8">
-              <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
-                <div className="relative aspect-video overflow-hidden bg-crfal-gray-100">
-                  <img
-                    src={featuredImage}
-                    alt=""
-                    aria-hidden="true"
-                    className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
-                  />
-                  <img
-                    src={featuredImage}
-                    alt={stripHTML(post.title.rendered)}
-                    className="relative z-10 w-full h-full object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
-                  />
-                  <span className="absolute top-4 left-4 z-20 px-3 py-1 bg-crfal-blue text-white text-xs font-semibold rounded-full">
-                    {categoria}
-                  </span>
-                </div>
+      </div>
 
-                <div className="p-5 sm:p-7">
-                  <div className="flex items-center gap-2 text-sm text-crfal-gray-500  mb-4">
-                    <Calendar className="w-4 h-4" />
-                    {formatarData(post.date)}
-                  </div>
-
-                  <h1
-                    className="text-2xl sm:text-3xl font-bold text-neutral-800  leading-tight mb-4"
-                    dangerouslySetInnerHTML={{ __html: sanitizeWP(post.title.rendered) }}
-                  />
-
-                  <p className="text-crfal-gray-600  leading-relaxed mb-6 text-sm sm:text-base">
+      {!isLoading && !errorMessage && post && (
+        <>
+          {/* Cabeçalho editorial: categoria, título, linha de destaque e metadados */}
+          <header className="mt-4 border-y border-crfal-gray-200 bg-white">
+            <div className="container-crfal py-10 md:py-14">
+              <div className="mx-auto max-w-4xl text-center">
+                <span className="inline-flex items-center rounded-full bg-crfal-gold px-4 py-1 text-xs font-bold uppercase tracking-wide text-crfal-blue-dark">
+                  {categoria}
+                </span>
+                <h1
+                  className="mt-5 font-display text-3xl font-bold leading-[1.1] text-crfal-blue-dark sm:text-4xl md:text-5xl"
+                  dangerouslySetInnerHTML={{ __html: sanitizeWP(post.title.rendered) }}
+                />
+                {stripHTML(post.excerpt.rendered) && (
+                  <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-crfal-gray-600 sm:text-lg">
                     {stripHTML(post.excerpt.rendered)}
                   </p>
+                )}
+              </div>
+            </div>
 
-                  <div
+            <div className="h-1.5 w-full bg-crfal-gold" />
+
+            <div className="container-crfal py-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  {autor && (
+                    <p className="text-sm font-bold uppercase tracking-wide text-crfal-blue-dark">
+                      {autor}
+                    </p>
+                  )}
+                  <p className="text-sm text-crfal-gray-500">
+                    Publicado em {formatarDataHoraPublicacao(post.date)}
+                  </p>
+                </div>
+                <ShareButtons url={canonicalUrl} title={stripHTML(post.title.rendered)} />
+              </div>
+            </div>
+          </header>
+
+          <div className="container-crfal py-8 md:py-12">
+            <div className="grid lg:grid-cols-12 gap-8">
+              {/* Article */}
+              <main className="lg:col-span-8">
+                <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
+                  {hasFeaturedImage && (
+                    <div className="relative aspect-video overflow-hidden bg-crfal-gray-100">
+                      <img
+                        src={featuredImage}
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
+                      />
+                      <img
+                        src={featuredImage}
+                        alt={stripHTML(post.title.rendered)}
+                        className="relative z-10 w-full h-full object-contain"
+                        onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-5 sm:p-7">
+                    <div
                     className="text-neutral-700  leading-relaxed text-sm sm:text-base
                       [&_p]:mb-4
                       [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]: [&_h2]:mt-8 [&_h2]:mb-3
@@ -338,9 +377,10 @@ export default function NewsDetailPage() {
                 })}
               </div>
             </aside>
+            </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

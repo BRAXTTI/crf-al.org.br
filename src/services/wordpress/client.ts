@@ -35,6 +35,8 @@ const NEWS_LIST_FIELDS = 'id,date,slug,link,title,excerpt,_links,_embedded';
 const NEWS_DETAIL_FIELDS = 'id,date,modified,slug,link,title,excerpt,content,_links,_embedded';
 /** Limita o `_embed` à mídia destacada e aos termos, reduzindo muito a resposta. */
 const NEWS_EMBED = 'wp:featuredmedia,wp:term';
+/** `_embed` da matéria individual: inclui o autor para o cabeçalho editorial. */
+const NEWS_DETAIL_EMBED = 'wp:featuredmedia,wp:term,author';
 
 /** URL no estilo `index.php?rest_route=` (usada pelo WP de eventos). */
 function restUrl(route: string, params: Record<string, string> = {}): string {
@@ -114,14 +116,14 @@ export async function fetchPosts(
 
 export async function fetchPostById(id: number, signal?: AbortSignal): Promise<WPPost> {
   return wpJson<WPPost>(
-    newsUrl(`/wp/v2/posts/${id}`, { _embed: NEWS_EMBED, _fields: NEWS_DETAIL_FIELDS }),
+    newsUrl(`/wp/v2/posts/${id}`, { _embed: NEWS_DETAIL_EMBED, _fields: NEWS_DETAIL_FIELDS }),
     signal
   );
 }
 
 export async function fetchPostBySlug(slug: string, signal?: AbortSignal): Promise<WPPost | null> {
   const posts = await wpJson<WPPost[]>(
-    newsUrl('/wp/v2/posts', { slug, _embed: NEWS_EMBED, _fields: NEWS_DETAIL_FIELDS }),
+    newsUrl('/wp/v2/posts', { slug, _embed: NEWS_DETAIL_EMBED, _fields: NEWS_DETAIL_FIELDS }),
     signal
   );
   return posts[0] ?? null;
@@ -172,6 +174,10 @@ export function getPostCategory(post: WPWithEmbed): string {
 
 export function getPostImage(post: WPWithEmbed): string | undefined {
   return post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+}
+
+export function getPostAuthor(post: WPWithEmbed): string | undefined {
+  return post._embedded?.author?.[0]?.name;
 }
 
 /** Sanitiza HTML do WordPress para uso seguro com dangerouslySetInnerHTML. */
