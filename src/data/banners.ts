@@ -42,6 +42,7 @@ export const banners: Banner[] = [
     image: '/images/banners/banner-golpe.webp',
     imageMobile: '/images/banners/banner-golpe-mobile.webp',
     alt: 'Alerta: golpe de cobrança de anuidade. Desconfie de boletos e links falsos, confira sempre o beneficiário e emita a 2ª via só pelo site oficial. Em caso de dúvida, fale com o CRF/AL pelos canais oficiais.',
+    href: '/imprensa/noticias/crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp',
   },
   {
     image: '/images/banners/banner4.jpg',
