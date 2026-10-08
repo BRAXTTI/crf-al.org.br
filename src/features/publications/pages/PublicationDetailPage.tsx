@@ -5,7 +5,7 @@ import { usePostBySlug } from '@/services/wordpress/hooks';
 /**
  * Rota legada `/publicacao/:slug` — existe apenas para redirecionar
  * links antigos (bookmarks/SEO) para a página de notícia padronizada
- * `/imprensa/noticias/:id`, que é a única tela de detalhe em uso.
+ * `/imprensa/noticias/:slug`, que é a única tela de detalhe em uso.
  */
 export default function PublicationDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -23,7 +23,7 @@ export default function PublicationDetailPage() {
   }
 
   if (post) {
-    return <Navigate to={`/imprensa/noticias/${post.id}`} replace />;
+    return <Navigate to={`/imprensa/noticias/${post.slug}`} replace />;
   }
 
   return (

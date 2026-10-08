@@ -43,7 +43,7 @@ const router = createBrowserRouter([
       { path: 'servicos/tutoriais', element: <TutorialsPage /> },
       { path: 'servicos/ouvidoria', element: <OmbudsmanPage /> },
       { path: 'imprensa/noticias', element: <NewsPage /> },
-      { path: 'imprensa/noticias/:id', element: <NewsDetailPage /> },
+      { path: 'imprensa/noticias/:slug', element: <NewsDetailPage /> },
       { path: 'contato', element: <ContactPage /> },
       { path: 'publicacao/:slug', element: <PublicationDetailPage /> },
       { path: 'fiscalizacao', element: <FiscalizacaoPage /> },

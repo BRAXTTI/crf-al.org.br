@@ -10,6 +10,7 @@ const IMG_FALLBACK =
 
 interface Publication {
   id: number;
+  slug: string;
   title: string;
   image: string;
 }
@@ -17,6 +18,7 @@ interface Publication {
 function mapWPPost(post: WPPost): Publication {
   return {
     id: post.id,
+    slug: post.slug,
     title: stripHTML(sanitizeWP(post.title.rendered)),
     image: getPostImage(post) || IMG_FALLBACK,
   };
@@ -124,7 +126,7 @@ export default function Publications() {
               {publications.map((pub) => (
                 <Link
                   key={pub.id}
-                  to={`/imprensa/noticias/${pub.id}`}
+                  to={`/imprensa/noticias/${pub.slug}`}
                   className="group flex w-[78%] shrink-0 snap-start flex-col text-center sm:w-[46%] lg:w-[31%]"
                 >
                   <div className="relative aspect-video overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-100">

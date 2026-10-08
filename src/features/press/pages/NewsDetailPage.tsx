@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { LOGO_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 import {
@@ -8,7 +8,7 @@ import {
   sanitizeWP,
   stripHTML,
 } from '@/services/wordpress/client';
-import { usePost, useRelatedPosts } from '@/services/wordpress/hooks';
+import { usePost, usePostBySlug, useRelatedPosts } from '@/services/wordpress/hooks';
 import {
   ArrowLeft,
   ArrowRight,
@@ -23,6 +23,7 @@ import {
 
 interface RelatedItem {
   id: number;
+  slug: string;
   title: string;
   date: string;
 }
@@ -79,16 +80,39 @@ function formatarData(dataISO: string) {
 }
 
 export default function NewsDetailPage() {
-  const { id } = useParams();
-  const postId = Number(id);
-  const isInvalidId = !id || Number.isNaN(postId);
+  const { slug } = useParams();
+  // Links antigos por ID (/imprensa/noticias/16193) são redirecionados para a
+  // URL canônica por slug. Novos links já chegam com o slug da matéria.
+  const isLegacyId = Boolean(slug && /^\d+$/.test(slug));
+  const isInvalidSlug = !slug;
 
-  const { data: post, isLoading, isError, error, refetch } = usePost(postId);
-  const { data: relatedPosts } = useRelatedPosts(postId, 3);
+  const {
+    data: slugPost,
+    isLoading: isSlugLoading,
+    isError: isSlugError,
+    error: slugError,
+    refetch: refetchSlug,
+  } = usePostBySlug(isLegacyId ? '' : slug ?? '');
+  const {
+    data: idPost,
+    isLoading: isIdLoading,
+    isError: isIdError,
+    error: idError,
+    refetch: refetchId,
+  } = usePost(isLegacyId ? Number(slug) : NaN);
+
+  const post = isLegacyId ? idPost : slugPost;
+  const isLoading = isLegacyId ? isIdLoading : isSlugLoading;
+  const isError = isLegacyId ? isIdError : isSlugError;
+  const error = isLegacyId ? idError : slugError;
+  const refetch = isLegacyId ? refetchId : refetchSlug;
+
+  const { data: relatedPosts } = useRelatedPosts(post?.id ?? NaN, 3);
 
   const related: RelatedItem[] =
     relatedPosts?.map((item) => ({
       id: item.id,
+      slug: item.slug,
       title: stripHTML(item.title.rendered),
       date: formatarData(item.date),
     })) ?? [];
@@ -100,7 +124,7 @@ export default function NewsDetailPage() {
     if (!post) return undefined;
     const headline = stripHTML(post.title.rendered);
     const description = stripHTML(post.excerpt?.rendered ?? '').slice(0, 160);
-    const canonical = `${SITE_URL}/imprensa/noticias/${id}`;
+    const canonical = `${SITE_URL}/imprensa/noticias/${post.slug}`;
     return {
       '@context': 'https://schema.org',
       '@type': 'NewsArticle',
@@ -119,15 +143,19 @@ export default function NewsDetailPage() {
         logo: { '@type': 'ImageObject', url: LOGO_IMAGE },
       },
     };
-  }, [post, featuredImage, categoria, id]);
+  }, [post, featuredImage, categoria]);
 
-  const errorMessage = isInvalidId
+  const errorMessage = isInvalidSlug
     ? 'Notícia inválida.'
     : isError
       ? error instanceof Error
         ? error.message
         : 'Falha ao carregar notícia.'
       : null;
+
+  if (isLegacyId && post) {
+    return <Navigate to={`/imprensa/noticias/${post.slug}`} replace />;
+  }
 
   return (
     <div className="min-h-screen bg-crfal-gray-50 ">
@@ -138,7 +166,7 @@ export default function NewsDetailPage() {
             ? stripHTML(post.excerpt.rendered).slice(0, 160)
             : 'Leia as últimas notícias do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas.'
         }
-        path={`/imprensa/noticias/${id}`}
+        path={`/imprensa/noticias/${post?.slug ?? slug ?? ''}`}
         image={featuredImage !== IMG_FALLBACK ? featuredImage : undefined}
         type="article"
         publishedAt={post?.date}
@@ -260,7 +288,7 @@ export default function NewsDetailPage() {
                       {related.map((item) => (
                         <Link
                           key={item.id}
-                          to={`/imprensa/noticias/${item.id}`}
+                          to={`/imprensa/noticias/${item.slug}`}
                           className="block p-3 rounded-xl border border-crfal-gray-200  hover:border-crfal-blue/40 transition-colors"
                         >
                           <p className="text-xs text-crfal-gray-500  mb-1">{item.date}</p>

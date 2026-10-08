@@ -23,7 +23,7 @@ async function fetchAllPosts() {
   let totalPages = 1;
   const out = [];
   while (page <= totalPages) {
-    const url = `${NEWS_WP}/wp-json/wp/v2/posts?per_page=${perPage}&page=${page}&_fields=id,date,modified`;
+    const url = `${NEWS_WP}/wp-json/wp/v2/posts?per_page=${perPage}&page=${page}&_fields=id,slug,date,modified`;
     const res = await fetch(url, { headers: { 'user-agent': 'crfal-sitemap/1.0' } });
     if (!res.ok) throw new Error(`WordPress respondeu ${res.status} na página ${page}`);
     const data = await res.json();
@@ -39,7 +39,7 @@ function newsSitemap(posts) {
   const body = posts
     .map((p) => {
       const lastmod = String(p.modified || p.date || '').slice(0, 10);
-      return `  <url>\n    <loc>${esc(`${SITE_URL}/imprensa/noticias/${p.id}`)}</loc>\n${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ''}    <changefreq>weekly</changefreq>\n  </url>`;
+      return `  <url>\n    <loc>${esc(`${SITE_URL}/imprensa/noticias/${p.slug}`)}</loc>\n${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ''}    <changefreq>weekly</changefreq>\n  </url>`;
     })
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;

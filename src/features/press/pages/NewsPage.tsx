@@ -63,7 +63,7 @@ function mapWPPost(post: WPPost): Publication {
     date: formatDate(post.date),
     tag: categoryName,
     tagColor: getTagColor(categoryName),
-    href: `/imprensa/noticias/${post.id}`,
+    href: `/imprensa/noticias/${post.slug}`,
   };
 }
 
