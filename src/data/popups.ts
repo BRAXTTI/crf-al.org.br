@@ -48,6 +48,14 @@ export interface Popup {
 
 export const popups: Popup[] = [
   {
+    id: 'alerta-golpe-anuidade-2026-10',
+    image: '/images/banners/banner-golpe.webp',
+    imageMobile: '/images/banners/banner-golpe-mobile.webp',
+    alt: 'Alerta: golpe de cobrança de anuidade. Desconfie de boletos e links falsos, confira sempre o beneficiário e emita a 2ª via só pelo site oficial. Em caso de dúvida, fale com o CRF/AL pelos canais oficiais.',
+    href: '/imprensa/noticias/crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp',
+    dismissDays: 1,
+  },
+  {
     id: 'exemplo-2026-01',
     // Exemplo usando uma arte existente. Troque por `image`/`imageMobile` do popup.
     image: '/images/popups/Farmacia_Feed_Inscreva-se.webp',
@@ -56,7 +64,7 @@ export const popups: Popup[] = [
     title: '',
     description: 'Cupom: FARMACIA20OFF',
     ctaLabel: '',
-    active: true,
+    active: false,
     external: true,
     dismissDays: 1,
   },
