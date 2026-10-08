@@ -39,6 +39,11 @@ export interface Banner {
 
 export const banners: Banner[] = [
   {
+    image: '/images/banners/banner-golpe.png',
+    imageMobile: '/images/banners/banner-golpe-mobile.png',
+    alt: 'Alerta: golpe de cobrança de anuidade. Desconfie de boletos e links falsos, confira sempre o beneficiário e emita a 2ª via só pelo site oficial. Em caso de dúvida, fale com o CRF/AL pelos canais oficiais.',
+  },
+  {
     image: '/images/banners/banner4.jpg',
     imageMobile: '/images/banners/banner4-mobile.jpg',
     alt: 'Há mais de seis décadas na defesa do âmbito profissional dos farmacêuticos alagoanos. Vantagens de ser inscrito no Conselho Regional de Farmácia: garantia do exercício legal, capacitações gratuitas com certificação, orientação técnica e eventos.',
