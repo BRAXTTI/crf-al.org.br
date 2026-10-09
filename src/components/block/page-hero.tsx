@@ -78,8 +78,8 @@ export default function PageHero({
   eyebrowIcon,
   children,
   aside,
-  backgroundImage = variant === 'compact' ? '/images/page-hero-premium-v2.jpg' : DEFAULT_BACKGROUND_IMAGE,
-  backgroundImageMobile = DEFAULT_BACKGROUND_IMAGE_MOBILE,
+  backgroundImage = variant === 'compact' ? '/images/page-hero-desktop-v3.jpg' : DEFAULT_BACKGROUND_IMAGE,
+  backgroundImageMobile = variant === 'compact' ? '/images/page-hero-mobile-v3.jpg' : DEFAULT_BACKGROUND_IMAGE_MOBILE,
   decoration,
   className,
 }: PageHeroProps) {
@@ -108,9 +108,12 @@ export default function PageHero({
 
   if (variant === 'compact') {
     return (
-      <section id={id} className={`relative overflow-hidden mt-[var(--header-offset)] bg-crfal-blue-dark py-10 lg:py-[68px] ${className ?? ''}`}>
+      <section id={id} className={`relative overflow-hidden mt-[var(--header-offset)] bg-crfal-blue-dark py-10 lg:flex lg:h-[203px] lg:items-center lg:py-0 ${className ?? ''}`}>
         {backgroundImage && (
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat opacity-80" style={{ backgroundImage: `url("${backgroundImage}")` }} />
+          <picture aria-hidden className="pointer-events-none absolute inset-0 block opacity-80 lg:[mask-image:linear-gradient(to_right,transparent_45%,black_75%)]">
+            {backgroundImageMobile && <source media="(max-width: 1023px)" srcSet={backgroundImageMobile} />}
+            <img src={backgroundImage} alt="" decoding="async" className="h-full w-full object-cover object-right lg:object-contain" />
+          </picture>
         )}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-crfal-blue-dark/90 via-crfal-blue-dark/65 to-crfal-blue-dark/40" />
         <div className="container-crfal relative z-10 flex w-full flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-5">
