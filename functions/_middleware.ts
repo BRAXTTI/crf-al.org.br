@@ -1,24 +1,5 @@
-/**
- * Pages Function (middleware): Open Graph dinâmico para notícias e eventos.
- *
- * O site é uma SPA: as meta tags por página são injetadas em runtime pelo
- * react-helmet-async. Scrapers sociais (WhatsApp, Facebook, X, LinkedIn…)
- * NÃO executam JavaScript, então leem apenas o index.html estático — daí o
- * preview genérico (logo + nome do site) em vez do título/imagem do conteúdo.
- *
- * Aqui detectamos esses robôs e devolvemos o HTML inicial já com as meta tags
- * específicas da página (título, descrição e imagem). Usuários comuns seguem
- * recebendo a SPA normalmente.
- *
- * Também converte URLs antigas de notícia por ID (/imprensa/noticias/16193) em
- * 301 para a URL canônica por slug.
- *
- * Observação: isto é "dynamic rendering" (paliativo). A solução definitiva é
- * SSR, que gera essas meta tags para todos no servidor.
- *
- * Fica na raiz de /functions para rodar também em frente aos arquivos
- * estáticos (as rotas de conteúdo são SPA fallback, sem Function própria).
- */
+/** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
+import { PAGE_METADATA } from '../src/config/page-metadata';
 
 const SITE_URL = 'https://institucional.crf-al.org.br';
 
@@ -32,10 +13,6 @@ const NEWS_EMBED = 'wp:featuredmedia,wp:term';
 const EVENTS_WP = 'https://wordpress.crf-al.org.br';
 const EVENTS_PREFIX = '/eventos/';
 const EVENTS_ROUTE = '/crfal/v1/events';
-
-/** Robôs de preview social que não executam JavaScript. */
-const SOCIAL_BOT_RE =
-  /whatsapp|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|telegrambot|discordbot|pinterest|skypeuripreview|vkshare|embedly|redditbot|w3c_validator|mastodon|bluesky|google-structured-data-testing-tool/i;
 
 interface WPFeaturedMedia {
   source_url?: string;
@@ -70,11 +47,13 @@ interface OgData {
   ogType?: string;
   publishedAt?: string;
   modifiedAt?: string;
+  noindex?: boolean;
 }
 
 interface PagesContext {
   request: Request;
   next: () => Promise<Response>;
+  waitUntil: (promise: Promise<unknown>) => void;
 }
 
 function decodeEntities(value: string): string {
@@ -84,7 +63,11 @@ function decodeEntities(value: string): string {
     .replace(/&#0?39;|&apos;/g, "'")
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&nbsp;/g, ' ');
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (entity, code: string) => {
+      const value = code.toLowerCase().startsWith('x') ? parseInt(code.slice(1), 16) : Number(code);
+      return value > 0 && value <= 0x10ffff ? String.fromCodePoint(value) : entity;
+    });
 }
 
 /** Remove HTML (e o bloco "Ver mais" do tema legado) e decodifica entidades. */
@@ -105,9 +88,16 @@ function escapeAttr(value: string): string {
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
-  const res = await fetch(url, { headers: { 'user-agent': 'crfal-og/1.0' } });
-  if (!res.ok) return null;
-  return (await res.json()) as T;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 4000);
+  try {
+    const res = await fetch(url, { signal: controller.signal, headers: { 'user-agent': 'crfal-og/2.0' } });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`WordPress metadata HTTP ${res.status}`);
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -132,7 +122,7 @@ async function resolveNews(slug: string): Promise<OgData | null> {
   const media = post._embedded?.['wp:featuredmedia']?.[0];
   return {
     title: stripHTML(post.title.rendered),
-    description: stripHTML(post.excerpt?.rendered ?? '').slice(0, 200) || undefined,
+    description: stripHTML(post.excerpt?.rendered ?? '').slice(0, 160) || undefined,
     image: media?.source_url,
     canonical: `${SITE_URL}${NEWS_PREFIX}${post.slug}`,
     ogType: 'article',
@@ -149,133 +139,114 @@ async function resolveEvent(slug: string): Promise<OgData | null> {
   if (!evento) return null;
   return {
     title: stripHTML(evento.title ?? ''),
-    description: stripHTML(evento.excerpt ?? '').slice(0, 200) || undefined,
+    description: stripHTML(evento.excerpt ?? '') || `Detalhes do evento ${stripHTML(evento.title ?? '')} do CRF-AL.`,
     image: evento.banner ?? undefined,
     canonical: `${SITE_URL}${EVENTS_PREFIX}${evento.slug}`,
     ogType: 'article',
   };
 }
 
-// ---------------------------------------------------------------------------
-// Injeção das meta tags
-// ---------------------------------------------------------------------------
+const GALLERY_PREFIX = '/imprensa/galeria-de-fotos/';
+const DEFAULT_IMAGE = `${SITE_URL}/images/og-image.jpg`;
+const SITE_NAME = 'Conselho Regional de Farmácia do Estado de Alagoas';
 
-/** Meta tags que não existem no index.html estático e precisam ser anexadas. */
-function buildExtraMeta(og: OgData): string {
+async function resolveAlbum(slug: string): Promise<OgData | null> {
+  const search = new URLSearchParams({ rest_route: `/crfal/v1/photo-albums/${slug}` });
+  const album = await fetchJson<{ title: string; description?: string; slug: string; cover?: { src: string } }>(
+    `${EVENTS_WP}/index.php?${search}`
+  );
+  if (!album) return null;
+  return {
+    title: stripHTML(album.title),
+    description: stripHTML(album.description || 'Confira as fotos dos eventos e ações do CRF-AL.'),
+    image: album.cover?.src,
+    canonical: `${SITE_URL}${GALLERY_PREFIX}${album.slug}`,
+  };
+}
+
+export function buildMeta(og: OgData): string {
   const fullTitle = `${og.title} | CRFAL`;
+  const image = og.image || DEFAULT_IMAGE;
+  const meta = (key: string, value: string, property = false) =>
+    `<meta data-page-metadata="true" ${property ? 'property' : 'name'}="${key}" content="${escapeAttr(value)}">`;
   return [
-    `<meta property="og:title" content="${escapeAttr(fullTitle)}" />`,
-    og.description
-      ? `<meta property="og:description" content="${escapeAttr(og.description)}" />`
-      : '',
-    `<meta property="og:url" content="${escapeAttr(og.canonical)}" />`,
-    og.publishedAt
-      ? `<meta property="article:published_time" content="${escapeAttr(og.publishedAt)}" />`
-      : '',
-    og.modifiedAt
-      ? `<meta property="article:modified_time" content="${escapeAttr(og.modifiedAt)}" />`
-      : '',
-    `<meta name="twitter:card" content="summary_large_image" />`,
-    `<meta name="twitter:title" content="${escapeAttr(fullTitle)}" />`,
-    og.description
-      ? `<meta name="twitter:description" content="${escapeAttr(og.description)}" />`
-      : '',
-    og.image ? `<meta name="twitter:image" content="${escapeAttr(og.image)}" />` : '',
-    `<link rel="canonical" href="${escapeAttr(og.canonical)}" />`,
-  ]
-    .filter(Boolean)
-    .join('\n    ');
+    meta('description', og.description || ''),
+    meta('og:title', fullTitle, true),
+    meta('og:description', og.description || '', true),
+    meta('og:url', og.canonical, true),
+    meta('og:image', image, true),
+    meta('og:image:alt', og.title, true),
+    meta('og:site_name', SITE_NAME, true),
+    meta('og:locale', 'pt_BR', true),
+    meta('og:type', og.ogType || 'website', true),
+    og.publishedAt ? meta('article:published_time', og.publishedAt, true) : '',
+    og.modifiedAt ? meta('article:modified_time', og.modifiedAt, true) : '',
+    meta('twitter:card', 'summary_large_image'),
+    meta('twitter:title', fullTitle),
+    meta('twitter:description', og.description || ''),
+    meta('twitter:image', image),
+    og.noindex ? meta('robots', 'noindex, nofollow') : '',
+    `<link data-page-metadata="true" rel="canonical" href="${escapeAttr(og.canonical)}">`,
+  ].filter(Boolean).join('\n');
 }
 
-function injectOg(context: PagesContext, og: OgData): Promise<Response> {
-  const { title, image, ogType } = og;
-  return context.next().then((asset) => {
-    try {
-      const fullTitle = `${title} | CRFAL`;
-      const extraMeta = buildExtraMeta(og);
-
-      const rewriter = new HTMLRewriter()
-        .on('title', {
-          element(el) {
-            el.setInnerContent(fullTitle);
-          },
-        })
-        // Substitui a imagem/alt genéricas (evita og:image duplicado).
-        .on('meta[property="og:image"]', {
-          element(el) {
-            if (image) el.setAttribute('content', image);
-          },
-        })
-        .on('meta[property="og:image:alt"]', {
-          element(el) {
-            if (image) el.setAttribute('content', title);
-          },
-        })
-        // Dimensões/formato genéricos não valem para a arte do conteúdo.
-        .on('meta[property="og:image:type"]', { element(el) { el.remove(); } })
-        .on('meta[property="og:image:width"]', { element(el) { el.remove(); } })
-        .on('meta[property="og:image:height"]', { element(el) { el.remove(); } })
-        .on('head', {
-          element(el) {
-            el.append(extraMeta, { html: true });
-          },
-        });
-
-      if (ogType) {
-        rewriter.on('meta[property="og:type"]', {
-          element(el) {
-            el.setAttribute('content', ogType);
-          },
-        });
-      }
-
-      return rewriter.transform(asset);
-    } catch {
-      return asset;
-    }
-  });
+function injectOg(asset: Response, og: OgData): Response {
+  return new HTMLRewriter()
+    .on('title', { element(el) { el.setAttribute('data-page-metadata', 'true'); el.setInnerContent(`${og.title} | CRFAL`); } })
+    .on('meta', { element(el) {
+      const property = el.getAttribute('property') || '';
+      const name = el.getAttribute('name') || '';
+      if (property.startsWith('og:') || property.startsWith('article:') || name.startsWith('twitter:') || name === 'description' || name === 'robots') el.remove();
+    } })
+    .on('link[rel="canonical"]', { element(el) { el.remove(); } })
+    .on('head', { element(el) { el.append(buildMeta(og), { html: true }); } })
+    .transform(asset);
 }
 
-// ---------------------------------------------------------------------------
-// Handler
-// ---------------------------------------------------------------------------
+async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
+  // Cache metadata only: never retain HTML pointing to an outdated deployment bundle.
+  const cache = (caches as CacheStorage & { default: Cache }).default;
+  const key = new Request(`${SITE_URL}/__page-metadata/v2${pathname}`);
+  const cached = await cache.match(key);
+  if (cached) return cached.json();
+  const data = await resolve();
+  if (data) context.waitUntil(cache.put(key, new Response(JSON.stringify(data), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' },
+  })).catch(() => undefined));
+  return data;
+}
 
-export async function onRequest(context: PagesContext) {
-  const { request, next } = context;
-  const url = new URL(request.url);
-  const { pathname } = url;
-
-  // 301 de URL antiga de notícia por ID para a canônica por slug (vale para todos).
-  if (pathname.startsWith(NEWS_PREFIX) && /^\d+$/.test(pathname.slice(NEWS_PREFIX.length))) {
-    const id = pathname.slice(NEWS_PREFIX.length);
-    try {
-      const post = await fetchNewsPost(`/${id}`, {});
-      if (post?.slug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);
-    } catch {
-      /* segue para a SPA */
-    }
-    return next();
+export async function onRequest(context: PagesContext): Promise<Response> {
+  const url = new URL(context.request.url);
+  const pathname = url.pathname.replace(/\/$/, '') || '/';
+  if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
+  if (pathname === '/instituicao/missao-visao') return Response.redirect(`${SITE_URL}/instituicao/sobre-conselho`, 301);
+  if (pathname.startsWith('/publicacao/') && pathname.slice('/publicacao/'.length) && !pathname.slice('/publicacao/'.length).includes('/')) {
+    return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${pathname.slice('/publicacao/'.length)}`, 301);
   }
-
-  const isNews = pathname.startsWith(NEWS_PREFIX);
-  const isEvent = pathname.startsWith(EVENTS_PREFIX);
-  if (!isNews && !isEvent) return next();
-
-  // Apenas robôs de preview precisam das meta tags no HTML inicial.
-  const ua = request.headers.get('user-agent') ?? '';
-  if (!SOCIAL_BOT_RE.test(ua)) return next();
-
-  const prefix = isNews ? NEWS_PREFIX : EVENTS_PREFIX;
-  const slug = decodeURIComponent(pathname.slice(prefix.length));
-  if (!slug || slug.includes('/')) return next();
-
-  let og: OgData | null = null;
+  const staticData = PAGE_METADATA[pathname];
+  const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));
+  if (!staticData && !prefix) return context.next();
+  const asset = await context.next();
+  if (!asset.ok || !asset.headers.get('content-type')?.includes('text/html')) return asset;
+  if (staticData) return injectOg(asset, { ...staticData, canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` });
+  let slug: string;
+  try { slug = decodeURIComponent(pathname.slice(prefix!.length)); } catch { return asset; }
+  if (!slug || slug.includes('/')) return asset;
   try {
-    og = isNews ? await resolveNews(slug) : await resolveEvent(slug);
+    if (prefix === NEWS_PREFIX && /^\d+$/.test(slug)) {
+      const post = await fetchNewsPost(`/${slug}`, {});
+      return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301) : asset;
+    }
+    const og = await cachedMetadata(context, pathname, () => prefix === NEWS_PREFIX ? resolveNews(slug) : prefix === EVENTS_PREFIX ? resolveEvent(slug) : resolveAlbum(slug));
+    if (og?.title) return injectOg(asset, og);
+    return injectOg(new Response(asset.body, { status: 404, headers: asset.headers }), {
+      title: 'Página não encontrada', description: 'O conteúdo solicitado não foi encontrado.', canonical: `${SITE_URL}${pathname}`, noindex: true,
+    });
   } catch {
-    /* segue para a SPA */
+    // Origin outages must not turn valid pages into cached 404s.
+    const response = new Response(asset.body, asset);
+    response.headers.set('Cache-Control', 'no-store');
+    return response;
   }
-  if (!og || !og.title) return next();
-
-  return injectOg(context, og);
 }

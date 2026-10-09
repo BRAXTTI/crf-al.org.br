@@ -121,7 +121,7 @@ export default function NewsDetailPage() {
   return (
     <div className="min-h-screen bg-crfal-gray-50 ">
       <SEO
-        title={post ? sanitizeWP(post.title.rendered) : 'Notícia'}
+        title={post ? stripHTML(post.title.rendered) : 'Notícia'}
         description={
           post
             ? stripHTML(post.excerpt.rendered).slice(0, 160)

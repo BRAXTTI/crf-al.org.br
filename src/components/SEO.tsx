@@ -1,3 +1,4 @@
+import { PAGE_METADATA } from '@/config/page-metadata';
 import { Helmet } from 'react-helmet-async';
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
 
@@ -28,6 +29,9 @@ export default function SEO({
   modifiedAt,
   jsonLd,
 }: SEOProps) {
+  const staticMetadata = PAGE_METADATA[path || '/'];
+  title = staticMetadata?.title ?? title;
+  description = staticMetadata?.description ?? description;
   const canonical = `${BASE_URL}${path}`;
   const fullTitle = `${title} | CRFAL`;
 
@@ -43,6 +47,7 @@ export default function SEO({
       <meta property="og:description" content={description} />
       <meta property="og:url" content={canonical} />
       <meta property="og:image" content={image} />
+      <meta property="og:image:alt" content={title} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="pt_BR" />
       <meta property="og:type" content={type} />

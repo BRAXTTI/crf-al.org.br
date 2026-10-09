@@ -13,22 +13,18 @@
     <link rel="preconnect" href="https://wordpress.crf-al.org.br" />
     <link rel="preconnect" href="https://wordpress.crf-al.org.br" crossorigin />
 
-    <!--
-      Apenas o <title> fica como fallback pré-render (a maioria dos scrapers sociais
-      não executa JS). canonical, description e robots são definidos por página via
-      react-helmet-async — não declarar aqui para não gerar tags duplicadas/conflitantes.
-    -->
-    <title>CRFAL - Conselho Regional de Farmácia do Estado de Alagoas</title>
+    <!-- Pages Functions replace these fallbacks; React takes over on navigation. -->
+    <title data-page-metadata="true">CRFAL - Conselho Regional de Farmácia do Estado de Alagoas</title>
 
     <!-- Open Graph base (fallback para scrapers que não executam JS) -->
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="pt_BR" />
-    <meta property="og:site_name" content="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas" />
-    <meta property="og:image" content="https://institucional.crf-al.org.br/images/og-image.jpg" />
-    <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="CRFAL — Conselho Regional de Farmácia de Alagoas. Valorizando a profissão. Protegendo a sociedade." />
+    <meta data-page-metadata="true" property="og:type" content="website" />
+    <meta data-page-metadata="true" property="og:locale" content="pt_BR" />
+    <meta data-page-metadata="true" property="og:site_name" content="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas" />
+    <meta data-page-metadata="true" property="og:image" content="https://institucional.crf-al.org.br/images/og-image.jpg" />
+    <meta data-page-metadata="true" property="og:image:type" content="image/jpeg" />
+    <meta data-page-metadata="true" property="og:image:width" content="1200" />
+    <meta data-page-metadata="true" property="og:image:height" content="630" />
+    <meta data-page-metadata="true" property="og:image:alt" content="CRFAL — Conselho Regional de Farmácia de Alagoas. Valorizando a profissão. Protegendo a sociedade." />
 
     <!-- JSON-LD: Organização -->
     <script type="application/ld+json">

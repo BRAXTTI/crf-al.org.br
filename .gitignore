@@ -20,3 +20,6 @@ crf-al.WordPress.*.xml
 .DS_Store
 .idea/
 .vscode/
+
+# Local Cloudflare runtime artifacts
+.wrangler/

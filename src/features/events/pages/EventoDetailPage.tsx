@@ -168,6 +168,8 @@ export default function EventoDetailPage() {
         title={evento.titulo}
         description={evento.descricao || `Detalhes do evento ${evento.titulo} do CRF-AL.`}
         path={`/eventos/${evento.slug}`}
+        image={evento.banner || undefined}
+        type="article"
       />
 
       <PageHero
