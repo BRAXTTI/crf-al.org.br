@@ -1,198 +1,69 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getPostImage, sanitizeWP, stripHTML } from '@/services/wordpress/client';
+import { ArrowRight, Newspaper } from 'lucide-react';
+import { getPostCategory, getPostImage, stripHTML } from '@/services/wordpress/client';
 import { usePosts } from '@/services/wordpress/hooks';
 import type { WPPost } from '@/services/wordpress/types';
 
-const IMG_FALLBACK =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect width='600' height='400' fill='%23E6F0F8'/%3E%3C/svg%3E";
+const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect width='600' height='400' fill='%23E6F0F8'/%3E%3C/svg%3E";
+const focusClass = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4';
 
-interface Publication {
-  id: number;
-  slug: string;
-  title: string;
-  image: string;
+function NewsImage({ post, className }: { post: WPPost; className: string }) {
+  return <img src={getPostImage(post) || IMG_FALLBACK} alt="" loading="lazy" decoding="async" className={className} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = IMG_FALLBACK; }} />;
 }
 
-function mapWPPost(post: WPPost): Publication {
-  return {
-    id: post.id,
-    slug: post.slug,
-    title: stripHTML(sanitizeWP(post.title.rendered)),
-    image: getPostImage(post) || IMG_FALLBACK,
-  };
+function NewsDate({ date }: { date: string }) {
+  return <time dateTime={date} className="text-xs font-medium text-crfal-gray-600">{new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</time>;
 }
 
 export default function Publications() {
-  const { data, isLoading, isError, refetch } = usePosts(1, 6);
-  const publications = useMemo(() => data?.posts.map(mapWPPost) ?? [], [data]);
-
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const getStep = useCallback(() => {
-    const el = trackRef.current;
-    const first = el?.querySelector('a');
-    if (!el || !first) return 0;
-    return first.getBoundingClientRect().width + 16;
-  }, []);
-
-  const updateArrows = useCallback(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    setCanPrev(el.scrollLeft > 4);
-    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-    const step = getStep();
-    if (step > 0) {
-      const index = Math.round(el.scrollLeft / step);
-      setActiveIndex(Math.max(0, Math.min(publications.length - 1, index)));
-    }
-  }, [getStep, publications.length]);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    updateArrows();
-    el.addEventListener('scroll', updateArrows, { passive: true });
-    window.addEventListener('resize', updateArrows);
-    return () => {
-      el.removeEventListener('scroll', updateArrows);
-      window.removeEventListener('resize', updateArrows);
-    };
-  }, [updateArrows]);
-
-  const scrollByCard = (direction: 1 | -1) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const step = getStep() || el.clientWidth * 0.8;
-    el.scrollBy({ left: direction * step, behavior: 'smooth' });
-  };
-
-  const scrollToIndex = (index: number) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const step = getStep();
-    if (step <= 0) return;
-    el.scrollTo({ left: index * step, behavior: 'smooth' });
-  };
-
-  const arrowClass =
-    'absolute top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-crfal-gray-200 bg-white/95 text-crfal-blue shadow-card transition-all hover:bg-white hover:scale-105 disabled:pointer-events-none disabled:opacity-0 sm:flex';
+  const { data, isLoading, isError, refetch } = usePosts(1, 5);
+  const [featured, ...remaining] = data?.posts ?? [];
 
   return (
-    <section id="noticias" className="py-16 sm:py-20 md:py-24 bg-crfal-gray-50">
+    <section id="noticias" className="bg-crfal-gray-50 py-14 sm:py-20" aria-labelledby="home-news-title">
       <div className="container-crfal">
-        <h2 className="mb-10 text-center font-display text-2xl sm:text-3xl md:text-4xl font-bold text-red-600 sm:mb-14">
-          Notícias
-        </h2>
-
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-5 border-b border-crfal-gray-200 pb-6">
+          <div>
+            <span className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-crfal-blue"><Newspaper className="h-4 w-4" aria-hidden="true" /> Informação para a profissão</span>
+            <h2 id="home-news-title" className="font-display text-3xl font-bold text-crfal-blue-dark sm:text-4xl">Últimas notícias</h2>
+          </div>
+          <Link to="/imprensa/noticias" className={`inline-flex min-h-11 items-center gap-3 rounded-md text-sm font-semibold text-crfal-blue hover:underline ${focusClass}`}>Todas as notícias <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>
+        </div>
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
-          </div>
+          <div role="status" className="flex min-h-80 items-center justify-center gap-3 text-crfal-gray-600"><span className="h-6 w-6 animate-spin rounded-full border-2 border-crfal-blue border-t-transparent motion-reduce:animate-none" />Carregando notícias...</div>
         ) : isError ? (
-          <div className="py-16 text-center">
-            <p className="text-crfal-gray-600">Não foi possível carregar as notícias. Tente novamente.</p>
-            <button
-              onClick={() => refetch()}
-              className="mt-4 rounded-md border-2 border-red-600 px-5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white"
-            >
-              Tentar novamente
-            </button>
-          </div>
-        ) : publications.length === 0 ? (
+          <div className="rounded-xl border border-crfal-gray-200 bg-white p-10 text-center"><p role="alert" className="text-crfal-gray-700">Não foi possível carregar as notícias.</p><button onClick={() => refetch()} className="btn-outline mt-4">Tentar novamente</button></div>
+        ) : !featured ? (
           <p className="py-16 text-center text-crfal-gray-600">Nenhuma notícia publicada no momento.</p>
         ) : (
-          <div className="relative mx-auto max-w-5xl">
-            <button
-              type="button"
-              onClick={() => scrollByCard(-1)}
-              disabled={!canPrev}
-              aria-label="Notícias anteriores"
-              className={`${arrowClass} left-0 lg:-left-4`}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-
-            <div
-              ref={trackRef}
-              className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
-              role="region"
-              aria-label="Notícias do CRF-AL"
-            >
-              {publications.map((pub) => (
-                <Link
-                  key={pub.id}
-                  to={`/imprensa/noticias/${pub.slug}`}
-                  className="group flex w-[78%] shrink-0 snap-start flex-col text-center sm:w-[46%] lg:w-[31%]"
-                >
-                  <div className="relative aspect-video overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-100">
-                    <img
-                      src={pub.image}
-                      alt=""
-                      aria-hidden="true"
-                      className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
-                    />
-                    <img
-                      src={pub.image}
-                      alt={pub.title}
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = IMG_FALLBACK;
-                      }}
-                      className="relative z-10 h-full w-full object-contain transition-transform duration-500 ease-out [@media(hover:hover)]:group-hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="mx-auto mb-4 mt-4 line-clamp-2 max-w-md text-base font-bold leading-snug text-crfal-blue sm:text-lg">
-                    {pub.title}
-                  </h3>
-                  <span className="mt-auto inline-flex min-h-[44px] items-center justify-center self-center rounded-md bg-primary px-6 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
-                    Leia mais
-                  </span>
-                </Link>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => scrollByCard(1)}
-              disabled={!canNext}
-              aria-label="Próximas notícias"
-              className={`${arrowClass} right-0 lg:-right-4`}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-
-            <div className="mt-6 flex justify-center gap-2" role="tablist" aria-label="Navegação das notícias">
-              {publications.map((pub, index) => (
-                <button
-                  key={pub.id}
-                  type="button"
-                  onClick={() => scrollToIndex(index)}
-                  aria-label={`Ir para a notícia ${index + 1}`}
-                  aria-current={index === activeIndex}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    index === activeIndex
-                      ? 'w-6 bg-crfal-blue'
-                      : 'w-2.5 bg-crfal-gray-300 hover:bg-crfal-gray-400'
-                  }`}
-                />
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-10">
+            <article>
+              <Link to={`/imprensa/noticias/${featured.slug}`} className={`group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white ${focusClass}`}>
+                <div className="aspect-[16/9] overflow-hidden bg-crfal-blue-lighter"><NewsImage post={featured} className="h-full w-full object-contain" /></div>
+                <div className="flex flex-1 flex-col items-start p-6 sm:p-8">
+                  <div className="mb-4 flex flex-wrap items-center gap-3"><span className="rounded-full bg-crfal-blue-lighter px-3 py-1 text-xs font-bold text-crfal-blue">{getPostCategory(featured)}</span><NewsDate date={featured.date} /></div>
+                  <h3 className="text-xl font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue sm:text-2xl">{stripHTML(featured.title.rendered)}</h3>
+                  <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-crfal-gray-600">{stripHTML(featured.excerpt.rendered)}</p>
+                  <span className="mt-6 inline-flex items-center gap-3 text-sm font-bold text-crfal-blue">Ler notícia <ArrowRight className="h-4 w-4" aria-hidden="true" /></span>
+                </div>
+              </Link>
+            </article>
+            <div className="divide-y divide-crfal-gray-200">
+              {remaining.map((post) => (
+                <article key={post.id} className="py-5 first:pt-0 last:pb-0">
+                  <Link to={`/imprensa/noticias/${post.slug}`} className={`group flex items-start gap-4 rounded-md sm:gap-5 ${focusClass}`}>
+                    <div className="aspect-square w-24 shrink-0 overflow-hidden rounded-lg bg-crfal-blue-lighter sm:w-32"><NewsImage post={post} className="h-full w-full object-contain" /></div>
+                    <div className="min-w-0 flex-1">
+                      <NewsDate date={post.date} />
+                      <h3 className="mt-2 text-sm font-bold leading-relaxed text-crfal-blue-dark group-hover:text-crfal-blue sm:text-base">{stripHTML(post.title.rendered)}</h3>
+                      <span className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-crfal-blue">Ler notícia <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></span>
+                    </div>
+                  </Link>
+                </article>
               ))}
             </div>
           </div>
         )}
-
-        <div className="mt-10 text-center sm:mt-14">
-          <Link
-            to="/imprensa/noticias"
-            className="inline-block rounded-md border-2 border-red-600 px-8 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-600 hover:text-white sm:text-base"
-          >
-            Leia todas as notícias
-          </Link>
-        </div>
       </div>
     </section>
   );

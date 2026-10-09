@@ -16,8 +16,8 @@ export default function HomePage() {
       <HeroSlider />
       <ImpactStrip />
       <InstitutionalCards />
-      <InstagramFeed />
       <Publications />
+      <InstagramFeed />
     </>
   );
 }
