@@ -76,7 +76,6 @@ export default function NewsDetailPage() {
     })) ?? [];
 
   const postImage = post ? getPostImage(post) : undefined;
-  const hasFeaturedImage = Boolean(postImage);
   const featuredImage = postImage || IMG_FALLBACK;
   const categoria = (post && getPostCategory(post)) || 'Notícia';
   const autor = post ? getPostAuthor(post) : undefined;
@@ -231,22 +230,6 @@ export default function NewsDetailPage() {
               {/* Article */}
               <main className="lg:col-span-8">
                 <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
-                  {hasFeaturedImage && (
-                    <div className="relative aspect-video overflow-hidden bg-crfal-gray-100">
-                      <img
-                        src={featuredImage}
-                        alt=""
-                        aria-hidden="true"
-                        className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
-                      />
-                      <img
-                        src={featuredImage}
-                        alt={stripHTML(post.title.rendered)}
-                        className="relative z-10 w-full h-full object-contain"
-                        onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
-                      />
-                    </div>
-                  )}
 
                   <div className="p-4 sm:p-6">
                     <div

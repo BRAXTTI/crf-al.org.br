@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { Link } from 'react-router-dom';
@@ -6,7 +6,6 @@ import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper, ChevronLeft
 import {
   getPostCategory,
   getPostImage,
-  sanitizeWP,
   stripHTML,
 } from '@/services/wordpress/client';
 import { usePosts } from '@/services/wordpress/hooks';
@@ -57,49 +56,14 @@ function mapWPPost(post: WPPost): Publication {
   const categoryName = getPostCategory(post);
   return {
     id: post.id,
-    title: sanitizeWP(post.title.rendered),
-    excerpt: stripHTML(post.excerpt.rendered).slice(0, 100) + '...',
+    title: stripHTML(post.title.rendered),
+    excerpt: stripHTML(post.excerpt.rendered),
     image: getPostImage(post) || IMG_FALLBACK,
     date: formatDate(post.date),
     tag: categoryName,
     tagColor: getTagColor(categoryName),
     href: `/imprensa/noticias/${post.slug}`,
   };
-}
-
-function RevealCard({ children, index }: { children: React.ReactNode; index: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-      }`}
-      style={{ transitionDelay: isVisible ? `${(index % 3) * 120}ms` : '0ms' }}
-    >
-      {children}
-    </div>
-  );
 }
 
 function Pagination({
@@ -148,6 +112,8 @@ function Pagination({
         ) : (
           <button
             key={p}
+            aria-current={p === page ? 'page' : undefined}
+            aria-label={`Página ${p}`}
             onClick={() => onPageChange(p as number)}
             className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
               p === page
@@ -229,6 +195,7 @@ export default function NewsPage() {
             <button
               key={tag.value}
               onClick={() => setActiveTag(tag.value)}
+              aria-pressed={activeTag === tag.value}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 activeTag === tag.value
                   ? `${tag.color} text-white shadow-card`
@@ -263,55 +230,44 @@ export default function NewsPage() {
           </div>
         ) : (
           <div className={isFetching ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPublications.map((pub, index) => (
-                <RevealCard key={pub.id} index={index}>
-                  <article className="group bg-white rounded-xl overflow-hidden border border-crfal-gray-200 hover:border-crfal-blue/30 hover:shadow-card transition-all duration-300 h-full">
-                    <div className="relative aspect-video overflow-hidden bg-crfal-gray-100">
+            <div className="grid gap-5 xl:grid-cols-2" aria-busy={isFetching}>
+              {filteredPublications.map((pub) => (
+                <article key={pub.id} className="h-full">
+                  <Link
+                    to={pub.href}
+                    className="group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white transition-colors hover:border-crfal-blue/40 hover:shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 motion-reduce:transition-none sm:flex-row"
+                  >
+                    <div className="relative aspect-video shrink-0 overflow-hidden bg-crfal-gray-100 sm:aspect-auto sm:w-48 lg:w-56">
                       <img
                         src={pub.image}
                         alt=""
-                        aria-hidden="true"
-                        className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70"
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-contain sm:absolute sm:inset-0"
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = IMG_FALLBACK; }}
                       />
-                      <img
-                        src={pub.image}
-                        alt={pub.title}
-                        className="relative z-10 w-full h-full object-contain"
-                        onError={(e) => { (e.target as HTMLImageElement).src = IMG_FALLBACK; }}
-                      />
-                      <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute top-4 left-4 z-20">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 ${pub.tagColor} text-white text-xs font-semibold rounded-full`}>
-                          <Tag className="w-3 h-3" />
-                          {pub.tag}
+                    </div>
+                    <div className="flex flex-1 flex-col items-start p-5 sm:p-6">
+                      <span className={`mb-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-white ${pub.tagColor}`}>
+                        <Tag className="h-3 w-3" aria-hidden="true" />
+                        {pub.tag}
+                      </span>
+                      <h2 className="mb-3 text-lg font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">
+                        {pub.title}
+                      </h2>
+                      <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-crfal-gray-600">{pub.excerpt}</p>
+                      <div className="mt-auto flex w-full flex-wrap items-center justify-between gap-3 border-t border-crfal-gray-100 pt-4">
+                        <span className="inline-flex items-center gap-2 text-xs text-crfal-gray-500">
+                          <Calendar className="h-4 w-4" aria-hidden="true" />
+                          {pub.date}
+                        </span>
+                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-crfal-blue">
+                          Ler notícia <ArrowRight className="h-4 w-4" aria-hidden="true" />
                         </span>
                       </div>
                     </div>
-
-                    <div className="p-5">
-                      <div className="flex items-center gap-2 text-crfal-gray-500 text-sm mb-3">
-                        <Calendar className="w-4 h-4" />
-                        {pub.date}
-                      </div>
-
-                      <h3
-                        className="font-bold text-neutral-800 mb-2 line-clamp-2 group-hover:text-crfal-blue transition-colors duration-300"
-                        dangerouslySetInnerHTML={{ __html: pub.title }}
-                      />
-
-                      <p className="text-sm text-crfal-gray-600 mb-4 line-clamp-2">{pub.excerpt}</p>
-
-                      <Link
-                        to={pub.href}
-                        className="inline-flex items-center gap-2 text-crfal-blue font-medium text-sm group/link"
-                      >
-                        <span className="group-hover/link:underline">Ler mais</span>
-                        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/link:translate-x-1" />
-                      </Link>
-                    </div>
-                  </article>
-                </RevealCard>
+                  </Link>
+                </article>
               ))}
             </div>
 
