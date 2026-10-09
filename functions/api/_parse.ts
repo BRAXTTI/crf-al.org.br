@@ -57,10 +57,10 @@ export async function getInstagramItems(feedUrl: string = DEFAULT_FEED_URL): Pro
       signal: controller.signal,
       headers: { 'user-agent': 'crfal-site/1.0 (+https://institucional.crf-al.org.br)' },
     });
-    if (!res.ok) return [];
-    return parseItems(await res.text());
-  } catch {
-    return [];
+    if (!res.ok) throw new Error(`Instagram feed origin returned HTTP ${res.status}`);
+    const items = parseItems(await res.text());
+    if (items.length === 0) throw new Error('Instagram feed origin returned no publications');
+    return items;
   } finally {
     clearTimeout(timer);
   }
