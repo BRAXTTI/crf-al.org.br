@@ -6,7 +6,7 @@ const source = await readFile(new URL('../functions/api/_parse.ts', import.meta.
 const parserUrl = `data:text/javascript;base64,${Buffer.from(ts.transpile(source, { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 })).toString('base64')}`;
 const handlerSource = (await readFile(new URL('../functions/api/instagram.js', import.meta.url), 'utf8')).replace("'./_parse'", JSON.stringify(parserUrl));
 const { onRequestGet } = await import(`data:text/javascript;base64,${Buffer.from(handlerSource).toString('base64')}`);
-const { parseItems } = await import(parserUrl);
+const { parseItems, getInstagramItems } = await import(parserUrl);
 const html = '<a class="sbi_photo" href="https://www.instagram.com/p/example/" data-full-res="https://www.crf-al.org.br/app/uploads/example.jpg">';
 assert.equal(parseItems(html).length, 1);
 
@@ -23,6 +23,11 @@ globalThis.fetch = async () => { requests++; return new Response(originHtml, { s
 console.error = () => {};
 const context = { request: new Request('https://example.org/api/instagram'), env: {}, waitUntil: promise => pending.push(promise) };
 try {
+  globalThis.fetch = async () => new Response(JSON.stringify([{ content: { rendered: html } }]), { headers: { 'content-type': 'application/json; charset=UTF-8' } });
+  assert.deepEqual(await getInstagramItems(), parseItems(html), 'WordPress REST page content supplies the feed');
+  globalThis.fetch = async () => new Response(JSON.stringify([]), { headers: { 'content-type': 'application/json' } });
+  await assert.rejects(getInstagramItems(), /no publications/);
+  globalThis.fetch = async () => { requests++; return new Response(originHtml, { status: originStatus }); };
   let response = await onRequestGet(context);
   assert.equal(response.status, 200);
   assert.equal((await response.json()).items.length, 1);

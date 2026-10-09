@@ -8,7 +8,7 @@ export interface InstagramFeedItem {
   image: string;
 }
 
-export const DEFAULT_FEED_URL = 'https://wordpress.crf-al.org.br/instagram/';
+export const DEFAULT_FEED_URL = 'https://wordpress.crf-al.org.br/index.php?rest_route=/wp/v2/pages&slug=instagram&_fields=content';
 
 export function decodeEntities(value: string): string {
   return value
@@ -58,7 +58,17 @@ export async function getInstagramItems(feedUrl: string = DEFAULT_FEED_URL): Pro
       headers: { 'user-agent': 'crfal-site/1.0 (+https://institucional.crf-al.org.br)' },
     });
     if (!res.ok) throw new Error(`Instagram feed origin returned HTTP ${res.status}`);
-    const items = parseItems(await res.text());
+    // A API REST evita depender das regras de links permanentes da hospedagem.
+    // URLs personalizadas de páginas HTML continuam sendo aceitas.
+    let html: string;
+    if (res.headers.get('content-type')?.includes('application/json')) {
+      const pages: unknown = await res.json();
+      if (!Array.isArray(pages)) throw new Error('Instagram feed origin returned an invalid page list');
+      html = pages.map((page) => typeof page?.content?.rendered === 'string' ? page.content.rendered : '').join('\n');
+    } else {
+      html = await res.text();
+    }
+    const items = parseItems(html);
     if (items.length === 0) throw new Error('Instagram feed origin returned no publications');
     return items;
   } finally {
