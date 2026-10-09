@@ -20,6 +20,7 @@ import {
   Newspaper,
   ExternalLink,
   Calendar,
+  Images,
 } from 'lucide-react';
 import { CRF_EM_CASA_URL, SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
 import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
@@ -115,6 +116,7 @@ const navItems: NavItem[] = [
         title: 'Comunicação',
         items: [
           { label: 'Notícias', href: '/imprensa/noticias', icon: Newspaper },
+          { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos', icon: Images },
           { label: 'Eventos', href: '/eventos', icon: Calendar },
         ],
       },

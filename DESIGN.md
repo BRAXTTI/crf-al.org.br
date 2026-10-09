@@ -42,3 +42,7 @@ Arte desktop `page-hero-desktop-v3.jpg`: encaixada pela altura, à direita, sem 
 ## Cards no celular
 
 Abaixo de 640px, estatísticas dividem igualmente a largura disponível, com padding horizontal de 8px, números de 24px e rótulos de 10px centralizados, com quebra de linha. Gap de 8px e largura mínima de 80px; rolagem disponível apenas quando necessária. A partir de 640px, preservar cards com padding de 20px, números de 28px e rótulos de 12px. A altura mobile acompanha o conteúdo.
+
+## Galeria de Fotos
+
+Em Imprensa, cada galeria publicada do FooGallery corresponde a um álbum. Usar o cabeçalho compacto e os tokens existentes. Capas e miniaturas têm proporção 4:3; fotos ampliadas preservam o enquadramento completo. Álbuns usam até três colunas; fotos usam duas colunas no celular e três no desktop. A ampliação reutiliza o Dialog acessível, com fechamento em português, Escape, restauração de foco e navegação pelas setas. Não exibir a data de publicação como data do evento.

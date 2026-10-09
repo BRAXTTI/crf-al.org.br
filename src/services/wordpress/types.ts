@@ -1,3 +1,32 @@
+export interface GalleryPhoto {
+  id: number;
+  src: string;
+  thumbnail: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
+}
+
+export interface PhotoAlbum {
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  date: string;
+  modified: string;
+  count: number;
+  cover: GalleryPhoto | null;
+  /** Disponíveis apenas na consulta de detalhe. */
+  photos?: GalleryPhoto[];
+}
+
+export interface PhotoAlbumPage {
+  albums: PhotoAlbum[];
+  total: number;
+  totalPages: number;
+}
+
 interface WPRendered {
   rendered: string;
 }

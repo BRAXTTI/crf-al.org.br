@@ -13,6 +13,8 @@ import TutorialsPage from '@/features/services/pages/TutorialsPage';
 import OmbudsmanPage from '@/features/services/pages/OmbudsmanPage';
 import NewsPage from '@/features/press/pages/NewsPage';
 import NewsDetailPage from '@/features/press/pages/NewsDetailPage';
+import PhotoGalleryPage from '@/features/press/pages/PhotoGalleryPage';
+import PhotoAlbumPage from '@/features/press/pages/PhotoAlbumPage';
 import PublicationDetailPage from '@/features/publications/pages/PublicationDetailPage';
 import FiscalizacaoPage from '@/features/fiscalizacao/pages/FiscalizacaoPage';
 import PapelFiscalizacaoPage from '@/features/fiscalizacao/pages/PapelFiscalizacaoPage';
@@ -44,6 +46,8 @@ const router = createBrowserRouter([
       { path: 'servicos/ouvidoria', element: <OmbudsmanPage /> },
       { path: 'imprensa/noticias', element: <NewsPage /> },
       { path: 'imprensa/noticias/:slug', element: <NewsDetailPage /> },
+      { path: 'imprensa/galeria-de-fotos', element: <PhotoGalleryPage /> },
+      { path: 'imprensa/galeria-de-fotos/:slug', element: <PhotoAlbumPage /> },
       { path: 'contato', element: <ContactPage /> },
       { path: 'publicacao/:slug', element: <PublicationDetailPage /> },
       { path: 'fiscalizacao', element: <FiscalizacaoPage /> },
