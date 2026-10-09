@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroStats } from '@/components/block/page-hero';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper, ChevronLeft } from 'lucide-react';
 import {
@@ -173,16 +173,7 @@ export default function NewsPage() {
           { label: 'Notícias' },
         ]}
         title="Notícias"
-        description="Acompanhe as últimas notícias, comunicados e novidades do Conselho Regional de Farmácia do Estado de Alagoas."
-        aside={
-          <div className="rounded-xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
-            <Newspaper className="mb-2 h-8 w-8 text-white" />
-            <span className="block text-2xl font-bold text-white">
-              {totalPosts || publications.length}
-            </span>
-            <span className="text-sm text-white/70">Notícias publicadas</span>
-          </div>
-        }
+        aside={<PageHeroStats items={[{ value: totalPosts || publications.length, label: 'Notícias publicadas' }]} />}
       />
 
       <div className="container-crfal py-10 md:py-16" ref={gridRef}>

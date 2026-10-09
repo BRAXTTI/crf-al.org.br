@@ -15,9 +15,7 @@ export default function StatutePage() {
           { label: 'Instituição', href: '/instituicao' },
           { label: 'Estatuto' },
         ]}
-        eyebrow="Institucional"
         title="Estatuto"
-        description="Acesse o estatuto do Conselho Regional de Farmácia do Estado de Alagoas (CRFAL) — normas, regimentos e regulamentos internos."
       />
     </div>
   );

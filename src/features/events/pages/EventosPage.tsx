@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroStats } from '@/components/block/page-hero';
 import { useEvents } from '@/services/wordpress/hooks';
 import {
   MODALIDADE_ICONS,
@@ -378,8 +378,6 @@ export default function EventosPage() {
       {/* Hero */}
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Eventos' }]}
-        eyebrow="Agenda oficial · CRF-AL"
-        eyebrowIcon={Sparkles}
         title={
           <>
             Agenda de{' '}
@@ -388,37 +386,7 @@ export default function EventosPage() {
             </span>
           </>
         }
-        description="Congressos, palestras, capacitações e ações sociais promovidos pelo Conselho Regional de Farmácia do Estado de Alagoas. Inscreva-se e participe."
-        decoration={
-          <div className="absolute inset-0" aria-hidden>
-            <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:26px_26px]" />
-            <div className="absolute -left-24 -top-24 h-96 w-96 animate-float rounded-full bg-crfal-blue-light/25 blur-3xl" />
-            <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
-            <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
-          </div>
-        }
-        aside={
-          <dl className="grid w-full max-w-lg grid-cols-3 gap-3">
-          {[
-            { valor: ativos.length, rotulo: 'Próximos' },
-            { valor: ativos.filter((e) => e.modalidade === 'online').length, rotulo: 'Online' },
-            {
-              valor: ativos.filter((e) => e.modalidade !== 'online').length,
-              rotulo: 'Presenciais',
-            },
-          ].map((item) => (
-            <div
-              key={item.rotulo}
-              className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
-            >
-              <dd className="font-display text-2xl font-bold text-white sm:text-3xl">{item.valor}</dd>
-              <dt className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
-                {item.rotulo}
-              </dt>
-            </div>
-          ))}
-          </dl>
-        }
+        aside={<PageHeroStats items={[{ value: ativos.length, label: 'Próximos' }, { value: ativos.filter((e) => e.modalidade === 'online').length, label: 'Online' }, { value: ativos.filter((e) => e.modalidade !== 'online').length, label: 'Presenciais' }]} />}
       />
 
       <main className="container-crfal py-8 md:py-12">

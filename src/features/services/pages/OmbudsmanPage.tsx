@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroStats } from '@/components/block/page-hero';
 import {
   MessageSquare,
   ThumbsUp,
@@ -118,8 +118,6 @@ export default function OmbudsmanPage() {
           { label: 'Serviços' },
           { label: 'Ouvidoria' },
         ]}
-        eyebrow="Canal oficial · CRF-AL"
-        eyebrowIcon={MessageSquare}
         title={
           <>
             Ouvidoria{' '}
@@ -128,33 +126,7 @@ export default function OmbudsmanPage() {
             </span>
           </>
         }
-        description="A Ouvidoria do Conselho Regional de Farmácia do Estado de Alagoas (CRF-AL) é o canal para registrar denúncias, reclamações, solicitações, sugestões e elogios."
-        decoration={
-          <div className="absolute inset-0" aria-hidden>
-            <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:26px_26px]" />
-            <div className="absolute -left-24 -top-24 h-96 w-96 animate-float rounded-full bg-crfal-blue-light/25 blur-3xl" />
-            <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
-          </div>
-        }
-        aside={
-          <dl className="grid w-full max-w-lg grid-cols-3 gap-3">
-          {[
-            { valor: '30', rotulo: 'Dias p/ resposta' },
-            { valor: '5', rotulo: 'Tipos de manifestação' },
-            { valor: '24h', rotulo: 'Canal disponível' },
-          ].map((item) => (
-            <div
-              key={item.rotulo}
-              className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
-            >
-              <dd className="font-display text-2xl font-bold text-white sm:text-3xl">{item.valor}</dd>
-              <dt className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
-                {item.rotulo}
-              </dt>
-            </div>
-          ))}
-          </dl>
-        }
+        aside={<PageHeroStats items={[{ value: '30', label: 'Dias p/ resposta' }, { value: '5', label: 'Tipos de manifestação' }, { value: '24h', label: 'Canal disponível' }]} />}
       />
 
       <main className="container-crfal py-10 md:py-14">

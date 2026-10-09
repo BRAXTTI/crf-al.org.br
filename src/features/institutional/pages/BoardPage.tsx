@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroStats } from '@/components/block/page-hero';
 import {
   ChevronRight,
   Users,
@@ -307,27 +307,8 @@ export default function BoardPage() {
           { label: 'Instituição' },
           { label: 'Diretoria' },
         ]}
-        eyebrow="Governança"
         title="Diretoria e Conselho"
-        description="Conheça os membros da diretoria executiva e os conselheiros que compõem o Conselho Regional de Farmácia do Estado de Alagoas."
-        aside={
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-              <Briefcase className="mb-2 h-7 w-7 text-white" />
-              <span className="block font-display text-3xl font-light text-white">
-                {secoes[0].membros.length}
-              </span>
-              <span className="text-xs uppercase tracking-wider text-white/70">Diretores</span>
-            </div>
-            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
-              <Users className="mb-2 h-7 w-7 text-white" />
-              <span className="block font-display text-3xl font-light text-white">
-                {secoes[1].membros.length + secoes[2].membros.length}
-              </span>
-              <span className="text-xs uppercase tracking-wider text-white/70">Conselheiros</span>
-            </div>
-          </div>
-        }
+        aside={<PageHeroStats items={[{ value: secoes[0].membros.length, label: 'Diretores' }, { value: secoes[1].membros.length + secoes[2].membros.length, label: 'Conselheiros' }]} />}
       />
 
       <div className="container-crfal py-6 lg:py-16" ref={sectionRef}>

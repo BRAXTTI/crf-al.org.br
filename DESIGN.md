@@ -23,6 +23,6 @@ Rawline, hospedada localmente, para títulos e texto. Azul #003366, azul escuro 
 
 ## Cabeçalhos de serviços
 
-`src/components/block/page-hero.tsx` é o componente compartilhado. A variante `compact` inicia em Requerimentos: breadcrumb e título à esquerda, estatísticas à direita em desktop (a partir de 1024px). Usar padding fixo, sem proporção ou altura mínima. Título clamp(28px, 3vw, 40px), gradiente preservado; cards com raio 12px e padding 12px 20px. Imagem à direita como marca d’água. A barra fixa usa o espaço definido por `--header-offset`.
+`src/components/block/page-hero.tsx` é o componente compartilhado. A variante `compact` é o padrão em todas as páginas internas: breadcrumb e título à esquerda, estatísticas à direita em desktop (a partir de 1024px). Usar padding fixo, sem proporção ou altura mínima. Título clamp(28px, 3vw, 40px), gradiente preservado; cards com raio 12px e padding 12px 20px. Imagem à direita como marca d’água. A barra fixa usa o espaço definido por `--header-offset`.
 
-Abaixo de 1024px, empilhar título e estatísticas. Em telas estreitas, estatísticas mantêm uma linha com rolagem horizontal acessível por teclado. As demais páginas mantêm a variante padrão até uma migração explícita.
+Abaixo de 1024px, empilhar título e estatísticas. Em telas estreitas, estatísticas mantêm uma linha com rolagem horizontal acessível por teclado. Títulos longos quebram naturalmente para preservar legibilidade. Detalhes de eventos mantêm data, local e status. `PageHeroStats` é o componente canônico de estatísticas. A variante `default` permanece disponível para banners editoriais explícitos.

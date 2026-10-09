@@ -11,9 +11,7 @@ export default function InstitutionalPage() {
       />
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Instituição' }]}
-        eyebrow="Institucional"
         title="Instituição"
-        description="Conheça o CRFAL — história, missão, visão, valores, diretoria e estatuto do Conselho Regional de Farmácia do Estado de Alagoas."
       />
     </div>
   );

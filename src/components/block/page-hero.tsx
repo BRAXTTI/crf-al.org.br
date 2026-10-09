@@ -70,7 +70,7 @@ const DEFAULT_DECORATION = (
 
 export default function PageHero({
   id,
-  variant = 'default',
+  variant = 'compact',
   title,
   description,
   breadcrumb,
@@ -108,17 +108,18 @@ export default function PageHero({
 
   if (variant === 'compact') {
     return (
-      <section id={id} className={`relative overflow-hidden mt-[var(--header-offset)] bg-crfal-blue-dark py-10 lg:py-[60px] ${className ?? ''}`}>
+      <section id={id} className={`relative overflow-hidden mt-[var(--header-offset)] bg-crfal-blue-dark py-10 lg:py-[68px] ${className ?? ''}`}>
         {backgroundImage && (
           <div aria-hidden className="pointer-events-none absolute inset-0 bg-[length:auto_140%] bg-right bg-no-repeat opacity-[0.15]" style={{ backgroundImage: `url("${backgroundImage}")` }} />
         )}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-crfal-blue-dark via-crfal-blue-dark/90 to-crfal-blue/70" />
         <div className="container-crfal relative z-10 flex w-full flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-5">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             {breadcrumbNav}
-            {title && <h1 className="font-display text-[clamp(28px,3vw,40px)] font-semibold leading-[1.15] tracking-tight text-white lg:whitespace-nowrap">{title}</h1>}
+            {title && <h1 className="font-display text-[clamp(28px,3vw,40px)] font-semibold leading-[1.15] tracking-tight text-white">{title}</h1>}
+            {children && <div className="mt-4">{children}</div>}
           </div>
-          {aside && <div className="w-full min-w-0 lg:w-auto lg:shrink-0 lg:translate-y-4">{aside}</div>}
+          {aside && <div className="w-full min-w-0 lg:w-auto lg:max-w-[50%] lg:shrink-0 lg:translate-y-4">{aside}</div>}
         </div>
       </section>
     );
@@ -185,5 +186,20 @@ export default function PageHero({
         </div>
       </div>
     </section>
+  );
+}
+
+
+/** Estatísticas compactas compartilhadas pelos cabeçalhos internos. */
+export function PageHeroStats({ items }: { items: { value: ReactNode; label: string }[] }) {
+  return (
+    <dl tabIndex={0} aria-label="Estatísticas da seção" className="flex gap-3 overflow-x-auto pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/85">
+      {items.map((item) => (
+        <div key={item.label} className="shrink-0 rounded-[12px] border border-white/[0.12] bg-white/[0.08] px-5 py-3">
+          <dd className="font-display text-[28px] font-bold leading-tight text-white">{item.value}</dd>
+          <dt className="mt-0.5 text-xs font-medium uppercase tracking-wider text-white/70">{item.label}</dt>
+        </div>
+      ))}
+    </dl>
   );
 }

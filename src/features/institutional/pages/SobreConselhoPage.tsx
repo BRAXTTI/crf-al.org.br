@@ -246,25 +246,9 @@ export default function SobreConselhoPage() {
           { label: 'Instituição' },
           { label: 'Sobre o Conselho' },
         ]}
-        eyebrow="Desde 1960"
         title={
           <>
-            Sobre o
-            <br className="hidden sm:block" /> Conselho
-          </>
-        }
-        description="Conheça a história, a missão e os valores do Conselho Regional de Farmácia do Estado de Alagoas — guardião da profissão farmacêutica alagoana há mais de seis décadas."
-        decoration={
-          <>
-            <div className="pointer-events-none absolute inset-0 select-none overflow-hidden" aria-hidden>
-              <span className="absolute -bottom-4 right-0 whitespace-nowrap text-[22vw] font-bold leading-none text-white/[0.055]">
-                1960
-              </span>
-            </div>
-            <div className="pointer-events-none absolute inset-0" aria-hidden>
-              <div className="absolute left-8 top-8 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-              <div className="absolute bottom-0 right-16 h-96 w-96 rounded-full bg-crfal-blue-light/10 blur-3xl" />
-            </div>
+            Sobre o Conselho
           </>
         }
       />

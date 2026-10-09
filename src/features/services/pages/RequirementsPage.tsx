@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroStats } from '@/components/block/page-hero';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import {
   LEGACY_WP_UPLOADS_URL,
@@ -647,25 +647,7 @@ export default function RequirementsPage() {
             </span>
           </>
         }
-        aside={
-          <dl tabIndex={0} aria-label="Estatísticas de requerimentos" className="flex gap-3 overflow-x-auto pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/85">
-          {[
-            { valor: ESTATISTICAS.servicos, rotulo: 'Serviços' },
-            { valor: ESTATISTICAS.formularios, rotulo: 'Formulários' },
-            { valor: ESTATISTICAS.categorias, rotulo: 'Categorias' },
-          ].map((item) => (
-            <div
-              key={item.rotulo}
-              className="shrink-0 rounded-[12px] border border-white/[0.12] bg-white/[0.08] px-5 py-3"
-            >
-              <dd className="font-display text-[28px] font-bold leading-tight text-white">{item.valor}</dd>
-              <dt className="mt-0.5 text-xs font-medium uppercase tracking-wider text-white/70">
-                {item.rotulo}
-              </dt>
-            </div>
-          ))}
-          </dl>
-        }
+        aside={<PageHeroStats items={[{ value: ESTATISTICAS.servicos, label: 'Serviços' }, { value: ESTATISTICAS.formularios, label: 'Formulários' }, { value: ESTATISTICAS.categorias, label: 'Categorias' }]} />}
       />
 
       <main className="container-crfal py-8 md:py-12">

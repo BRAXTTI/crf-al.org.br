@@ -13,7 +13,6 @@ export default function PrivacyPolicyPage() {
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Política de Privacidade' }]}
         title="Política de Privacidade"
-        description="Esta política descreve como os dados pessoais são coletados, utilizados e protegidos pelo CRF-AL."
       />
 
       <div className="container-crfal py-10 md:py-16">

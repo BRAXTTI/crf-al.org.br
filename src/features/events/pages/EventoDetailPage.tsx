@@ -176,7 +176,6 @@ export default function EventoDetailPage() {
           { label: 'Eventos', href: '/eventos' },
           { label: evento.titulo },
         ]}
-        eyebrow="Detalhes do evento"
         title={evento.titulo}
       >
         <div className="flex flex-wrap items-center gap-2">

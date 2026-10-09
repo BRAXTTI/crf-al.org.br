@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroStats } from '@/components/block/page-hero';
 import {
   Search,
   ChevronRight,
   Play,
   X,
-  BookOpen,
   Clock,
   Filter,
 } from 'lucide-react';
@@ -71,21 +70,7 @@ export default function TutorialsPage() {
           { label: 'Tutoriais' },
         ]}
         title="Tutoriais"
-        description="Aprenda a utilizar todos os serviços do CRFAL com nossos tutoriais passo a passo. Simples, rápido e direto ao ponto."
-        aside={
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
-              <BookOpen className="mb-2 h-8 w-8 text-white" />
-              <span className="block text-2xl font-bold text-white">{tutorials.length}</span>
-              <span className="text-sm text-white/70">Tutoriais</span>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
-              <Clock className="mb-2 h-8 w-8 text-white" />
-              <span className="block text-2xl font-bold text-white">2-5</span>
-              <span className="text-sm text-white/70">Min. cada</span>
-            </div>
-          </div>
-        }
+        aside={<PageHeroStats items={[{ value: tutorials.length, label: 'Tutoriais' }, { value: '2-5', label: 'Min. cada' }]} />}
       />
 
       <div className="container-crfal py-10 md:py-16" ref={sectionRef}>

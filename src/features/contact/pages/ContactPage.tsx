@@ -83,21 +83,7 @@ export default function ContactPage() {
       {/* Hero — sobrio, institucional */}
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Fale Conosco' }]}
-        eyebrow="Atendimento"
         title="Fale Conosco"
-        description="Canais oficiais de comunicação do CRFAL. Escolha o setor, toque para ligar, enviar mensagem por WhatsApp ou e-mail."
-        decoration={
-          <>
-            <div className="pointer-events-none absolute inset-0 opacity-[0.07]" aria-hidden>
-              <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white blur-3xl" />
-              <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-white blur-3xl" />
-            </div>
-            <div
-              className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-crfal-blue-light via-white/40 to-transparent"
-              aria-hidden
-            />
-          </>
-        }
       />
 
       <div className="container-crfal py-8 md:py-14" ref={sectionRef}>

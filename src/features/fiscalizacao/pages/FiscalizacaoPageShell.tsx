@@ -34,10 +34,7 @@ export default function FiscalizacaoPageShell({ title, description, children }: 
 
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Fiscalização' }]}
-        eyebrow="Fiscalização"
-        eyebrowIcon={ShieldCheck}
         title={title}
-        description="Conteúdo institucional da fiscalização farmacêutica no CRFAL com foco em clareza de procedimentos, atribuições legais e orientação aos profissionais e estabelecimentos."
       />
 
       <div className="bg-crfal-gray-50 pb-16  md:pb-24">
