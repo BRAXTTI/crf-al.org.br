@@ -41,26 +41,26 @@ export interface Banner {
 
 export const banners: Banner[] = [
   {
-    image: '/images/banners/banner-golpe.webp',
+    image: '/images/banners/banner-golpe-nova-resolucao-desktop.png',
     imageMobile: '/images/banners/banner-golpe-mobile.webp',
     alt: 'Alerta: golpe de cobrança de anuidade. Desconfie de boletos e links falsos, confira sempre o beneficiário e emita a 2ª via só pelo site oficial. Em caso de dúvida, fale com o CRF/AL pelos canais oficiais.',
     href: '/imprensa/noticias/crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp',
   },
   {
-    image: '/images/banners/banner4.jpg',
+    image: '/images/banners/banner-4-nova-resolucao-final-desktop.png',
     imageMobile: '/images/banners/banner4-mobile.jpg',
     alt: 'Há mais de seis décadas na defesa do âmbito profissional dos farmacêuticos alagoanos. Vantagens de ser inscrito no Conselho Regional de Farmácia: garantia do exercício legal, capacitações gratuitas com certificação, orientação técnica e eventos.',
     href: '/instituicao/sobre-conselho',
   },
   {
-    image: '/images/banners/banner5.jpg',
+    image: '/images/banners/banner-5-nova-proporcao-desktop.png',
     imageMobile: '/images/banners/banner5-mobile.jpg',
     alt: 'Seus requerimentos no CRF/AL em Casa de forma simples, rápida e 100% online: primeira inscrição, renovação de registro, alteração de dados cadastrais, certidões e declarações e cancelamento de registro.',
     href: CRF_EM_CASA_URL,
     external: true,
   },
   {
-    image: '/images/banners/banner6.jpg',
+    image: '/images/banners/banner6-nova-proporcao-desktop.png',
     imageMobile: '/images/banners/banner6-mobile.jpg',
     alt: 'Ouvidoria do CRF/AL: canal direto entre você e o Conselho. Registre sugestões, elogios, reclamações, solicitações e denúncias.',
     href: OUVIDORIA_URL,
