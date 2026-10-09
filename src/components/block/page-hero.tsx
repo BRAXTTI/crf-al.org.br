@@ -196,11 +196,11 @@ export default function PageHero({
 /** Estatísticas compactas compartilhadas pelos cabeçalhos internos. */
 export function PageHeroStats({ items }: { items: { value: ReactNode; label: string }[] }) {
   return (
-    <dl tabIndex={0} aria-label="Estatísticas da seção" className="flex gap-3 overflow-x-auto pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/85">
+    <dl tabIndex={0} aria-label="Estatísticas da seção" className="flex gap-2 overflow-x-auto pb-1 sm:gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/85">
       {items.map((item) => (
-        <div key={item.label} className="shrink-0 rounded-[12px] border border-white/[0.12] bg-white/[0.08] px-5 py-3">
-          <dd className="font-display text-[28px] font-bold leading-tight text-white">{item.value}</dd>
-          <dt className="mt-0.5 text-xs font-medium uppercase tracking-wider text-white/70">{item.label}</dt>
+        <div key={item.label} className="min-w-[80px] flex-1 rounded-[12px] border border-white/[0.12] bg-white/[0.08] px-2 py-3 text-center sm:flex-none sm:shrink-0 sm:px-5 sm:text-left">
+          <dd className="font-display text-2xl font-bold leading-tight text-white sm:text-[28px]">{item.value}</dd>
+          <dt className="mt-1 break-words text-[10px] font-medium uppercase leading-relaxed tracking-[0.03em] text-white/80 sm:mt-0.5 sm:text-xs sm:tracking-wider sm:text-white/70">{item.label}</dt>
         </div>
       ))}
     </dl>
