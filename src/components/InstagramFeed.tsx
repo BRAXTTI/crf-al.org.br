@@ -23,7 +23,9 @@ export default function InstagramFeed({
     <section className="bg-white py-14 sm:py-20" aria-labelledby="instagram-title">
       <div className="container-crfal">
         <div className="grid overflow-hidden rounded-2xl border border-crfal-gray-200 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-          <div className="flex flex-col items-start bg-crfal-blue p-7 text-white sm:p-10 lg:p-12">
+          <div className="relative isolate flex flex-col items-start overflow-hidden bg-crfal-blue p-7 text-white sm:p-10 lg:p-12">
+            <img src="/images/instagram-card-background-v1.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className="pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-right-bottom" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-crfal-blue/95 via-crfal-blue/80 to-crfal-blue/30" />
             <span className="mb-8 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/80"><Instagram className="h-5 w-5" aria-hidden="true" /> No Instagram</span>
             <h2 id="instagram-title" className="max-w-sm font-display text-3xl font-bold leading-tight sm:text-4xl">{title}</h2>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/80 sm:text-base">{description}</p>

@@ -35,6 +35,10 @@ Abaixo de 1024px, empilhar título e estatísticas. Em telas estreitas, estatís
 
 Arte desktop `page-hero-desktop-v3.jpg`: encaixada pela altura, à direita, sem cortar a taça; o fundo azul preenche a extensão panorâmica. Arte mobile `page-hero-mobile-v3.jpg`: composição específica próxima de 375:247, aplicada abaixo de 1024px. Requerimentos mede aproximadamente 247px em 375px de largura. Títulos maiores podem aumentar a altura no celular para evitar cortes.
 
+## Arte do card do Instagram
+
+`public/images/instagram-card-background-v1.jpg`: fundo azul com taça de Hígia, fitas suaves e detalhes dourados concentrados à direita. Imagem decorativa sem texto, com camada azul sobreposta para preservar a leitura. Aplicar apenas ao painel de apresentação da seção Instagram; manter altura natural e carregamento adiado.
+
 ## Cards no celular
 
 Abaixo de 640px, estatísticas dividem igualmente a largura disponível, com padding horizontal de 8px, números de 24px e rótulos de 10px centralizados, com quebra de linha. Gap de 8px e largura mínima de 80px; rolagem disponível apenas quando necessária. A partir de 640px, preservar cards com padding de 20px, números de 28px e rótulos de 12px. A altura mobile acompanha o conteúdo.
