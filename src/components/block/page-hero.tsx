@@ -78,7 +78,7 @@ export default function PageHero({
   eyebrowIcon,
   children,
   aside,
-  backgroundImage = DEFAULT_BACKGROUND_IMAGE,
+  backgroundImage = variant === 'compact' ? '/images/page-hero-premium-v2.jpg' : DEFAULT_BACKGROUND_IMAGE,
   backgroundImageMobile = DEFAULT_BACKGROUND_IMAGE_MOBILE,
   decoration,
   className,
@@ -110,9 +110,9 @@ export default function PageHero({
     return (
       <section id={id} className={`relative overflow-hidden mt-[var(--header-offset)] bg-crfal-blue-dark py-10 lg:py-[68px] ${className ?? ''}`}>
         {backgroundImage && (
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[length:auto_140%] bg-right bg-no-repeat opacity-[0.15]" style={{ backgroundImage: `url("${backgroundImage}")` }} />
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-cover bg-right bg-no-repeat opacity-80" style={{ backgroundImage: `url("${backgroundImage}")` }} />
         )}
-        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-crfal-blue-dark via-crfal-blue-dark/90 to-crfal-blue/70" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-crfal-blue-dark/90 via-crfal-blue-dark/65 to-crfal-blue-dark/40" />
         <div className="container-crfal relative z-10 flex w-full flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-5">
           <div className="min-w-0 flex-1">
             {breadcrumbNav}
