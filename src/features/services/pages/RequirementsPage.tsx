@@ -633,13 +633,12 @@ export default function RequirementsPage() {
 
       {/* Hero */}
       <PageHero
+        variant="compact"
         breadcrumb={[
           { label: 'Início', href: '/' },
           { label: 'Serviços' },
           { label: 'Requerimentos' },
         ]}
-        eyebrow="Atendimento digital · CRF-AL"
-        eyebrowIcon={ClipboardList}
         title={
           <>
             Central de{' '}
@@ -648,17 +647,8 @@ export default function RequirementsPage() {
             </span>
           </>
         }
-        description="Escolha o perfil, encontre o serviço e acompanhe documentos e instruções passo a passo — tudo em um só lugar."
-        decoration={
-          <div className="absolute inset-0" aria-hidden>
-            <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(rgba(255,255,255,0.55)_1px,transparent_1px)] [background-size:26px_26px]" />
-            <div className="absolute -left-24 -top-24 h-96 w-96 animate-float rounded-full bg-crfal-blue-light/25 blur-3xl" />
-            <div className="absolute -bottom-32 right-0 h-[26rem] w-[26rem] rounded-full bg-[#0066CC]/20 blur-3xl" />
-            <div className="absolute right-1/4 top-10 h-40 w-40 rounded-full bg-crfal-gold/20 blur-3xl" />
-          </div>
-        }
         aside={
-          <dl className="grid w-full max-w-lg grid-cols-3 gap-3">
+          <dl tabIndex={0} aria-label="Estatísticas de requerimentos" className="flex gap-3 overflow-x-auto pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/85">
           {[
             { valor: ESTATISTICAS.servicos, rotulo: 'Serviços' },
             { valor: ESTATISTICAS.formularios, rotulo: 'Formulários' },
@@ -666,10 +656,10 @@ export default function RequirementsPage() {
           ].map((item) => (
             <div
               key={item.rotulo}
-              className="rounded-xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm"
+              className="shrink-0 rounded-[12px] border border-white/[0.12] bg-white/[0.08] px-5 py-3"
             >
-              <dd className="font-display text-2xl font-bold text-white sm:text-3xl">{item.valor}</dd>
-              <dt className="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-white/70">
+              <dd className="font-display text-[28px] font-bold leading-tight text-white">{item.valor}</dd>
+              <dt className="mt-0.5 text-xs font-medium uppercase tracking-wider text-white/70">
                 {item.rotulo}
               </dt>
             </div>

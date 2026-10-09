@@ -31,6 +31,8 @@ export interface PageHeroBreadcrumb {
 export interface PageHeroProps {
   /** Ancora opcional (ex.: `#sobre-conselho`). */
   id?: string;
+  /** Cabeçalho reduzido para centrais de serviços. */
+  variant?: 'default' | 'compact';
   title?: ReactNode;
   description?: ReactNode;
   breadcrumb?: PageHeroBreadcrumb[];
@@ -68,6 +70,7 @@ const DEFAULT_DECORATION = (
 
 export default function PageHero({
   id,
+  variant = 'default',
   title,
   description,
   breadcrumb,
@@ -82,6 +85,44 @@ export default function PageHero({
 }: PageHeroProps) {
   const EyebrowIcon = eyebrowIcon;
   const hasAside = Boolean(aside);
+
+  const breadcrumbNav = breadcrumb && breadcrumb.length > 0 ? (
+          <nav
+            aria-label="Breadcrumb"
+            className={`flex flex-wrap items-center gap-2 text-xs sm:text-sm ${variant === 'compact' ? 'mb-3 text-white/85' : 'mb-6 text-white/60'}`}
+          >
+            {breadcrumb.map((item, index) => (
+              <Fragment key={`${item.label}-${index}`}>
+                {index > 0 && <ChevronRight className="h-4 w-4" aria-hidden />}
+                {item.href ? (
+                  <Link to={item.href} className="transition-colors hover:text-white">
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span aria-current={index === breadcrumb.length - 1 ? 'page' : undefined} className={variant === 'compact' && index < breadcrumb.length - 1 ? 'text-white/85' : 'text-white'}>{item.label}</span>
+                )}
+              </Fragment>
+            ))}
+          </nav>
+        ) : null;
+
+  if (variant === 'compact') {
+    return (
+      <section id={id} className={`relative overflow-hidden mt-[var(--header-offset)] bg-crfal-blue-dark py-10 lg:py-[60px] ${className ?? ''}`}>
+        {backgroundImage && (
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[length:auto_140%] bg-right bg-no-repeat opacity-[0.15]" style={{ backgroundImage: `url("${backgroundImage}")` }} />
+        )}
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-crfal-blue-dark via-crfal-blue-dark/90 to-crfal-blue/70" />
+        <div className="container-crfal relative z-10 flex w-full flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-5">
+          <div className="min-w-0">
+            {breadcrumbNav}
+            {title && <h1 className="font-display text-[clamp(28px,3vw,40px)] font-semibold leading-[1.15] tracking-tight text-white lg:whitespace-nowrap">{title}</h1>}
+          </div>
+          {aside && <div className="w-full min-w-0 lg:w-auto lg:shrink-0 lg:translate-y-4">{aside}</div>}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -118,25 +159,7 @@ export default function PageHero({
       {decoration ?? DEFAULT_DECORATION}
 
       <div className="container-crfal relative z-10 w-full">
-        {breadcrumb && breadcrumb.length > 0 && (
-          <nav
-            aria-label="Breadcrumb"
-            className="mb-6 flex flex-wrap items-center gap-2 text-xs text-white/60 sm:text-sm"
-          >
-            {breadcrumb.map((item, index) => (
-              <Fragment key={`${item.label}-${index}`}>
-                {index > 0 && <ChevronRight className="h-4 w-4" aria-hidden />}
-                {item.href ? (
-                  <Link to={item.href} className="transition-colors hover:text-white">
-                    {item.label}
-                  </Link>
-                ) : (
-                  <span className="text-white">{item.label}</span>
-                )}
-              </Fragment>
-            ))}
-          </nav>
-        )}
+        {breadcrumbNav}
 
         <div className={hasAside ? 'grid items-center gap-8 md:grid-cols-2' : undefined}>
           <div>
