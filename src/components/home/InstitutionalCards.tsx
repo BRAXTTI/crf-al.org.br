@@ -19,9 +19,9 @@ interface CardItem {
 
 const cards: CardItem[] = [
   {
-    title: 'Serviços Online',
-    description: 'Requerimentos, tutoriais, ouvidoria e atendimento digital para farmacêuticos e estabelecimentos.',
-    href: '/servicos/requerimentos',
+    title: 'Tutoriais',
+    description: 'Orientações passo a passo para utilizar os serviços digitais do CRFAL.',
+    href: '/servicos/tutoriais',
     icon: ClipboardList,
   },
   {
@@ -106,11 +106,11 @@ export default function InstitutionalCards() {
   return (
     <section
       ref={sectionRef}
-      className="bg-[#F8FAFC] py-12 sm:py-20 md:py-28"
+      className="bg-[#F8FAFC] py-10 sm:py-14"
     >
       <div className="container-crfal">
         <div
-          className={`mb-8 text-center transition-all duration-700 sm:mb-14 ${
+          className={`mb-8 text-center transition-all duration-700 sm:mb-10 ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}
         >

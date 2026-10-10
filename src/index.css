@@ -115,12 +115,14 @@
 
     /* Altura total do cabeçalho (barra de identidade + barra de menu).
        Usada para deslocar o conteúdo e elementos fixos/sticky. */
-    --header-offset: 64px;
+    --header-offset: 80px;
+    --page-header-offset: 176px;
   }
 
   @media (min-width: 1024px) {
     :root {
       --header-offset: 132px;
+      --page-header-offset: 132px;
     }
   }
 }

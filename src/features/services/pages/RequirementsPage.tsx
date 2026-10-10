@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import PageHero, { PageHeroStats } from '@/components/block/page-hero';
@@ -560,9 +561,19 @@ const ESTATISTICAS = {
 };
 
 export default function RequirementsPage() {
-  const [activeType, setActiveType] = useState<'individual' | 'corporate'>('individual');
+  const [searchParams] = useSearchParams();
+  return <RequirementsContent key={`${searchParams.get('perfil') ?? 'pessoa-fisica'}|${searchParams.get('categoria') ?? 'todas'}`} />;
+}
+
+function RequirementsContent() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeType = searchParams.get('perfil') === 'pessoa-juridica' ? 'corporate' : 'individual';
   const [busca, setBusca] = useState('');
-  const [categoria, setCategoria] = useState<string>('todas');
+  const [categoria, setCategoria] = useState<string>(() => {
+    const requested = searchParams.get('categoria');
+    const menu = activeType === 'corporate' ? corporateMenu : individualMenu;
+    return menu.some(category => category.id === requested) ? requested! : 'todas';
+  });
   const [selectedItem, setSelectedItem] = useState<RequirementItem | null>(null);
   const [activeTab, setActiveTab] = useState<'documentos' | 'instrucoes' | 'observacoes'>('documentos');
   const [mostraFluxograma, setMostraFluxograma] = useState(false);
@@ -603,10 +614,15 @@ export default function RequirementsPage() {
   }, [selectedItem]);
 
   const handleTypeChange = useCallback((type: 'individual' | 'corporate') => {
-    setActiveType(type);
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(previous);
+      next.set('perfil', type === 'corporate' ? 'pessoa-juridica' : 'pessoa-fisica');
+      next.delete('categoria');
+      return next;
+    });
     setCategoria('todas');
     setBusca('');
-  }, []);
+  }, [setSearchParams]);
 
   const handleSelectItem = useCallback((item: RequirementItem) => {
     setSelectedItem(item);

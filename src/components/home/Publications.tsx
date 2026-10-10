@@ -20,7 +20,7 @@ export default function Publications() {
   const [featured, ...remaining] = data?.posts ?? [];
 
   return (
-    <section id="noticias" className="bg-crfal-gray-50 py-14 sm:py-20" aria-labelledby="home-news-title">
+    <section id="noticias" className="bg-crfal-gray-50 py-10 sm:py-14" aria-labelledby="home-news-title">
       <div className="container-crfal">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-5 border-b border-crfal-gray-200 pb-6">
           <div>

@@ -63,9 +63,8 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   if (slides.length === 0) return null;
 
   return (
-    <div className="pt-16 lg:pt-[var(--header-offset)]">
     <section
-      className="relative aspect-[4/5] w-full overflow-hidden bg-crfal-blue-dark md:aspect-[16/5]"
+      className="w-full"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="region"
@@ -75,6 +74,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
       {/* H1 fixo da home (as artes podem ou não ter texto). */}
       <h1 className="sr-only">Conselho Regional de Farmácia do Estado de Alagoas</h1>
 
+      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-[16/5]">
       {slides.map((slide, index) => {
         const isActive = index === activeIndex;
         const hasOverlay = Boolean(slide.title || slide.subtitle || slide.ctaLabel);
@@ -173,31 +173,34 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
             <ChevronRight className="h-5 w-5" />
           </button>
 
-          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 sm:bottom-6">
-            <div className="flex items-center gap-2.5">
+        </>
+      )}
+      </div>
+      {slides.length > 1 && (
+          <div className="mt-3 flex items-center justify-center gap-3">
+            <div className="flex items-center gap-1">
               {slides.map((slide, index) => (
                 <button
                   key={slide.image}
                   onClick={() => goTo(index)}
-                  className={`rounded-full transition-all duration-300 ${
-                    index === activeIndex ? 'h-2.5 w-8 bg-white shadow-card' : 'h-2.5 w-2.5 bg-white/45 hover:bg-white/70'
-                  }`}
+                  className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-crfal-blue-lighter"
+                  aria-current={index === activeIndex ? "true" : undefined}
                   aria-label={`Ir para slide ${index + 1}`}
-                />
+                >
+                  <span aria-hidden="true" className={`h-2.5 rounded-full transition-all ${index === activeIndex ? "w-7 bg-crfal-blue" : "w-2.5 bg-crfal-gray-400"}`} />
+                </button>
               ))}
             </div>
 
             <button
               onClick={() => setIsPaused(!isPaused)}
-              className="ml-2 flex h-8 w-8 items-center justify-center rounded-full text-white/60 transition-colors hover:text-white/90"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-crfal-blue transition-colors hover:bg-crfal-blue-lighter"
               aria-label={isPaused ? 'Retomar reprodução' : 'Pausar reprodução'}
             >
               {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
             </button>
           </div>
-        </>
       )}
     </section>
-    </div>
   );
 }

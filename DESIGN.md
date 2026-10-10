@@ -37,7 +37,7 @@ Arte desktop `page-hero-desktop-v3.jpg`: encaixada pela altura, à direita, sem 
 
 ## Arte do card do Instagram
 
-`public/images/instagram-card-background-v1.jpg`: fundo azul com taça de Hígia, fitas suaves e detalhes dourados concentrados à direita. Imagem decorativa sem texto, com camada azul sobreposta para preservar a leitura. Aplicar apenas ao painel de apresentação da seção Instagram; manter altura natural e carregamento adiado.
+`public/images/instagram-card-background-v1.jpg`: fundo azul com taça de Hígia, fitas suaves e detalhes dourados concentrados à direita. Imagem decorativa sem texto, com camada azul sobreposta para preservar a leitura. Aplicar apenas ao painel de apresentação da seção Instagram; manter altura natural e carregamento adiado. O painel não estica junto à grade: usa alinhamento ao topo, padding de 16/24/20px e título de 18/24/20px conforme o breakpoint. Em mobile, título e ação ficam lado a lado, sem descrição secundária. Em desktop, ocupar 30% da largura e deixar 70% para as postagens. Remover o rodapé redundante de identificação; priorizar as publicações.
 
 ## Cards no celular
 
@@ -46,3 +46,17 @@ Abaixo de 640px, estatísticas dividem igualmente a largura disponível, com pad
 ## Galeria de Fotos
 
 Em Imprensa, cada galeria publicada do FooGallery corresponde a um álbum. Usar o cabeçalho compacto e os tokens existentes. Capas e miniaturas têm proporção 4:3; fotos ampliadas preservam o enquadramento completo. Álbuns usam até três colunas; fotos usam duas colunas no celular e três no desktop. A ampliação reutiliza o Dialog acessível, com fechamento em português, Escape, restauração de foco e navegação pelas setas. Não exibir a data de publicação como data do evento.
+
+## Página inicial: serviços e enquadramento
+
+Priorizar CRF em Casa (sistema externo, nova aba anunciada) e Serviços e Requerimentos (orientações internas) antes das notícias. `ServiceAccessCards` usa dois cards a partir de 768px. Abaixo disso, usar um bloco de duas faixas contíguas, com cantos arredondados apenas nas extremidades, título à esquerda e ação “Acessar” à direita, sem descrição. A segunda faixa usa azul claro para distinguir os destinos. Imagens decorativas sem texto, azul institucional e textos HTML. Os fundos gerados mostram atendimento digital e documentos, com detalhes dourados. `crf-em-casa-card-v2.webp` preserva o cenário do notebook e insere na tela a captura do sistema CRF em Casa fornecida pelo usuário. Botões visuais pertencem ao único link de cada card.
+
+Cards e `HeroSlider` compartilham `.container-crfal` de `src/index.css`: max-width 1280px, padding de 16/24/32px. Preservar as proporções 4:5 mobile e 16:5 desktop das artes do slider. O deslocamento inicial do cabeçalho fica na composição da home, aplicado uma única vez. Pontos de navegação e controle de reprodução ficam abaixo da arte do slider, com alvos de 44px e azul sobre fundo claro. Seções editoriais usam padding vertical 40px mobile e 56px desktop. A seção de indicadores institucionais não é exibida na página inicial. A antiga grade “Conheça o CRFAL” foi substituída por `ServiceProfiles`: três painéis azuis para Empresas, Farmacêuticos e Cidadão, com ícone, título, cinco links separados por linhas e ação ao final. Três colunas em desktop (1024px), uma coluna abaixo. `src/config/service-profiles.ts` é a fonte canônica compartilhada com o cabeçalho. Os links para categorias de requerimentos usam `perfil` e `categoria` na URL; categorias inválidas retornam à lista completa.
+
+## Cabeçalho mobile por perfil
+
+Abaixo de 1024px, barra azul de 80px com menu à esquerda, logo branca oficial sobre o azul, sem superfície branca e busca à direita. Faixa branca de 96px com três acessos iguais: Empresas (Building2, requerimentos com `perfil=pessoa-juridica`), Farmacêuticos (PillBottle, `perfil=pessoa-fisica`) e Cidadão (UserRound, Ouvidoria). Usar ícones Lucide de 32px com traço 1.5, divisórias discretas e rótulos legíveis em 320px. Apenas a barra principal de 80px permanece fixa; a faixa de perfis fica no início da página e sai durante a rolagem. `--header-offset` em `src/index.css` acompanha 80px mobile e 132px desktop para elementos fixos/sticky; `--page-header-offset` reserva inicialmente 176px mobile e 132px desktop. A busca usa o Dialog compartilhado para pesquisar nomes das páginas e serviços da navegação, com limpar, estado vazio e fechamento por Escape. O filtro de perfil dos requerimentos acompanha a URL e reinicia os filtros locais ao mudar de perfil.
+
+## Menu de navegação mobile
+
+`MobileNavigation` reutiliza `DialogContent` na variante compartilhada `drawer`: painel pela direita, largura máxima 420px, altura `100dvh`, animação de entrada/saída de 300ms e fundo escurecido. Respeitar movimento reduzido. Cabeçalho e fechamento permanecem visíveis, com rolagem interna e padding de área segura ao final. O Dialog gerencia foco, Escape, clique fora e bloqueio da rolagem de fundo; ao fechar, devolver foco ao botão de menu. Fechar ao navegar ou passar para desktop. Incluir Página inicial, atalhos por perfil, CRF em Casa e navegação principal. Submenus usam acordeão de abertura única, `aria-expanded`, `aria-controls` e `inert` quando fechados; links da página atual usam `aria-current`. Links externos indicam nova aba. Evitar links dentro de botões.

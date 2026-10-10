@@ -108,7 +108,7 @@ export default function PageHero({
 
   if (variant === 'compact') {
     return (
-      <section id={id} className={`relative overflow-hidden mt-[var(--header-offset)] bg-crfal-blue-dark py-10 lg:flex lg:h-[203px] lg:items-center lg:py-0 ${className ?? ''}`}>
+      <section id={id} className={`relative overflow-hidden mt-[var(--page-header-offset)] bg-crfal-blue-dark py-10 lg:flex lg:h-[203px] lg:items-center lg:py-0 ${className ?? ''}`}>
         {backgroundImage && (
           <picture aria-hidden className="pointer-events-none absolute inset-0 block opacity-80 lg:[mask-image:linear-gradient(to_right,transparent_45%,black_75%)]">
             {backgroundImageMobile && <source media="(max-width: 1023px)" srcSet={backgroundImageMobile} />}

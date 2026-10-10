@@ -1,10 +1,7 @@
-import { useState, useEffect, type MouseEvent } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useEffect, useRef, type MouseEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
-  Menu,
-  X,
   User,
   Building2,
   Users,
@@ -21,7 +18,11 @@ import {
   ExternalLink,
   Calendar,
   Images,
+  Search,
 } from 'lucide-react';
+import MobileHeaderSearch from '@/components/layout/MobileHeaderSearch';
+import MobileNavigation from '@/components/layout/MobileNavigation';
+import { serviceProfiles } from '@/config/service-profiles';
 import { CRF_EM_CASA_URL, SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
 import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
 
@@ -133,34 +134,28 @@ const navItems: NavItem[] = [
   },
 ];
 
+const searchItems = navItems
+  .flatMap(item => item.columns ? item.columns.flatMap(column => column.items) : [{ label: item.label, href: item.href }])
+  .filter((item, index, items) => items.findIndex(candidate => candidate.label === item.label && candidate.href === item.href) === index);
+
 export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [expandedMobileItems, setExpandedMobileItems] = useState<string[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setIsMobileMenuOpen(false);
+        setIsSearchOpen(false);
       }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isMobileMenuOpen]);
-
-  const toggleMobileItem = (label: string) => {
-    setExpandedMobileItems((prev) =>
-      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
-    );
-  };
 
   const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -178,7 +173,8 @@ export default function Header() {
   const renderSocial = (
     itemClassName: string,
     iconClassName: string,
-    listClassName = 'flex items-center gap-1'
+    listClassName = 'flex items-center gap-1',
+    onNavigate?: () => void
   ) => (
     <ul className={listClassName}>
       {SOCIAL_LINKS.map((social) => {
@@ -191,6 +187,7 @@ export default function Header() {
               rel="noopener noreferrer"
               aria-label={social.label}
               className={itemClassName}
+              onClick={onNavigate}
             >
               <Icon className={iconClassName} />
             </a>
@@ -201,31 +198,42 @@ export default function Header() {
   );
 
   return (
+    <>
     <header className="fixed top-0 left-0 right-0 z-50">
       {/* Barra de identidade — logo, nome da entidade, redes sociais e acesso do profissional */}
-      <div className="border-b border-crfal-gray-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+      <div className="border-crfal-gray-200 bg-crfal-blue shadow-[0_1px_2px_rgba(15,23,42,0.05)] lg:border-b lg:bg-white">
         <div className="container-crfal">
-          <div className="flex h-16 items-center justify-between gap-2 lg:h-[76px] lg:gap-3">
+          <div className="relative flex h-20 items-center justify-between gap-2 lg:h-[76px] lg:gap-3">
             <button
+              ref={menuButtonRef}
+              type="button"
+              aria-controls="mobile-navigation"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-crfal-blue transition-colors hover:bg-crfal-blue-lighter lg:hidden"
-              aria-label="Menu"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 focus-visible:outline-white lg:hidden"
+              aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={isMobileMenuOpen}
             >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <span aria-hidden="true" className="relative block h-5 w-6">
+                <span className={`absolute left-0 top-0 h-0.5 w-6 bg-current transition-transform duration-200 motion-reduce:transition-none ${isMobileMenuOpen ? 'translate-y-[9px] rotate-45' : ''}`} />
+                <span className={`absolute left-0 top-[9px] h-0.5 w-6 bg-current transition-opacity duration-200 motion-reduce:transition-none ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
+                <span className={`absolute bottom-0 left-0 h-0.5 w-6 bg-current transition-transform duration-200 motion-reduce:transition-none ${isMobileMenuOpen ? '-translate-y-[9px] -rotate-45' : ''}`} />
+              </span>
             </button>
 
             <Link
               to="/"
               onClick={handleLogoClick}
-              className="group flex min-w-0 items-center gap-2.5 lg:gap-3"
+              className="group absolute left-1/2 flex -translate-x-1/2 items-center rounded-lg px-3 py-2 focus-visible:outline-white lg:static lg:min-w-0 lg:translate-x-0 lg:gap-3 lg:bg-transparent lg:p-0"
             >
+              <picture>
+              <source media="(max-width: 1023px)" srcSet="/images/logo-crf-branca.png" />
               <img
                 src="/images/logo-crf-azul.png"
                 alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
                 className="h-10 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-12"
               />
-              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-2.5 leading-tight sm:block lg:pl-3">
+              </picture>
+              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-2.5 leading-tight lg:block lg:pl-3">
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-crfal-blue lg:text-[11px]">
                   Conselho Regional de Farmácia
                 </span>
@@ -234,6 +242,10 @@ export default function Header() {
                 </span>
               </span>
             </Link>
+
+            <button ref={searchButtonRef} type="button" onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }} aria-label="Buscar páginas e serviços" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-white lg:hidden">
+              <Search className="h-6 w-6" aria-hidden="true" />
+            </button>
 
             <div className="hidden items-center gap-2 lg:flex">
               <a
@@ -273,6 +285,9 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+
+      <MobileHeaderSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} items={searchItems} triggerRef={searchButtonRef} />
 
       {/* Barra de menu — navegação principal (desktop) */}
       <div className="hidden bg-[#003366] lg:block">
@@ -402,153 +417,24 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Menu mobile */}
-      {isMobileMenuOpen &&
-        typeof document !== 'undefined' &&
-        createPortal(
-          <div
-            className="fixed left-0 right-0 bottom-0 top-[var(--header-offset)] z-[9999] overflow-y-auto bg-[#F8FAFC] lg:hidden"
-            style={{ WebkitOverflowScrolling: 'touch' }}
-            aria-modal
-            role="dialog"
-            aria-label="Menu de navegação"
-          >
-            <nav className="min-h-full pb-24">
-              <div className="container-crfal py-6">
-                <div className="overflow-hidden rounded-xl border border-crfal-gray-200 bg-white">
-                  {navItems.map((item) => {
-                    const ItemIcon = item.directIcon;
-                    return (
-                      <div key={item.label} className="border-b border-crfal-gray-200 last:border-0">
-                        <button
-                          onClick={() => item.columns && toggleMobileItem(item.label)}
-                          className="flex min-h-[48px] w-full items-center justify-between px-4 py-4 text-left font-medium text-neutral-800 transition-colors hover:bg-crfal-gray-100"
-                        >
-                          <span className="flex items-center gap-2">
-                            {ItemIcon && <ItemIcon className="h-4 w-4" />}
-                            {item.columns ? (
-                              <span>{item.label}</span>
-                            ) : item.href.startsWith('/') ? (
-                              <Link
-                                to={item.href}
-                                className="flex-1"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                              >
-                                {item.label}
-                              </Link>
-                            ) : (
-                              <a
-                                href={item.href}
-                                target={isExternalLink(item.href) ? '_blank' : undefined}
-                                rel={isExternalLink(item.href) ? 'noopener noreferrer' : undefined}
-                                className="flex-1"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                              >
-                                {item.label}
-                              </a>
-                            )}
-                          </span>
-                          {item.columns && (
-                            <ChevronDown
-                              className={`h-5 w-5 transition-transform duration-300 ${
-                                expandedMobileItems.includes(item.label) ? 'rotate-180' : ''
-                              }`}
-                            />
-                          )}
-                        </button>
-
-                        {item.columns && (
-                          <div
-                            className={`overflow-hidden transition-all duration-300 ${
-                              expandedMobileItems.includes(item.label)
-                                ? 'max-h-[600px] opacity-100'
-                                : 'max-h-0 opacity-0'
-                            }`}
-                          >
-                            <div className="space-y-4 bg-crfal-gray-100/60 pb-3 pl-4 pr-4">
-                              {item.columns.map((column) => (
-                                <div key={column.title}>
-                                  <p className="mb-2 px-3 text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400">
-                                    {column.title}
-                                  </p>
-                                  <div className="space-y-1">
-                                    {column.items.map((subItem) => {
-                                      const SubIcon = subItem.icon;
-                                      return subItem.href.startsWith('/') ? (
-                                        <Link
-                                          key={subItem.label}
-                                          to={subItem.href}
-                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-200/70 hover:text-crfal-blue"
-                                          onClick={() => setIsMobileMenuOpen(false)}
-                                        >
-                                          <SubIcon className="h-4 w-4 shrink-0" />
-                                          {subItem.label}
-                                        </Link>
-                                      ) : (
-                                        <a
-                                          key={subItem.label}
-                                          href={subItem.href}
-                                          target={subItem.external ? '_blank' : undefined}
-                                          rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                          className="flex items-center gap-3 rounded-lg py-2.5 pl-3 pr-2 text-sm text-neutral-700 transition-colors hover:bg-neutral-200/70 hover:text-crfal-blue"
-                                          onClick={() => setIsMobileMenuOpen(false)}
-                                        >
-                                          <SubIcon className="h-4 w-4 shrink-0" />
-                                          {subItem.label}
-                                        </a>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <a
-                  href={TRANSPARENCIA_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Acesso à Informação — Portal da Transparência do CRF-AL"
-                  className="mt-5 flex items-center justify-center rounded-xl border border-crfal-gray-200 bg-white px-4 py-3.5 transition-colors hover:bg-crfal-gray-50"
-                >
-                  <img
-                    src="/images/logo-acesso-a-Informacao-colorido.png"
-                    alt="Acesso à Informação"
-                    className="h-9 w-auto object-contain"
-                  />
-                </a>
-
-                <div className="mt-4 rounded-xl border border-crfal-gray-200 bg-white p-4">
-                  <p className="mb-3 text-center text-[11px] font-bold uppercase tracking-wider text-crfal-gray-400">
-                    Redes sociais
-                  </p>
-                  {renderSocial(
-                    'flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white',
-                    'h-[18px] w-[18px]',
-                    'flex items-center justify-center gap-2'
-                  )}
-                </div>
-
-                <a
-                  href={CRF_EM_CASA_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-4 py-4 font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <User className="h-5 w-5" />
-                  CRF AL em Casa
-                </a>
-              </div>
-            </nav>
-          </div>,
-          document.body
-        )}
+      <MobileNavigation open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} triggerRef={menuButtonRef} items={navItems} socialLinks={renderSocial(
+        'flex h-11 w-11 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white',
+        'h-[18px] w-[18px]',
+        'flex items-center justify-center gap-2',
+        () => setIsMobileMenuOpen(false)
+      )} />
     </header>
+      <nav aria-label="Acessos por perfil" className="absolute left-0 right-0 top-20 z-40 h-24 border-b border-crfal-gray-200 bg-white lg:hidden">
+        <div className="container-crfal grid h-full grid-cols-3 items-center">
+          {serviceProfiles.map(({ label, href, icon: Icon }) => (
+            <Link key={label} to={href} onClick={() => { setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); }} className="flex min-h-16 min-w-0 flex-col items-center justify-center gap-2 border-r border-crfal-blue/20 px-1 text-crfal-blue last:border-r-0 hover:bg-crfal-blue-lighter focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue">
+              <Icon className="h-8 w-8" strokeWidth={1.5} aria-hidden="true" />
+              <span className="text-[11px] font-semibold sm:text-sm">{label}</span>
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+    </>
   );
 }

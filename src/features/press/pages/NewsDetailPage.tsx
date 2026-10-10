@@ -80,6 +80,16 @@ export default function NewsDetailPage() {
   const categoria = (post && getPostCategory(post)) || 'Notícia';
   const autor = post ? getPostAuthor(post) : undefined;
   const canonicalUrl = `${SITE_URL}/imprensa/noticias/${post?.slug ?? slug ?? ''}`;
+  const standfirst = useMemo(() => {
+    if (!post) return '';
+    const excerpt = stripHTML(post.excerpt?.rendered ?? '');
+    // O WordPress pode gerar o resumo a partir da abertura da matéria,
+    // inclusive truncando-o com reticências. Nesse caso, exibir só no corpo.
+    const normalize = (text: string) => text.normalize('NFKC').toLocaleLowerCase('pt-BR').replace(/[^\p{L}\p{N}]/gu, '');
+    const normalizedExcerpt = normalize(excerpt);
+    const normalizedContent = normalize(stripHTML(post.content?.rendered ?? ''));
+    return normalizedExcerpt && !normalizedContent.startsWith(normalizedExcerpt) ? excerpt : '';
+  }, [post]);
 
   const jsonLd = useMemo(() => {
     if (!post) return undefined;
@@ -135,7 +145,7 @@ export default function NewsDetailPage() {
         jsonLd={jsonLd}
       />
       {/* Cabeçalho compacto (breadcrumb + voltar) — sem hero, conteúdo perto da navbar */}
-      <div className="pt-[calc(var(--header-offset)+0.75rem)]">
+      <div className="pt-[calc(var(--page-header-offset)+0.75rem)]">
         <div className="container-crfal flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <nav
             aria-label="Breadcrumb"
@@ -198,9 +208,9 @@ export default function NewsDetailPage() {
                   className="mt-3 font-display text-2xl font-bold leading-[1.15] text-crfal-blue-dark sm:text-3xl md:text-4xl"
                   dangerouslySetInnerHTML={{ __html: sanitizeWP(post.title.rendered) }}
                 />
-                {stripHTML(post.excerpt.rendered) && (
+                {standfirst && (
                   <p className="mx-auto mt-3 max-w-3xl text-sm leading-relaxed text-crfal-gray-600 sm:text-base">
-                    {stripHTML(post.excerpt.rendered)}
+                    {standfirst}
                   </p>
                 )}
               </div>

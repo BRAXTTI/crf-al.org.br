@@ -56,7 +56,7 @@ export default function ImpactStrip() {
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden border-y border-crfal-gray-200/70 bg-white py-14   sm:py-16"
+      className="relative overflow-hidden border-y border-crfal-gray-200/70 bg-white py-8 sm:py-10"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35] "
