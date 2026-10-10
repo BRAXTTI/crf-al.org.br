@@ -14,7 +14,7 @@ import type { WPPost } from '@/services/wordpress/types';
 const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'%3E%3C/svg%3E";
 
 interface Publication {
-  id: number;
+  id: string;
   title: string;
   excerpt: string;
   image: string;
@@ -55,7 +55,7 @@ const filterTags = [
 function mapWPPost(post: WPPost): Publication {
   const categoryName = getPostCategory(post);
   return {
-    id: post.id,
+    id: `${post.newsSource}:${post.id}`,
     title: stripHTML(post.title.rendered),
     excerpt: stripHTML(post.excerpt.rendered),
     image: getPostImage(post) || IMG_FALLBACK,

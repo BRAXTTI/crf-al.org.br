@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "sitemap:refresh": "node scripts/generate-sitemaps.mjs public",
+    "test:seo": "node scripts/test-seo-routing.mjs",
+    "test:news": "node scripts/test-news.mjs",
+    "news:archive": "node scripts/generate-news-archive.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

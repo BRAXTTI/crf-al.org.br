@@ -2,6 +2,7 @@ import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig, type Plugin } from "vite"
 import { getInstagramItems } from "./functions/api/_parse"
+import { newsApi } from "./functions/_news"
 
 /**
  * Em dev, o Vite não executa as Pages Functions. Este middleware replica
@@ -11,6 +12,12 @@ function instagramDevApi(): Plugin {
   return {
     name: "instagram-dev-api",
     configureServer(server) {
+      server.middlewares.use("/api/news", async (req, res) => {
+        const response = await newsApi(new Request(`http://localhost/api/news${req.url ?? ''}`, { method: req.method }))
+        res.statusCode = response.status
+        response.headers.forEach((value, key) => res.setHeader(key, value))
+        res.end(await response.text())
+      })
       server.middlewares.use("/api/instagram", async (_req, res) => {
         try {
           const items = await getInstagramItems(process.env.VITE_INSTAGRAM_FEED_URL)

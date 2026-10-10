@@ -50,7 +50,7 @@ export default function Publications() {
             </article>
             <div className="divide-y divide-crfal-gray-200">
               {remaining.map((post) => (
-                <article key={post.id} className="py-5 first:pt-0 last:pb-0">
+                <article key={`${post.newsSource}:${post.id}`} className="py-5 first:pt-0 last:pb-0">
                   <Link to={`/imprensa/noticias/${post.slug}`} className={`group flex items-start gap-4 rounded-md sm:gap-5 ${focusClass}`}>
                     <div className="aspect-square w-24 shrink-0 overflow-hidden rounded-lg bg-crfal-blue-lighter sm:w-32"><NewsImage post={post} className="h-full w-full object-contain" /></div>
                     <div className="min-w-0 flex-1">

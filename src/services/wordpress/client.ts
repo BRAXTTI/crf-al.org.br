@@ -8,46 +8,16 @@ import type { CRFEvent, CRFInstagramPost, WPEmbedded, WPEventListing, WPPost, WP
 const WP_SITE_URL =
   import.meta.env.VITE_WP_SITE_URL ?? 'https://wordpress.crf-al.org.br';
 
-/**
- * WordPress antigo (crf-al.org.br): fonte exclusiva de notícias e suas mídias.
- * Aqui a REST API fica em `/wp-json/wp/v2` e as imagens usam URLs originais
- * do legado (`www.crf-al.org.br/app/uploads`).
- */
-const NEWS_WP_SITE_URL =
-  import.meta.env.VITE_WP_NEWS_SITE_URL ?? 'https://www.crf-al.org.br';
-
 export const WP_UPLOADS_URL = `${WP_SITE_URL}/wp-content/uploads`;
 
 export const LEGACY_WP_UPLOADS_URL = 'https://www.crf-al.org.br/app/uploads';
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 
-/**
- * Campos enxutos para listagens (sem `content`).
- * `_links` é obrigatório para que o WP consiga resolver o `_embedded`.
- */
-const NEWS_LIST_FIELDS = 'id,date,slug,link,title,excerpt,_links,_embedded';
-/**
- * Campos para a matéria individual (inclui o corpo completo).
- * `_links` é obrigatório: sem ele o WP legado não resolve o `_embed` na
- * consulta por slug (`/wp/v2/posts?slug=...`) e a imagem destacada some.
- */
-const NEWS_DETAIL_FIELDS = 'id,date,modified,slug,link,title,excerpt,content,_links,_embedded';
-/** Limita o `_embed` à mídia destacada e aos termos, reduzindo muito a resposta. */
-const NEWS_EMBED = 'wp:featuredmedia,wp:term';
-/** `_embed` da matéria individual: inclui o autor para o cabeçalho editorial. */
-const NEWS_DETAIL_EMBED = 'wp:featuredmedia,wp:term,author';
-
 /** URL no estilo `index.php?rest_route=` (usada pelo WP de eventos). */
 function restUrl(route: string, params: Record<string, string> = {}): string {
   const search = new URLSearchParams(params).toString();
   return `${WP_SITE_URL}/index.php?rest_route=${route}${search ? `&${search}` : ''}`;
-}
-
-/** URL no estilo `/wp-json/...` (usada pelo WP de notícias). */
-function newsUrl(route: string, params: Record<string, string> = {}): string {
-  const search = new URLSearchParams(params).toString();
-  return `${NEWS_WP_SITE_URL}/wp-json${route}${search ? `?${search}` : ''}`;
 }
 
 async function wpRequest(url: string, signal?: AbortSignal): Promise<Response> {
@@ -95,38 +65,20 @@ export async function fetchPosts(
   options: { page?: number; perPage?: number; signal?: AbortSignal } = {}
 ): Promise<WPPostsPage> {
   const { page = 1, perPage = 10, signal } = options;
-
-  const response = await wpRequest(
-    newsUrl('/wp/v2/posts', {
-      _embed: NEWS_EMBED,
-      _fields: NEWS_LIST_FIELDS,
-      page: String(page),
-      per_page: String(perPage),
-    }),
-    signal
-  );
-  const posts = (await response.json()) as WPPost[];
-
-  return {
-    posts,
-    total: Number(response.headers.get('X-WP-Total')) || posts.length,
-    totalPages: Number(response.headers.get('X-WP-TotalPages')) || 1,
-  };
+  return wpJson<WPPostsPage>(`/api/news?page=${page}&per_page=${perPage}`, signal);
 }
 
 export async function fetchPostById(id: number, signal?: AbortSignal): Promise<WPPost> {
-  return wpJson<WPPost>(
-    newsUrl(`/wp/v2/posts/${id}`, { _embed: NEWS_DETAIL_EMBED, _fields: NEWS_DETAIL_FIELDS }),
-    signal
-  );
+  const post = await fetchPostBySlug(String(id), signal);
+  if (!post) throw new Error('Notícia não encontrada.');
+  return post;
 }
 
 export async function fetchPostBySlug(slug: string, signal?: AbortSignal): Promise<WPPost | null> {
-  const posts = await wpJson<WPPost[]>(
-    newsUrl('/wp/v2/posts', { slug, _embed: NEWS_DETAIL_EMBED, _fields: NEWS_DETAIL_FIELDS }),
-    signal
-  );
-  return posts[0] ?? null;
+  const response = await fetch(`/api/news?slug=${encodeURIComponent(slug)}`, { signal });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`A API de notícias respondeu com status ${response.status}.`);
+  return response.json();
 }
 
 /** Decodifica entidades HTML (ex.: `&ccedil;` -> `ç`) em texto puro vindo do WordPress. */
@@ -157,19 +109,23 @@ export async function fetchEventById(id: number, signal?: AbortSignal): Promise<
 }
 
 export async function fetchRelatedPosts(
-  excludeId: number,
+  excludeSlug: string,
   perPage = 3,
   signal?: AbortSignal
 ): Promise<WPPost[]> {
   const posts = await fetchPosts({ perPage: perPage + 1, signal }).then((page) => page.posts);
-  return posts.filter((post) => post.id !== excludeId).slice(0, perPage);
+  return posts.filter((post) => post.slug !== excludeSlug).slice(0, perPage);
 }
 
 /** Qualquer payload do WordPress que possa conter recursos embutidos (`_embed`). */
 type WPWithEmbed = { _embedded?: WPEmbedded };
 
 export function getPostCategory(post: WPWithEmbed): string {
-  return post._embedded?.['wp:term']?.[0]?.[0]?.name || 'Geral';
+  const categories = post._embedded?.['wp:term']?.[0] ?? [];
+  const isPortalCategory = (category: (typeof categories)[number]) =>
+    category.slug === 'noticias-do-portal' ||
+    category.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR') === 'noticias do portal';
+  return categories.find(category => !isPortalCategory(category))?.name || (categories.some(isPortalCategory) ? 'Notícias' : 'Geral');
 }
 
 export function getPostImage(post: WPWithEmbed): string | undefined {

@@ -44,11 +44,11 @@ export function usePostBySlug(slug: string) {
   });
 }
 
-export function useRelatedPosts(excludeId: number, perPage = 3) {
+export function useRelatedPosts(excludeSlug: string, perPage = 3) {
   return useQuery({
-    queryKey: ['wp', 'posts', 'related', excludeId, perPage],
-    queryFn: ({ signal }) => fetchRelatedPosts(excludeId, perPage, signal),
-    enabled: Number.isFinite(excludeId),
+    queryKey: ['wp', 'posts', 'related', excludeSlug, perPage],
+    queryFn: ({ signal }) => fetchRelatedPosts(excludeSlug, perPage, signal),
+    enabled: Boolean(excludeSlug),
   });
 }
 

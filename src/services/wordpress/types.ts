@@ -34,6 +34,7 @@ interface WPRendered {
 interface WPTerm {
   id: number;
   name: string;
+  slug?: string;
 }
 
 interface WPMedia {
@@ -49,6 +50,7 @@ export interface WPEmbedded {
 }
 
 export interface WPPost {
+  newsSource?: 'legacy' | 'current';
   id: number;
   date: string;
   modified?: string;

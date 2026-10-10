@@ -14,7 +14,7 @@ import ShareButtons from '../components/ShareButtons';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 
 interface RelatedItem {
-  id: number;
+  id: string;
   slug: string;
   title: string;
   date: string;
@@ -65,11 +65,11 @@ export default function NewsDetailPage() {
   const error = isLegacyId ? idError : slugError;
   const refetch = isLegacyId ? refetchId : refetchSlug;
 
-  const { data: relatedPosts } = useRelatedPosts(post?.id ?? NaN, 3);
+  const { data: relatedPosts } = useRelatedPosts(post?.slug ?? '', 3);
 
   const related: RelatedItem[] =
     relatedPosts?.map((item) => ({
-      id: item.id,
+      id: `${item.newsSource}:${item.id}`,
       slug: item.slug,
       title: stripHTML(item.title.rendered),
       date: formatarData(item.date),

@@ -1,6 +1,6 @@
 /**
  * Atualiza os sitemaps estáticos sob demanda (npm run sitemap:refresh):
- *  - public/sitemap-news.xml (URLs das notícias, vindas da API do WordPress antigo)
+ *  - public/sitemap-news.xml (URLs do acervo reservado e das novas notícias da categoria do portal)
  *  - public/sitemap.xml      (índice referenciando sitemap-pages.xml + sitemap-news.xml)
  *
  * Não roda durante o build: a lista de notícias só precisa ser atualizada quando
@@ -9,30 +9,17 @@
  */
 import { writeFileSync, existsSync, renameSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
+import { loadNews } from './load-news.mjs';
 
 const SITE_URL = (process.env.VITE_SITE_URL || 'https://institucional.crf-al.org.br').replace(/\/$/, '');
-const NEWS_WP = (process.env.VITE_WP_NEWS_SITE_URL || 'https://www.crf-al.org.br').replace(/\/$/, '');
 const OUTPUT_DIR = process.argv[2] || 'public';
 
 const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 async function fetchAllPosts() {
-  const perPage = 100;
-  let page = 1;
-  let totalPages = 1;
-  const out = [];
-  while (page <= totalPages) {
-    const url = `${NEWS_WP}/wp-json/wp/v2/posts?per_page=${perPage}&page=${page}&_fields=id,slug,date,modified`;
-    const res = await fetch(url, { headers: { 'user-agent': 'crfal-sitemap/1.0' } });
-    if (!res.ok) throw new Error(`WordPress respondeu ${res.status} na página ${page}`);
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error('resposta inesperada da API');
-    for (const p of data) out.push(p);
-    totalPages = Number(res.headers.get('X-WP-TotalPages') || 1);
-    page += 1;
-  }
-  return out;
+  const { newsIndex } = await import(await loadNews());
+  return newsIndex();
 }
 
 function newsSitemap(posts) {
