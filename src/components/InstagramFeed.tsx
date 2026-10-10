@@ -20,7 +20,7 @@ export default function InstagramFeed({
   const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed'], queryFn: ({ signal }) => fetchInstagram(signal), staleTime: 10 * 60 * 1000, retry: 1 });
   const items = data ?? [];
   return (
-    <section className="bg-white py-10 sm:py-14" aria-labelledby="instagram-title">
+    <section className="border-t border-crfal-gray-200 bg-white py-10 sm:py-14" aria-labelledby="instagram-title">
       <div className="container-crfal">
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)] lg:gap-6">
           <div className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 overflow-hidden rounded-xl bg-crfal-blue p-4 text-white sm:p-6 lg:flex lg:flex-col lg:items-start lg:p-5">

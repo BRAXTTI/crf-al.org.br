@@ -4,7 +4,7 @@ import { serviceProfiles } from '@/config/service-profiles';
 
 export default function ServiceProfiles() {
   return (
-    <section aria-labelledby="services-by-profile-title" className="py-10 sm:py-14">
+    <section aria-labelledby="services-by-profile-title" className="border-t border-crfal-gray-200 bg-white py-10 sm:py-14">
       <div className="container-crfal">
         <h2 id="services-by-profile-title" className="sr-only">Serviços por perfil</h2>
         <div className="grid gap-5 lg:grid-cols-3 lg:gap-6">
