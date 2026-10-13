@@ -134,7 +134,7 @@ export const NAV_ITEMS: NavItem[] = [
       title: 'Departamento de Fiscalização',
       text: 'Para comunicações formais, envio de documentos e dúvidas sobre fiscalização.',
       cta: { label: 'fiscalizacao@crf-al.org.br', href: 'mailto:fiscalizacao@crf-al.org.br', external: true },
-      secondary: { label: 'WhatsApp do setor', href: 'https://wa.me/558299998624' },
+      secondary: { label: 'WhatsApp do setor', href: 'https://wa.me/5582999998624' },
     },
   },
   {
