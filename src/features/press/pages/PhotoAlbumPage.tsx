@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import SEO from '@/components/SEO';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero from '@/components/block/page-hero';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { usePhotoAlbum } from '@/services/wordpress/hooks';
 import { GalleryApiError } from '@/services/wordpress/gallery';
@@ -63,7 +63,7 @@ export default function PhotoAlbumPage() {
   return (
     <div className="min-h-screen bg-crfal-gray-50">
       <SEO title={data?.title ?? 'Álbum de Fotos'} description={data?.description || 'Confira as fotos dos eventos e ações do CRF-AL.'} path={`/imprensa/galeria-de-fotos/${slug}`} image={data?.cover?.src} noindex={isError} />
-      <PageHero title={data?.title ?? 'Álbum de Fotos'} breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos' }, { label: 'Álbum' }]} aside={<PageHeroStats items={[{ value: data?.count ?? '—', label: 'Fotos no álbum' }]} />} />
+      <PageHero title={data?.title ?? 'Álbum de Fotos'} breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos' }, { label: 'Álbum' }]} section="imprensa" eyebrow="Álbum de fotos" meta={data?.count ? [{ value: data.count, label: 'fotos no álbum' }] : undefined} />
       <section className="container-crfal py-10 md:py-16" aria-label="Fotos do álbum">
         <Link to="/imprensa/galeria-de-fotos" className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-crfal-blue hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crfal-blue"><ArrowLeft className="h-4 w-4" aria-hidden="true" />Voltar para os álbuns</Link>
         {data?.description && <p className="mb-8 max-w-3xl leading-relaxed text-crfal-gray-600">{data.description}</p>}

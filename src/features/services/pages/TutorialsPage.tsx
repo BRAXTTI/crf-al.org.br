@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import SEO from '@/components/SEO';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero from '@/components/block/page-hero';
 import {
   Search,
   ChevronRight,
@@ -66,11 +66,13 @@ export default function TutorialsPage() {
       <PageHero
         breadcrumb={[
           { label: 'Início', href: '/' },
-          { label: 'Serviços' },
+          { label: 'Serviços', href: '/servicos/requerimentos' },
           { label: 'Tutoriais' },
         ]}
         title="Tutoriais"
-        aside={<PageHeroStats items={[{ value: tutorials.length, label: 'Tutoriais' }, { value: '2-5', label: 'Min. cada' }]} />}
+        section="servicos"
+        lead="Guias passo a passo para usar os serviços online do CRF AL em Casa: inscrição, atualização cadastral, responsabilidade técnica e mais."
+        meta={[{ value: tutorials.length, label: tutorials.length === 1 ? 'tutorial' : 'tutoriais' }]}
       />
 
       <div className="container-crfal py-10 md:py-16" ref={sectionRef}>

@@ -23,9 +23,11 @@ Rawline, hospedada localmente, para títulos e texto. Azul #003366, azul escuro 
 
 ## Cabeçalhos de serviços
 
-`src/components/block/page-hero.tsx` é o componente compartilhado. A variante `compact` é o padrão em todas as páginas internas: breadcrumb e título à esquerda, estatísticas à direita em desktop (a partir de 1024px). Desktop: altura de 203px. Tablet e celular: padding vertical de 40px e altura natural para acomodar conteúdo. Título clamp(28px, 3vw, 40px), gradiente preservado; cards com raio 12px e padding 12px 20px. Imagem à direita como marca d’água. A barra fixa usa o espaço definido por `--header-offset`.
+`src/components/block/page-hero.tsx` é o componente compartilhado; a variante `compact` (padrão) é um cabeçalho editorial escuro. Estrutura: breadcrumb completo com separadores dourados (no celular, vira o link “← <página anterior>”), rótulo dourado da seção com traço de 24px (vem de `section`, `eyebrow` ou do breadcrumb), título de 30/40/48px com tracking -0,02em e entrada suave (desativada com movimento reduzido), frase de apoio (`lead`, uma frase útil, até 2 linhas no desktop), dados em linha (`meta`: número em negrito branco e rótulo em minúsculas, separados por pontos dourados a partir de 640px) e ações (`actions` com `PageHeroAction`: primária branca, secundária vazada; à direita no desktop, abaixo do texto no celular). Fundo: gradiente azul, textura de grade de 48px com máscara radial, brilhos azul e dourado desfocados, arte da taça (`page-hero-desktop-v3.jpg`) só a partir de 1024px, com 35% de opacidade e máscara, e fio dourado de 1px na base. Sem estatísticas em caixas: `PageHeroStats` existe só por compatibilidade e renderiza o mesmo formato de `meta`. Esconder números que ainda não carregaram (nunca mostrar 0 ou —).
 
-Abaixo de 1024px, empilhar título e estatísticas. Em telas estreitas, estatísticas mantêm uma linha com rolagem horizontal acessível por teclado. Títulos longos quebram naturalmente para preservar legibilidade. Detalhes de eventos mantêm data, local e status. `PageHeroStats` é o componente canônico de estatísticas. A variante `default` permanece disponível para banners editoriais explícitos.
+## Abas por seção
+
+`src/config/section-nav.ts` define as abas de Instituição, Serviços, Fiscalização e Imprensa. Com `section`, o cabeçalho mostra as páginas da seção na base, separadas por uma borda branca a 10%, com sublinhado dourado na página atual (`aria-current`); `matchPrefix` mantém a aba ativa em subpáginas (álbuns, notícias, eventos). No celular, as abas rolam na horizontal e centralizam a ativa. Links externos têm seta diagonal e aviso de nova aba. As abas substituem o dropdown “Navegação da Fiscalização” no celular; no desktop, o menu lateral da Fiscalização permanece.
 
 ## Arte dos cabeçalhos
 
@@ -33,15 +35,11 @@ Abaixo de 1024px, empilhar título e estatísticas. Em telas estreitas, estatís
 
 ## Proporções das artes responsivas
 
-Arte desktop `page-hero-desktop-v3.jpg`: encaixada pela altura, à direita, sem cortar a taça; o fundo azul preenche a extensão panorâmica. Arte mobile `page-hero-mobile-v3.jpg`: composição específica próxima de 375:247, aplicada abaixo de 1024px. Requerimentos mede aproximadamente 247px em 375px de largura. Títulos maiores podem aumentar a altura no celular para evitar cortes.
+Arte desktop `page-hero-desktop-v3.jpg`: encaixada pela altura, à direita, sem cortar a taça. No cabeçalho editorial, a arte não aparece abaixo de 1024px: no celular, o fundo é só gradiente, textura e brilho, para priorizar o conteúdo. `page-hero-mobile-v3.jpg` continua disponível para a variante `default`.
 
 ## Arte do card do Instagram
 
 `public/images/instagram-card-background-v1.jpg`: fundo azul com taça de Hígia, fitas suaves e detalhes dourados concentrados à direita. Imagem decorativa sem texto, com camada azul sobreposta para preservar a leitura. Aplicar apenas ao painel de apresentação da seção Instagram; manter altura natural e carregamento adiado. O painel não estica junto à grade: usa alinhamento ao topo, padding de 16/24/20px e título de 18/24/20px conforme o breakpoint. Em mobile, título e ação ficam lado a lado, sem descrição secundária. Em desktop, ocupar 30% da largura e deixar 70% para as postagens. Remover o rodapé redundante de identificação; priorizar as publicações.
-
-## Cards no celular
-
-Abaixo de 640px, estatísticas dividem igualmente a largura disponível, com padding horizontal de 8px, números de 24px e rótulos de 10px centralizados, com quebra de linha. Gap de 8px e largura mínima de 80px; rolagem disponível apenas quando necessária. A partir de 640px, preservar cards com padding de 20px, números de 28px e rótulos de 12px. A altura mobile acompanha o conteúdo.
 
 ## Galeria de Fotos
 

@@ -28,6 +28,7 @@ export default function AfastamentoProvisorioPage() {
   return (
     <FiscalizacaoPageShell
       title="Afastamento Provisório"
+      lead="Quando e como comunicar o afastamento provisório do farmacêutico, e por quais canais protocolar."
       description="Saiba como comunicar o afastamento provisório do farmacêutico ao CRFAL — procedimentos, requerimento e canais de protocolo em Alagoas."
     >
       <p>

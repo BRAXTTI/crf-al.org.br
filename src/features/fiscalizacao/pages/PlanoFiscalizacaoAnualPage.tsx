@@ -18,6 +18,7 @@ export default function PlanoFiscalizacaoAnualPage() {
   return (
     <FiscalizacaoPageShell
       title="Plano de Fiscalização Anual"
+      lead="O planejamento estratégico que orienta as ações de fiscalização do CRF-AL ao longo do ano."
       description="Acesse o Plano de Fiscalização Anual (PFA) do CRFAL — documento estratégico que orienta as atividades de fiscalização farmacêutica em Alagoas."
     >
       <p>

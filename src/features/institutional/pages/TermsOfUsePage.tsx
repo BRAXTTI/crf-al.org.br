@@ -13,6 +13,8 @@ export default function TermsOfUsePage() {
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Termos de Uso' }]}
         title="Termos de Uso"
+        eyebrow="Portal CRF-AL"
+        lead="As condições de uso deste portal e dos serviços digitais oferecidos pelo CRF-AL."
       />
 
       <div className="container-crfal py-10 md:py-16">

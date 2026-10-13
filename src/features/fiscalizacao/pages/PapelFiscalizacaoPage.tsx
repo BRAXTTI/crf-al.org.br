@@ -17,6 +17,7 @@ export default function PapelFiscalizacaoPage() {
   return (
     <FiscalizacaoPageShell
       title="Papel da Fiscalização"
+      lead="Por que a fiscalização existe, em que normas se apoia e como garante um exercício farmacêutico ético e legal."
       description="Entenda o papel da fiscalização do CRFAL — objetivos, base normativa e medidas adotadas para garantir o exercício ético e legal da farmácia em Alagoas."
     >
       <p>

@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { ExternalLink, ShieldCheck, ChevronDown, Mail } from 'lucide-react';
+import { ExternalLink, Mail } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
@@ -7,6 +6,8 @@ import PageHero from '@/components/block/page-hero';
 interface FiscalizacaoPageShellProps {
   title: string;
   description?: string;
+  /** Frase de apoio exibida no cabeçalho. */
+  lead?: string;
   children: React.ReactNode;
 }
 
@@ -22,9 +23,9 @@ const quickLinks = [
   { label: 'Custos da fiscalização', href: 'https://crf-al.implanta.net.br/portaltransparencia/', external: true },
 ];
 
-export default function FiscalizacaoPageShell({ title, description, children }: FiscalizacaoPageShellProps) {
+export default function FiscalizacaoPageShell({ title, description, lead, children }: FiscalizacaoPageShellProps) {
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isOverview = location.pathname === '/fiscalizacao';
 
   return (
     <>
@@ -33,67 +34,14 @@ export default function FiscalizacaoPageShell({ title, description, children }: 
       )}
 
       <PageHero
-        breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Fiscalização' }]}
+        breadcrumb={isOverview ? [{ label: 'Início', href: '/' }, { label: 'Fiscalização' }] : [{ label: 'Início', href: '/' }, { label: 'Fiscalização', href: '/fiscalizacao' }, { label: title }]}
         title={title}
+        section="fiscalizacao"
+        lead={lead}
       />
 
       <div className="bg-crfal-gray-50 pb-16  md:pb-24">
         <div className="container-crfal py-8 md:py-10">
-          <div className="lg:hidden mb-8">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex w-full items-center justify-between rounded-xl border border-crfal-gray-200 bg-white px-5 py-3.5 text-sm font-semibold text-neutral-800 shadow-sm transition-colors hover:bg-crfal-gray-50    "
-              aria-expanded={mobileMenuOpen}
-            >
-              <span className="flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-crfal-blue " />
-                Navegação da Fiscalização
-              </span>
-              <ChevronDown className={`h-5 w-5 text-crfal-gray-400 transition-transform duration-300 ${mobileMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <div className={`overflow-hidden transition-all duration-300 ${mobileMenuOpen ? 'mt-3 max-h-[600px] opacity-100' : 'max-h-0 mt-0 opacity-0'}`}>
-              <div className="grid grid-cols-1 gap-1.5 rounded-xl border border-crfal-gray-200 bg-white p-2 shadow-sm   sm:grid-cols-2">
-                {quickLinks.map((item) => {
-                  const isExternal = !item.href.startsWith('/');
-                  const isActive = !isExternal && location.pathname === item.href;
-                  const linkClass = `flex items-center justify-between rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
-                    isActive
-                      ? 'bg-crfal-blue text-white'
-                      : 'text-neutral-700 hover:bg-crfal-gray-100  '
-                  }`;
-
-                  if (isExternal) {
-                    return (
-                      <a
-                        key={item.label}
-                        href={item.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={linkClass}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item.label}
-                        <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-                      </a>
-                    );
-                  }
-                  return (
-                    <Link
-                      key={item.label}
-                      to={item.href}
-                      className={linkClass}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.label}
-                      {isActive && <span className="text-xs opacity-70">→</span>}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
           <div className="grid gap-8 lg:grid-cols-12">
             <article className="lg:col-span-8 rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm   md:p-8 lg:p-10 [&>h2]:mt-10 [&>h2]:mb-3 [&>h2]:border-t [&>h2]:border-crfal-gray-200 [&>h2]:pt-6 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-neutral-900 [&>h2]: [&>h2]: [&>h2]:md:text-2xl [&>h2:first-of-type]:mt-0 [&>h2:first-of-type]:border-0 [&>h2:first-of-type]:pt-0 [&>p]:mb-4 [&>p]:leading-8 [&>p]:text-neutral-700 [&>p]: [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-neutral-700 [&>ul]: [&>li]:leading-7">
               {children}

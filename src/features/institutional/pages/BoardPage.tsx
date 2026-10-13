@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import SEO from '@/components/SEO';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero from '@/components/block/page-hero';
 import {
   ChevronRight,
   Users,
@@ -304,11 +304,13 @@ export default function BoardPage() {
       <PageHero
         breadcrumb={[
           { label: 'Início', href: '/' },
-          { label: 'Instituição' },
+          { label: 'Instituição', href: '/instituicao' },
           { label: 'Diretoria' },
         ]}
         title="Diretoria e Conselho"
-        aside={<PageHeroStats items={[{ value: secoes[0].membros.length, label: 'Diretores' }, { value: secoes[1].membros.length + secoes[2].membros.length, label: 'Conselheiros' }]} />}
+        section="instituicao"
+        lead="Quem compõe a Diretoria e o plenário de conselheiros do CRF-AL na gestão atual."
+        meta={[{ value: secoes[0].membros.length, label: 'diretores' }, { value: secoes[1].membros.length + secoes[2].membros.length, label: 'conselheiros' }]}
       />
 
       <div className="container-crfal py-6 lg:py-16" ref={sectionRef}>

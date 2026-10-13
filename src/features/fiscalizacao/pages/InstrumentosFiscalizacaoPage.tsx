@@ -26,6 +26,7 @@ export default function InstrumentosFiscalizacaoPage() {
   return (
     <FiscalizacaoPageShell
       title="Instrumentos de Fiscalização"
+      lead="Os termos, autos e notificações usados pelos fiscais, e o que cada um significa para o profissional e o estabelecimento."
       description="Conheça os instrumentos formais utilizados pelo CRFAL na fiscalização do exercício farmacêutico em Alagoas — autos, termos e notificações."
     >
       <p>

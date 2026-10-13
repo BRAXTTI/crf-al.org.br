@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import {
   LEGACY_WP_UPLOADS_URL,
@@ -564,8 +564,8 @@ const CRF_EM_CASA_URL = 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.
 type ProfileType = 'individual' | 'corporate';
 
 const PROFILES = [
-  { id: 'individual', param: 'pessoa-fisica', label: 'Farmacêuticos', sublabel: 'Pessoa física', icon: PillBottle, menu: individualMenu },
-  { id: 'corporate', param: 'pessoa-juridica', label: 'Empresas', sublabel: 'Pessoa jurídica', icon: Building2, menu: corporateMenu },
+  { id: 'individual', param: 'pessoa-fisica', label: 'Farmacêuticos', audience: 'farmacêuticos', sublabel: 'Pessoa física', icon: PillBottle, menu: individualMenu },
+  { id: 'corporate', param: 'pessoa-juridica', label: 'Empresas', audience: 'empresas', sublabel: 'Pessoa jurídica', icon: Building2, menu: corporateMenu },
 ] as const;
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
@@ -785,13 +785,11 @@ function RequirementsContent() {
       <PageHero
         variant="compact"
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Serviços' }, { label: 'Requerimentos' }]}
-        title={
-          <>
-            Central de{' '}
-            <span className="bg-gradient-to-r from-[#8FC1F2] to-crfal-gold bg-clip-text text-transparent">Requerimentos</span>
-          </>
-        }
-        aside={<PageHeroStats items={[{ value: totalPerfil, label: `Requerimentos · ${activeProfile.label}` }, { value: currentMenu.length, label: 'Categorias' }]} />}
+        section="servicos"
+        lead="Documentos, instruções e formulários de cada requerimento, organizados para farmacêuticos e empresas."
+        title="Central de Requerimentos"
+        meta={[{ value: totalPerfil, label: `requerimentos para ${activeProfile.audience}` }, { value: currentMenu.length, label: 'categorias' }]}
+        actions={<PageHeroAction href={CRF_EM_CASA_URL}>Acessar CRF AL em Casa</PageHeroAction>}
       />
 
       <main className="container-crfal py-8 md:py-12">

@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Images } from 'lucide-react';
 import SEO from '@/components/SEO';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero from '@/components/block/page-hero';
 import { usePhotoAlbums } from '@/services/wordpress/hooks';
 import GalleryState from '../components/GalleryState';
 
@@ -15,7 +15,7 @@ export default function PhotoGalleryPage() {
   return (
     <div className="min-h-screen bg-crfal-gray-50">
       <SEO title="Galeria de Fotos" description="Registros fotográficos dos eventos, encontros e ações do Conselho Regional de Farmácia de Alagoas." path="/imprensa/galeria-de-fotos" />
-      <PageHero title="Galeria de Fotos" breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Galeria de Fotos' }]} aside={<PageHeroStats items={[{ value: data?.total ?? '—', label: 'Álbuns publicados' }]} />} />
+      <PageHero title="Galeria de Fotos" breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Galeria de Fotos' }]} section="imprensa" lead="Registros fotográficos de eventos, ações e encontros do CRF-AL." meta={data?.total ? [{ value: data.total, label: 'álbuns publicados' }] : undefined} />
       <section className="container-crfal py-10 md:py-16" aria-label="Álbuns de fotos" aria-busy={isFetching}>
         <p className="mb-8 max-w-2xl leading-relaxed text-crfal-gray-600">Acompanhe os registros dos eventos, encontros e ações do CRF-AL. Selecione um álbum para ver todas as fotos.</p>
         {isPending || isError || albums.length === 0 ? <GalleryState loading={isPending} error={isError} onRetry={() => void refetch()} /> : (

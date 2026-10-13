@@ -23,6 +23,7 @@ export default function RelatoriosFiscalizacaoPage() {
   return (
     <FiscalizacaoPageShell
       title="Relatórios de Fiscalização"
+      lead="Os resultados e a execução das atividades de fiscalização, publicados ano a ano."
       description="Acesse os Relatórios de Fiscalização Anual (RFA) do CRFAL — resultados e execução das atividades de fiscalização farmacêutica em Alagoas."
     >
       <p>

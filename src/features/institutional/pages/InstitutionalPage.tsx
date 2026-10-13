@@ -12,6 +12,8 @@ export default function InstitutionalPage() {
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Instituição' }]}
         title="Instituição"
+        section="instituicao"
+        lead="Conheça o Conselho Regional de Farmácia de Alagoas: história, missão, valores, diretoria e estatuto."
       />
     </div>
   );

@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero from '@/components/block/page-hero';
 import { useEvents } from '@/services/wordpress/hooks';
 import {
   MODALIDADE_ICONS,
@@ -377,16 +377,11 @@ export default function EventosPage() {
 
       {/* Hero */}
       <PageHero
-        breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Eventos' }]}
-        title={
-          <>
-            Agenda de{' '}
-            <span className="bg-gradient-to-r from-[#8FC1F2] to-crfal-gold bg-clip-text text-transparent">
-              Eventos
-            </span>
-          </>
-        }
-        aside={<PageHeroStats items={[{ value: ativos.length, label: 'Próximos' }, { value: ativos.filter((e) => e.modalidade === 'online').length, label: 'Online' }, { value: ativos.filter((e) => e.modalidade !== 'online').length, label: 'Presenciais' }]} />}
+        breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Eventos' }]}
+        section="imprensa"
+        lead="Congressos, palestras, capacitações e ações do CRF-AL para farmacêuticos e para a sociedade."
+        title="Agenda de Eventos"
+        meta={[{ value: ativos.length, label: 'próximos' }, { value: ativos.filter((e) => e.modalidade === 'online').length, label: 'online' }, { value: ativos.filter((e) => e.modalidade !== 'online').length, label: 'presenciais' }]}
       />
 
       <main className="container-crfal py-8 md:py-12">

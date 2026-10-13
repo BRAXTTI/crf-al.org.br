@@ -10,7 +10,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 
 interface ContactInfo {
   id: number;
@@ -84,6 +84,9 @@ export default function ContactPage() {
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Fale Conosco' }]}
         title="Fale Conosco"
+        eyebrow="Atendimento"
+        lead="Fale com o setor certo por telefone, e-mail ou WhatsApp. Atendimento de segunda a sexta, das 9h às 17h."
+        actions={<PageHeroAction href="https://wa.me/5582999710247">WhatsApp do atendimento</PageHeroAction>}
       />
 
       <div className="container-crfal py-8 md:py-14" ref={sectionRef}>

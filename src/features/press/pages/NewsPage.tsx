@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react';
 import SEO from '@/components/SEO';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero from '@/components/block/page-hero';
 import { Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper, ChevronLeft } from 'lucide-react';
 import {
@@ -173,7 +173,9 @@ export default function NewsPage() {
           { label: 'Notícias' },
         ]}
         title="Notícias"
-        aside={<PageHeroStats items={[{ value: totalPosts || publications.length, label: 'Notícias publicadas' }]} />}
+        section="imprensa"
+        lead="Comunicados, alertas e notícias do CRF-AL sobre a profissão farmacêutica em Alagoas."
+        meta={totalPosts || publications.length ? [{ value: (totalPosts || publications.length).toLocaleString('pt-BR'), label: 'notícias publicadas' }] : undefined}
       />
 
       <div className="container-crfal py-10 md:py-16" ref={gridRef}>

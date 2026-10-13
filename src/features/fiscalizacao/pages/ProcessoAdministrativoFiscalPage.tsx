@@ -36,6 +36,7 @@ export default function ProcessoAdministrativoFiscalPage() {
   return (
     <FiscalizacaoPageShell
       title="Processo Administrativo Fiscal"
+      lead="Como tramita um processo após uma infração: defesa, recursos, multas e penalidades."
       description="Entenda o Processo Administrativo Fiscal do CRFAL — rito processual, defesa, multas e penalidades para infrações à legislação farmacêutica em Alagoas."
     >
       <p>

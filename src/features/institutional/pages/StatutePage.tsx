@@ -16,6 +16,8 @@ export default function StatutePage() {
           { label: 'Estatuto' },
         ]}
         title="Estatuto"
+        section="instituicao"
+        lead="O documento que define a organização, as competências e o funcionamento do CRF-AL."
       />
     </div>
   );

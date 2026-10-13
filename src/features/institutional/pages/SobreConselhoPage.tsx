@@ -243,14 +243,12 @@ export default function SobreConselhoPage() {
         id="sobre-conselho"
         breadcrumb={[
           { label: 'Início', href: '/' },
-          { label: 'Instituição' },
+          { label: 'Instituição', href: '/instituicao' },
           { label: 'Sobre o Conselho' },
         ]}
-        title={
-          <>
-            Sobre o Conselho
-          </>
-        }
+        title="Sobre o Conselho"
+        section="instituicao"
+        lead="A história, a missão e as atribuições do CRF-AL na defesa da profissão farmacêutica e da saúde pública em Alagoas."
       />
 
       {/* ── HISTÓRIA ─────────────────────────────────────────────────── */}

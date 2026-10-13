@@ -34,6 +34,7 @@ export default function FiscalizacaoPage() {
   return (
     <FiscalizacaoPageShell
       title="Fiscalização"
+      lead="Como o CRF-AL fiscaliza o exercício da profissão farmacêutica em Alagoas: procedimentos, instrumentos, penalidades e base legal."
       description="Saiba como o CRFAL fiscaliza o exercício profissional farmacêutico em Alagoas — procedimentos, atuações, penalidades e base legal."
     >
       <p>

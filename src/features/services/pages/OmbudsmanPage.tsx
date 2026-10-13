@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
-import PageHero, { PageHeroStats } from '@/components/block/page-hero';
+import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import {
   MessageSquare,
   ThumbsUp,
@@ -115,18 +115,14 @@ export default function OmbudsmanPage() {
       <PageHero
         breadcrumb={[
           { label: 'Início', href: '/' },
-          { label: 'Serviços' },
+          { label: 'Serviços', href: '/servicos/requerimentos' },
           { label: 'Ouvidoria' },
         ]}
-        title={
-          <>
-            Ouvidoria{' '}
-            <span className="bg-gradient-to-r from-[#8FC1F2] to-crfal-gold bg-clip-text text-transparent">
-              CRF-AL
-            </span>
-          </>
-        }
-        aside={<PageHeroStats items={[{ value: '30', label: 'Dias p/ resposta' }, { value: '5', label: 'Tipos de manifestação' }, { value: '24h', label: 'Canal disponível' }]} />}
+        title="Ouvidoria"
+        section="servicos"
+        lead="Registre reclamações, elogios, sugestões, solicitações ou denúncias sobre os serviços do CRF-AL. Toda manifestação recebe resposta em até 30 dias."
+        meta={[{ value: '30', label: 'dias para resposta' }, { value: '5', label: 'tipos de manifestação' }, { value: 'Online', label: 'a qualquer hora' }]}
+        actions={<PageHeroAction href={PORTAL_TRANSPARENCIA_URL}>Registrar manifestação</PageHeroAction>}
       />
 
       <main className="container-crfal py-10 md:py-14">
