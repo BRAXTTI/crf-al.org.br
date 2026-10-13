@@ -4,8 +4,9 @@ import { serviceProfiles } from '@/config/service-profiles';
 
 export default function ServiceProfiles() {
   return (
-    <section aria-labelledby="services-by-profile-title" className="border-t border-crfal-gray-200 bg-white py-10 sm:py-14">
+    <section aria-labelledby="services-by-profile-title" className="py-2 sm:py-3">
       <div className="container-crfal">
+        <div className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Central de serviços</p>
@@ -76,6 +77,7 @@ export default function ServiceProfiles() {
               </nav>
             );
           })}
+        </div>
         </div>
       </div>
     </section>

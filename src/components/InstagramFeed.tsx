@@ -106,8 +106,9 @@ export default function InstagramFeed({
   const items = data ?? [];
 
   return (
-    <section className="border-t border-crfal-gray-200 bg-white py-10 sm:py-14" aria-labelledby="instagram-title">
+    <section className="py-2 sm:py-3" aria-labelledby="instagram-title">
       <div className="container-crfal">
+        <div className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
@@ -153,6 +154,7 @@ export default function InstagramFeed({
             <FollowCard />
           </div>
         )}
+        </div>
       </div>
     </section>
   );

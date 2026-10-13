@@ -264,7 +264,7 @@ function CompactHero({
   }, [pathname]);
 
   return (
-    <section id={id} className={`relative isolate mt-[var(--page-header-offset)] overflow-hidden bg-crfal-blue-dark text-white ${className ?? ''}`}>
+    <section id={id} className={`relative isolate mt-[var(--page-header-offset)] overflow-hidden rounded-b-[28px] bg-crfal-blue-dark text-white sm:rounded-b-[40px] ${className ?? ''}`}>
       {/* Fundo: gradiente, textura fina, brilho e arte da taça como assinatura discreta. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0A2A4F] via-crfal-blue-dark to-[#071222]" />
@@ -279,7 +279,7 @@ function CompactHero({
             className="absolute inset-y-0 right-0 hidden h-full w-[52%] object-contain object-right opacity-35 [mask-image:linear-gradient(to_right,transparent,black_45%)] lg:block"
           />
         )}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-crfal-gold/60 to-transparent" />
+        <div className="absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-crfal-gold/60 to-transparent" />
       </div>
 
       <div className="container-crfal relative">
@@ -335,7 +335,7 @@ function CompactHero({
         </div>
 
         {sectionNav && (
-          <nav aria-label={`Páginas de ${sectionNav.label}`} className="border-t border-white/10">
+          <nav aria-label={`Páginas de ${sectionNav.label}`} className="border-t border-white/10 pb-1 sm:px-2">
             <div ref={tabsRef} className="-mx-4 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
               {sectionNav.links.map((link: SectionNavLink) => {
                 const active = isLinkActive(link, pathname);

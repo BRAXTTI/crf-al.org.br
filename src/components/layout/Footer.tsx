@@ -37,7 +37,7 @@ const socialLinks = SOCIAL_LINKS.map((social) => ({
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0B192C] text-white relative overflow-hidden">
+    <footer className="relative mt-6 overflow-hidden rounded-t-[28px] bg-[#0B192C] text-white sm:mt-10 sm:rounded-t-[40px]">
       <div className="absolute top-0 right-0 w-96 h-96 bg-crfal-blue-light rounded-full translate-x-1/2 -translate-y-1/2 opacity-10" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-crfal-blue-dark rounded-full -translate-x-1/2 translate-y-1/2 opacity-20" />
 
