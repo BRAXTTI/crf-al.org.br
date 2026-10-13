@@ -169,7 +169,7 @@
      acompanha o .container-crfal (16/24px) para os carrosséis sangrarem
      até a borda do painel. */
   .section-panel {
-    @apply overflow-hidden rounded-[28px] border border-crfal-gray-200/80 bg-white px-4 py-9 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-[40px] sm:px-6 sm:py-12 md:px-8 lg:px-12 lg:py-14;
+    @apply overflow-hidden rounded-2xl border border-crfal-gray-200/80 bg-white px-4 py-9 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-12 md:px-8 lg:px-12 lg:py-14;
   }
   /* Fundo do site: arte suave azul (presa ao topo, rola com a página) que
      termina em #E8F1FB, a mesma cor sólida que continua abaixo dela. */

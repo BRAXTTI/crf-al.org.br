@@ -264,7 +264,7 @@ function CompactHero({
   }, [pathname]);
 
   return (
-    <section id={id} className={`relative isolate mt-[var(--page-header-offset)] overflow-hidden rounded-b-[28px] bg-crfal-blue-dark text-white sm:rounded-b-[40px] ${className ?? ''}`}>
+    <section id={id} className={`relative isolate mt-[var(--page-header-offset)] overflow-hidden rounded-b-2xl bg-crfal-blue-dark text-white sm:rounded-b-3xl ${className ?? ''}`}>
       {/* Fundo: gradiente, textura fina, brilho e arte da taça como assinatura discreta. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0A2A4F] via-crfal-blue-dark to-[#071222]" />
