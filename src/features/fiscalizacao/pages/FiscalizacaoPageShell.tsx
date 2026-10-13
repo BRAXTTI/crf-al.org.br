@@ -48,7 +48,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, childr
             </article>
 
             <aside className="hidden lg:col-span-4 lg:block">
-              <div className="sticky top-36 space-y-5">
+              <div className="sticky top-[calc(var(--header-offset)+1.5rem)] space-y-5">
                 <nav className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm  ">
                   <h2 className="mb-4 text-lg font-semibold text-neutral-900 ">
                     Menu da Fiscalização

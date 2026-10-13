@@ -115,17 +115,18 @@
 
     /* Altura total do cabeçalho (barra de identidade + barra de menu).
        Usada para deslocar o conteúdo e elementos fixos/sticky. */
-    --header-offset: 80px;
-    --page-header-offset: 80px;
+    --header-offset: 64px;
+    --page-header-offset: 64px;
     /* Home: cabeçalho + faixa de acesso por perfil (só no celular). */
-    --home-header-offset: 152px;
+    --home-header-offset: 136px;
   }
 
   @media (min-width: 1024px) {
     :root {
-      --header-offset: 132px;
-      --page-header-offset: 132px;
-      --home-header-offset: 132px;
+      /* Barra principal fixa (72px); a faixa utilitária de 32px some ao rolar. */
+      --header-offset: 72px;
+      --page-header-offset: 104px;
+      --home-header-offset: 104px;
     }
   }
 }

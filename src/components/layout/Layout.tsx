@@ -8,7 +8,7 @@ export default function Layout() {
     <div className="site-background min-h-screen text-[#1E293B]">
       <ScrollRestoration />
       <Header />
-      <main>
+      <main id="conteudo" tabIndex={-1} className="outline-none">
         <Outlet />
       </main>
       <Footer />

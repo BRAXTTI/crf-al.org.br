@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, type MouseEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, ChevronDown, ExternalLink, Search, User } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ChevronDown, ExternalLink, Info, Search, User } from 'lucide-react';
 import MobileHeaderSearch from '@/components/layout/MobileHeaderSearch';
 import MobileNavigation from '@/components/layout/MobileNavigation';
 import { serviceProfiles } from '@/config/service-profiles';
@@ -27,6 +27,8 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const desktopSearchRef = useRef<HTMLButtonElement>(null);
+  const searchTriggerRef = useRef<HTMLButtonElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -67,12 +69,22 @@ export default function Header() {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [activeDropdown]);
 
+  // Ctrl/⌘ + K abre a busca no desktop.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        searchTriggerRef.current = desktopSearchRef.current;
+        setIsSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsMobileMenuOpen(false);
-        setIsSearchOpen(false);
-      }
+      if (window.innerWidth >= 1024) setIsMobileMenuOpen(false);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -87,7 +99,7 @@ export default function Header() {
   };
 
   const navLinkBase =
-    'relative flex items-center gap-1.5 rounded-md px-3 py-2 text-[15px] font-medium tracking-[0.02em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70';
+    'relative flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-2 text-[14px] font-semibold xl:gap-1.5 xl:px-3 xl:text-[14.5px] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue';
 
   const renderSocial = (
     itemClassName: string,
@@ -118,11 +130,35 @@ export default function Header() {
 
   return (
     <>
+    <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-crfal-blue focus:shadow-lg lg:hidden">Ir para o conteúdo</a>
     <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Barra de identidade — logo, nome da entidade, redes sociais e acesso do profissional */}
-      <div className={`border-crfal-gray-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-[background-color,box-shadow] duration-300 lg:border-b ${scrolled ? 'glass-blue lg:glass-light lg:border-white/40 shadow-[0_8px_32px_-12px_rgba(11,25,44,0.35)]' : 'bg-crfal-blue lg:bg-white'}`}>
-        <div className="container-crfal">
-          <div className="relative flex h-20 items-center justify-between gap-2 lg:h-[76px] lg:gap-3">
+      {/* Faixa utilitária (desktop): some ao rolar. */}
+      <div className={`hidden overflow-hidden bg-crfal-blue-dark text-white/75 transition-[height] duration-300 motion-reduce:transition-none lg:block ${scrolled ? 'h-0' : 'h-8'}`} aria-hidden={scrolled || undefined}>
+        <div className="container-crfal flex h-8 items-center justify-between text-[12.5px]">
+          <ul className="flex items-center gap-5">
+            <li><a href="#conteudo" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">Ir para o conteúdo</a></li>
+            <li>
+              <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" tabIndex={scrolled ? -1 : undefined} className="inline-flex items-center gap-1.5 rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+                <Info className="h-3.5 w-3.5 text-crfal-gold" aria-hidden />Acesso à Informação<span className="sr-only">(abre em uma nova aba)</span>
+              </a>
+            </li>
+            <li>
+              <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">Transparência<span className="sr-only">(abre em uma nova aba)</span></a>
+            </li>
+            <li><Link to="/servicos/ouvidoria" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">Ouvidoria</Link></li>
+          </ul>
+          {renderSocial(
+            'flex h-7 w-7 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+            'h-3.5 w-3.5',
+            'flex items-center gap-0.5'
+          )}
+        </div>
+      </div>
+
+      {/* Barra principal: logo, menu, busca e CRF AL em Casa. */}
+      <div className={`relative transition-[background-color,box-shadow] duration-300 lg:border-b ${scrolled ? 'glass-blue shadow-[0_8px_32px_-12px_rgba(11,25,44,0.35)] lg:glass-light lg:border-white/50' : 'bg-crfal-blue lg:border-crfal-gray-200/80 lg:bg-white'}`}>
+        <div className="container-crfal relative">
+          <div className="flex h-16 items-center justify-between gap-2 lg:h-[72px] lg:gap-4">
             <button
               ref={menuButtonRef}
               type="button"
@@ -142,78 +178,24 @@ export default function Header() {
             <Link
               to="/"
               onClick={handleLogoClick}
-              className="group absolute left-1/2 flex -translate-x-1/2 items-center rounded-lg px-3 py-2 focus-visible:outline-white lg:static lg:min-w-0 lg:translate-x-0 lg:gap-3 lg:bg-transparent lg:p-0"
+              className="group absolute left-1/2 flex -translate-x-1/2 items-center rounded-lg px-3 py-1.5 focus-visible:outline-white lg:static lg:shrink-0 lg:translate-x-0 lg:gap-3 lg:p-0 lg:focus-visible:outline-crfal-blue"
             >
               <picture>
-              <source media="(max-width: 1023px)" srcSet="/images/logo-crf-branca.png" />
-              <img
-                src="/images/logo-crf-azul.png"
-                alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
-                className="h-10 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-12"
-              />
+                <source media="(max-width: 1023px)" srcSet="/images/logo-crf-branca.png" />
+                <img
+                  src="/images/logo-crf-azul.png"
+                  alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
+                  className="h-9 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-11"
+                />
               </picture>
-              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-2.5 leading-tight lg:block lg:pl-3">
-                <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-crfal-blue lg:text-[11px]">
-                  Conselho Regional de Farmácia
-                </span>
-                <span className="block truncate text-sm font-bold text-crfal-blue-dark lg:text-base">
-                  Estado de Alagoas
-                </span>
+              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-3 leading-tight xl:block">
+                <span className="block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Conselho Regional de Farmácia</span>
+                <span className="block text-[15px] font-bold text-crfal-blue-dark">Estado de Alagoas</span>
               </span>
             </Link>
 
-            <button ref={searchButtonRef} type="button" onClick={() => { setIsMobileMenuOpen(false); setIsSearchOpen(true); }} aria-label="Buscar páginas e serviços" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-white lg:hidden">
-              <Search className="h-6 w-6" aria-hidden="true" />
-            </button>
-
-            <div className="hidden items-center gap-2 lg:flex">
-              <a
-                href={TRANSPARENCIA_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Acesso à Informação — Portal da Transparência do CRF-AL"
-                title="Acesso à Informação — Portal da Transparência"
-                className="mr-1 flex h-11 items-center rounded-lg px-1 transition-opacity hover:opacity-80"
-              >
-                <img
-                  src="/images/logo-acesso-a-Informacao-colorido.png"
-                  alt="Acesso à Informação"
-                  className="h-8 w-auto object-contain"
-                />
-              </a>
-
-              <span aria-hidden className="h-6 w-px bg-crfal-gray-200" />
-
-              {renderSocial(
-                'flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-crfal-blue-lighter hover:text-crfal-blue',
-                'h-[18px] w-[18px]'
-              )}
-
-              <span aria-hidden className="mx-1 h-6 w-px bg-crfal-gray-200" />
-
-              <a
-                href={CRF_EM_CASA_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 whitespace-nowrap rounded-lg border-2 border-crfal-blue px-4 py-2 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white"
-              >
-                <User className="h-4 w-4" />
-                CRF AL em Casa
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <MobileHeaderSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} items={searchItems} triggerRef={searchButtonRef} />
-
-      {/* Barra de menu — navegação principal (desktop) */}
-      <div className={`relative hidden transition-[background-color] duration-300 lg:block ${scrolled ? 'glass-blue' : 'bg-[#003366]'}`}>
-        <div className="container-crfal">
-          <div className="relative flex h-14 items-center justify-center">
-            <nav aria-label="Navegação principal" className="flex items-center">
-              {navItems.map((item, index) => (
+            <nav aria-label="Navegação principal" className="hidden min-w-0 flex-1 items-center justify-center lg:flex">
+              {navItems.filter((item) => item.columns || !item.href.startsWith('http')).map((item, index) => (
                 <DesktopNavEntry
                   key={item.label}
                   item={item}
@@ -229,13 +211,43 @@ export default function Header() {
                 />
               ))}
             </nav>
+
+            <button ref={searchButtonRef} type="button" onClick={() => { searchTriggerRef.current = searchButtonRef.current; setIsMobileMenuOpen(false); setIsSearchOpen(true); }} aria-label="Buscar páginas e serviços" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-white lg:hidden">
+              <Search className="h-6 w-6" aria-hidden="true" />
+            </button>
+
+            <div className="hidden shrink-0 items-center gap-2 lg:flex">
+              <button
+                ref={desktopSearchRef}
+                type="button"
+                onClick={() => { searchTriggerRef.current = desktopSearchRef.current; setIsSearchOpen(true); }}
+                aria-label="Buscar páginas e serviços (Ctrl ou ⌘ + K)"
+                title="Buscar (Ctrl/⌘ + K)"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue"
+              >
+                <Search className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <a
+                href={CRF_EM_CASA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-crfal-blue px-4 text-sm font-bold text-white shadow-[0_6px_16px_-6px_rgba(0,51,102,0.55)] transition-colors hover:bg-crfal-blue-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 ring-1 ring-crfal-gold/50"><User className="h-3.5 w-3.5" aria-hidden="true" /></span>
+                CRF AL em Casa
+                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden="true" />
+                <span className="sr-only">(abre em uma nova aba)</span>
+              </a>
+            </div>
           </div>
         </div>
         {/* Véu suave sobre a página enquanto um menu está aberto. */}
-        <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-full h-screen bg-crfal-blue-dark/25 transition-opacity duration-200 motion-reduce:transition-none ${activeDropdown ? 'opacity-100' : 'opacity-0'}`} />
+        <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-full hidden h-screen bg-crfal-blue-dark/25 transition-opacity duration-200 motion-reduce:transition-none lg:block ${activeDropdown ? 'opacity-100' : 'opacity-0'}`} />
       </div>
 
-      <MobileNavigation open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} triggerRef={menuButtonRef} items={navItems} onOpenSearch={() => setIsSearchOpen(true)} socialLinks={renderSocial(
+      <MobileHeaderSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} items={searchItems} triggerRef={searchTriggerRef} />
+
+      <MobileNavigation open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} triggerRef={menuButtonRef} items={navItems} onOpenSearch={() => { searchTriggerRef.current = searchButtonRef.current; setIsSearchOpen(true); }} socialLinks={renderSocial(
         'flex h-11 w-11 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white',
         'h-[18px] w-[18px]',
         'flex items-center justify-center gap-2',
@@ -243,7 +255,7 @@ export default function Header() {
       )} />
     </header>
       {pathname === '/' && (
-        <nav aria-label="Acesso rápido por perfil" className="absolute left-0 right-0 top-20 z-40 h-[72px] border-b border-crfal-gray-200 bg-white lg:hidden">
+        <nav aria-label="Acesso rápido por perfil" className="absolute left-0 right-0 top-16 z-40 h-[72px] border-b border-crfal-gray-200 bg-white lg:hidden">
           <div className="container-crfal grid h-full grid-cols-3 items-stretch divide-x divide-crfal-gray-200 py-2">
             {serviceProfiles.map(({ label, href, icon: Icon }) => (
               <Link
@@ -298,9 +310,9 @@ function DesktopNavEntry({
 }) {
   const panelId = `mega-menu-${index}`;
   const currentMark = isCurrent
-    ? 'after:absolute after:inset-x-3 after:-bottom-[9px] after:h-0.5 after:rounded-full after:bg-crfal-gold'
+    ? 'after:absolute after:inset-x-2 after:-bottom-[16px] xl:after:inset-x-3 after:h-0.5 after:rounded-full after:bg-crfal-gold'
     : '';
-  const stateClass = isOpen ? 'bg-white/15 text-white' : isCurrent ? 'text-white' : 'text-white/85 hover:bg-white/10 hover:text-white';
+  const stateClass = isOpen ? 'bg-crfal-blue-lighter text-crfal-blue' : isCurrent ? 'text-crfal-blue' : 'text-crfal-blue-dark/80 hover:bg-crfal-blue-lighter/70 hover:text-crfal-blue';
 
   if (!item.columns) {
     const external = item.href.startsWith('http');
@@ -308,7 +320,7 @@ function DesktopNavEntry({
     const className = `${navLinkBase} ${stateClass} ${currentMark}`;
     return external ? (
       <a href={item.href} target="_blank" rel="noopener noreferrer" className={className}>
-        {DirectIcon && <DirectIcon className="h-3.5 w-3.5" aria-hidden />}
+        {DirectIcon && <DirectIcon className="h-3.5 w-3.5 text-crfal-gray-400" aria-hidden />}
         {item.label}
         <span className="sr-only">(abre em uma nova aba)</span>
       </a>
@@ -336,7 +348,7 @@ function DesktopNavEntry({
       </button>
 
       {isOpen && (
-        <div id={panelId} className={`absolute left-1/2 top-full z-50 -translate-x-1/2 pt-1.5 ${widthClass}`}>
+        <div id={panelId} className={`absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2 ${widthClass}`}>
           <div className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-[0_28px_60px_-16px_rgba(11,25,44,0.45)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-safe:duration-200">
             <div aria-hidden className="h-0.5 bg-gradient-to-r from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
             <div className={`grid gap-2 p-3 ${columnCount > 1 ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_280px]' : 'grid-cols-[minmax(0,1fr)_250px]'}`}>

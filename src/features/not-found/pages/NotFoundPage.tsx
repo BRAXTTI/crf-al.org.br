@@ -4,7 +4,7 @@ import SEO from '@/components/SEO';
 
 export default function NotFoundPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-crfal-gray-50 px-4 pt-32 pb-16 lg:pt-44">
+    <div className="flex min-h-screen items-center justify-center px-4 pb-16 pt-[calc(var(--page-header-offset)+2rem)]">
       <SEO
         title="Página não encontrada"
         description="A página que você procura não existe ou foi movida. Volte à página inicial do CRFAL."
