@@ -44,6 +44,10 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "title": "Notícias",
     "description": "Fique por dentro das últimas notícias e comunicados do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas."
   },
+  "/imprensa/noticias-cff": {
+    "title": "Notícias do CFF",
+    "description": "Notícias do Conselho Federal de Farmácia (CFF) sobre a profissão farmacêutica, normas e ações do Sistema CFF/CRFs, reunidas pelo CRF-AL."
+  },
   "/imprensa/galeria-de-fotos": {
     "title": "Galeria de Fotos",
     "description": "Registros fotográficos dos eventos, encontros e ações do Conselho Regional de Farmácia de Alagoas."

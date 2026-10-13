@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react"
 import { defineConfig, type Plugin } from "vite"
 import { getInstagramItems } from "./functions/api/_parse"
 import { newsApi } from "./functions/_news"
+import { getCffNews } from "./functions/api/_cff"
 
 /**
  * Em dev, o Vite não executa as Pages Functions. Este middleware replica
@@ -17,6 +18,18 @@ function instagramDevApi(): Plugin {
         res.statusCode = response.status
         response.headers.forEach((value, key) => res.setHeader(key, value))
         res.end(await response.text())
+      })
+      server.middlewares.use("/api/cff", async (req, res) => {
+        const params = new URL(req.url ?? "", "http://localhost").searchParams
+        try {
+          const page = await getCffNews({ limit: Number(params.get("limite")) || 8, cursor: Number(params.get("cursor")) || 1 })
+          res.setHeader("content-type", "application/json; charset=utf-8")
+          res.end(JSON.stringify(page))
+        } catch (error) {
+          res.statusCode = 502
+          res.setHeader("content-type", "application/json; charset=utf-8")
+          res.end(JSON.stringify({ items: [], nextCursor: null, error: String(error) }))
+        }
       })
       server.middlewares.use("/api/instagram", async (_req, res) => {
         try {

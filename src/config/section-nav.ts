@@ -53,6 +53,7 @@ export const SECTION_NAV = {
     href: '/imprensa/noticias',
     links: [
       { label: 'Notícias', href: '/imprensa/noticias', matchPrefix: true },
+      { label: 'Notícias do CFF', href: '/imprensa/noticias-cff' },
       { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos', matchPrefix: true },
       { label: 'Eventos', href: '/eventos', matchPrefix: true },
     ],
