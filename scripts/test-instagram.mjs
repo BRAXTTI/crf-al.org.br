@@ -10,6 +10,14 @@ const { parseItems, getInstagramItems } = await import(parserUrl);
 const html = '<a class="sbi_photo" href="https://www.instagram.com/p/example/" data-full-res="https://www.crf-al.org.br/app/uploads/example.jpg">';
 assert.equal(parseItems(html).length, 1);
 
+const richHtml = '<div class="sbi_item sbi_type_video sbi_new" role="listitem" id="sbi_1" data-date="1791829881"><div class="sbi_photo_wrap"><a class="sbi_photo" href="https://www.instagram.com/p/rich/" data-full-res="https://example.com/rich.jpg"><img src="x.png" alt="Dia de Nossa Senhora &amp; homenagem\n\nTexto"></a></div></div><div class="sbi_item sbi_type_image" data-date="1791483801"><a class="sbi_photo" href="https://www.instagram.com/p/plain/" data-full-res="https://example.com/plain.jpg"><img src="x.png" alt="Instagram post 123"></a></div>';
+const [rich, plain] = parseItems(richHtml);
+assert.equal(rich.type, 'video');
+assert.equal(rich.date, 1791829881000);
+assert.equal(rich.caption, 'Dia de Nossa Senhora & homenagem Texto');
+assert.equal(plain.type, 'image');
+assert.equal(plain.caption, undefined, 'legenda genérica é descartada');
+
 const originalFetch = globalThis.fetch;
 const originalCaches = globalThis.caches;
 const originalError = console.error;

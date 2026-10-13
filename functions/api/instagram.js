@@ -23,7 +23,7 @@ export async function onRequestGet(context) {
   // A origem faz parte da chave para não reutilizar dados de outra configuração.
   const cacheUrl = new URL('/api/instagram', request.url);
   cacheUrl.searchParams.set('source', feedUrl);
-  cacheUrl.searchParams.set('version', '2');
+  cacheUrl.searchParams.set('version', '3');
   const cacheKey = new Request(cacheUrl, { method: 'GET' });
   const cached = await cache.match(cacheKey);
   let backup;

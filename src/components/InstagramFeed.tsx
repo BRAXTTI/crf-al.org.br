@@ -1,59 +1,158 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpRight, Instagram } from 'lucide-react';
+import { ArrowUpRight, Copy, Instagram, Play } from 'lucide-react';
 import { INSTAGRAM_PROFILE_URL } from '@/config/site';
 
-interface InstagramItem { link: string; image: string }
+type MediaType = 'image' | 'video' | 'carousel';
+interface InstagramItem { link: string; image: string; caption?: string; date?: number; type?: MediaType }
 interface InstagramFeedProps { title?: string; description?: string }
+
 const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23E6F0F8'/%3E%3C/svg%3E";
+const POSTS = 4;
+const HANDLE = `@${INSTAGRAM_PROFILE_URL.replace(/\/+$/, '').split('/').pop() || 'crfal'}`;
+const motion = 'transition duration-300 motion-reduce:transition-none';
 
 async function fetchInstagram(signal: AbortSignal): Promise<InstagramItem[]> {
   const res = await fetch('/api/instagram', { signal });
   if (!res.ok) throw new Error('Falha ao carregar o Instagram');
   const data = (await res.json()) as { items?: InstagramItem[] };
-  return Array.isArray(data.items) ? data.items.filter(item => item.link && item.image).slice(0, 4) : [];
+  return Array.isArray(data.items) ? data.items.filter(item => item.link && item.image).slice(0, POSTS) : [];
 }
+
+function formatDate(ms?: number) {
+  if (!ms) return undefined;
+  return new Date(ms).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', timeZone: 'America/Maceio' });
+}
+
+function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
+  event.currentTarget.onerror = null;
+  event.currentTarget.src = IMG_FALLBACK;
+}
+
+const TYPE_BADGE: Record<Exclude<MediaType, 'image'>, { label: string; icon: typeof Play }> = {
+  video: { label: 'Vídeo', icon: Play },
+  carousel: { label: 'Carrossel', icon: Copy },
+};
+
+function PostCard({ item }: { item: InstagramItem }) {
+  const date = formatDate(item.date);
+  const badge = item.type && item.type !== 'image' ? TYPE_BADGE[item.type] : undefined;
+  const BadgeIcon = badge?.icon;
+  const label = [date ? `Publicação de ${date}` : 'Publicação no Instagram', item.caption].filter(Boolean).join(': ');
+  return (
+    <a
+      href={item.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${label.slice(0, 160)} (abre o Instagram em uma nova aba)`}
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-xl hover:shadow-crfal-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
+    >
+      <div className="relative isolate aspect-[4/5] overflow-hidden bg-crfal-blue-dark">
+        <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" onError={handleImageError} className="absolute inset-0 -z-10 h-full w-full scale-150 object-cover opacity-60 blur-2xl" />
+        <img src={item.image} alt="" loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-contain group-hover:scale-[1.03] ${motion}`} />
+        {badge && BadgeIcon && (
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-crfal-blue-dark/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+            <BadgeIcon className="h-3 w-3" aria-hidden="true" />{badge.label}
+          </span>
+        )}
+        <span aria-hidden="true" className={`absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-crfal-blue shadow-md group-hover:bg-crfal-blue group-hover:text-white ${motion}`}>
+          <ArrowUpRight className="h-4 w-4" />
+        </span>
+      </div>
+      {(date || item.caption) && (
+        <div className="flex flex-1 flex-col border-t-2 border-crfal-gold/0 p-4 group-hover:border-crfal-gold/70">
+          {date && <time dateTime={new Date(item.date!).toISOString()} className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8A6A12]">{date}</time>}
+          {item.caption && <p className="mt-1.5 line-clamp-2 text-[13.5px] leading-snug text-crfal-gray-700 group-hover:text-crfal-blue-dark">{item.caption}</p>}
+        </div>
+      )}
+    </a>
+  );
+}
+
+function FollowCard() {
+  return (
+    <a
+      href={INSTAGRAM_PROFILE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group relative isolate flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue p-5 text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
+    >
+      <img src="/images/instagram-card-background-v1.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-right-bottom group-hover:scale-105 ${motion}`} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-crfal-blue-dark via-crfal-blue/85 to-crfal-blue/50" />
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/50">
+        <Instagram className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">{HANDLE}</p>
+        <p className="mt-1.5 text-lg font-bold leading-snug">Siga o CRF-AL no Instagram</p>
+        <p className="mt-1.5 text-[13px] leading-relaxed text-white/75">Eventos, alertas e o dia a dia da profissão.</p>
+        <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-crfal-blue">
+          Seguir <ArrowUpRight className={`h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${motion}`} aria-hidden="true" />
+        </span>
+      </div>
+      <span className="sr-only">(abre em uma nova aba)</span>
+    </a>
+  );
+}
+
+/** Trilho: carrossel com deslize no celular, grade a partir de 768px. */
+const trackClass = '-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-2 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-5 [&::-webkit-scrollbar]:hidden';
+const slotClass = 'w-[72%] shrink-0 snap-start sm:w-[44%] md:w-auto';
 
 export default function InstagramFeed({
   title = 'O CRF-AL mais perto de você',
   description = 'Acompanhe os eventos, as ações do Conselho e o dia a dia da profissão farmacêutica.',
 }: InstagramFeedProps) {
-  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed'], queryFn: ({ signal }) => fetchInstagram(signal), staleTime: 10 * 60 * 1000, retry: 1 });
+  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed', 3], queryFn: ({ signal }) => fetchInstagram(signal), staleTime: 10 * 60 * 1000, retry: 1 });
   const items = data ?? [];
+
   return (
     <section className="border-t border-crfal-gray-200 bg-white py-10 sm:py-14" aria-labelledby="instagram-title">
       <div className="container-crfal">
-        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)] lg:gap-6">
-          <div className="relative isolate grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 overflow-hidden rounded-xl bg-crfal-blue p-4 text-white sm:p-6 lg:flex lg:flex-col lg:items-start lg:p-5">
-            <img src="/images/instagram-card-background-v1.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className="pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-right-bottom" />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-crfal-blue/95 via-crfal-blue/80 to-crfal-blue/30" />
-            <div>
-            <span className="mb-2 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-white/80 sm:text-xs"><Instagram className="h-5 w-5" aria-hidden="true" /> No Instagram</span>
-            <h2 id="instagram-title" className="max-w-sm font-display text-lg font-bold leading-tight sm:text-2xl lg:text-xl">{title}</h2>
-            <p className="mt-3 hidden max-w-sm text-xs leading-relaxed text-white/80 sm:block lg:hidden xl:block">{description}</p>
-            </div>
-            <a href={INSTAGRAM_PROFILE_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs sm:px-4 sm:text-sm lg:mt-4 font-bold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-crfal-blue motion-reduce:transition-none"><span className="sm:hidden">Seguir</span><span className="hidden sm:inline">Seguir no Instagram</span><ArrowUpRight className="h-4 w-4" aria-hidden="true" /></a>
+        <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
+              <Instagram className="h-3.5 w-3.5" aria-hidden="true" /> No Instagram · {HANDLE}
+            </p>
+            <h2 id="instagram-title" className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[32px]">{title}</h2>
+            <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-crfal-gray-600">{description}</p>
           </div>
-          <div className="min-w-0">
-            {isLoading ? (
-              <div role="status" className="flex min-h-48 items-center justify-center gap-3 text-crfal-gray-600"><span className="h-6 w-6 animate-spin rounded-full border-2 border-crfal-blue border-t-transparent motion-reduce:animate-none" />Carregando publicações...</div>
-            ) : !isError && items.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {items.map((item, index) => (
-                  <a key={item.link} href={item.link} target="_blank" rel="noopener noreferrer" aria-label={`Abrir publicação ${index + 1} no Instagram (nova aba)`} className="group relative aspect-square overflow-hidden rounded-lg border border-crfal-gray-200 bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2">
-                    <img src={item.image} alt="" loading="lazy" decoding="async" className="h-full w-full object-contain" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = IMG_FALLBACK; }} />
-                    <span className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-crfal-blue shadow-card transition-colors group-hover:bg-crfal-blue group-hover:text-white group-focus-visible:bg-crfal-blue group-focus-visible:text-white motion-reduce:transition-none"><ArrowUpRight className="h-4 w-4" aria-hidden="true" /></span>
-                  </a>
-                ))}
-              </div>
-            ) : (
-              <div className="flex min-h-48 h-full flex-col items-center justify-center p-6 text-center">
-                <Instagram className="mb-5 h-10 w-10 text-crfal-blue" aria-hidden="true" />
-                <p className="text-lg font-bold text-crfal-blue-dark">As novidades continuam no nosso perfil</p>
-                <p className="mt-3 max-w-xs text-sm leading-relaxed text-crfal-gray-600">Acesse o Instagram do CRF-AL para ver as últimas publicações.</p>
-              </div>
-            )}
-          </div>
+          <a href={INSTAGRAM_PROFILE_URL} target="_blank" rel="noopener noreferrer" className="group inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
+            Seguir {HANDLE}
+            <ArrowUpRight className={`h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${motion}`} aria-hidden="true" />
+            <span className="sr-only">(abre em uma nova aba)</span>
+          </a>
         </div>
+
+        {isLoading ? (
+          <div role="status" aria-label="Carregando publicações" className={`${trackClass} animate-pulse motion-reduce:animate-none`}>
+            {Array.from({ length: POSTS }, (_, i) => (
+              <div key={i} className={`${slotClass} overflow-hidden rounded-xl border border-crfal-gray-200 bg-white`}>
+                <div className="aspect-[4/5] bg-crfal-gray-200" />
+                <div className="space-y-2 p-4"><div className="h-2.5 w-20 rounded bg-crfal-gray-200" /><div className="h-3 w-full rounded bg-crfal-gray-100" /><div className="h-3 w-2/3 rounded bg-crfal-gray-100" /></div>
+              </div>
+            ))}
+            <span className="sr-only">Carregando publicações...</span>
+          </div>
+        ) : !isError && items.length > 0 ? (
+          <ul className={trackClass}>
+            {items.map((item, index) => (
+              <li key={item.link} className={`${slotClass} ${index === 3 ? 'md:hidden lg:block' : ''}`}>
+                <PostCard item={item} />
+              </li>
+            ))}
+            <li className={slotClass}><FollowCard /></li>
+          </ul>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="flex min-h-48 flex-col items-center justify-center rounded-xl border border-dashed border-crfal-gray-300 p-6 text-center">
+              <Instagram className="mb-4 h-9 w-9 text-crfal-blue" aria-hidden="true" />
+              <p className="text-lg font-bold text-crfal-blue-dark">As novidades continuam no nosso perfil</p>
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-crfal-gray-600">Acesse o Instagram do CRF-AL para ver as últimas publicações.</p>
+            </div>
+            <FollowCard />
+          </div>
+        )}
       </div>
     </section>
   );

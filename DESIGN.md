@@ -37,9 +37,9 @@ Rawline, hospedada localmente, para títulos e texto. Azul #003366, azul escuro 
 
 Arte desktop `page-hero-desktop-v3.jpg`: encaixada pela altura, à direita, sem cortar a taça. No cabeçalho editorial, a arte não aparece abaixo de 1024px: no celular, o fundo é só gradiente, textura e brilho, para priorizar o conteúdo. `page-hero-mobile-v3.jpg` continua disponível para a variante `default`.
 
-## Arte do card do Instagram
+## Instagram na página inicial
 
-`public/images/instagram-card-background-v1.jpg`: fundo azul com taça de Hígia, fitas suaves e detalhes dourados concentrados à direita. Imagem decorativa sem texto, com camada azul sobreposta para preservar a leitura. Aplicar apenas ao painel de apresentação da seção Instagram; manter altura natural e carregamento adiado. O painel não estica junto à grade: usa alinhamento ao topo, padding de 16/24/20px e título de 18/24/20px conforme o breakpoint. Em mobile, título e ação ficam lado a lado, sem descrição secundária. Em desktop, ocupar 30% da largura e deixar 70% para as postagens. Remover o rodapé redundante de identificação; priorizar as publicações.
+`InstagramFeed` segue o cabeçalho das seções da home: rótulo dourado “No Instagram · @crfal”, título, traço dourado, frase de apoio e “Seguir @crfal” à direita. Uma única fileira: 4 publicações em 4:5 e o card “Siga o CRF-AL” a partir de 1024px (5 colunas); 3 publicações e o card entre 768px e 1023px; no celular, carrossel horizontal com snap e 72% de largura por card, deixando o próximo aparecer. Cada publicação mostra a imagem inteira sobre a própria versão desfocada, selo “Vídeo” ou “Carrossel” quando for o caso, data em rótulo dourado e até duas linhas da legenda; o rótulo acessível usa data e legenda. `functions/api/_parse.ts` extrai legenda (texto alternativo do Smash Balloon, descartando “Instagram post …”), data (`data-date`) e tipo (`sbi_type_*`); a chave de cache da função usa `version=3`. O card “Siga” usa `public/images/instagram-card-background-v1.jpg` com camada azul em gradiente vertical, fio dourado e botão em pílula. Carregamento com esqueleto do mesmo layout; sem publicações, mensagem e card de seguir lado a lado.
 
 ## Galeria de Fotos
 

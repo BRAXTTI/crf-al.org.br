@@ -3,9 +3,16 @@
  * Usada pela Pages Function (/api/instagram) e pelo middleware de dev do Vite.
  */
 
+export type InstagramMediaType = 'image' | 'video' | 'carousel';
+
 export interface InstagramFeedItem {
   link: string;
   image: string;
+  /** Legenda da publicação (texto alternativo do Smash Balloon). */
+  caption?: string;
+  /** Data de publicação em milissegundos desde a época. */
+  date?: number;
+  type?: InstagramMediaType;
 }
 
 export const DEFAULT_FEED_URL = 'https://wordpress.crf-al.org.br/index.php?rest_route=/wp/v2/pages&slug=instagram&_fields=content';
@@ -18,6 +25,28 @@ export function decodeEntities(value: string): string {
     .replace(/&#0?39;|&apos;/g, "'")
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>');
+}
+
+const ITEM_OPEN = '<div class="sbi_item';
+
+function parseItemMeta(html: string, anchorIndex: number): Pick<InstagramFeedItem, 'caption' | 'date' | 'type'> {
+  const meta: Pick<InstagramFeedItem, 'caption' | 'date' | 'type'> = {};
+  const start = html.lastIndexOf(ITEM_OPEN, anchorIndex);
+  if (start !== -1) {
+    const openTag = html.slice(start, html.indexOf('>', start) + 1);
+    const seconds = Number(openTag.match(/data-date="(\d+)"/)?.[1]);
+    if (Number.isFinite(seconds) && seconds > 0) meta.date = seconds * 1000;
+    const type = openTag.match(/sbi_type_(image|video|carousel)/)?.[1] as InstagramFeedItem['type'] | undefined;
+    if (type) meta.type = type;
+  }
+  const nextItem = html.indexOf(ITEM_OPEN, anchorIndex + 1);
+  const scope = html.slice(anchorIndex, nextItem === -1 ? undefined : nextItem);
+  const alt = scope.match(/<img[^>]*\salt="([^"]*)"/)?.[1];
+  if (alt) {
+    const caption = decodeEntities(alt).replace(/\s+/g, ' ').trim();
+    if (caption && !/^instagram post/i.test(caption)) meta.caption = caption.slice(0, 400);
+  }
+  return meta;
 }
 
 export function parseItems(html: string): InstagramFeedItem[] {
@@ -44,7 +73,7 @@ export function parseItems(html: string): InstagramFeedItem[] {
     const image = decodeEntities(img);
     if (seen.has(link)) continue;
     seen.add(link);
-    items.push({ link, image });
+    items.push({ link, image, ...parseItemMeta(html, match.index ?? 0) });
   }
   return items;
 }
