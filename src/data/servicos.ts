@@ -1,193 +1,191 @@
+import type { ElementType } from 'react';
 import {
-  FileText,
+  BadgeCheck,
+  CalendarOff,
   Edit3,
-  Copy,
-  FileCheck,
-  Search,
-  UserCheck,
+  FileSearch,
+  Gavel,
+  MessageSquareText,
+  Stamp,
+  UserMinus,
+  UserPlus,
 } from 'lucide-react';
+import { getRequerimento, perfilDoRequerimento } from '@/data/requerimentos';
 
-export interface ServiceItem {
-  id: number;
-  icon: React.ElementType;
+export type TutorialPerfil = 'pessoa-fisica' | 'pessoa-juridica';
+
+interface TutorialBase {
+  /** Slug usado no link direto (`?tutorial=<id>`). */
+  id: string;
+  icon: ElementType;
   title: string;
   description: string;
   category: string;
-  valor: string;
+}
+
+/**
+ * Tutorial espelho de um requerimento: passos, vídeo, prazo e perfil vêm de
+ * `src/data/requerimentos.ts`. Para mudar o texto, edite o requerimento.
+ */
+interface TutorialVinculado extends TutorialBase {
+  requerimentoId: string;
+}
+
+/** Serviço de autoatendimento do CRF AL em Casa que não é um requerimento. */
+interface TutorialAutoatendimento extends TutorialBase {
+  perfil: TutorialPerfil;
   prazo?: string;
-  tutorial: {
-    steps: string[];
-    videoUrl?: string;
+  steps: string[];
+  videoUrl?: string;
+}
+
+type TutorialSource = TutorialVinculado | TutorialAutoatendimento;
+
+export interface Tutorial extends TutorialBase {
+  perfil: TutorialPerfil;
+  prazo?: string;
+  steps: string[];
+  videoUrl?: string;
+  /** Presente quando o tutorial espelha um requerimento. */
+  requerimentoId?: string;
+}
+
+const fontes: TutorialSource[] = [
+  // Inscrição
+  {
+    id: 'primeira-inscricao',
+    icon: UserPlus,
+    title: 'Primeira Inscrição (Provisória)',
+    description: 'Para farmacêuticos que nunca estiveram inscritos em um Conselho Regional de Farmácia.',
+    category: 'Inscrição',
+    requerimentoId: 'primeira-inscricao-profissional-provisoria',
+  },
+  {
+    id: 'inscricao-definitiva',
+    icon: BadgeCheck,
+    title: 'Inscrição Definitiva',
+    description: 'Solicite a inscrição definitiva e a carteira profissional com o diploma.',
+    category: 'Inscrição',
+    requerimentoId: 'inscricao-profissional-definitiva',
+  },
+  // Cadastro
+  {
+    id: 'alteracao-de-dados',
+    icon: Edit3,
+    title: 'Alteração de Dados',
+    description: 'Atualize suas informações cadastrais de forma rápida e segura.',
+    category: 'Cadastro',
+    perfil: 'pessoa-fisica',
+    prazo: 'Imediato',
+    steps: [
+      'Faça login no CRF AL em Casa.',
+      'Acesse "Meus Dados".',
+      'Clique no campo correspondente ao dado que deseja alterar.',
+      'Altere as informações necessárias.',
+      'Anexe documentos comprobatórios, se necessário.',
+      'Confirme as alterações clicando em "Salvar Protocolo".',
+    ],
+  },
+  // Responsabilidade técnica
+  {
+    id: 'contratacao-rt',
+    icon: Stamp,
+    title: 'Contratação de Responsável Técnico',
+    description: 'Vincule um farmacêutico como responsável técnico do estabelecimento.',
+    category: 'Responsabilidade Técnica',
+    requerimentoId: 'contratacao-rt-pj',
+  },
+  {
+    id: 'baixa-rt',
+    icon: UserMinus,
+    title: 'Baixa de Responsabilidade Técnica',
+    description: 'Encerre o vínculo de responsabilidade técnica sem precisar anexar requerimento.',
+    category: 'Responsabilidade Técnica',
+    perfil: 'pessoa-fisica',
+    prazo: 'Imediato',
+    videoUrl: 'https://www.youtube.com/watch?v=1EfNUxgilW0',
+    steps: [
+      'Acesse o CRF AL em Casa como Pessoa Física.',
+      'Clique em "Baixa de Contrato de Trabalho".',
+      'Em "Responsabilidades Técnicas", selecione a empresa do vínculo a ser encerrado.',
+      'Selecione o motivo da baixa.',
+      'Informe a data do contrato e a data de desligamento.',
+      'Se houver problemas no desligamento, anexe uma declaração expondo os motivos e, se existir, a cópia da ação na Justiça do Trabalho.',
+      'Clique em "Salvar Protocolo".',
+    ],
+  },
+  {
+    id: 'consulta-rt',
+    icon: FileSearch,
+    title: 'Consulta de Responsabilidade Técnica',
+    description: 'Consulte seus vínculos de responsabilidade técnica ativos.',
+    category: 'Responsabilidade Técnica',
+    perfil: 'pessoa-fisica',
+    prazo: 'Imediato',
+    steps: [
+      'Acesse o CRF AL em Casa como Pessoa Física.',
+      'Clique em "Resp. Técnicas Ativas/Perfil".',
+      'As empresas com as quais você tem vínculo serão exibidas.',
+      'Confira o tipo de vínculo, a situação e os perfis.',
+    ],
+  },
+  // Fiscalização
+  {
+    id: 'afastamento-provisorio',
+    icon: CalendarOff,
+    title: 'Comunicado de Afastamento Provisório',
+    description: 'Comunique seu afastamento provisório 100% online e evite autuações.',
+    category: 'Fiscalização',
+    perfil: 'pessoa-fisica',
+    videoUrl: 'https://www.youtube.com/watch?v=nd6smKz0R78',
+    steps: [
+      'Acesse o CRF AL em Casa como Pessoa Física.',
+      'Clique em "Comunicado de Afastamento Provisório".',
+      'Selecione a responsabilidade técnica (RT).',
+      'Selecione o motivo da ausência.',
+      'Informe a data de início e de término do afastamento.',
+      'Informe o horário de início e de término, quando o motivo permitir.',
+      'Anexe um comprovante do motivo da ausência. Atestado médico deve ser apresentado presencialmente no CRF-AL em até 10 dias.',
+      'Clique em "Salvar Protocolo".',
+      'Se necessário, acompanhe o processo em "Protocolos Web".',
+    ],
+  },
+  {
+    id: 'justificativa-de-ausencia',
+    icon: MessageSquareText,
+    title: 'Justificativa de Ausência',
+    description: 'Justifique uma ausência identificada em inspeção da fiscalização.',
+    category: 'Fiscalização',
+    perfil: 'pessoa-fisica',
+    steps: [
+      'Acesse o CRF AL em Casa como Pessoa Física.',
+      'Abra o menu "Justificativa de Ausência".',
+      'Selecione a inspeção com ausência identificada.',
+      'Preencha o formulário exibido.',
+      'Clique em "Salvar Justificativa".',
+    ],
+  },
+  {
+    id: 'defesa-auto-infracao',
+    icon: Gavel,
+    title: 'Defesa de Auto de Infração',
+    description: 'Apresente a defesa do estabelecimento sem sair de casa.',
+    category: 'Fiscalização',
+    requerimentoId: 'defesa-auto-infracao',
+  },
+];
+
+function resolver(fonte: TutorialSource): Tutorial {
+  if (!('requerimentoId' in fonte)) return fonte;
+  const requerimento = getRequerimento(fonte.requerimentoId);
+  if (!requerimento) throw new Error(`Tutorial "${fonte.id}" aponta para requerimento inexistente: ${fonte.requerimentoId}`);
+  return {
+    ...fonte,
+    perfil: perfilDoRequerimento(requerimento.id),
+    prazo: requerimento.prazo,
+    steps: requerimento.instrucoes,
+    videoUrl: requerimento.videoUrl,
   };
 }
 
-export const servicesData: ServiceItem[] = [
-  // Para habilitar o vídeo no modal, adicione `videoUrl` em cada tutorial com o link do YouTube.
-  // Exemplo: videoUrl: 'https://www.youtube.com/watch?v=SEU_VIDEO_ID'
-  {
-    id: 1,
-    icon: FileText,
-    title: 'Primeira Inscrição - Pessoa Física',
-    description:
-      'Destinado a farmacêuticos que nunca estiveram inscritos em nenhum Conselho Regional de Farmácia.',
-    category: 'Inscrição',
-    valor: 'Consulte o valor nos canais de atendimento do CRFAL',
-    prazo: '30 dias (a depender da data da plenária)',
-    tutorial: {
-      steps: [
-        'Acesse o portal do CRF em Casa',
-        'Clique em "Pré Inscrição Pessoa Física"',
-        'Preencha o formulário atentamente',
-        'Anexe os documentos necessários',
-        'Imprima seu protocolo e leve sua documentação original na sede/seccional do CRFAL',
-        'Aguarde a análise da sua documentação pelo CRFAL',
-        'Após a análise e aprovação em plenária, você receberá um email avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição',
-        'Efetue o pagamento, aguarde a compensação do pagamento para receber a confirmação da sua inscrição',
-      ],
-    },
-  },
-  {
-    id: 2,
-    icon: Edit3,
-    title: 'Alteração de Dados',
-    description:
-      'Atualize suas informações cadastrais de forma rápida e segura.',
-    category: 'Atualização Cadastral',
-    valor: 'Gratuito',
-    prazo: 'Instantaneamente',
-    tutorial: {
-      steps: [
-        'Faça login no CRFAL em Casa',
-        'Acesse "Meus Dados"',
-        'Clique na caixa correspondendo ao dado que deseja alterar"',
-        'Altere as informações necessárias',
-        'Anexe documentos comprobatórios, se necessário',
-        'Confirme as alterações clicando em "Salvar Protocolo"',
-      ],
-    },
-  },
-  {
-    id: 3,
-    icon: Copy,
-    title: 'Baixa de Responsabilidade Técnica',
-    description:
-      'Solicite a baixa do vínculo de responsabilidade técnica sem precisar anexar requerimento.',
-    category: 'Responsabilidade Técnica',
-    valor: 'Gratuito',
-    prazo: 'Instantaneamente',
-    tutorial: {
-      videoUrl: 'https://www.youtube.com/watch?v=1EfNUxgilW0',
-      steps: [
-        'Acesse o CRF em Casa como Pessoa Física',
-        'Clique em "Baixa de Contrato de Trabalho"',
-        'Selecione o vínculo a ser encerrado (Responsabilidades Técnicas (Selecione a Empresa)"',
-        'Selecione o motivo da baixa',
-        'Coloque a Data do Contrato e a Data de Desligamento',
-        'Em caso de problemas na hora da demissão: ANEXAR UMA DECLARAÇÃO EXPONDO OS MOTIVOS e/ou CÓPIA DA AÇÃO NA JUSTIÇA DO TRABALHO (SE ACONTECER).',
-        'Clique em "Salvar Protocolo"',
-      ],
-    },
-  },
-  {
-    id: 4,
-    icon: FileCheck,
-    title: 'Comunicado de Afastamento Provisório',
-    description:
-      'Comunique seu afastamento provisório 100% online e evite autuações.',
-    category: 'Responsabilidade Técnica',
-    valor: 'Gratuito',
-    tutorial: {
-      videoUrl: 'https://www.youtube.com/watch?v=nd6smKz0R78',
-      steps: [
-        'Entre no CRFAL em Casa como Pessoa Física',
-        'Clique em "Comunicado de Afastamento Provisório"',
-        'Selecione a Responsabilidade Técnica (RT)',
-        'Selecione o Motivo de Ausência',
-        'Coloque a Data de Início e de Término do Afastamento',
-        'Informe o horário de início e término do afastamento, caso o motivo permita',
-        'Anexe um comprovante do motivo de ausência.',
-        'Em caso de atestado médico, o farmacêutico deverá apresenta-lo presencialmente no CRFAL em até 10 dias.',
-        'Clique em "Salvar Protocolo"',
-        'Caso seja necessário, acompanhe o processo pelo menu de "Protocolos Web"',
-      ],
-    },
-  },
-  {
-    id: 5,
-    icon: Search,
-    title: 'Justificativa de Ausência',
-    description:
-      'Em caso de autuação ou qualquer outro motivo, você pode solicitar a justificativa de ausência para o CRFAL.',
-    category: 'Consultas e Justificativas',
-    valor: 'Gratuito',
-    tutorial: {
-      steps: [
-        'Acesse o CRF AL em Casa como Pessoa Física',
-        'Vá até o menu de Justificativa de Ausencia',
-        'Selecione a inspeção com ausência identificada',
-        'Preencha o formulário que será exibido',
-        'Clique em "Salvar Justificativa"',
-      ],
-    },
-  },
-  {
-    id: 6,
-    icon: UserCheck,
-    title: 'Consulta a Responsabilidade Técnica',
-    description: 'Consulte os vínculos de responsabilidade técnica.',
-    category: 'Estabelecimentos',
-    valor: 'Gratuito',
-    prazo: 'Instantaneo',
-    tutorial: {
-      steps: [
-        'Acesse o CRF AL em Casa como Pessoa Fisica',
-        'Clique em Resp. Técnicas Ativas/Perfil',
-        'As empresas que você possui vínculo será exibida.',
-        'Visualize seu tipo de vinculo, situação e perfis.'
-      ],
-    },
-  },
-  {
-    id: 7,
-    icon: UserCheck,
-    title: 'Defesa de Auto de Infração - Pessoa Júridica',
-    description: 'Realize sua defesa de auto de infração sem sair de casa.',
-    category: 'Estabelecimentos',
-    valor: 'Gratuito',
-    prazo: 'Instantaneo',
-    tutorial: {
-      videoUrl: 'https://www.youtube.com/watch?v=_3F3mOfv-1A',
-      steps: [
-        'Acesse o CRF AL em Casa como Pessoa Juridica',
-        'Clique em Defesa de Infração na seção Fiscalização',
-        'Selecione o auto que você irá interpolar a defesa',
-        'Anexe sua defesa de Auto de Infração assinado digitalmente',
-        'Anexe um documento que comprove a representação legal',
-        'Por fim, clique em "Salvar Defesa"',
-        'Acompanhe seu protocolo pelo CRF AL em Casa na seção de "Protocolos Web"'
-      ],
-    },
-  },
-  {
-    id: 8,
-    icon: UserCheck,
-    title: 'Inscrição Definitiva - Pessoa Física',
-    description: 'Solicitando sua inscrição definitiva no CRFAL',
-    category: 'Inscrição',
-    valor: 'Gratuito',
-    prazo: 'Instantaneo',
-    tutorial: {
-      videoUrl: 'https://youtu.be/P6TfpvT-pqk?t=13',
-      steps: [
-        'Acesse o CRF AL em Casa como Pessoa Física',
-        'Clique em "Formularios e Requerimentos"',
-        'Baixe o formulário de SOLICITAÇÃO DE CARTEIRA DEFINITIVA, SEGUNDA VIA OU CÉDULA DE IDENTIDADE"',
-        'Preencha o formulário seguindo as instruções do próprio formulário',
-        'Vá até a página inicial e aperta em "Enviar Documentos"',
-        'Selecione a opção de SOLICITAÇÃO DE CARTEIRA DEFINITIVA',
-        'Anexe o formulário preenchido e envie também seu diploma',
-        'Salve o protocolo e você pode acompanhar sua solicitação na opção "Protocolos Web"'
-      ],
-    },
-  },
-];
+export const tutoriais: Tutorial[] = fontes.map(resolver);

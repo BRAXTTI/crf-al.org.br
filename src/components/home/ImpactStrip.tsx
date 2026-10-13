@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { servicesData } from '@/data/servicos';
+import { tutoriais } from '@/data/servicos';
 
 function useCountUp(target: number, active: boolean, duration = 1600) {
   const [value, setValue] = useState(0);
@@ -27,7 +27,7 @@ function useCountUp(target: number, active: boolean, duration = 1600) {
 }
 
 const metrics = [
-  { target: servicesData.length, suffix: '+', label: 'Serviços online' },
+  { target: tutoriais.length, suffix: '+', label: 'Serviços online' },
   { target: 102, suffix: '', label: 'Municípios abrangidos' },
   { target: 24, suffix: 'h', label: 'Disponibilidade' },
   { target: 100, suffix: '%', label: 'Atendimento digital' },
