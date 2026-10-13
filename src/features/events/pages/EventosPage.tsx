@@ -508,7 +508,7 @@ export default function EventosPage() {
             )}
 
             {/* Barra de filtros */}
-            <div className="sticky top-[var(--header-offset)] z-30 rounded-2xl border border-crfal-gray-200/80 bg-white/85 p-3 shadow-card backdrop-blur-lg   sm:p-4">
+            <div className="sticky top-[var(--header-offset)] z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative lg:max-w-xs lg:flex-1">
                   <label htmlFor="busca-evento" className="sr-only">Buscar evento</label>

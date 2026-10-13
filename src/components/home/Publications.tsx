@@ -83,7 +83,7 @@ export default function Publications() {
               <Link to={`/imprensa/noticias/${featured.slug}`} className={`group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-xl hover:shadow-crfal-blue/10 motion-reduce:hover:translate-y-0 ${motionClass} ${focusClass}`}>
                 <div className="relative">
                   <NewsImage post={featured} className="aspect-[16/10]" />
-                  <span className="absolute left-4 top-4 rounded-full bg-crfal-blue-dark/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-crfal-gold ring-1 ring-crfal-gold/40 backdrop-blur-sm">Em destaque</span>
+                  <span className="absolute left-4 top-4 glass-chip rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-crfal-gold ring-1 ring-crfal-gold/40">Em destaque</span>
                 </div>
                 <div className="flex flex-1 flex-col items-start border-t-2 border-crfal-gold p-6 sm:p-8">
                   <div className="mb-3 flex flex-wrap items-center gap-3">

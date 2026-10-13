@@ -50,7 +50,7 @@ function PostCard({ item }: { item: InstagramItem }) {
         <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" onError={handleImageError} className="absolute inset-0 -z-10 h-full w-full scale-150 object-cover opacity-60 blur-2xl" />
         <img src={item.image} alt="" loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-contain group-hover:scale-[1.03] ${motion}`} />
         {badge && BadgeIcon && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-crfal-blue-dark/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 glass-chip rounded-full px-2.5 py-1 text-[11px] font-semibold text-white">
             <BadgeIcon className="h-3 w-3" aria-hidden="true" />{badge.label}
           </span>
         )}

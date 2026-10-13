@@ -159,7 +159,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
         <>
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+            className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center glass-light rounded-full text-crfal-blue shadow-card transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
             aria-label="Slide anterior"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -167,7 +167,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
 
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-crfal-blue shadow-card backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+            className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center glass-light rounded-full text-crfal-blue shadow-card transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
             aria-label="Próximo slide"
           >
             <ChevronRight className="h-5 w-5" />
