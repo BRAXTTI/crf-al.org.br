@@ -20,10 +20,8 @@ export const SECTION_NAV = {
     label: 'Instituição',
     href: '/instituicao',
     links: [
-      { label: 'Visão geral', href: '/instituicao' },
       { label: 'Sobre o Conselho', href: '/instituicao/sobre-conselho' },
       { label: 'Diretoria', href: '/instituicao/diretoria' },
-      { label: 'Estatuto', href: '/instituicao/estatuto' },
     ],
   },
   servicos: {
