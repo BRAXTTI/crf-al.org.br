@@ -3,7 +3,7 @@ import PageHero from '@/components/block/page-hero';
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO
         title="Política de Privacidade"
         description="Política de Privacidade do CRFAL — saiba como tratamos seus dados pessoais em conformidade com a LGPD."

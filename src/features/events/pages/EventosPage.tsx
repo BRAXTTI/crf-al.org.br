@@ -368,7 +368,7 @@ export default function EventosPage() {
   const rotuloContagemDestaque = destaque ? rotuloContagem(destaque.data) : null;
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50 ">
+    <div className="min-h-screen ">
       <SEO
         title="Eventos"
         description="Confira a agenda de eventos do CRF-AL — Conselho Regional de Farmácia do Estado de Alagoas. Congressos, palestras, capacitações e ações sociais."

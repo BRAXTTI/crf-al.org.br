@@ -40,7 +40,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, childr
         lead={lead}
       />
 
-      <div className="bg-crfal-gray-50 pb-16  md:pb-24">
+      <div className="pb-16 md:pb-24">
         <div className="container-crfal py-8 md:py-10">
           <div className="grid gap-8 lg:grid-cols-12">
             <article className="lg:col-span-8 rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm   md:p-8 lg:p-10 [&>h2]:mt-10 [&>h2]:mb-3 [&>h2]:border-t [&>h2]:border-crfal-gray-200 [&>h2]:pt-6 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:text-neutral-900 [&>h2]: [&>h2]: [&>h2]:md:text-2xl [&>h2:first-of-type]:mt-0 [&>h2:first-of-type]:border-0 [&>h2:first-of-type]:pt-0 [&>p]:mb-4 [&>p]:leading-8 [&>p]:text-neutral-700 [&>p]: [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-neutral-700 [&>ul]: [&>li]:leading-7">

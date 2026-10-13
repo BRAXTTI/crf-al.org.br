@@ -61,7 +61,7 @@ export default function PhotoAlbumPage() {
   const { slug = '' } = useParams();
   const { data, isPending, isError, error, refetch } = usePhotoAlbum(slug);
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO title={data?.title ?? 'Álbum de Fotos'} description={data?.description || 'Confira as fotos dos eventos e ações do CRF-AL.'} path={`/imprensa/galeria-de-fotos/${slug}`} image={data?.cover?.src} noindex={isError} />
       <PageHero title={data?.title ?? 'Álbum de Fotos'} breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos' }, { label: 'Álbum' }]} section="imprensa" eyebrow="Álbum de fotos" meta={data?.count ? [{ value: data.count, label: 'fotos no álbum' }] : undefined} />
       <section className="container-crfal py-10 md:py-16" aria-label="Fotos do álbum">

@@ -3,7 +3,7 @@ import PageHero from '@/components/block/page-hero';
 
 export default function TermsOfUsePage() {
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO
         title="Termos de Uso"
         description="Termos de Uso do site CRFAL — condições gerais de uso do portal do Conselho Regional de Farmácia do Estado de Alagoas."

@@ -13,7 +13,7 @@ export default function PhotoGalleryPage() {
   const albums = data?.albums ?? [];
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO title="Galeria de Fotos" description="Registros fotográficos dos eventos, encontros e ações do Conselho Regional de Farmácia de Alagoas." path="/imprensa/galeria-de-fotos" />
       <PageHero title="Galeria de Fotos" breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Galeria de Fotos' }]} section="imprensa" lead="Registros fotográficos de eventos, ações e encontros do CRF-AL." meta={data?.total ? [{ value: data.total, label: 'álbuns publicados' }] : undefined} />
       <section className="container-crfal py-10 md:py-16" aria-label="Álbuns de fotos" aria-busy={isFetching}>

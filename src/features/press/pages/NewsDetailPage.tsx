@@ -129,7 +129,7 @@ export default function NewsDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50 ">
+    <div className="min-h-screen ">
       <SEO
         title={post ? stripHTML(post.title.rendered) : 'Notícia'}
         description={

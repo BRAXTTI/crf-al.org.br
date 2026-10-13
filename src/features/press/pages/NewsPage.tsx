@@ -160,7 +160,7 @@ export default function NewsPage() {
       : publications.filter((pub) => pub.tag === activeTag);
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO
         title="Notícias"
         description="Fique por dentro das últimas notícias e comunicados do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas."

@@ -99,7 +99,7 @@ export default function OmbudsmanPage() {
   const [faqAberta, setFaqAberta] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO
         title="Ouvidoria"
         description="Ouvidoria do CRFAL — canal oficial para reclamações, sugestões, elogios e denúncias, atendido pelo Portal da Transparência da Implanta. Manifeste-se e contribua para a melhoria dos serviços farmacêuticos em Alagoas."

@@ -57,7 +57,7 @@ export default function TutorialsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO
         title="Tutoriais"
         description="Tutoriais e guias passo a passo para os serviços do CRFAL — aprenda como realizar seus registros, renovações e demais serviços online de forma simples."

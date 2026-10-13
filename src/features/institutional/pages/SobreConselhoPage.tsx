@@ -231,7 +231,7 @@ export default function SobreConselhoPage() {
   const { ref: hinoRef, inView: hinoInView } = useInView();
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50 ">
+    <div className="min-h-screen ">
       <SEO
         title="Sobre o Conselho"
         description="Conheça a história e a trajetória do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas, suas atribuições e papel na saúde pública alagoana."

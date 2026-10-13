@@ -3,7 +3,7 @@ import PageHero from '@/components/block/page-hero';
 
 export default function InstitutionalPage() {
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO
         title="Institucional"
         description="Conheça o CRFAL — história, missão, visão, valores, diretoria e estatuto do Conselho Regional de Farmácia do Estado de Alagoas."

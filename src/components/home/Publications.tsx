@@ -59,7 +59,7 @@ export default function Publications() {
   return (
     <section id="noticias" className="py-2 sm:py-3" aria-labelledby="home-news-title">
       <div className="container-crfal">
-        <div className="section-panel section-panel-tint">
+        <div className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Informação para a profissão</p>

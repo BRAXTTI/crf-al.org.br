@@ -775,7 +775,7 @@ function RequirementsContent() {
   const progresso = totalDocs ? Math.round((marcados.length / totalDocs) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50">
+    <div className="min-h-screen">
       <SEO
         title="Requerimentos"
         description="Acesse todos os requerimentos do CRFAL para pessoa física e jurídica — registro, renovação, certidões e muito mais para profissionais farmacêuticos em Alagoas."

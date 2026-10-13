@@ -99,7 +99,7 @@
     --crfal-gray-300: #b4c2d1;
     --crfal-gray-400: #9ba8b8;
     --crfal-gray-500: #8a9bb0;
-    --crfal-gray-600: #64748b;
+    --crfal-gray-600: #566579;
     --crfal-gray-700: #334155;
     --crfal-gray-800: #1e293b;
     --crfal-gray-900: #0f172a;
@@ -111,7 +111,7 @@
     --crfal-gray: #f8fafc;
     --crfal-gray-medium: #e2e8f0;
     --crfal-gray-dark: #1e293b;
-    --crfal-text-gray: #64748b;
+    --crfal-text-gray: #566579;
 
     /* Altura total do cabeçalho (barra de identidade + barra de menu).
        Usada para deslocar o conteúdo e elementos fixos/sticky. */
@@ -148,7 +148,7 @@
     /* `clip` evita rolagem horizontal sem criar um container de rolagem,
        que quebraria `position: sticky` nos painéis fixos das listagens. */
     overflow-x: clip;
-    background: #f8fafc;
+    background: #e8f1fb;
   }
 
   #root {
@@ -170,8 +170,17 @@
   .section-panel {
     @apply overflow-hidden rounded-[28px] border border-crfal-gray-200/80 bg-white px-4 py-9 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-[40px] sm:px-6 sm:py-12 md:px-8 lg:px-12 lg:py-14;
   }
-  .section-panel-tint {
-    @apply bg-gradient-to-b from-[#EEF4FA] to-white;
+  /* Fundo do site: arte suave azul (presa ao topo, rola com a página) que
+     termina em #E8F1FB, a mesma cor sólida que continua abaixo dela. */
+  .site-background {
+    background-color: #e8f1fb;
+    background-image: url('/images/site-background-mobile.webp');
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: 100% auto;
+  }
+  @media (min-width: 1024px) {
+    .site-background { background-image: url('/images/site-background-desktop.webp'); }
   }
 
   .container-crfal {

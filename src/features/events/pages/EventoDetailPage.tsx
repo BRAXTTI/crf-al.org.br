@@ -106,7 +106,7 @@ export default function EventoDetailPage() {
 
   if (erroLista) {
     return (
-      <div className="min-h-screen bg-crfal-gray-50  flex items-center justify-center px-4">
+      <div className="min-h-screen  flex items-center justify-center px-4">
         <div className="max-w-xl w-full bg-white  rounded-xl border border-red-200  p-8 text-center">
           <p className="text-red-600  mb-4">Não foi possível carregar o evento agora.</p>
           <button
@@ -123,7 +123,7 @@ export default function EventoDetailPage() {
 
   if (carregandoLista) {
     return (
-      <div className="min-h-screen bg-crfal-gray-50  flex items-center justify-center">
+      <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
           <p className="text-crfal-gray-500 ">Carregando evento...</p>
@@ -134,7 +134,7 @@ export default function EventoDetailPage() {
 
   if (!resumo || !evento) {
     return (
-      <div className="min-h-screen bg-crfal-gray-50  flex items-center justify-center px-4">
+      <div className="min-h-screen  flex items-center justify-center px-4">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-crfal-gray-100  rounded-full flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-crfal-gray-400 " />
@@ -163,7 +163,7 @@ export default function EventoDetailPage() {
     Boolean(evento.link) && evento.status !== 'cancelado' && evento.status !== 'encerrado';
 
   return (
-    <div className="min-h-screen bg-crfal-gray-50 ">
+    <div className="min-h-screen ">
       <SEO
         title={evento.titulo}
         description={evento.descricao || `Detalhes do evento ${evento.titulo} do CRF-AL.`}
