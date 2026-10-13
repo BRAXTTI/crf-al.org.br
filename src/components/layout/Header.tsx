@@ -31,6 +31,14 @@ export default function Header() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [lastPathname, setLastPathname] = useState(pathname);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const timerRef = useRef<number | undefined>(undefined);
   const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -112,7 +120,7 @@ export default function Header() {
     <>
     <header className="fixed top-0 left-0 right-0 z-50">
       {/* Barra de identidade — logo, nome da entidade, redes sociais e acesso do profissional */}
-      <div className="border-crfal-gray-200 bg-crfal-blue shadow-[0_1px_2px_rgba(15,23,42,0.05)] lg:border-b lg:bg-white">
+      <div className={`border-crfal-gray-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-[background-color,box-shadow] duration-300 lg:border-b ${scrolled ? 'glass-blue lg:glass-light lg:border-white/40 shadow-[0_8px_32px_-12px_rgba(11,25,44,0.35)]' : 'bg-crfal-blue lg:bg-white'}`}>
         <div className="container-crfal">
           <div className="relative flex h-20 items-center justify-between gap-2 lg:h-[76px] lg:gap-3">
             <button
@@ -201,7 +209,7 @@ export default function Header() {
       <MobileHeaderSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} items={searchItems} triggerRef={searchButtonRef} />
 
       {/* Barra de menu — navegação principal (desktop) */}
-      <div className="relative hidden bg-[#003366] lg:block">
+      <div className={`relative hidden transition-[background-color] duration-300 lg:block ${scrolled ? 'glass-blue' : 'bg-[#003366]'}`}>
         <div className="container-crfal">
           <div className="relative flex h-14 items-center justify-center">
             <nav aria-label="Navegação principal" className="flex items-center">
