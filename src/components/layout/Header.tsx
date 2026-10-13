@@ -1,41 +1,13 @@
-import { useState, useEffect, useRef, type MouseEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import {
-  ChevronDown,
-  User,
-  Building2,
-  Users,
-  Target,
-  BookOpen,
-  FileText,
-  CreditCard,
-  ClipboardList,
-  HeadphonesIcon,
-  Scale,
-  Gavel,
-  BarChart3,
-  Newspaper,
-  ExternalLink,
-  Calendar,
-  Images,
-  Search,
-} from 'lucide-react';
+import { useState, useEffect, useRef, useCallback, type MouseEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowRight, ArrowUpRight, ChevronDown, ExternalLink, Search, User } from 'lucide-react';
 import MobileHeaderSearch from '@/components/layout/MobileHeaderSearch';
 import MobileNavigation from '@/components/layout/MobileNavigation';
 import { serviceProfiles } from '@/config/service-profiles';
 import { CRF_EM_CASA_URL, SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
 import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
+import { NAV_ITEMS, isNavItemActive, isNavSubItemActive, type NavItem } from '@/config/navigation';
 
-
-type SubItem = { label: string; href: string; icon: React.ElementType; external?: boolean };
-type Column = { title: string; items: SubItem[] };
-
-interface NavItem {
-  label: string;
-  href: string;
-  columns?: Column[];
-  directIcon?: React.ElementType;
-}
 
 const SOCIAL_ICONS: Record<string, React.ElementType> = {
   Instagram: InstagramIcon,
@@ -44,98 +16,10 @@ const SOCIAL_ICONS: Record<string, React.ElementType> = {
   X: XIcon,
 };
 
-const navItems: NavItem[] = [
-  {
-    label: 'Instituição',
-    href: '/instituicao',
-    columns: [
-      {
-        title: 'O CRF AL',
-        items: [
-          { label: 'Sobre o Conselho', href: '/instituicao/sobre-conselho', icon: Building2 },
-          { label: 'Diretoria', href: '/instituicao/diretoria', icon: Users },
-          { label: 'Estatuto', href: '/instituicao/estatuto', icon: BookOpen },
-        ],
-      },
-      {
-        title: 'Normas e Controle',
-        items: [
-          { label: 'Legislação', href: '/legislacao', icon: Gavel },
-          { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/', icon: BarChart3, external: true },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Serviços',
-    href: '/servicos/requerimentos',
-    columns: [
-      {
-        title: 'Atendimento Digital',
-        items: [
-          { label: 'Requerimentos', href: '/servicos/requerimentos', icon: FileText },
-          { label: 'Tutoriais', href: '/servicos/tutoriais', icon: ClipboardList },
-          { label: 'Ouvidoria', href: '/servicos/ouvidoria', icon: HeadphonesIcon },
-        ],
-      },
-      {
-        title: 'Financeiro',
-        items: [
-          { label: 'Boletos e Anuidades', href: 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/consulta/boletos/inicial.jsf', icon: CreditCard, external: true },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Fiscalização',
-    href: '/fiscalizacao',
-    columns: [
-      {
-        title: 'Atuação',
-        items: [
-          { label: 'Papel da Fiscalização', href: '/fiscalizacao/papel-da-fiscalizacao', icon: Building2 },
-          { label: 'Instrumentos', href: '/fiscalizacao/instrumentos-da-fiscalizacao', icon: Gavel },
-          { label: 'Plano Anual', href: '/fiscalizacao/plano-de-fiscalizacao-anual', icon: Target },
-        ],
-      },
-      {
-        title: 'Processos e Relatórios',
-        items: [
-          { label: 'Relatórios', href: '/fiscalizacao/relatorios', icon: BarChart3 },
-          { label: 'Processo Administrativo', href: '/fiscalizacao/processo-administrativo-fiscal', icon: FileText },
-          { label: 'Afastamento Provisório', href: '/fiscalizacao/afastamento-provisorio', icon: Users },
-          { label: 'Custos da Fiscalização', href: 'https://crf-al.implanta.net.br/portaltransparencia/', icon: Scale, external: true },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Imprensa',
-    href: '#imprensa',
-    columns: [
-      {
-        title: 'Comunicação',
-        items: [
-          { label: 'Notícias', href: '/imprensa/noticias', icon: Newspaper },
-          { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos', icon: Images },
-          { label: 'Eventos', href: '/eventos', icon: Calendar },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Transparência',
-    href: 'https://crf-al.implanta.net.br/portaltransparencia/',
-    directIcon: ExternalLink,
-  },
-  {
-    label: 'Fale Conosco',
-    href: '/contato',
-  },
-];
+const navItems = NAV_ITEMS;
 
 const searchItems = navItems
-  .flatMap(item => item.columns ? item.columns.flatMap(column => column.items) : [{ label: item.label, href: item.href }])
+  .flatMap(item => item.columns ? item.columns.flatMap(column => column.items.map(({ label, href }) => ({ label, href }))) : [{ label: item.label, href: item.href }])
   .filter((item, index, items) => items.findIndex(candidate => candidate.label === item.label && candidate.href === item.href) === index);
 
 export default function Header() {
@@ -145,6 +29,35 @@ export default function Header() {
   const searchButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [lastPathname, setLastPathname] = useState(pathname);
+  const timerRef = useRef<number | undefined>(undefined);
+  const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  // Fecha o menu ao trocar de página.
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
+    setActiveDropdown(null);
+  }
+
+  const scheduleDropdown = useCallback((label: string | null, delay: number) => {
+    window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setActiveDropdown(label), delay);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(timerRef.current), []);
+
+  useEffect(() => {
+    if (!activeDropdown) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        triggerRefs.current[activeDropdown]?.focus();
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [activeDropdown]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -165,10 +78,8 @@ export default function Header() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const isExternalLink = (href: string) => href.startsWith('http');
-
   const navLinkBase =
-    'flex items-center gap-1.5 rounded-md px-3 py-2 text-[15px] font-medium tracking-[0.02em] transition-all duration-200';
+    'relative flex items-center gap-1.5 rounded-md px-3 py-2 text-[15px] font-medium tracking-[0.02em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70';
 
   const renderSocial = (
     itemClassName: string,
@@ -290,134 +201,33 @@ export default function Header() {
       <MobileHeaderSearch open={isSearchOpen} onOpenChange={setIsSearchOpen} items={searchItems} triggerRef={searchButtonRef} />
 
       {/* Barra de menu — navegação principal (desktop) */}
-      <div className="hidden bg-[#003366] lg:block">
+      <div className="relative hidden bg-[#003366] lg:block">
         <div className="container-crfal">
           <div className="relative flex h-14 items-center justify-center">
-            <nav className="flex items-center">
+            <nav aria-label="Navegação principal" className="flex items-center">
               {navItems.map((item, index) => (
-                <div
+                <DesktopNavEntry
                   key={item.label}
-                  className="relative"
-                  onMouseEnter={() => item.columns && setActiveDropdown(item.label)}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  {item.columns ? (
-                    <button
-                      type="button"
-                      className={`${navLinkBase} ${
-                        activeDropdown === item.label
-                          ? 'bg-white/15 text-white'
-                          : 'text-white/90 hover:bg-white/10 hover:text-white'
-                      }`}
-                      onClick={() =>
-                        setActiveDropdown(activeDropdown === item.label ? null : item.label)
-                      }
-                    >
-                      {item.label}
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform duration-200 ${
-                          activeDropdown === item.label ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
-                  ) : item.href.startsWith('/') ? (
-                    <Link
-                      to={item.href}
-                      className={`${navLinkBase} text-white/90 hover:bg-white/10 hover:text-white`}
-                    >
-                      {item.directIcon && <item.directIcon className="h-3.5 w-3.5" />}
-                      {item.label}
-                    </Link>
-                  ) : (
-                    <a
-                      href={item.href}
-                      target={isExternalLink(item.href) ? '_blank' : undefined}
-                      rel={isExternalLink(item.href) ? 'noopener noreferrer' : undefined}
-                      className={`${navLinkBase} text-white/90 hover:bg-white/10 hover:text-white`}
-                    >
-                      {item.directIcon && <item.directIcon className="h-3.5 w-3.5" />}
-                      {item.label}
-                    </a>
-                  )}
-
-                  {item.columns && activeDropdown === item.label && (
-                    <>
-                      <div
-                        className={`absolute top-full h-4 w-[640px] max-w-[calc(100vw-2rem)] ${
-                          index === 0 ? 'left-0' : 'left-1/2 -translate-x-1/2'
-                        }`}
-                        aria-hidden
-                      />
-                      <div
-                        className={`absolute top-[calc(100%+12px)] z-50 w-[640px] max-w-[calc(100vw-2rem)] ${
-                          index === 0 ? 'left-0' : 'left-1/2 -translate-x-1/2'
-                        }`}
-                      >
-                        <div className="origin-top overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-2xl animate-scale-in">
-                          <div className="grid grid-cols-2 gap-8 p-6">
-                            {item.columns.map((column) => (
-                              <div key={column.title}>
-                                <h4 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-crfal-gray-400">
-                                  {column.title}
-                                </h4>
-                                <ul className="space-y-1">
-                                  {column.items.map((subItem) => {
-                                    const Icon = subItem.icon;
-                                    const content = (
-                                      <>
-                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors duration-200 group-hover:bg-crfal-blue group-hover:text-white">
-                                          <Icon className="h-4.5 w-4.5" />
-                                        </span>
-                                        <span className="flex-1">
-                                          <span className="block text-sm font-semibold text-neutral-700 transition-colors duration-200 group-hover:text-crfal-blue">
-                                            {subItem.label}
-                                          </span>
-                                          {subItem.external && (
-                                            <span className="block text-[10px] uppercase tracking-wider text-crfal-gray-400">
-                                              Link externo
-                                            </span>
-                                          )}
-                                        </span>
-                                      </>
-                                    );
-                                    return (
-                                      <li key={subItem.label}>
-                                        {subItem.href.startsWith('/') ? (
-                                          <Link
-                                            to={subItem.href}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50"
-                                          >
-                                            {content}
-                                          </Link>
-                                        ) : (
-                                          <a
-                                            href={subItem.href}
-                                            target={subItem.external ? '_blank' : undefined}
-                                            rel={subItem.external ? 'noopener noreferrer' : undefined}
-                                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-crfal-gray-50"
-                                          >
-                                            {content}
-                                          </a>
-                                        )}
-                                      </li>
-                                    );
-                                  })}
-                                </ul>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                  item={item}
+                  index={index}
+                  isOpen={activeDropdown === item.label}
+                  isCurrent={isNavItemActive(item, pathname)}
+                  pathname={pathname}
+                  navLinkBase={navLinkBase}
+                  triggerRef={(el) => { triggerRefs.current[item.label] = el; }}
+                  onOpen={(delay) => scheduleDropdown(item.label, delay)}
+                  onClose={(delay) => scheduleDropdown(null, delay)}
+                  onToggle={() => { window.clearTimeout(timerRef.current); setActiveDropdown(activeDropdown === item.label ? null : item.label); }}
+                />
               ))}
             </nav>
           </div>
         </div>
+        {/* Véu suave sobre a página enquanto um menu está aberto. */}
+        <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-full h-screen bg-crfal-blue-dark/25 transition-opacity duration-200 motion-reduce:transition-none ${activeDropdown ? 'opacity-100' : 'opacity-0'}`} />
       </div>
 
-      <MobileNavigation open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} triggerRef={menuButtonRef} items={navItems} socialLinks={renderSocial(
+      <MobileNavigation open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} triggerRef={menuButtonRef} items={navItems} onOpenSearch={() => setIsSearchOpen(true)} socialLinks={renderSocial(
         'flex h-11 w-11 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white',
         'h-[18px] w-[18px]',
         'flex items-center justify-center gap-2',
@@ -436,5 +246,158 @@ export default function Header() {
       </nav>
 
     </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Item da barra desktop e mega menu                                           */
+/* -------------------------------------------------------------------------- */
+
+const OPEN_DELAY = 90;
+const CLOSE_DELAY = 160;
+
+function DesktopNavEntry({
+  item,
+  index,
+  isOpen,
+  isCurrent,
+  pathname,
+  navLinkBase,
+  triggerRef,
+  onOpen,
+  onClose,
+  onToggle,
+}: {
+  item: NavItem;
+  index: number;
+  isOpen: boolean;
+  isCurrent: boolean;
+  pathname: string;
+  navLinkBase: string;
+  triggerRef: (el: HTMLButtonElement | null) => void;
+  onOpen: (delay: number) => void;
+  onClose: (delay: number) => void;
+  onToggle: () => void;
+}) {
+  const panelId = `mega-menu-${index}`;
+  const currentMark = isCurrent
+    ? 'after:absolute after:inset-x-3 after:-bottom-[9px] after:h-0.5 after:rounded-full after:bg-crfal-gold'
+    : '';
+  const stateClass = isOpen ? 'bg-white/15 text-white' : isCurrent ? 'text-white' : 'text-white/85 hover:bg-white/10 hover:text-white';
+
+  if (!item.columns) {
+    const external = item.href.startsWith('http');
+    const DirectIcon = item.directIcon;
+    const className = `${navLinkBase} ${stateClass} ${currentMark}`;
+    return external ? (
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className={className}>
+        {DirectIcon && <DirectIcon className="h-3.5 w-3.5" aria-hidden />}
+        {item.label}
+        <span className="sr-only">(abre em uma nova aba)</span>
+      </a>
+    ) : (
+      <Link to={item.href} aria-current={isCurrent ? 'page' : undefined} className={className}>{item.label}</Link>
+    );
+  }
+
+  const columnCount = item.columns.length;
+  const widthClass = columnCount > 1 ? 'w-[min(980px,calc(100vw-2rem))]' : 'w-[min(640px,calc(100vw-2rem))]';
+
+  return (
+    // Sem `relative`: o painel se posiciona pela barra inteira e fica sempre centralizado na tela.
+    <div onMouseEnter={() => onOpen(OPEN_DELAY)} onMouseLeave={() => onClose(CLOSE_DELAY)}>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        onClick={onToggle}
+        className={`${navLinkBase} ${stateClass} ${currentMark}`}
+      >
+        {item.label}
+        <ChevronDown className={`h-4 w-4 transition-transform duration-200 motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`} aria-hidden />
+      </button>
+
+      {isOpen && (
+        <div id={panelId} className={`absolute left-1/2 top-full z-50 -translate-x-1/2 pt-1.5 ${widthClass}`}>
+          <div className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-[0_28px_60px_-16px_rgba(11,25,44,0.45)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-safe:duration-200">
+            <div aria-hidden className="h-0.5 bg-gradient-to-r from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
+            <div className={`grid gap-2 p-3 ${columnCount > 1 ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_280px]' : 'grid-cols-[minmax(0,1fr)_250px]'}`}>
+              {item.columns.map((column) => (
+                <div key={column.title} className="p-3">
+                  <p className="mb-2 flex items-center gap-2 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
+                    {column.title}
+                    <span aria-hidden className="h-px flex-1 bg-crfal-gray-200" />
+                  </p>
+                  <ul className="space-y-0.5">
+                    {column.items.map((sub) => {
+                      const Icon = sub.icon;
+                      const active = isNavSubItemActive(sub, pathname);
+                      const linkClass = `group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue motion-reduce:transition-none ${active ? 'bg-crfal-blue-lighter/70' : 'hover:bg-crfal-gray-50'}`;
+                      const content = (
+                        <>
+                          <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ring-1 transition-colors duration-150 ${active ? 'bg-crfal-blue text-white ring-crfal-gold/50' : 'bg-crfal-blue-lighter text-crfal-blue ring-crfal-blue/10 group-hover:bg-crfal-blue group-hover:text-white'}`}>
+                            <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className={`block text-sm font-semibold leading-snug ${active ? 'text-crfal-blue' : 'text-crfal-blue-dark group-hover:text-crfal-blue'}`}>{sub.label}</span>
+                            {sub.description && <span className="mt-0.5 block text-[12.5px] leading-snug text-crfal-gray-600">{sub.description}</span>}
+                          </span>
+                          {sub.external ? (
+                            <ArrowUpRight className="h-4 w-4 shrink-0 text-crfal-gray-400 group-hover:text-[#8A6A12]" aria-hidden />
+                          ) : (
+                            <ArrowRight className="h-4 w-4 shrink-0 -translate-x-1 text-[#8A6A12] opacity-0 transition duration-150 group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none" aria-hidden />
+                          )}
+                        </>
+                      );
+                      return (
+                        <li key={sub.label}>
+                          {sub.external ? (
+                            <a href={sub.href} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                              {content}
+                              <span className="sr-only">(abre em uma nova aba)</span>
+                            </a>
+                          ) : (
+                            <Link to={sub.href} aria-current={active ? 'page' : undefined} className={linkClass}>{content}</Link>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+
+              {item.feature && (
+                <aside className="relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-5 text-white">
+                  <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 -z-10 h-40 w-40 rounded-full bg-crfal-blue-light/30 blur-3xl" />
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">{item.feature.eyebrow}</p>
+                  <p className="mt-2 text-lg font-bold leading-snug">{item.feature.title}</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-white/75">{item.feature.text}</p>
+                  <div className="mt-auto space-y-2 pt-5">
+                    <a
+                      href={item.feature.cta.href}
+                      target={item.feature.cta.href.startsWith('http') ? '_blank' : undefined}
+                      rel={item.feature.cta.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="group flex min-h-10 w-full items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue"
+                    >
+                      <span className="truncate">{item.feature.cta.label}</span>
+                      {item.feature.cta.href.startsWith('http') ? <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden /> : <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />}
+                      {item.feature.cta.href.startsWith('http') && <span className="sr-only">(abre em uma nova aba)</span>}
+                    </a>
+                    {item.feature.secondary && (
+                      <a href={item.feature.secondary.href} target="_blank" rel="noopener noreferrer" className="flex min-h-10 w-full items-center justify-between gap-2 rounded-full border border-white/30 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                        <span className="truncate">{item.feature.secondary.label}</span>
+                        <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
+                        <span className="sr-only">(abre em uma nova aba)</span>
+                      </a>
+                    )}
+                  </div>
+                </aside>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
