@@ -234,16 +234,25 @@ export default function Header() {
         () => setIsMobileMenuOpen(false)
       )} />
     </header>
-      <nav aria-label="Acessos por perfil" className="absolute left-0 right-0 top-20 z-40 h-24 border-b border-crfal-gray-200 bg-white lg:hidden">
-        <div className="container-crfal grid h-full grid-cols-3 items-center">
-          {serviceProfiles.map(({ label, href, icon: Icon }) => (
-            <Link key={label} to={href} onClick={() => { setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); }} className="flex min-h-16 min-w-0 flex-col items-center justify-center gap-2 border-r border-crfal-blue/20 px-1 text-crfal-blue last:border-r-0 hover:bg-crfal-blue-lighter focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue">
-              <Icon className="h-8 w-8" strokeWidth={1.5} aria-hidden="true" />
-              <span className="text-[11px] font-semibold sm:text-sm">{label}</span>
-            </Link>
-          ))}
-        </div>
-      </nav>
+      {pathname === '/' && (
+        <nav aria-label="Acesso rápido por perfil" className="absolute left-0 right-0 top-20 z-40 h-[72px] border-b border-crfal-gray-200 bg-white lg:hidden">
+          <div className="container-crfal grid h-full grid-cols-3 items-stretch divide-x divide-crfal-gray-200 py-2">
+            {serviceProfiles.map(({ label, href, icon: Icon }) => (
+              <Link
+                key={label}
+                to={href}
+                onClick={() => { setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); }}
+                className="group relative flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-crfal-blue-dark after:absolute after:inset-x-6 after:bottom-[-8px] after:h-0.5 after:rounded-full after:bg-crfal-gold after:opacity-0 after:transition-opacity active:after:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue focus-visible:after:opacity-100"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10 transition-colors group-active:bg-crfal-blue group-active:text-white">
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <span className="truncate text-[12.5px] font-semibold leading-tight">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
 
     </>
   );
