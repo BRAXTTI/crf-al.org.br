@@ -12,6 +12,7 @@ import ContactPage from '@/features/contact/pages/ContactPage';
 import RequirementsPage from '@/features/services/pages/RequirementsPage';
 import TutorialsPage from '@/features/services/pages/TutorialsPage';
 import OmbudsmanPage from '@/features/services/pages/OmbudsmanPage';
+import ManualCrfEmCasaPage from '@/features/services/pages/ManualCrfEmCasaPage';
 import NewsPage from '@/features/press/pages/NewsPage';
 import CffPublicationsPage from '@/features/press/pages/CffPublicationsPage';
 import NewsDetailPage from '@/features/press/pages/NewsDetailPage';
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
       { path: 'termos-de-uso', element: <TermsOfUsePage /> },
       { path: 'servicos/requerimentos', element: <RequirementsPage /> },
       { path: 'servicos/tutoriais', element: <TutorialsPage /> },
+      { path: 'servicos/manual-crf-em-casa', element: <ManualCrfEmCasaPage /> },
       { path: 'servicos/ouvidoria', element: <OmbudsmanPage /> },
       { path: 'imprensa/noticias', element: <NewsPage /> },
       { path: 'imprensa/publicacoes-cff', element: <CffPublicationsPage /> },

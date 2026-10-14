@@ -1,6 +1,7 @@
 import type { ElementType } from 'react';
 import {
   BarChart3,
+  BookOpen,
   BookOpenText,
   CalendarClock,
   CalendarDays,
@@ -88,6 +89,7 @@ export const NAV_ITEMS: NavItem[] = [
         items: [
           { label: 'Requerimentos', href: '/servicos/requerimentos', icon: FileText, description: 'Documentos e formulários por serviço' },
           { label: 'Tutoriais', href: '/servicos/tutoriais', icon: PlayCircle, description: 'Guias passo a passo do CRF AL em Casa' },
+          { label: 'Manual do CRF AL em Casa', href: '/servicos/manual-crf-em-casa', icon: BookOpen, description: 'Como usar o sistema, com demonstrações' },
           { label: 'Ouvidoria', href: '/servicos/ouvidoria', icon: HeadphonesIcon, description: 'Reclamações, sugestões e denúncias' },
         ],
       },

@@ -40,6 +40,10 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "title": "Tutoriais",
     "description": "Tutoriais e guias passo a passo para os serviços do CRFAL — aprenda como realizar seus registros, renovações e demais serviços online de forma simples."
   },
+  "/servicos/manual-crf-em-casa": {
+    "title": "Manual do CRF AL em Casa",
+    "description": "Manual de uso do CRF AL em Casa — aprenda com demonstrações a acessar o sistema, enviar documentos, acompanhar protocolos, emitir boletos, solicitar baixa de responsabilidade técnica e imprimir a certidão de regularidade."
+  },
   "/servicos/ouvidoria": {
     "title": "Ouvidoria",
     "description": "Ouvidoria do CRFAL — canal oficial para reclamações, sugestões, elogios e denúncias, atendido pelo Portal da Transparência da Implanta. Manifeste-se e contribua para a melhoria dos serviços farmacêuticos em Alagoas."
