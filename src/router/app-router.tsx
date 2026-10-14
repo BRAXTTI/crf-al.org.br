@@ -5,6 +5,7 @@ import InstitutionalPage from '@/features/institutional/pages/InstitutionalPage'
 import SobreConselhoPage from '@/features/institutional/pages/SobreConselhoPage';
 import BoardPage from '@/features/institutional/pages/BoardPage';
 import StatutePage from '@/features/institutional/pages/StatutePage';
+import PlenariasPage from '@/features/institutional/pages/PlenariasPage';
 import PrivacyPolicyPage from '@/features/institutional/pages/PrivacyPolicyPage';
 import TermsOfUsePage from '@/features/institutional/pages/TermsOfUsePage';
 import ContactPage from '@/features/contact/pages/ContactPage';
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       { path: 'instituicao/missao-visao', element: <Navigate to="/instituicao/sobre-conselho" replace /> },
       { path: 'instituicao/diretoria', element: <BoardPage /> },
       { path: 'instituicao/estatuto', element: <StatutePage /> },
+      { path: 'instituicao/plenarias', element: <PlenariasPage /> },
       { path: 'politica-de-privacidade', element: <PrivacyPolicyPage /> },
       { path: 'termos-de-uso', element: <TermsOfUsePage /> },
       { path: 'servicos/requerimentos', element: <RequirementsPage /> },

@@ -67,6 +67,7 @@ export const NAV_ITEMS: NavItem[] = [
         items: [
           { label: 'Sobre o Conselho', href: '/instituicao/sobre-conselho', icon: Landmark, description: 'História, missão e atribuições' },
           { label: 'Diretoria', href: '/instituicao/diretoria', icon: Users, description: 'Diretoria e conselheiros da gestão' },
+          { label: 'Plenárias', href: '/instituicao/plenarias', icon: CalendarDays, description: 'Sessões plenárias do Conselho' },
         ],
       },
     ],

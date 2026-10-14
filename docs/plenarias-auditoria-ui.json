@@ -1,0 +1,41 @@
+{
+  "findings": [
+    {
+      "category": "violation",
+      "file": "src/features/institutional/pages/BoardPage.tsx",
+      "line": 202,
+      "message": "Enabled literal button has no detectable action or submit behavior.",
+      "remediation": "Connect the button to a real action, make it a submit button, or disable/remove it.",
+      "ruleId": "affordance.actionless-button",
+      "severity": "error"
+    },
+    {
+      "category": "violation",
+      "file": "src/index.css",
+      "line": 223,
+      "message": "Base scrollbar theming is activated by an opt-in class.",
+      "remediation": "Apply base scrollbar tokens globally; reserve classes for geometry or semantic exceptions.",
+      "ruleId": "scrollbar.opt-in-base",
+      "severity": "error"
+    },
+    {
+      "category": "violation",
+      "file": "src/index.css",
+      "line": 205,
+      "message": "Scrollbar theme does not provide both standards-based scrollbar properties.",
+      "remediation": "Add global scrollbar-color and scrollbar-width standards properties plus fallbacks.",
+      "ruleId": "scrollbar.webkit-only",
+      "severity": "error"
+    }
+  ],
+  "mode": "strict",
+  "projectRoot": "/Users/thailanderson/Desktop/crf-al.org.br",
+  "schemaVersion": 1,
+  "summary": {
+    "errors": 3,
+    "total": 3,
+    "unresolved": 0,
+    "violations": 3,
+    "warnings": 0
+  }
+}

@@ -20,6 +20,10 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "title": "Estatuto",
     "description": "Acesse o estatuto do Conselho Regional de Farmácia do Estado de Alagoas (CRFAL) — normas, regimentos e regulamentos internos."
   },
+  "/instituicao/plenarias": {
+    "title": "Plenárias",
+    "description": "Acompanhe a agenda das reuniões plenárias do CRF-AL e consulte as pautas, atas e transmissões disponibilizadas pelo Conselho."
+  },
   "/politica-de-privacidade": {
     "title": "Política de Privacidade",
     "description": "Política de Privacidade do CRFAL — saiba como tratamos seus dados pessoais em conformidade com a LGPD."
