@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, Copy, Instagram, Play } from 'lucide-react';
 import { INSTAGRAM_PROFILE_URL } from '@/config/site';
+import { CFF_COVER_ASPECT } from '@/features/press/cff';
 
 type MediaType = 'image' | 'video' | 'carousel';
 interface InstagramItem { link: string; image: string; caption?: string; date?: number; type?: MediaType }
@@ -44,9 +45,9 @@ function PostCard({ item }: { item: InstagramItem }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${label.slice(0, 160)} (abre o Instagram em uma nova aba)`}
-      className="group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-xl hover:shadow-crfal-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
+      className="group flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-crfal-gray-200 shadow-sm transition-shadow duration-300 hover:shadow-xl hover:shadow-crfal-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
     >
-      <div className="relative isolate aspect-[4/5] overflow-hidden bg-crfal-blue-dark">
+      <div className={`relative isolate ${CFF_COVER_ASPECT} overflow-hidden bg-crfal-blue-dark`}>
         <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" onError={handleImageError} className="absolute inset-0 -z-10 h-full w-full scale-150 object-cover opacity-60 blur-2xl" />
         <img src={item.image} alt="" loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-contain group-hover:scale-[1.03] ${motion}`} />
         {badge && BadgeIcon && (
@@ -94,9 +95,9 @@ function FollowCard() {
   );
 }
 
-/** Trilho: carrossel com deslize no celular, grade a partir de 768px. */
-const trackClass = '-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-2 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-5 [&::-webkit-scrollbar]:hidden';
-const slotClass = 'w-[72%] shrink-0 snap-start sm:w-[44%] md:w-auto';
+/** Trilho: carrossel com deslize no celular, grade de 4 colunas a partir de 768px — mesma largura e espaçamento das capas de Publicações do CFF. */
+const trackClass = '-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-2 [scrollbar-width:none] sm:-mx-6 sm:gap-8 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 md:pb-0 lg:gap-10 [&::-webkit-scrollbar]:hidden';
+const slotClass = 'w-[calc(50%-0.5rem)] shrink-0 snap-start sm:w-[calc(50%-1rem)] md:w-auto';
 
 export default function InstagramFeed({
   title = 'O CRF-AL mais perto de você',
@@ -129,7 +130,7 @@ export default function InstagramFeed({
           <div role="status" aria-label="Carregando publicações" className={`${trackClass} animate-pulse motion-reduce:animate-none`}>
             {Array.from({ length: POSTS }, (_, i) => (
               <div key={i} className={`${slotClass} overflow-hidden rounded-xl border border-crfal-gray-200 bg-white`}>
-                <div className="aspect-[4/5] bg-crfal-gray-200" />
+                <div className={`${CFF_COVER_ASPECT} bg-crfal-gray-200`} />
                 <div className="space-y-2 p-4"><div className="h-2.5 w-20 rounded bg-crfal-gray-200" /><div className="h-3 w-full rounded bg-crfal-gray-100" /><div className="h-3 w-2/3 rounded bg-crfal-gray-100" /></div>
               </div>
             ))}
@@ -138,7 +139,7 @@ export default function InstagramFeed({
         ) : !isError && items.length > 0 ? (
           <ul className={trackClass}>
             {items.map((item, index) => (
-              <li key={item.link} className={`${slotClass} ${index === 3 ? 'md:hidden lg:block' : ''}`}>
+              <li key={item.link} className={`${slotClass} ${index === 3 ? 'md:hidden' : ''}`}>
                 <PostCard item={item} />
               </li>
             ))}

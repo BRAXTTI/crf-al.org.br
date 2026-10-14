@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Landmark } from 'lucide-react';
-import { CffPublicationCard } from '@/features/press/cff';
+import { CFF_COVER_ASPECT, CffPublicationCard } from '@/features/press/cff';
 import { CFF_PUBLICATIONS_PATH, CFF_PUBLICATIONS_URL, useCffPublications } from '@/features/press/cff-data';
 
 const SHOWN = 4;
@@ -34,7 +34,7 @@ export default function CffPublications() {
 
           <ul className="-mx-2 -mb-6 flex flex-wrap justify-center sm:-mx-4 sm:-mb-10 lg:-mx-5" aria-busy={isLoading || undefined}>
             {isLoading
-              ? Array.from({ length: SHOWN }, (_, i) => <li key={i} className={`${colClass} mb-6 sm:mb-10`}><div className="aspect-[5/7] animate-pulse rounded-xl bg-crfal-gray-200 motion-reduce:animate-none" /></li>)
+              ? Array.from({ length: SHOWN }, (_, i) => <li key={i} className={`${colClass} mb-6 sm:mb-10`}><div className={`${CFF_COVER_ASPECT} animate-pulse rounded-xl bg-crfal-gray-200 motion-reduce:animate-none`} /></li>)
               : collections.map((collection) => (
                   <li key={collection.slug} className={`${colClass} mb-6 sm:mb-10`}>
                     <CffPublicationCard collection={collection} index={0} />

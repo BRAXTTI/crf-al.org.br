@@ -6,6 +6,9 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.src = CFF_COVER_FALLBACK;
 }
 
+/** Proporção fixa das capas (as do CFF são 395×560), para que capas e miniaturas que a reutilizam tenham sempre a mesma altura. */
+export const CFF_COVER_ASPECT = 'aspect-[395/560]';
+
 /** Colunas como no site do CFF: 1 capa no celular, 2 no tablet, 4 no desktop, centralizadas. */
 export const cffColClass = 'w-2/3 px-3 sm:w-1/2 sm:px-4 md:w-5/12 lg:w-1/4 lg:px-3.5';
 
@@ -34,7 +37,7 @@ export function CffPublicationCard({ collection, index }: { collection: CffColle
           decoding="async"
           referrerPolicy="no-referrer"
           onError={handleImageError}
-          className="block h-auto w-full transition-transform delay-200 duration-[350ms] group-hover:rotate-[5deg] group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none"
+          className={`block ${CFF_COVER_ASPECT} w-full object-cover transition-transform delay-200 duration-[350ms] group-hover:rotate-[5deg] group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none`}
         />
         <span
           aria-hidden="true"
@@ -52,7 +55,7 @@ export function CffCoverSkeleton({ count }: { count: number }) {
     <>
       {Array.from({ length: count }, (_, i) => (
         <li key={i} className={`${cffColClass} mb-10`}>
-          <div className="aspect-[5/7] animate-pulse rounded-xl bg-crfal-gray-200 motion-reduce:animate-none" />
+          <div className={`${CFF_COVER_ASPECT} animate-pulse rounded-xl bg-crfal-gray-200 motion-reduce:animate-none`} />
         </li>
       ))}
     </>
