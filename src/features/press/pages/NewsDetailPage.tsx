@@ -122,7 +122,9 @@ export default function NewsDetailPage() {
       ? error instanceof Error
         ? error.message
         : 'Falha ao carregar notícia.'
-      : null;
+      : !isLoading && !post
+        ? 'Notícia não encontrada.'
+        : null;
 
   if (isLegacyId && post) {
     return <Navigate to={`/imprensa/noticias/${post.slug}`} replace />;

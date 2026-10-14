@@ -105,7 +105,8 @@ export default function Header() {
     itemClassName: string,
     iconClassName: string,
     listClassName = 'flex items-center gap-1',
-    onNavigate?: () => void
+    onNavigate?: () => void,
+    tabIndex?: number
   ) => (
     <ul className={listClassName}>
       {SOCIAL_LINKS.map((social) => {
@@ -119,6 +120,7 @@ export default function Header() {
               aria-label={social.label}
               className={itemClassName}
               onClick={onNavigate}
+              tabIndex={tabIndex}
             >
               <Icon className={iconClassName} />
             </a>
@@ -150,7 +152,9 @@ export default function Header() {
           {renderSocial(
             'flex h-7 w-7 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
             'h-3.5 w-3.5',
-            'flex items-center gap-0.5'
+            'flex items-center gap-0.5',
+            undefined,
+            scrolled ? -1 : undefined
           )}
         </div>
       </div>

@@ -158,7 +158,7 @@ export function buildMeta(og: OgData): string {
 }
 
 function injectOg(asset: Response, og: OgData): Response {
-  return new HTMLRewriter()
+  const rewritten = new HTMLRewriter()
     .on('title', { element(el) { el.setAttribute('data-page-metadata', 'true'); el.setInnerContent(`${og.title} | CRFAL`); } })
     .on('meta', { element(el) {
       const property = el.getAttribute('property') || '';
@@ -168,6 +168,11 @@ function injectOg(asset: Response, og: OgData): Response {
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
     .on('head', { element(el) { el.append(buildMeta(og), { html: true }); } })
     .transform(asset);
+  // The rewritten body no longer matches the shell's validators.
+  const response = new Response(rewritten.body, rewritten);
+  response.headers.delete('ETag');
+  response.headers.delete('Last-Modified');
+  return response;
 }
 
 async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
@@ -204,7 +209,15 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   }
   const staticData = Object.hasOwn(PAGE_METADATA, pathname) ? PAGE_METADATA[pathname] : undefined;
   const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));
-  const asset = await context.next();
+  // Conditional validators belong to the static shell; drop them so a 304 never skips the metadata lookup.
+  let upstream = context.request;
+  if (upstream.headers.has('If-None-Match') || upstream.headers.has('If-Modified-Since')) {
+    const headers = new Headers(upstream.headers);
+    headers.delete('If-None-Match');
+    headers.delete('If-Modified-Since');
+    upstream = new Request(upstream, { headers });
+  }
+  const asset = await context.next(upstream);
   if (!asset.ok || !asset.headers.get('content-type')?.includes('text/html')) return asset;
   // Pages falls back to index.html for missing files and routes in a SPA.
   // Keep real assets/API responses, but never report that HTML fallback as success.
