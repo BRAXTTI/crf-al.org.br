@@ -13,7 +13,7 @@ import RequirementsPage from '@/features/services/pages/RequirementsPage';
 import TutorialsPage from '@/features/services/pages/TutorialsPage';
 import OmbudsmanPage from '@/features/services/pages/OmbudsmanPage';
 import NewsPage from '@/features/press/pages/NewsPage';
-import CffNewsPage from '@/features/press/pages/CffNewsPage';
+import CffPublicationsPage from '@/features/press/pages/CffPublicationsPage';
 import NewsDetailPage from '@/features/press/pages/NewsDetailPage';
 import PhotoGalleryPage from '@/features/press/pages/PhotoGalleryPage';
 import PhotoAlbumPage from '@/features/press/pages/PhotoAlbumPage';
@@ -48,7 +48,8 @@ const router = createBrowserRouter([
       { path: 'servicos/tutoriais', element: <TutorialsPage /> },
       { path: 'servicos/ouvidoria', element: <OmbudsmanPage /> },
       { path: 'imprensa/noticias', element: <NewsPage /> },
-      { path: 'imprensa/noticias-cff', element: <CffNewsPage /> },
+      { path: 'imprensa/publicacoes-cff', element: <CffPublicationsPage /> },
+      { path: 'imprensa/noticias-cff', element: <Navigate to="/imprensa/publicacoes-cff" replace /> },
       { path: 'imprensa/noticias/:slug', element: <NewsDetailPage /> },
       { path: 'imprensa/galeria-de-fotos', element: <PhotoGalleryPage /> },
       { path: 'imprensa/galeria-de-fotos/:slug', element: <PhotoAlbumPage /> },

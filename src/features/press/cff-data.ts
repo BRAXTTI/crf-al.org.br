@@ -1,37 +1,39 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-export interface CffNewsItem { link: string; title: string; image?: string; date?: string; summary?: string }
-interface CffNewsPage { items: CffNewsItem[]; nextCursor: number | null }
+export interface CffPublication { link: string; cover?: string; edition?: number }
+export interface CffCollection { title: string; items: CffPublication[]; slug: string }
 
-export const CFF_NEWS_URL = 'https://site.cff.org.br/noticias';
-export const CFF_IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect width='800' height='500' fill='%23E6F0F8'/%3E%3C/svg%3E";
+export const CFF_PUBLICATIONS_URL = 'https://site.cff.org.br/publicacoes';
+export const CFF_PUBLICATIONS_PATH = '/imprensa/publicacoes-cff';
+export const CFF_COVER_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='700'%3E%3Crect width='500' height='700' fill='%23E6F0F8'/%3E%3C/svg%3E";
 
-async function fetchCffNews(limit: number, cursor: number, signal: AbortSignal): Promise<CffNewsPage> {
-  const res = await fetch(`/api/cff?limite=${limit}&cursor=${cursor}`, { signal });
-  if (!res.ok) throw new Error('Falha ao carregar as notícias do CFF');
-  const data = (await res.json()) as Partial<CffNewsPage>;
-  return {
-    items: Array.isArray(data.items) ? data.items.filter((item) => item.link && item.title) : [],
-    nextCursor: typeof data.nextCursor === 'number' ? data.nextCursor : null,
-  };
+const slugify = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+async function fetchCffPublications(signal: AbortSignal): Promise<CffCollection[]> {
+  const res = await fetch('/api/cff-publicacoes', { signal });
+  if (!res.ok) throw new Error('Falha ao carregar as publicações do CFF');
+  const data = (await res.json()) as { collections?: Omit<CffCollection, 'slug'>[] };
+  const collections = Array.isArray(data.collections) ? data.collections : [];
+  return collections
+    .map((c) => ({ title: c.title, slug: slugify(c.title), items: (c.items ?? []).filter((item) => /^https?:\/\//.test(item.link)) }))
+    .filter((c) => c.title && c.items.length > 0);
 }
 
-/** Notícias do CFF com paginação por cursor (páginas da listagem do CFF). */
-export function useCffNews(limit: number) {
-  return useInfiniteQuery({
-    queryKey: ['cff-news', limit],
-    queryFn: ({ pageParam, signal }) => fetchCffNews(limit, pageParam, signal),
-    initialPageParam: 1,
-    getNextPageParam: (last) => last.nextCursor ?? undefined,
-    staleTime: 15 * 60 * 1000,
+/** Coleções de publicações do CFF (os PDFs ficam no site do CFF; aqui só os links). */
+export function useCffPublications() {
+  return useQuery({
+    queryKey: ['cff-publications'],
+    queryFn: ({ signal }) => fetchCffPublications(signal),
+    staleTime: 60 * 60 * 1000,
     retry: 1,
   });
 }
 
-export function formatCffDate(date?: string) {
-  if (!date) return undefined;
-  const [y, m, d] = date.split('-').map(Number);
-  if (!y || !m || !d) return undefined;
-  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
-}
+export const isPdfLink = (link: string) => /\.pdf($|[?#])/i.test(link);
 
+/** Nome acessível de uma capa (as capas do CFF não trazem título em texto). */
+export function publicationLabel(collection: CffCollection, index: number) {
+  const item = collection.items[index];
+  if (item.edition) return `${collection.title}, edição ${item.edition}`;
+  return collection.items.length > 1 ? `${collection.title}, publicação ${index + 1} de ${collection.items.length}` : collection.title;
+}

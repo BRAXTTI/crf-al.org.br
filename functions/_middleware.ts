@@ -198,6 +198,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   }
 
   if (pathname === '/instituicao/missao-visao') return Response.redirect(`${SITE_URL}/instituicao/sobre-conselho`, 301);
+  if (pathname === '/imprensa/noticias-cff') return Response.redirect(`${SITE_URL}/imprensa/publicacoes-cff`, 301);
   if (pathname.startsWith('/publicacao/') && pathname.slice('/publicacao/'.length) && !pathname.slice('/publicacao/'.length).includes('/')) {
     return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${pathname.slice('/publicacao/'.length)}`, 301);
   }

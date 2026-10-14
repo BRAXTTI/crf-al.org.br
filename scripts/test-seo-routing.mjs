@@ -60,7 +60,7 @@ try {
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
   const sitemapPaths = new Set([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => new URL(url).pathname));
   for (const [, path] of routes.matchAll(/\{ path: '([^':*]+)', element:/g)) {
-    if (path !== 'instituicao/missao-visao') assert.ok(Object.hasOwn(PAGE_METADATA, `/${path}`), `route coverage: ${path}`);
+    if (!['instituicao/missao-visao', 'imprensa/noticias-cff'].includes(path)) assert.ok(Object.hasOwn(PAGE_METADATA, `/${path}`), `route coverage: ${path}`);
   }
   for (const path of Object.keys(PAGE_METADATA)) {
     assert.ok(sitemapPaths.has(path), `Static sitemap coverage: ${path}`);
@@ -84,7 +84,7 @@ try {
   const postResponse = Response.json({ ok: true });
   assert.equal(await request('/api/instagram', { method: 'POST', response: postResponse }), postResponse);
 
-  for (const [path, target] of [['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia']]) {
+  for (const [path, target] of [['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia'], ['/imprensa/noticias-cff', '/imprensa/publicacoes-cff']]) {
     const response = await request(path);
     assert.equal(response.status, 301);
     assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br${target}`);

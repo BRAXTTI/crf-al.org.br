@@ -2,7 +2,7 @@ import HeroSlider from '@/components/home/HeroSlider';
 import ServiceProfiles from '@/components/home/ServiceProfiles';
 import InstagramFeed from '@/components/InstagramFeed';
 import Publications from '@/components/home/Publications';
-import CffNews from '@/components/home/CffNews';
+import CffPublications from '@/components/home/CffPublications';
 import SEO from '@/components/SEO';
 import ServiceAccessCards from '@/components/home/ServiceAccessCards';
 
@@ -22,7 +22,7 @@ export default function HomePage() {
       </div>
       <ServiceProfiles />
       <Publications />
-      <CffNews />
+      <CffPublications />
       <InstagramFeed />
     </>
   );

@@ -147,7 +147,7 @@ export const NAV_ITEMS: NavItem[] = [
         title: 'Comunicação',
         items: [
           { label: 'Notícias', href: '/imprensa/noticias', icon: Newspaper, description: 'Comunicados, alertas e notícias' },
-          { label: 'Notícias do CFF', href: '/imprensa/noticias-cff', icon: Landmark, description: 'Do Conselho Federal de Farmácia' },
+          { label: 'Publicações do CFF', href: '/imprensa/publicacoes-cff', icon: Landmark, description: 'Revistas, guias e notas técnicas' },
           { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos', icon: Images, description: 'Álbuns de eventos e ações' },
           { label: 'Eventos', href: '/eventos', icon: CalendarDays, description: 'Agenda de capacitações e encontros' },
         ],

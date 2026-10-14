@@ -8,7 +8,7 @@ const canonical='https://institucional.crf-al.org.br';
 const htmlDecode=s=>s.replaceAll('&amp;','&').replaceAll('&quot;','"').replaceAll('&lt;','<').replaceAll('&gt;','>');
 function meta(html,key){const tags=[...html.matchAll(/<meta\b[^>]*>/g)].map(m=>m[0]).filter(t=>t.includes(`property="${key}"`)||t.includes(`name="${key}"`));assert.equal(tags.length,1,`${key}: exactly one tag`);return htmlDecode(tags[0].match(/content="([^"]*)"/)[1]);}
 const routes=fs.readFileSync('src/router/app-router.tsx','utf8');
-for(const match of routes.matchAll(/\{ path: '([^':*]+)', element:/g)){const path='/'+match[1];if(path==='/instituicao/missao-visao')continue;assert.ok(PAGE_METADATA[path],`route coverage ${path}`);}
+for(const match of routes.matchAll(/\{ path: '([^':*]+)', element: (?!<Navigate)/g)){const path='/'+match[1];if(path==='/instituicao/missao-visao')continue;assert.ok(PAGE_METADATA[path],`route coverage ${path}`);}
 for(const [path,expected] of Object.entries(PAGE_METADATA)){
  const response=await fetch(base+path+'?utm_source=test');assert.equal(response.status,200,path);const html=await response.text();assert.equal(meta(html,'og:title'),expected.title+' | CRFAL',path);assert.equal(meta(html,'description'),expected.description,path);assert.equal(meta(html,'og:url'),canonical+(path==='/'?'':path));assert.equal(meta(html,'og:image'),canonical+'/images/og-image.jpg');assert.equal((html.match(/rel="canonical"/g)||[]).length,1);assert.ok(html.includes('data-page-metadata="true"'));
 }
