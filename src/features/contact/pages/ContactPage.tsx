@@ -353,7 +353,7 @@ function ContactGroup({ title, items }: { title: string; items: ContactInfo[] })
           const Icon = c.icon;
           const actionClass = `inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold ${motion} ${focusRing}`;
           return (
-            <li key={c.id} id={`setor-${c.id}`} className="scroll-mt-[calc(var(--header-offset)+1.5rem)] p-4 target:bg-crfal-blue-lighter/40 sm:p-5">
+            <li key={c.id} id={`setor-${c.id}`} className="scroll-mt-[calc(var(--header-offset)+1.5rem)] p-4 data-[alvo]:bg-crfal-blue-lighter/40 sm:p-5">
               <div className="flex items-start gap-4">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10">
                   <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden />

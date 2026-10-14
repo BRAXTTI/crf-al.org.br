@@ -413,7 +413,8 @@ export function PageHeroAction({
       )}
     </>
   );
-  return isExternal ? (
+  // Âncoras da própria página (#secao) usam <a> para o navegador rolar até o alvo.
+  return isExternal || href.startsWith('#') ? (
     <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noopener noreferrer' : undefined} className={cls}>
       {content}
       {href.startsWith('http') && <span className="sr-only">(abre em uma nova aba)</span>}
