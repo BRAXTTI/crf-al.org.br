@@ -181,9 +181,9 @@ export default function Header() {
               className="group absolute left-1/2 flex -translate-x-1/2 items-center rounded-lg px-3 py-1.5 focus-visible:outline-white lg:static lg:shrink-0 lg:translate-x-0 lg:gap-3 lg:p-0 lg:focus-visible:outline-crfal-blue"
             >
               <picture>
-                <source media="(max-width: 1023px)" srcSet="/images/logo-crf-branca.png" />
+                <source media="(max-width: 1023px)" srcSet="/images/logo-crf-branca.webp" />
                 <img
-                  src="/images/logo-crf-azul.png"
+                  src="/images/logo-crf-azul.webp"
                   alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
                   className="h-9 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-11"
                 />

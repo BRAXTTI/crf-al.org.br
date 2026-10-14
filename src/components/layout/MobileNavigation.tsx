@@ -35,7 +35,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
         <div className="relative isolate flex shrink-0 items-center justify-between gap-4 overflow-hidden border-b-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark px-5 py-4 text-white">
           <div aria-hidden className="pointer-events-none absolute -right-10 -top-16 -z-10 h-40 w-40 rounded-full bg-crfal-blue-light/30 blur-3xl" />
           <Link to="/" onClick={close} className="rounded-lg focus-visible:outline-white">
-            <img src="/images/logo-crf-branca.png" alt="CRF-AL, página inicial" className="h-10 w-auto object-contain" />
+            <img src="/images/logo-crf-branca.webp" alt="CRF-AL, página inicial" className="h-10 w-auto object-contain" />
           </Link>
           <DialogTitle className="sr-only">Menu de navegação</DialogTitle>
           <DialogDescription className="sr-only">Conselho Regional de Farmácia de Alagoas</DialogDescription>
@@ -163,7 +163,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
           </a>
 
           <div className="rounded-2xl border border-crfal-gray-200 bg-white p-4">
-            <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" onClick={close} aria-label="Acesso à Informação — Portal da Transparência, abre em uma nova aba" className="mb-4 flex min-h-11 justify-center rounded-lg"><img src="/images/logo-acesso-a-Informacao-colorido.png" alt="Acesso à Informação" className="h-9 w-auto object-contain" /></a>
+            <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" onClick={close} aria-label="Acesso à Informação — Portal da Transparência, abre em uma nova aba" className="mb-4 flex min-h-11 justify-center rounded-lg"><img src="/images/logo-acesso-a-Informacao-colorido.webp" alt="Acesso à Informação" className="h-9 w-auto object-contain" /></a>
             <p className={`mb-3 text-center ${goldLabel}`}>Redes sociais</p>
             {socialLinks}
           </div>

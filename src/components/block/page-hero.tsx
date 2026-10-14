@@ -72,7 +72,7 @@ const TITLE_CLASSES =
   'font-display text-3xl font-semibold leading-[1.1] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.3)] sm:text-4xl md:text-5xl';
 
 /** Imagem de fundo padrão do hero (desktop). Ver proporção no topo do arquivo. */
-const DEFAULT_BACKGROUND_IMAGE = '/images/page-hero.jpg';
+const DEFAULT_BACKGROUND_IMAGE = '/images/page-hero.webp';
 const DEFAULT_BACKGROUND_IMAGE_MOBILE = '/images/page-hero-mobile.webp';
 
 const DEFAULT_DECORATION = (
@@ -92,8 +92,8 @@ export default function PageHero({
   eyebrowIcon,
   children,
   aside,
-  backgroundImage = variant === 'compact' ? '/images/page-hero-desktop-v3.jpg' : DEFAULT_BACKGROUND_IMAGE,
-  backgroundImageMobile = variant === 'compact' ? '/images/page-hero-mobile-v3.jpg' : DEFAULT_BACKGROUND_IMAGE_MOBILE,
+  backgroundImage = variant === 'compact' ? '/images/page-hero-desktop-v3.webp' : DEFAULT_BACKGROUND_IMAGE,
+  backgroundImageMobile = variant === 'compact' ? '/images/page-hero-mobile-v3.webp' : DEFAULT_BACKGROUND_IMAGE_MOBILE,
   decoration,
   className,
   lead,

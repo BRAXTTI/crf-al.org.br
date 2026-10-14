@@ -14,7 +14,7 @@ function CardContent({ title, description, image, action, external = false }: {
   const Arrow = external ? ArrowUpRight : ArrowRight;
   return (
     <>
-      <img src={image} alt="" width={1536} height={512} decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-right" />
+      <img src={image} alt="" width={1672} height={941} decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-right" />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-r from-crfal-blue via-crfal-blue/90 to-crfal-blue/30 group-last:from-crfal-blue-light group-last:via-crfal-blue-light/90 md:to-crfal-blue/10 md:group-last:from-crfal-blue md:group-last:via-crfal-blue/90" />
       <div className="relative flex w-full flex-1 items-center justify-between gap-4 md:h-full md:flex-col md:items-start">
         <h2 className="min-w-0 max-w-[19rem] text-lg font-bold leading-tight sm:text-2xl md:text-2xl">{title}</h2>
@@ -32,10 +32,10 @@ export default function ServiceAccessCards() {
   return (
     <section aria-label="Acesso aos serviços" className="mb-5 grid rounded-xl md:grid-cols-2 md:gap-5">
       <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className={cardClass}>
-        <CardContent title="CRF em Casa" description="Acesse sua área de atendimento online." image="/images/crf-em-casa-card-v2.webp" action="Acessar o sistema" external />
+        <CardContent title="CRF em Casa" description="Acesse sua área de atendimento online." image="/images/crf-em-casa-card-v3.webp" action="Acessar o sistema" external />
       </a>
       <Link to="/servicos/requerimentos" className={cardClass}>
-        <CardContent title="Serviços e Requerimentos" description="Consulte documentos e orientações para profissionais e estabelecimentos." image="/images/servicos-requerimentos-card-v1.webp" action="Consultar serviços" />
+        <CardContent title="Serviços e Requerimentos" description="Consulte documentos e orientações para profissionais e estabelecimentos." image="/images/servicos-requerimentos-card-v2.webp" action="Consultar serviços" />
       </Link>
     </section>
   );

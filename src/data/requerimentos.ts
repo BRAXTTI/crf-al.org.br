@@ -87,7 +87,7 @@ export const individualMenu: MenuCategory[] = [
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf',
-        fluxogramaUrl: '/images/fluxograma-primeira-inscricao-crfal.png',
+        fluxogramaUrl: '/images/fluxograma-primeira-inscricao-crfal.webp',
       },
       {
         id: 'inscricao-profissional-definitiva',

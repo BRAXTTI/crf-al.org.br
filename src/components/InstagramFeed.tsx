@@ -76,7 +76,7 @@ function FollowCard() {
       rel="noopener noreferrer"
       className="group relative isolate flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue p-5 text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
     >
-      <img src="/images/instagram-card-background-v1.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-right-bottom group-hover:scale-105 ${motion}`} />
+      <img src="/images/instagram-card-background-v1.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-right-bottom group-hover:scale-105 ${motion}`} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-crfal-blue-dark via-crfal-blue/85 to-crfal-blue/50" />
       <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/50">
         <Instagram className="h-5 w-5" aria-hidden="true" />
