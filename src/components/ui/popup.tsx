@@ -14,6 +14,7 @@ import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 const DEFAULT_DELAY_MS = 3000;
 const DEFAULT_DISMISS_DAYS = 1;
 const STORAGE_PREFIX = 'crfal:popup:';
+const INTERACTION_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
 
 function dismissDays(popup: PopupData) {
   return popup.dismissDays ?? DEFAULT_DISMISS_DAYS;
@@ -56,7 +57,7 @@ interface PopupProps {
 /**
  * Popup do site, nativo em React (sem plugin de WordPress).
  *
- * - Abre após um delay, uma vez por usuário (frequência configurável).
+ * - Abre após um delay e a primeira interação, uma vez por usuário (frequência configurável).
  * - Responsivo: usa `imageMobile` em telas < 640px quando informado.
  * - Link interno (`/...`) via react-router; externo (`https://...`) em nova aba.
  */
@@ -71,8 +72,29 @@ export default function Popup({ popup }: PopupProps) {
 
   useEffect(() => {
     if (!active || isDismissed(active)) return;
-    const timer = window.setTimeout(() => setOpen(true), active.delayMs ?? DEFAULT_DELAY_MS);
-    return () => window.clearTimeout(timer);
+    // Abre só após o delay E a primeira interação do usuário: depois de uma interação o
+    // navegador encerra a medição do LCP, então a arte do popup não vira o LCP da página.
+    // Sem `scroll`: rolagens programáticas (âncoras) também disparam esse evento.
+    let delayDone = false;
+    let interacted = false;
+    const tryOpen = () => {
+      if (delayDone && interacted) setOpen(true);
+    };
+    const onInteract = () => {
+      interacted = true;
+      removeListeners();
+      tryOpen();
+    };
+    const removeListeners = () => INTERACTION_EVENTS.forEach((type) => window.removeEventListener(type, onInteract));
+    INTERACTION_EVENTS.forEach((type) => window.addEventListener(type, onInteract, { passive: true }));
+    const timer = window.setTimeout(() => {
+      delayDone = true;
+      tryOpen();
+    }, active.delayMs ?? DEFAULT_DELAY_MS);
+    return () => {
+      window.clearTimeout(timer);
+      removeListeners();
+    };
   }, [active]);
 
   const handleOpenChange = useCallback(
