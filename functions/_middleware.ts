@@ -2,6 +2,7 @@
 import { newsPost, newsIndex, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
+import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES } from '../src/data/banners';
 
 const SITE_URL = 'https://institucional.crf-al.org.br';
 
@@ -164,15 +165,35 @@ export function buildMeta(og: OgData): string {
   ].filter(Boolean).join('\n');
 }
 
+interface ImagePreload { href: string; srcset?: string; sizes?: string; media?: string }
+
 /** Preload da imagem LCP. Sem data-page-metadata: o SPA remove esses elementos ao hidratar. */
-export function buildPreload(og: OgData): string {
-  if (!og.preloadImage) return '';
-  const srcset = og.preloadSrcset ? ` imagesrcset="${escapeAttr(og.preloadSrcset)}" imagesizes="${escapeAttr(NEWS_COVER_SIZES)}"` : '';
-  return `<link rel="preload" as="image" fetchpriority="high" href="${escapeAttr(og.preloadImage)}"${srcset}>`;
+export function buildPreload(preloads: ImagePreload[]): string {
+  return preloads.map(({ href, srcset, sizes, media }) => '<link rel="preload" as="image" fetchpriority="high"'
+    + ` href="${escapeAttr(href)}"`
+    + (srcset ? ` imagesrcset="${escapeAttr(srcset)}"` : '')
+    + (srcset && sizes ? ` imagesizes="${escapeAttr(sizes)}"` : '')
+    + (media ? ` media="${escapeAttr(media)}"` : '') + '>').join('');
 }
 
-function injectOg(asset: Response, og: OgData): Response {
-  const preload = buildPreload(og);
+/** Capa da notícia: mesmo srcset/sizes do `<img>` do NewsDetailPage. */
+export function newsPreload(og: OgData): ImagePreload[] {
+  return og.preloadImage ? [{ href: og.preloadImage, srcset: og.preloadSrcset, sizes: NEWS_COVER_SIZES }] : [];
+}
+
+/** 1º banner da home: mesmas fontes do `<picture>` do HeroSlider. */
+export function homePreload(): ImagePreload[] {
+  const first = banners.find(banner => banner.image);
+  if (!first) return [];
+  if (!first.imageMobile) return [{ href: first.image }];
+  return [
+    { href: first.imageMobile, srcset: bannerMobileSrcSet(first), sizes: first.imageMobileSmall ? BANNER_MOBILE_SIZES : undefined, media: '(max-width: 767px)' },
+    { href: first.image, media: '(min-width: 768px)' },
+  ];
+}
+
+function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Response {
+  const preload = buildPreload(preloads);
   const rewritten = new HTMLRewriter()
     .on('title', { element(el) { el.setAttribute('data-page-metadata', 'true'); el.setInnerContent(`${og.title} | CRFAL`); } })
     .on('meta', { element(el) {
@@ -248,7 +269,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     }
     return notFound(asset, pathname);
   }
-  if (staticData) return injectOg(asset, { ...staticData, canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` });
+  if (staticData) return injectOg(asset, { ...staticData, canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` }, pathname === '/' ? homePreload() : []);
   let slug: string;
   try { slug = decodeURIComponent(pathname.slice(prefix!.length)); } catch { return notFound(asset, pathname); }
   if (!slug || slug.includes('/')) return notFound(asset, pathname);
