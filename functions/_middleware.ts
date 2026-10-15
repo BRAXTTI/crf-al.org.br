@@ -1,5 +1,5 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsIndex } from './_news';
+import { newsPost, newsIndex, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 
 const SITE_URL = 'https://institucional.crf-al.org.br';
@@ -70,7 +70,7 @@ async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | nul
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4000);
   try {
-    const res = await fetch(url, { signal: controller.signal, headers: { 'user-agent': 'crfal-og/2.0' } });
+    const res = await fetch(url, { ...ORIGIN_CACHE, signal: controller.signal, headers: { 'user-agent': 'crfal-og/2.0' } });
     if (res.status === 404 && allowNotFound) return null;
     if (!res.ok) throw new Error(`WordPress metadata HTTP ${res.status}`);
     return (await res.json()) as T;
@@ -183,7 +183,7 @@ async function cachedMetadata(context: PagesContext, pathname: string, resolve: 
   if (cached) return cached.json();
   const data = await resolve();
   if (data) context.waitUntil(cache.put(key, new Response(JSON.stringify(data), {
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=600' },
   })).catch(() => undefined));
   return data;
 }

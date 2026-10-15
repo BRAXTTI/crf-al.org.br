@@ -15,35 +15,49 @@ function endpoint(source: Source, path: string, params: Record<string, string> =
   return url.href;
 }
 
+// Edge cache for WordPress subrequests; errors are never cached so outages stay short.
+export const ORIGIN_CACHE = { cf: { cacheTtlByStatus: { '200-299': 600, '404': 60, '500-599': 0 }, cacheEverything: true } } as RequestInit;
+
 async function request(source: Source, path: string, params: Record<string, string> = {}, missing = false): Promise<Response | null> {
-  const response = await fetch(endpoint(source, path, params), { signal: AbortSignal.timeout(15000) });
+  const response = await fetch(endpoint(source, path, params), { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
   if (missing && response.status === 404) return null;
   if (!response.ok) throw new Error(`News ${source} HTTP ${response.status}`);
   return response;
 }
 
 // Cache only successful public data. No module-level mutable request state.
+// Entries live 10 min; after 60 s they are served stale and refreshed in the background.
 interface NewsContext { waitUntil: (promise: Promise<unknown>) => void }
-interface PublicCache { match: (request: Request) => Promise<Response | undefined>; put: (request: Request, response: Response) => Promise<void> }
+interface PublicCache { match: (request: Request) => Promise<Response | undefined>; put: (request: Request, response: Response) => Promise<void>; delete?: (request: Request) => Promise<unknown> }
+const FRESH_MS = 60_000;
 async function cached<T>(key: string, context: NewsContext | undefined, load: () => Promise<T>): Promise<T> {
   const cache = (globalThis as typeof globalThis & { caches?: { default?: PublicCache } }).caches?.default;
-  const request = new Request(`https://institucional.crf-al.org.br/__news/v1/${key}`);
+  const request = new Request(`https://institucional.crf-al.org.br/__news/v2/${key}`);
+  const store = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': 'public, max-age=600' } }));
   const hit = cache && context ? await cache.match(request) : undefined;
-  if (hit) return hit.json() as Promise<T>;
+  if (hit) {
+    const entry = await hit.json() as { storedAt: number; value: T };
+    if (Date.now() - entry.storedAt > FRESH_MS) {
+      context!.waitUntil(load().then(async value => { await (value !== null ? store(value) : cache!.delete?.(request)); }).catch(() => undefined));
+    }
+    return entry.value;
+  }
   const value = await load();
-  if (cache && context && value !== null) context.waitUntil(cache.put(request, Response.json(value, { headers: { 'Cache-Control': 'public, max-age=60' } })).catch(() => undefined));
+  if (cache && context && value !== null) context.waitUntil(store(value).catch(() => undefined));
   return value;
 }
 
-async function currentCategory(): Promise<number | null> {
-  const response = await request('current', 'categories', { slug: NEWS_CATEGORY_SLUG, _fields: 'id,slug', per_page: '1' });
-  const categories = await response!.json() as Array<{id: number; slug: string}>;
-  return categories.find(category => category.slug === NEWS_CATEGORY_SLUG)?.id ?? null;
+async function currentCategory(context?: NewsContext): Promise<number | null> {
+  return cached('current-category', context, async () => {
+    const response = await request('current', 'categories', { slug: NEWS_CATEGORY_SLUG, _fields: 'id,slug', per_page: '1' });
+    const categories = await response!.json() as Array<{id: number; slug: string}>;
+    return categories.find(category => category.slug === NEWS_CATEGORY_SLUG)?.id ?? null;
+  });
 }
 
 export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   const current = await cached<Entry[]>('current-index', context, async () => {
-    const category = await currentCategory();
+    const category = await currentCategory(context);
     if (!category) return []; // Never expose imported posts when the category is absent.
     const rows: Entry[] = [];
     let pages = 1;
@@ -74,7 +88,7 @@ export async function newsPost(slug: string, context?: NewsContext, metadataOnly
       const response = await request('legacy', `posts/${historical?.id ?? slug}`, { _fields: postFields, _embed: embed }, true);
       return response ? { ...await response.json() as WPPost, newsSource: 'legacy' } : null;
     }
-    const category = await currentCategory();
+    const category = await currentCategory(context);
     if (!category) return null;
     const response = await request('current', 'posts', { slug, categories: String(category), _fields: postFields, _embed: embed });
     const posts = await response!.json() as WPPost[];
