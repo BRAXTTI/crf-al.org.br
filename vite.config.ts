@@ -52,4 +52,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Bibliotecas em chunks próprios: mudam pouco e ficam em cache entre deploys.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom|cookie|set-cookie-parser)[\\/]/.test(id)) return "react"
+          if (id.includes("@tanstack")) return "tanstack"
+          if (id.includes("@radix-ui")) return "radix"
+          if (id.includes("dompurify")) return "dompurify"
+          if (id.includes("lucide-react")) return "lucide"
+          if (id.includes("react-helmet-async")) return "helmet"
+        },
+      },
+    },
+  },
 });

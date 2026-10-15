@@ -1,4 +1,3 @@
-import DOMPurify from 'dompurify';
 import { mediaImageSet, type ImageSet } from './image-set';
 import type { CRFEvent, CRFInstagramPost, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
 
@@ -140,11 +139,6 @@ export function getPostImageSet(post: WPWithEmbed): ImageSet | undefined {
 
 export function getPostAuthor(post: WPWithEmbed): string | undefined {
   return post._embedded?.author?.[0]?.name;
-}
-
-/** Sanitiza HTML do WordPress para uso seguro com dangerouslySetInnerHTML. */
-export function sanitizeWP(html: string): string {
-  return DOMPurify.sanitize(html);
 }
 
 /**

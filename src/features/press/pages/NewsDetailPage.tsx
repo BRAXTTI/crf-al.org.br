@@ -7,9 +7,9 @@ import {
   getPostCategory,
   getPostImage,
   getPostImageSet,
-  sanitizeWP,
   stripHTML,
 } from '@/services/wordpress/client';
+import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { NEWS_COVER_SIZES } from '@/services/wordpress/image-set';
 import { usePost, usePostBySlug, useRelatedPosts } from '@/services/wordpress/hooks';
 import ShareButtons from '../components/ShareButtons';

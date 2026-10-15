@@ -66,7 +66,7 @@ try {
   const routes = await readFile(new URL('../src/router/app-router.tsx', import.meta.url), 'utf8');
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
   const sitemapPaths = new Set([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => new URL(url).pathname));
-  for (const [, path] of routes.matchAll(/\{ path: '([^':*]+)', element:/g)) {
+  for (const [, path] of routes.matchAll(/\{ path: '([^':*]+)', (?:element|lazy):/g)) {
     if (!['instituicao/missao-visao', 'imprensa/noticias-cff'].includes(path)) assert.ok(Object.hasOwn(PAGE_METADATA, `/${path}`), `route coverage: ${path}`);
   }
   for (const path of Object.keys(PAGE_METADATA)) {
