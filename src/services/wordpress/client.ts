@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import { mediaImageSet, type ImageSet } from './image-set';
 import type { CRFEvent, CRFInstagramPost, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
 
 /**
@@ -130,6 +131,11 @@ export function getPostCategory(post: WPWithEmbed): string {
 
 export function getPostImage(post: WPWithEmbed): string | undefined {
   return post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+}
+
+/** Capa com srcset (ver `mediaImageSet`). */
+export function getPostImageSet(post: WPWithEmbed): ImageSet | undefined {
+  return mediaImageSet(post._embedded?.['wp:featuredmedia']?.[0]);
 }
 
 export function getPostAuthor(post: WPWithEmbed): string | undefined {

@@ -1,6 +1,7 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
 import { newsPost, newsIndex, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
+import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 
 const SITE_URL = 'https://institucional.crf-al.org.br';
 
@@ -27,6 +28,9 @@ interface OgData {
   publishedAt?: string;
   modifiedAt?: string;
   noindex?: boolean;
+  /** Capa da notícia (LCP): mesmo src/srcset que o `<img>` do NewsDetailPage. */
+  preloadImage?: string;
+  preloadSrcset?: string;
 }
 
 interface PagesContext {
@@ -87,6 +91,7 @@ async function resolveNews(slug: string, context: PagesContext): Promise<OgData 
   const post = await newsPost(slug, context, true);
   if (!post) return null;
   const media = post._embedded?.['wp:featuredmedia']?.[0];
+  const cover = mediaImageSet(media);
   return {
     title: stripHTML(post.title.rendered),
     description: stripHTML(post.excerpt?.rendered ?? '').slice(0, 160) || undefined,
@@ -95,6 +100,8 @@ async function resolveNews(slug: string, context: PagesContext): Promise<OgData 
     ogType: 'article',
     publishedAt: post.date,
     modifiedAt: post.modified,
+    preloadImage: cover?.src,
+    preloadSrcset: cover?.srcSet,
   };
 }
 
@@ -157,7 +164,15 @@ export function buildMeta(og: OgData): string {
   ].filter(Boolean).join('\n');
 }
 
+/** Preload da imagem LCP. Sem data-page-metadata: o SPA remove esses elementos ao hidratar. */
+export function buildPreload(og: OgData): string {
+  if (!og.preloadImage) return '';
+  const srcset = og.preloadSrcset ? ` imagesrcset="${escapeAttr(og.preloadSrcset)}" imagesizes="${escapeAttr(NEWS_COVER_SIZES)}"` : '';
+  return `<link rel="preload" as="image" fetchpriority="high" href="${escapeAttr(og.preloadImage)}"${srcset}>`;
+}
+
 function injectOg(asset: Response, og: OgData): Response {
+  const preload = buildPreload(og);
   const rewritten = new HTMLRewriter()
     .on('title', { element(el) { el.setAttribute('data-page-metadata', 'true'); el.setInnerContent(`${og.title} | CRFAL`); } })
     .on('meta', { element(el) {
@@ -166,7 +181,10 @@ function injectOg(asset: Response, og: OgData): Response {
       if (property.startsWith('og:') || property.startsWith('article:') || name.startsWith('twitter:') || name === 'description' || name === 'robots') el.remove();
     } })
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
-    .on('head', { element(el) { el.append(buildMeta(og), { html: true }); } })
+    .on('head', { element(el) {
+      if (preload) el.prepend(preload, { html: true });
+      el.append(buildMeta(og), { html: true });
+    } })
     .transform(asset);
   // The rewritten body no longer matches the shell's validators.
   const response = new Response(rewritten.body, rewritten);
@@ -178,7 +196,7 @@ function injectOg(asset: Response, og: OgData): Response {
 async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
   // Cache metadata only: never retain HTML pointing to an outdated deployment bundle.
   const cache = (caches as CacheStorage & { default: Cache }).default;
-  const key = new Request(`${SITE_URL}/__page-metadata/v3${pathname}`);
+  const key = new Request(`${SITE_URL}/__page-metadata/v4${pathname}`);
   const cached = await cache.match(key);
   if (cached) return cached.json();
   const data = await resolve();

@@ -6,9 +6,11 @@ import {
   getPostAuthor,
   getPostCategory,
   getPostImage,
+  getPostImageSet,
   sanitizeWP,
   stripHTML,
 } from '@/services/wordpress/client';
+import { NEWS_COVER_SIZES } from '@/services/wordpress/image-set';
 import { usePost, usePostBySlug, useRelatedPosts } from '@/services/wordpress/hooks';
 import ShareButtons from '../components/ShareButtons';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
@@ -77,6 +79,7 @@ export default function NewsDetailPage() {
 
   const postImage = post ? getPostImage(post) : undefined;
   const featuredImage = postImage || IMG_FALLBACK;
+  const cover = post ? getPostImageSet(post) : undefined;
   const categoria = (post && getPostCategory(post)) || 'Notícia';
   const autor = post ? getPostAuthor(post) : undefined;
   const canonicalUrl = `${SITE_URL}/imprensa/noticias/${post?.slug ?? slug ?? ''}`;
@@ -175,9 +178,18 @@ export default function NewsDetailPage() {
       {(isLoading || errorMessage) && (
         <div className="container-crfal py-8 md:py-12">
           {isLoading && (
-            <div className="bg-white  rounded-xl border border-crfal-gray-200  p-10 text-center text-crfal-gray-500">
-              <div className="animate-spin w-8 h-8 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4" />
-              Carregando matéria...
+            <div role="status" aria-busy="true" className="animate-pulse">
+              <span className="sr-only">Carregando matéria...</span>
+              <div className="mx-auto max-w-4xl space-y-3 text-center">
+                <div className="mx-auto h-5 w-24 rounded-full bg-crfal-gray-200" />
+                <div className="mx-auto h-8 w-full max-w-3xl rounded bg-crfal-gray-200 md:h-10" />
+                <div className="mx-auto h-8 w-2/3 rounded bg-crfal-gray-200 md:h-10" />
+              </div>
+              <div className="mt-8 grid gap-6 lg:grid-cols-12 lg:gap-8">
+                <div className="lg:col-span-8">
+                  <div className="aspect-video w-full rounded-xl bg-crfal-gray-200" />
+                </div>
+              </div>
             </div>
           )}
 
@@ -242,7 +254,19 @@ export default function NewsDetailPage() {
               {/* Article */}
               <main className="lg:col-span-8">
                 <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
-
+                  {cover && (
+                    <img
+                      src={cover.src}
+                      srcSet={cover.srcSet}
+                      sizes={cover.srcSet ? NEWS_COVER_SIZES : undefined}
+                      width={cover.width}
+                      height={cover.height}
+                      alt={cover.alt}
+                      fetchPriority="high"
+                      loading="eager"
+                      className="aspect-video w-full object-cover"
+                    />
+                  )}
                   <div className="p-4 sm:p-6">
                     <div
                     className="text-neutral-700  leading-relaxed text-sm sm:text-base
