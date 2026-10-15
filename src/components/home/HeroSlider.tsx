@@ -45,6 +45,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   const nextIndex = slides.length > 0 ? (activeIndex + 1) % slides.length : 0;
 
   // Só baixa o slide ativo e o próximo; os já exibidos continuam montados para o fade.
+  // `isActive` também entra na condição: o efeito abaixo só marca o slide depois do render.
   const [shown, setShown] = useState(() => new Set([0]));
   useEffect(() => {
     setShown((prev) => (prev.has(activeIndex) ? prev : new Set(prev).add(activeIndex)));
@@ -97,7 +98,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
               ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` }
               : {})}
           >
-            {(shown.has(index) || index === nextIndex) && (
+            {(isActive || shown.has(index) || index === nextIndex) && (
               <picture className="absolute inset-0 block">
                 {slide.imageMobile && (
                   <source

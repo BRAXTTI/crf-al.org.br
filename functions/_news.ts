@@ -16,7 +16,9 @@ function endpoint(source: Source, path: string, params: Record<string, string> =
 }
 
 // Edge cache for WordPress subrequests; errors are never cached so outages stay short.
-export const ORIGIN_CACHE = { cf: { cacheTtlByStatus: { '200-299': 600, '404': 60, '500-599': 0 }, cacheEverything: true } } as RequestInit;
+// 2xx lives only as long as cached()'s freshness window: a background refresh must reach
+// the origin, otherwise it would re-store old data with a new timestamp.
+export const ORIGIN_CACHE = { cf: { cacheTtlByStatus: { '200-299': 60, '404': 60, '500-599': 0 }, cacheEverything: true } } as RequestInit;
 
 async function request(source: Source, path: string, params: Record<string, string> = {}, missing = false): Promise<Response | null> {
   const response = await fetch(endpoint(source, path, params), { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
