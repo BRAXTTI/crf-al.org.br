@@ -151,7 +151,7 @@ export default function NewsDetailPage() {
       />
       {/* Cabeçalho compacto (breadcrumb + voltar) — sem hero, conteúdo perto da navbar */}
       <div className="pt-[calc(var(--page-header-offset)+0.75rem)]">
-        <div className="container-crfal flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="container-crfal flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-2 sm:min-h-5">
           <nav
             aria-label="Breadcrumb"
             className="flex flex-wrap items-center gap-2 text-xs text-crfal-gray-500 sm:text-sm"
