@@ -82,7 +82,7 @@ function MeetingRow({ meeting, today }: { meeting: PlenaryMeeting; today: string
     </div>
     <div className="grid gap-3 sm:grid-cols-2">
       <DocumentSlot label="Pauta do dia" icon={FileText} href={meeting.agendaUrl} pendingText={held ? 'Não publicada' : 'A divulgar'} meetingName={longDate} />
-      <DocumentSlot label="Ata assinada" icon={FileSignature} href={meeting.minutesUrl} pendingText={held ? (meeting.noQuorum ? 'Não se aplica' : 'Aguardando publicação') : 'Após a reunião'} meetingName={longDate} />
+      <DocumentSlot label="Ata assinada" icon={FileSignature} href={meeting.minutesUrl} pendingText={held ? (meeting.noQuorum ? 'Não se aplica' : 'Ata em breve') : 'Após a reunião'} meetingName={longDate} />
     </div>
   </li>;
 }
