@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
-import { banners as defaultBanners, type Banner } from '@/data/banners';
+import { banners as defaultBanners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, type Banner } from '@/data/banners';
 
 const AUTOPLAY_MS = 6000;
 
@@ -42,6 +42,14 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   const prev = useCallback(() => goTo(current - 1), [current, goTo]);
 
   const activeIndex = slides.length > 0 ? current % slides.length : 0;
+  const nextIndex = slides.length > 0 ? (activeIndex + 1) % slides.length : 0;
+
+  // Só baixa o slide ativo e o próximo; os já exibidos continuam montados para o fade.
+  // `isActive` também entra na condição: o efeito abaixo só marca o slide depois do render.
+  const [shown, setShown] = useState(() => new Set([0]));
+  useEffect(() => {
+    setShown((prev) => (prev.has(activeIndex) ? prev : new Set(prev).add(activeIndex)));
+  }, [activeIndex]);
 
   useEffect(() => {
     if (isReducedMotion || isPaused || slides.length <= 1) {
@@ -90,17 +98,29 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
               ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` }
               : {})}
           >
-            <picture className="absolute inset-0 block">
-              {slide.imageMobile && <source media="(max-width: 767px)" srcSet={slide.imageMobile} />}
-              <img
-                src={slide.image}
-                alt={slide.href ? '' : slide.alt}
-                loading={index === 0 ? 'eager' : 'lazy'}
-                fetchPriority={index === 0 ? 'high' : 'auto'}
-                decoding="async"
-                className="h-full w-full object-cover md:object-contain"
-              />
-            </picture>
+            {(isActive || shown.has(index) || index === nextIndex) && (
+              <picture className="absolute inset-0 block">
+                {slide.imageMobile && (
+                  <source
+                    media="(max-width: 767px)"
+                    srcSet={bannerMobileSrcSet(slide)}
+                    sizes={slide.imageMobileSmall ? BANNER_MOBILE_SIZES : undefined}
+                    width={1080}
+                    height={1350}
+                  />
+                )}
+                <img
+                  src={slide.image}
+                  alt={slide.href ? '' : slide.alt}
+                  width={1920}
+                  height={600}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  fetchPriority={index === 0 ? 'high' : 'auto'}
+                  decoding={index === 0 ? undefined : 'async'}
+                  className="h-full w-full object-cover md:object-contain"
+                />
+              </picture>
+            )}
 
             {hasOverlay && (
               <>

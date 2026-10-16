@@ -8,7 +8,8 @@
  *
  * Comportamento:
  *  - Exibe UM popup por vez: o primeiro da lista com `active !== false`.
- *  - Abre após `delayMs` (padrão 3000 ms) do carregamento da página.
+ *  - Abre após `delayMs` (padrão 3000 ms) do carregamento da página E depois da primeira
+ *    interação (toque, clique, tecla ou roda do mouse), para não virar o LCP da página.
  *  - Ao fechar, não aparece de novo por `dismissDays` dias (padrão 1).
  *    Use `0` para não repetir na mesma sessão do navegador.
  *  - Sem `title`/`description`/`ctaLabel`, a arte inteira vira um link.
@@ -54,17 +55,17 @@ export const popups: Popup[] = [
     alt: 'Alerta: golpe de cobrança de anuidade. Desconfie de boletos e links falsos, confira sempre o beneficiário e emita a 2ª via só pelo site oficial. Em caso de dúvida, fale com o CRF/AL pelos canais oficiais.',
     href: '/imprensa/noticias/crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp',
     dismissDays: 1,
+    active: false,
   },
   {
-    id: 'exemplo-2026-01',
-    // Exemplo usando uma arte existente. Troque por `image`/`imageMobile` do popup.
+    id: 'simposio-einstein-2026-10',
+    // Parceria com o Einstein: VIII Simpósio Internacional de Farmácia (30/10/2026).
     image: '/images/popups/Farmacia_Feed_Inscreva-se.webp',
     alt: 'Simposio Internacional - Albert Eistein CRFAL',
     href: 'https://ensino.einstein.br/evento_simposio_internacional_farmacia_p0961/p',
     title: '',
     description: 'Cupom: FARMACIA20OFF',
     ctaLabel: '',
-    active: false,
     external: true,
     dismissDays: 1,
   },

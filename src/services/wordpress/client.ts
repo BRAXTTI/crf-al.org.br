@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import { mediaImageSet, type ImageSet } from './image-set';
 import type { CRFEvent, CRFInstagramPost, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
 
 /**
@@ -132,13 +132,13 @@ export function getPostImage(post: WPWithEmbed): string | undefined {
   return post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
 }
 
-export function getPostAuthor(post: WPWithEmbed): string | undefined {
-  return post._embedded?.author?.[0]?.name;
+/** Capa com srcset (ver `mediaImageSet`). */
+export function getPostImageSet(post: WPWithEmbed): ImageSet | undefined {
+  return mediaImageSet(post._embedded?.['wp:featuredmedia']?.[0]);
 }
 
-/** Sanitiza HTML do WordPress para uso seguro com dangerouslySetInnerHTML. */
-export function sanitizeWP(html: string): string {
-  return DOMPurify.sanitize(html);
+export function getPostAuthor(post: WPWithEmbed): string | undefined {
+  return post._embedded?.author?.[0]?.name;
 }
 
 /**

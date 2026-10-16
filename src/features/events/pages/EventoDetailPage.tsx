@@ -16,7 +16,8 @@ import {
 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
-import { getPostImage, sanitizeWP, stripHTML } from '@/services/wordpress/client';
+import { getPostImage, stripHTML } from '@/services/wordpress/client';
+import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { useEventById, useEvents } from '@/services/wordpress/hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
 import type { WPEventListing } from '@/services/wordpress/types';

@@ -37,10 +37,21 @@ interface WPTerm {
   slug?: string;
 }
 
-interface WPMedia {
+export interface WPMediaSize {
+  source_url: string;
+  width: number;
+  height: number;
+}
+
+export interface WPMedia {
   id?: number;
   source_url: string;
   alt_text?: string;
+  media_details?: {
+    width?: number;
+    height?: number;
+    sizes?: Record<string, WPMediaSize>;
+  };
 }
 
 export interface WPEmbedded {

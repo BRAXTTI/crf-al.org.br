@@ -9,10 +9,17 @@ const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(ts.transp
   module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022,
 })).toString('base64')}`;
 const metadataUrl = moduleUrl(await readFile(new URL('../src/config/page-metadata.ts', import.meta.url), 'utf8'));
+const imageSetUrl = moduleUrl(await readFile(new URL('../src/services/wordpress/image-set.ts', import.meta.url), 'utf8'));
+const siteUrl = moduleUrl(await readFile(new URL('../src/config/site.ts', import.meta.url), 'utf8'));
+const bannersUrl = moduleUrl((await readFile(new URL('../src/data/banners.ts', import.meta.url), 'utf8')).replace("'../config/site'", JSON.stringify(siteUrl)));
 const source = (await readFile(new URL('../functions/_middleware.ts', import.meta.url), 'utf8'))
+  .replace("'../src/data/banners'", JSON.stringify(bannersUrl))
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
+  .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
   .replace("'./_news'", JSON.stringify(await loadNews()));
-const { onRequest, buildMeta } = await import(moduleUrl(source));
+const { onRequest, buildMeta, buildPreload, newsPreload, homePreload } = await import(moduleUrl(source));
+const { banners } = await import(bannersUrl);
+const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
 const { PAGE_METADATA } = await import(metadataUrl);
 const saved = { fetch: globalThis.fetch, caches: globalThis.caches, rewriter: globalThis.HTMLRewriter, error: console.error };
 let fetches = 0;
@@ -59,7 +66,7 @@ try {
   const routes = await readFile(new URL('../src/router/app-router.tsx', import.meta.url), 'utf8');
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
   const sitemapPaths = new Set([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => new URL(url).pathname));
-  for (const [, path] of routes.matchAll(/\{ path: '([^':*]+)', element:/g)) {
+  for (const [, path] of routes.matchAll(/\{ path: '([^':*]+)', (?:element|lazy):/g)) {
     if (!['instituicao/missao-visao', 'imprensa/noticias-cff'].includes(path)) assert.ok(Object.hasOwn(PAGE_METADATA, `/${path}`), `route coverage: ${path}`);
   }
   for (const path of Object.keys(PAGE_METADATA)) {
@@ -135,6 +142,20 @@ try {
   assert.ok(tags.includes('Título &lt;teste&gt;'));
   assert.equal((tags.match(/rel="canonical"/g) || []).length, 1);
   assert.ok(tags.includes('content="noindex, nofollow"'));
+  const cover = mediaImageSet({ source_url: 'https://example.org/full.jpg', alt_text: 'Capa', media_details: { width: 1600, height: 900, sizes: {
+    thumbnail: { source_url: 'https://example.org/t.jpg', width: 150, height: 150 },
+    crop: { source_url: 'https://example.org/c.jpg', width: 930, height: 620 },
+    full: { source_url: 'https://example.org/full.jpg', width: 1600, height: 900 },
+    large: { source_url: 'https://example.org/l.jpg', width: 1024, height: 576 },
+    medium: { source_url: 'https://example.org/m.jpg', width: 300, height: 169 },
+  } } });
+  assert.deepEqual(cover, { src: 'https://example.org/l.jpg', srcSet: 'https://example.org/m.jpg 300w, https://example.org/l.jpg 1024w, https://example.org/full.jpg 1600w', width: 1024, height: 576, alt: 'Capa' });
+  const preload = buildPreload(newsPreload({ title: 'x', canonical: 'https://example.org/n', preloadImage: cover.src, preloadSrcset: cover.srcSet }));
+  assert.ok(preload.includes(`imagesrcset="${cover.srcSet}"`) && preload.includes(`imagesizes="${NEWS_COVER_SIZES}"`) && !preload.includes('data-page-metadata'));
+  assert.equal(buildPreload(newsPreload({ title: 'x', canonical: 'https://example.org/n' })), '');
+  const home = buildPreload(homePreload());
+  assert.ok(home.includes(`href="${banners[0].imageMobile}"`) && home.includes('media="(max-width: 767px)"'));
+  assert.ok(home.includes(`href="${banners[0].image}"`) && home.includes('media="(min-width: 768px)"'));
   console.log(`SEO: ${Object.keys(PAGE_METADATA).length} static routes, genuine 404s, resources/APIs, redirects, metadata cache and origin failures passed (offline handler tests).`);
 } finally {
   globalThis.fetch = saved.fetch;

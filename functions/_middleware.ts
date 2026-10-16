@@ -1,6 +1,8 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsIndex } from './_news';
+import { newsPost, newsIndex, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
+import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
+import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES } from '../src/data/banners';
 
 const SITE_URL = 'https://institucional.crf-al.org.br';
 
@@ -27,6 +29,9 @@ interface OgData {
   publishedAt?: string;
   modifiedAt?: string;
   noindex?: boolean;
+  /** Capa da notícia (LCP): mesmo src/srcset que o `<img>` do NewsDetailPage. */
+  preloadImage?: string;
+  preloadSrcset?: string;
 }
 
 interface PagesContext {
@@ -70,7 +75,7 @@ async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | nul
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4000);
   try {
-    const res = await fetch(url, { signal: controller.signal, headers: { 'user-agent': 'crfal-og/2.0' } });
+    const res = await fetch(url, { ...ORIGIN_CACHE, signal: controller.signal, headers: { 'user-agent': 'crfal-og/2.0' } });
     if (res.status === 404 && allowNotFound) return null;
     if (!res.ok) throw new Error(`WordPress metadata HTTP ${res.status}`);
     return (await res.json()) as T;
@@ -87,6 +92,7 @@ async function resolveNews(slug: string, context: PagesContext): Promise<OgData 
   const post = await newsPost(slug, context, true);
   if (!post) return null;
   const media = post._embedded?.['wp:featuredmedia']?.[0];
+  const cover = mediaImageSet(media);
   return {
     title: stripHTML(post.title.rendered),
     description: stripHTML(post.excerpt?.rendered ?? '').slice(0, 160) || undefined,
@@ -95,6 +101,8 @@ async function resolveNews(slug: string, context: PagesContext): Promise<OgData 
     ogType: 'article',
     publishedAt: post.date,
     modifiedAt: post.modified,
+    preloadImage: cover?.src,
+    preloadSrcset: cover?.srcSet,
   };
 }
 
@@ -157,7 +165,35 @@ export function buildMeta(og: OgData): string {
   ].filter(Boolean).join('\n');
 }
 
-function injectOg(asset: Response, og: OgData): Response {
+interface ImagePreload { href: string; srcset?: string; sizes?: string; media?: string }
+
+/** Preload da imagem LCP. Sem data-page-metadata: o SPA remove esses elementos ao hidratar. */
+export function buildPreload(preloads: ImagePreload[]): string {
+  return preloads.map(({ href, srcset, sizes, media }) => '<link rel="preload" as="image" fetchpriority="high"'
+    + ` href="${escapeAttr(href)}"`
+    + (srcset ? ` imagesrcset="${escapeAttr(srcset)}"` : '')
+    + (srcset && sizes ? ` imagesizes="${escapeAttr(sizes)}"` : '')
+    + (media ? ` media="${escapeAttr(media)}"` : '') + '>').join('');
+}
+
+/** Capa da notícia: mesmo srcset/sizes do `<img>` do NewsDetailPage. */
+export function newsPreload(og: OgData): ImagePreload[] {
+  return og.preloadImage ? [{ href: og.preloadImage, srcset: og.preloadSrcset, sizes: NEWS_COVER_SIZES }] : [];
+}
+
+/** 1º banner da home: mesmas fontes do `<picture>` do HeroSlider. */
+export function homePreload(): ImagePreload[] {
+  const first = banners.find(banner => banner.image);
+  if (!first) return [];
+  if (!first.imageMobile) return [{ href: first.image }];
+  return [
+    { href: first.imageMobile, srcset: bannerMobileSrcSet(first), sizes: first.imageMobileSmall ? BANNER_MOBILE_SIZES : undefined, media: '(max-width: 767px)' },
+    { href: first.image, media: '(min-width: 768px)' },
+  ];
+}
+
+function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Response {
+  const preload = buildPreload(preloads);
   const rewritten = new HTMLRewriter()
     .on('title', { element(el) { el.setAttribute('data-page-metadata', 'true'); el.setInnerContent(`${og.title} | CRFAL`); } })
     .on('meta', { element(el) {
@@ -166,7 +202,10 @@ function injectOg(asset: Response, og: OgData): Response {
       if (property.startsWith('og:') || property.startsWith('article:') || name.startsWith('twitter:') || name === 'description' || name === 'robots') el.remove();
     } })
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
-    .on('head', { element(el) { el.append(buildMeta(og), { html: true }); } })
+    .on('head', { element(el) {
+      if (preload) el.prepend(preload, { html: true });
+      el.append(buildMeta(og), { html: true });
+    } })
     .transform(asset);
   // The rewritten body no longer matches the shell's validators.
   const response = new Response(rewritten.body, rewritten);
@@ -178,12 +217,12 @@ function injectOg(asset: Response, og: OgData): Response {
 async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
   // Cache metadata only: never retain HTML pointing to an outdated deployment bundle.
   const cache = (caches as CacheStorage & { default: Cache }).default;
-  const key = new Request(`${SITE_URL}/__page-metadata/v3${pathname}`);
+  const key = new Request(`${SITE_URL}/__page-metadata/v4${pathname}`);
   const cached = await cache.match(key);
   if (cached) return cached.json();
   const data = await resolve();
   if (data) context.waitUntil(cache.put(key, new Response(JSON.stringify(data), {
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60' },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=600' },
   })).catch(() => undefined));
   return data;
 }
@@ -230,7 +269,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     }
     return notFound(asset, pathname);
   }
-  if (staticData) return injectOg(asset, { ...staticData, canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` });
+  if (staticData) return injectOg(asset, { ...staticData, canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` }, pathname === '/' ? homePreload() : []);
   let slug: string;
   try { slug = decodeURIComponent(pathname.slice(prefix!.length)); } catch { return notFound(asset, pathname); }
   if (!slug || slug.includes('/')) return notFound(asset, pathname);

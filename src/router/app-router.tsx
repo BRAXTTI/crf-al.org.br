@@ -1,72 +1,50 @@
+import type { ComponentType } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import HomePage from '@/features/home/pages/HomePage';
-import InstitutionalPage from '@/features/institutional/pages/InstitutionalPage';
-import SobreConselhoPage from '@/features/institutional/pages/SobreConselhoPage';
-import BoardPage from '@/features/institutional/pages/BoardPage';
-import StatutePage from '@/features/institutional/pages/StatutePage';
-import PlenariasPage from '@/features/institutional/pages/PlenariasPage';
-import PrivacyPolicyPage from '@/features/institutional/pages/PrivacyPolicyPage';
-import TermsOfUsePage from '@/features/institutional/pages/TermsOfUsePage';
-import ContactPage from '@/features/contact/pages/ContactPage';
-import RequirementsPage from '@/features/services/pages/RequirementsPage';
-import TutorialsPage from '@/features/services/pages/TutorialsPage';
-import OmbudsmanPage from '@/features/services/pages/OmbudsmanPage';
-import ManualCrfEmCasaPage from '@/features/services/pages/ManualCrfEmCasaPage';
-import NewsPage from '@/features/press/pages/NewsPage';
-import CffPublicationsPage from '@/features/press/pages/CffPublicationsPage';
-import NewsDetailPage from '@/features/press/pages/NewsDetailPage';
-import PhotoGalleryPage from '@/features/press/pages/PhotoGalleryPage';
-import PhotoAlbumPage from '@/features/press/pages/PhotoAlbumPage';
-import PublicationDetailPage from '@/features/publications/pages/PublicationDetailPage';
-import FiscalizacaoPage from '@/features/fiscalizacao/pages/FiscalizacaoPage';
-import PapelFiscalizacaoPage from '@/features/fiscalizacao/pages/PapelFiscalizacaoPage';
-import InstrumentosFiscalizacaoPage from '@/features/fiscalizacao/pages/InstrumentosFiscalizacaoPage';
-import PlanoFiscalizacaoAnualPage from '@/features/fiscalizacao/pages/PlanoFiscalizacaoAnualPage';
-import RelatoriosFiscalizacaoPage from '@/features/fiscalizacao/pages/RelatoriosFiscalizacaoPage';
-import ProcessoAdministrativoFiscalPage from '@/features/fiscalizacao/pages/ProcessoAdministrativoFiscalPage';
-import AfastamentoProvisorioPage from '@/features/fiscalizacao/pages/AfastamentoProvisorioPage';
-import LegislacaoPage from '@/features/fiscalizacao/pages/LegislacaoPage';
-import EventosPage from '@/features/events/pages/EventosPage';
-import EventoDetailPage from '@/features/events/pages/EventoDetailPage';
 import NotFoundPage from '@/features/not-found/pages/NotFoundPage';
+
+/** Rota carregada sob demanda: cada página vira um chunk próprio. */
+const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({ Component: (await load()).default });
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
+    // Primeira visita direto numa rota lazy: nada a mostrar até o chunk chegar.
+    HydrateFallback: () => null,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'instituicao', element: <InstitutionalPage /> },
-      { path: 'instituicao/sobre-conselho', element: <SobreConselhoPage /> },
+      { path: 'instituicao', lazy: page(() => import('@/features/institutional/pages/InstitutionalPage')) },
+      { path: 'instituicao/sobre-conselho', lazy: page(() => import('@/features/institutional/pages/SobreConselhoPage')) },
       { path: 'instituicao/missao-visao', element: <Navigate to="/instituicao/sobre-conselho" replace /> },
-      { path: 'instituicao/diretoria', element: <BoardPage /> },
-      { path: 'instituicao/estatuto', element: <StatutePage /> },
-      { path: 'instituicao/plenarias', element: <PlenariasPage /> },
-      { path: 'politica-de-privacidade', element: <PrivacyPolicyPage /> },
-      { path: 'termos-de-uso', element: <TermsOfUsePage /> },
-      { path: 'servicos/requerimentos', element: <RequirementsPage /> },
-      { path: 'servicos/tutoriais', element: <TutorialsPage /> },
-      { path: 'servicos/manual-crf-em-casa', element: <ManualCrfEmCasaPage /> },
-      { path: 'servicos/ouvidoria', element: <OmbudsmanPage /> },
-      { path: 'imprensa/noticias', element: <NewsPage /> },
-      { path: 'imprensa/publicacoes-cff', element: <CffPublicationsPage /> },
+      { path: 'instituicao/diretoria', lazy: page(() => import('@/features/institutional/pages/BoardPage')) },
+      { path: 'instituicao/estatuto', lazy: page(() => import('@/features/institutional/pages/StatutePage')) },
+      { path: 'instituicao/plenarias', lazy: page(() => import('@/features/institutional/pages/PlenariasPage')) },
+      { path: 'politica-de-privacidade', lazy: page(() => import('@/features/institutional/pages/PrivacyPolicyPage')) },
+      { path: 'termos-de-uso', lazy: page(() => import('@/features/institutional/pages/TermsOfUsePage')) },
+      { path: 'servicos/requerimentos', lazy: page(() => import('@/features/services/pages/RequirementsPage')) },
+      { path: 'servicos/tutoriais', lazy: page(() => import('@/features/services/pages/TutorialsPage')) },
+      { path: 'servicos/manual-crf-em-casa', lazy: page(() => import('@/features/services/pages/ManualCrfEmCasaPage')) },
+      { path: 'servicos/ouvidoria', lazy: page(() => import('@/features/services/pages/OmbudsmanPage')) },
+      { path: 'imprensa/noticias', lazy: page(() => import('@/features/press/pages/NewsPage')) },
+      { path: 'imprensa/publicacoes-cff', lazy: page(() => import('@/features/press/pages/CffPublicationsPage')) },
       { path: 'imprensa/noticias-cff', element: <Navigate to="/imprensa/publicacoes-cff" replace /> },
-      { path: 'imprensa/noticias/:slug', element: <NewsDetailPage /> },
-      { path: 'imprensa/galeria-de-fotos', element: <PhotoGalleryPage /> },
-      { path: 'imprensa/galeria-de-fotos/:slug', element: <PhotoAlbumPage /> },
-      { path: 'contato', element: <ContactPage /> },
-      { path: 'publicacao/:slug', element: <PublicationDetailPage /> },
-      { path: 'fiscalizacao', element: <FiscalizacaoPage /> },
-      { path: 'fiscalizacao/papel-da-fiscalizacao', element: <PapelFiscalizacaoPage /> },
-      { path: 'fiscalizacao/instrumentos-da-fiscalizacao', element: <InstrumentosFiscalizacaoPage /> },
-      { path: 'fiscalizacao/plano-de-fiscalizacao-anual', element: <PlanoFiscalizacaoAnualPage /> },
-      { path: 'fiscalizacao/relatorios', element: <RelatoriosFiscalizacaoPage /> },
-      { path: 'fiscalizacao/processo-administrativo-fiscal', element: <ProcessoAdministrativoFiscalPage /> },
-      { path: 'fiscalizacao/afastamento-provisorio', element: <AfastamentoProvisorioPage /> },
-      { path: 'legislacao', element: <LegislacaoPage /> },
-      { path: 'eventos', element: <EventosPage /> },
-      { path: 'eventos/:slug', element: <EventoDetailPage /> },
+      { path: 'imprensa/noticias/:slug', lazy: page(() => import('@/features/press/pages/NewsDetailPage')) },
+      { path: 'imprensa/galeria-de-fotos', lazy: page(() => import('@/features/press/pages/PhotoGalleryPage')) },
+      { path: 'imprensa/galeria-de-fotos/:slug', lazy: page(() => import('@/features/press/pages/PhotoAlbumPage')) },
+      { path: 'contato', lazy: page(() => import('@/features/contact/pages/ContactPage')) },
+      { path: 'publicacao/:slug', lazy: page(() => import('@/features/publications/pages/PublicationDetailPage')) },
+      { path: 'fiscalizacao', lazy: page(() => import('@/features/fiscalizacao/pages/FiscalizacaoPage')) },
+      { path: 'fiscalizacao/papel-da-fiscalizacao', lazy: page(() => import('@/features/fiscalizacao/pages/PapelFiscalizacaoPage')) },
+      { path: 'fiscalizacao/instrumentos-da-fiscalizacao', lazy: page(() => import('@/features/fiscalizacao/pages/InstrumentosFiscalizacaoPage')) },
+      { path: 'fiscalizacao/plano-de-fiscalizacao-anual', lazy: page(() => import('@/features/fiscalizacao/pages/PlanoFiscalizacaoAnualPage')) },
+      { path: 'fiscalizacao/relatorios', lazy: page(() => import('@/features/fiscalizacao/pages/RelatoriosFiscalizacaoPage')) },
+      { path: 'fiscalizacao/processo-administrativo-fiscal', lazy: page(() => import('@/features/fiscalizacao/pages/ProcessoAdministrativoFiscalPage')) },
+      { path: 'fiscalizacao/afastamento-provisorio', lazy: page(() => import('@/features/fiscalizacao/pages/AfastamentoProvisorioPage')) },
+      { path: 'legislacao', lazy: page(() => import('@/features/fiscalizacao/pages/LegislacaoPage')) },
+      { path: 'eventos', lazy: page(() => import('@/features/events/pages/EventosPage')) },
+      { path: 'eventos/:slug', lazy: page(() => import('@/features/events/pages/EventoDetailPage')) },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

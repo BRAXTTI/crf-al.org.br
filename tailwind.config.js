@@ -78,8 +78,8 @@ module.exports = {
         header: "0 4px 20px rgba(0, 33, 64, 0.09)",
       },
       fontFamily: {
-        sans: ['Rawline', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['Rawline', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Rawline', 'Rawline Fallback', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Rawline', 'Rawline Fallback', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
