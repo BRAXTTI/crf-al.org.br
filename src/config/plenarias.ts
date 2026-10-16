@@ -36,7 +36,7 @@ export const plenaryYears: PlenaryYear[] = [{
     { id: 'plenaria-2026-04-17', title: '4ª Reunião Plenária Ordinária', date: '2026-04-17' },
     { id: 'plenaria-2026-05-15', title: '5ª Reunião Plenária Ordinária', date: '2026-05-15', minutesUrl: '/documentos/plenarias/2026/2026-05-15-ata-5a-reuniao-plenaria-ordinaria.pdf', videoUrls: ['https://www.youtube.com/watch?v=eCMdJjCnFck'] },
     { id: 'plenaria-2026-06-19', title: '6ª Reunião Plenária Ordinária', date: '2026-06-19', minutesUrl: '/documentos/plenarias/2026/2026-06-19-ata-6a-reuniao-plenaria-ordinaria.pdf', videoUrls: ['https://www.youtube.com/watch?v=hovhwau2lxM'], noQuorum: true },
-    { id: 'plenaria-2026-07-17', title: '7ª Reunião Plenária Ordinária', date: '2026-07-17', minutesUrl: '/documentos/plenarias/2026/2026-07-17-ata-7a-reuniao-plenaria-ordinaria.pdf', videoUrls: ['https://www.youtube.com/watch?v=g-j9HB_OApM', 'https://www.youtube.com/watch?v=TKHPNbMgVgg'], noQuorum: true },
+    { id: 'plenaria-2026-07-17', title: '7ª Reunião Plenária Ordinária', date: '2026-07-17', videoUrls: ['https://www.youtube.com/watch?v=g-j9HB_OApM', 'https://www.youtube.com/watch?v=TKHPNbMgVgg'], noQuorum: true },
     { id: 'plenaria-2026-08-21', title: '8ª Reunião Plenária Ordinária', date: '2026-08-21', videoUrls: ['https://www.youtube.com/watch?v=6AvO-jaXHFk'], noQuorum: true },
     { id: 'plenaria-2026-09-25', title: '9ª Reunião Plenária Ordinária', date: '2026-09-25', videoUrls: ['https://www.youtube.com/watch?v=XmNtBSm_C7I'] },
     { id: 'plenaria-2026-10-16', title: '10ª Reunião Plenária Ordinária', date: '2026-10-16', agendaUrl: '/documentos/plenarias/2026/2026-10-16-pauta-10a-reuniao-plenaria-ordinaria.pdf' },
