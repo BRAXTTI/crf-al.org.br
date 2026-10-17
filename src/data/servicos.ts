@@ -3,9 +3,11 @@ import {
   BadgeCheck,
   CalendarOff,
   Edit3,
+  FileClock,
   FileSearch,
   Gavel,
   MessageSquareText,
+  ReceiptText,
   Stamp,
   UserMinus,
   UserPlus,
@@ -14,6 +16,14 @@ import { getRequerimento, perfilDoRequerimento } from '@/data/requerimentos';
 
 export type TutorialPerfil = 'pessoa-fisica' | 'pessoa-juridica';
 
+/** Vídeo vertical (9:16) em motion, servido de `public/images/tutoriais/`. */
+export interface TutorialMotion {
+  src: string;
+  poster: string;
+  /** Duração exibida no botão, ex.: `0:30`. */
+  duracao: string;
+}
+
 interface TutorialBase {
   /** Slug usado no link direto (`?tutorial=<id>`). */
   id: string;
@@ -21,6 +31,7 @@ interface TutorialBase {
   title: string;
   description: string;
   category: string;
+  motion?: TutorialMotion;
 }
 
 /**
@@ -33,7 +44,8 @@ interface TutorialVinculado extends TutorialBase {
 
 /** Serviço de autoatendimento do CRF AL em Casa que não é um requerimento. */
 interface TutorialAutoatendimento extends TutorialBase {
-  perfil: TutorialPerfil;
+  /** `ambos` aparece nos dois filtros de perfil. */
+  perfil: TutorialPerfil | 'ambos';
   prazo?: string;
   steps: string[];
   videoUrl?: string;
@@ -42,7 +54,7 @@ interface TutorialAutoatendimento extends TutorialBase {
 type TutorialSource = TutorialVinculado | TutorialAutoatendimento;
 
 export interface Tutorial extends TutorialBase {
-  perfil: TutorialPerfil;
+  perfil: TutorialPerfil | 'ambos';
   prazo?: string;
   steps: string[];
   videoUrl?: string;
@@ -104,6 +116,7 @@ const fontes: TutorialSource[] = [
     perfil: 'pessoa-fisica',
     prazo: 'Imediato',
     videoUrl: 'https://www.youtube.com/watch?v=1EfNUxgilW0',
+    motion: { src: '/images/tutoriais/baixa-rt.mp4', poster: '/images/tutoriais/baixa-rt-poster.webp', duracao: '0:19' },
     steps: [
       'Acesse o CRF AL em Casa como Pessoa Física.',
       'Clique em "Baixa de Contrato de Trabalho".',
@@ -172,6 +185,40 @@ const fontes: TutorialSource[] = [
     description: 'Apresente a defesa do estabelecimento sem sair de casa.',
     category: 'Fiscalização',
     requerimentoId: 'defesa-auto-infracao',
+  },
+  // Protocolos e boletos
+  {
+    id: 'situacao-protocolos',
+    icon: FileClock,
+    title: 'Situação dos Protocolos',
+    description: 'Acompanhe o andamento das suas solicitações pelo número de protocolo.',
+    category: 'Protocolos e Boletos',
+    perfil: 'ambos',
+    prazo: 'Imediato',
+    motion: { src: '/images/tutoriais/protocolos.mp4', poster: '/images/tutoriais/protocolos-poster.webp', duracao: '0:30' },
+    steps: [
+      'Acesse o CRF AL em Casa com seu login.',
+      'Na página inicial, clique em "Protocolos Web".',
+      'Localize a solicitação pelo número de protocolo.',
+      'Confira a situação e, se houver pendência, envie o que foi pedido.',
+    ],
+  },
+  {
+    id: 'emitir-boletos',
+    icon: ReceiptText,
+    title: 'Emitir Boletos e Anuidades',
+    description: 'Emita a segunda via de anuidades e parcelas sem precisar fazer login.',
+    category: 'Protocolos e Boletos',
+    perfil: 'ambos',
+    prazo: 'Imediato',
+    motion: { src: '/images/tutoriais/boletos.mp4', poster: '/images/tutoriais/boletos-poster.webp', duracao: '0:30' },
+    steps: [
+      'Abra a tela de acesso do CRF AL em Casa.',
+      'No Painel de Controle, clique em "Impressão Parcelamentos/Acordo".',
+      'Selecione o tipo (por exemplo, Farmacêutico) e informe sua inscrição e o CPF ou CNPJ.',
+      'Clique em "Consultar" para ver os débitos em aberto.',
+      'Selecione a anuidade ou parcela e imprima o boleto.',
+    ],
   },
 ];
 

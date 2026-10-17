@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1720">
+  <defs>
+    <linearGradient id="titanium" x1="0" y1="0" x2="1" y2="0.32">
+      <stop stop-color="#77797b"/>
+      <stop offset=".035" stop-color="#383a3d"/>
+      <stop offset=".23" stop-color="#515356"/>
+      <stop offset=".52" stop-color="#303235"/>
+      <stop offset=".8" stop-color="#4b4d50"/>
+      <stop offset=".97" stop-color="#292b2e"/>
+      <stop offset="1" stop-color="#747679"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2=".65" y2="1">
+      <stop stop-color="#a0a2a4"/>
+      <stop offset=".25" stop-color="#606266"/>
+      <stop offset=".55" stop-color="#27292c"/>
+      <stop offset=".85" stop-color="#737579"/>
+      <stop offset="1" stop-color="#44464a"/>
+    </linearGradient>
+    <linearGradient id="button" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#303236"/>
+      <stop offset=".45" stop-color="#66686b"/>
+      <stop offset="1" stop-color="#292b2e"/>
+    </linearGradient>
+    <radialGradient id="camera">
+      <stop stop-color="#172333"/>
+      <stop offset=".45" stop-color="#0b121d"/>
+      <stop offset=".8" stop-color="#06090e"/>
+      <stop offset="1" stop-color="#15171b"/>
+    </radialGradient>
+  </defs>
+  <!-- Side buttons stay within the viewBox. -->
+  <g fill="url(#button)">
+    <rect x="2" y="277" width="8" height="62" rx="3"/>
+    <rect x="2" y="386" width="8" height="112" rx="3"/>
+    <rect x="2" y="532" width="8" height="112" rx="3"/>
+    <rect x="990" y="424" width="8" height="176" rx="3"/>
+  </g>
+  <!-- Titanium chassis with an open center. -->
+  <path fill="url(#titanium)" fill-rule="evenodd" d="M160 20H840A150 150 0 0 1 990 170V1550A150 150 0 0 1 840 1700H160A150 150 0 0 1 10 1550V170A150 150 0 0 1 160 20Z M160 38H840A132 132 0 0 1 972 170V1550A132 132 0 0 1 840 1682H160A132 132 0 0 1 28 1550V170A132 132 0 0 1 160 38Z"/>
+  <!-- Fine outer highlight, entirely outside the screen opening. -->
+  <path fill="url(#edge)" fill-rule="evenodd" d="M160 20H840A150 150 0 0 1 990 170V1550A150 150 0 0 1 840 1700H160A150 150 0 0 1 10 1550V170A150 150 0 0 1 160 20Z M160 22H840A148 148 0 0 1 988 170V1550A148 148 0 0 1 840 1698H160A148 148 0 0 1 12 1550V170A148 148 0 0 1 160 22Z"/>
+  <!-- Black bezel; exact transparent opening: x=50 y=60 w=900 h=1600 rx=110. -->
+  <path fill="#050506" fill-rule="evenodd" d="M160 38H840A132 132 0 0 1 972 170V1550A132 132 0 0 1 840 1682H160A132 132 0 0 1 28 1550V170A132 132 0 0 1 160 38Z M160 60H840A110 110 0 0 1 950 170V1550A110 110 0 0 1 840 1660H160A110 110 0 0 1 50 1550V170A110 110 0 0 1 160 60Z"/>
+  <!-- Dynamic Island is the only artwork inside the screen opening. -->
+  <rect x="370" y="92" width="260" height="76" rx="38" fill="#020203"/>
+  <circle cx="593" cy="130" r="13" fill="url(#camera)"/>
+  <circle cx="590" cy="127" r="3" fill="#34445b" opacity=".4"/>
+</svg>
