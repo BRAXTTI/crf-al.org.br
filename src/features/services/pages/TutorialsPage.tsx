@@ -4,6 +4,7 @@ import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
+import TopDestaques from '@/features/services/components/TopDestaques';
 import { tutoriais, type Tutorial, type TutorialMotion, type TutorialPerfil } from '@/data/servicos';
 import { getRequerimento } from '@/data/requerimentos';
 import {
@@ -136,6 +137,25 @@ export default function TutorialsPage() {
     alterarFiltro('todos');
   };
 
+  // Vindo de um reel: mostra o tutorial com todos os filtros limpos e rola até ele.
+  const verTutorialDoReel = (id: string) => {
+    setBusca('');
+    setFiltro('todos');
+    setSearchParams(
+      (anterior) => {
+        const next = new URLSearchParams(anterior);
+        next.delete('perfil');
+        next.set('tutorial', id);
+        return next;
+      },
+      { replace: true, preventScrollReset: true }
+    );
+    window.setTimeout(() => {
+      const alvo = document.getElementById(isDesktop ? 'painel-tutorial' : `tutorial-${id}`);
+      alvo?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen">
       <SEO
@@ -160,6 +180,8 @@ export default function TutorialsPage() {
       />
 
       <div className="container-crfal py-8 md:py-12">
+        <TopDestaques onVerTutorial={verTutorialDoReel} />
+
         {/* Perfil e busca */}
         <div className="sticky top-[var(--header-offset)] z-30 glass-light flex flex-col gap-3 rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4 lg:flex-row lg:items-center">
           <div role="group" aria-label="Filtrar por perfil" className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -252,7 +274,7 @@ export default function TutorialsPage() {
                                 onClick={() => selecionar(ativo && !isDesktop ? null : tutorial.id)}
                               />
                               {ativo && !isDesktop && (
-                                <div id={`tutorial-${tutorial.id}`} className="border-t border-crfal-gray-200">
+                                <div id={`tutorial-${tutorial.id}`} className="scroll-mt-[calc(var(--header-offset)+13rem)] border-t border-crfal-gray-200">
                                   <TutorialDetail key={tutorial.id} tutorial={tutorial} embutido />
                                 </div>
                               )}
@@ -267,7 +289,7 @@ export default function TutorialsPage() {
 
               {/* Painel do tutorial (desktop) */}
               {isDesktop && selecionado && (
-                <div className="lg:col-span-7">
+                <div id="painel-tutorial" className="scroll-mt-[calc(var(--header-offset)+6.5rem)] lg:col-span-7">
                   <div className="sticky top-[calc(var(--header-offset)+6.5rem)] max-h-[calc(100dvh-var(--header-offset)-8rem)] overflow-y-auto rounded-2xl [scrollbar-width:thin]">
                     <TutorialDetail key={selecionado.id} tutorial={selecionado} />
                   </div>
