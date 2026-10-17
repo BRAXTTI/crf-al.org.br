@@ -2,7 +2,7 @@
 import { newsPost, newsIndex, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
-import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES } from '../src/data/banners';
+import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
 
 const SITE_URL = 'https://institucional.crf-al.org.br';
 
@@ -165,12 +165,13 @@ export function buildMeta(og: OgData): string {
   ].filter(Boolean).join('\n');
 }
 
-interface ImagePreload { href: string; srcset?: string; sizes?: string; media?: string }
+interface ImagePreload { href: string; type?: string; srcset?: string; sizes?: string; media?: string }
 
 /** Preload da imagem LCP. Sem data-page-metadata: o SPA remove esses elementos ao hidratar. */
 export function buildPreload(preloads: ImagePreload[]): string {
-  return preloads.map(({ href, srcset, sizes, media }) => '<link rel="preload" as="image" fetchpriority="high"'
+  return preloads.map(({ href, type, srcset, sizes, media }) => '<link rel="preload" as="image" fetchpriority="high"'
     + ` href="${escapeAttr(href)}"`
+    + (type ? ` type="${escapeAttr(type)}"` : '')
     + (srcset ? ` imagesrcset="${escapeAttr(srcset)}"` : '')
     + (srcset && sizes ? ` imagesizes="${escapeAttr(sizes)}"` : '')
     + (media ? ` media="${escapeAttr(media)}"` : '') + '>').join('');
@@ -187,8 +188,8 @@ export function homePreload(): ImagePreload[] {
   if (!first) return [];
   if (!first.imageMobile) return [{ href: first.image }];
   return [
-    { href: first.imageMobile, srcset: bannerMobileSrcSet(first), sizes: first.imageMobileSmall ? BANNER_MOBILE_SIZES : undefined, media: '(max-width: 767px)' },
-    { href: first.image, media: '(min-width: 768px)' },
+    { href: first.imageMobile, type: 'image/webp', srcset: bannerMobileSrcSet(first), sizes: first.imageMobileSmall ? BANNER_MOBILE_SIZES : undefined, media: BANNER_MOBILE_MEDIA },
+    { href: first.image, type: 'image/webp', media: BANNER_DESKTOP_MEDIA },
   ];
 }
 
@@ -202,8 +203,11 @@ function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Resp
       if (property.startsWith('og:') || property.startsWith('article:') || name.startsWith('twitter:') || name === 'description' || name === 'robots') el.remove();
     } })
     .on('link[rel="canonical"]', { element(el) { el.remove(); } })
+    .on('meta[name="viewport"]', { element(el) {
+      // O viewport deve ser conhecido antes de avaliar media e imagesizes no mobile.
+      if (preload) el.after(preload, { html: true });
+    } })
     .on('head', { element(el) {
-      if (preload) el.prepend(preload, { html: true });
       el.append(buildMeta(og), { html: true });
     } })
     .transform(asset);

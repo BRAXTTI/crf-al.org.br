@@ -86,6 +86,10 @@ export const banners: Banner[] = [
 /** `sizes` da arte mobile: largura do container (100vw menos o padding de 16px). */
 export const BANNER_MOBILE_SIZES = 'calc(100vw - 2rem)';
 
+/** Condições complementares, inclusive para larguras fracionárias (zoom). */
+export const BANNER_MOBILE_MEDIA = '(width < 768px)';
+export const BANNER_DESKTOP_MEDIA = '(width >= 768px)';
+
 /** srcset mobile (720w e largura real da arte principal). Compartilhado com o preload. */
 export function bannerMobileSrcSet(banner: Banner): string | undefined {
   if (!banner.imageMobile) return undefined;

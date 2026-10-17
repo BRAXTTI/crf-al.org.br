@@ -18,7 +18,7 @@ const source = (await readFile(new URL('../functions/_middleware.ts', import.met
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
   .replace("'./_news'", JSON.stringify(await loadNews()));
 const { onRequest, buildMeta, buildPreload, newsPreload, homePreload } = await import(moduleUrl(source));
-const { banners } = await import(bannersUrl);
+const { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } = await import(bannersUrl);
 const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
 const { PAGE_METADATA } = await import(metadataUrl);
 const saved = { fetch: globalThis.fetch, caches: globalThis.caches, rewriter: globalThis.HTMLRewriter, error: console.error };
@@ -154,8 +154,20 @@ try {
   assert.ok(preload.includes(`imagesrcset="${cover.srcSet}"`) && preload.includes(`imagesizes="${NEWS_COVER_SIZES}"`) && !preload.includes('data-page-metadata'));
   assert.equal(buildPreload(newsPreload({ title: 'x', canonical: 'https://example.org/n' })), '');
   const home = buildPreload(homePreload());
-  assert.ok(home.includes(`href="${banners[0].imageMobile}"`) && home.includes('media="(max-width: 767px)"'));
-  assert.ok(home.includes(`href="${banners[0].image}"`) && home.includes('media="(min-width: 768px)"'));
+  assert.ok(home.includes(`href="${banners[0].imageMobile}"`) && home.includes(`media="${BANNER_MOBILE_MEDIA.replaceAll('<', '&lt;')}"`));
+  assert.ok(home.includes(`href="${banners[0].image}"`) && home.includes(`media="${BANNER_DESKTOP_MEDIA.replaceAll('>', '&gt;')}"`));
+  assert.ok(home.includes(`imagesrcset="${bannerMobileSrcSet(banners[0])}"`) && home.includes(`imagesizes="${BANNER_MOBILE_SIZES}"`));
+  assert.equal((home.match(/as="image"/g) || []).length, 2);
+  assert.equal((home.match(/type="image\/webp"/g) || []).length, 2);
+  // Uma reordenação deve mudar o preload sem editar o middleware.
+  const firstBanner = banners.shift();
+  try {
+    assert.equal(homePreload()[0].href, banners[0].imageMobile);
+    assert.equal(homePreload()[1].href, banners[0].image);
+    assert.ok(!buildPreload(homePreload()).includes(firstBanner.image));
+  } finally {
+    banners.unshift(firstBanner);
+  }
   console.log(`SEO: ${Object.keys(PAGE_METADATA).length} static routes, genuine 404s, resources/APIs, redirects, metadata cache and origin failures passed (offline handler tests).`);
 } finally {
   globalThis.fetch = saved.fetch;

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
-import { banners as defaultBanners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, type Banner } from '@/data/banners';
+import { banners as defaultBanners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, type Banner } from '@/data/banners';
 
 const AUTOPLAY_MS = 6000;
 
@@ -102,7 +102,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
               <picture className="absolute inset-0 block">
                 {slide.imageMobile && (
                   <source
-                    media="(max-width: 767px)"
+                    media={BANNER_MOBILE_MEDIA}
                     srcSet={bannerMobileSrcSet(slide)}
                     sizes={slide.imageMobileSmall ? BANNER_MOBILE_SIZES : undefined}
                     width={slide.imageMobileWidth ?? 1080}
