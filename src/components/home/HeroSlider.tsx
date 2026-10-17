@@ -105,8 +105,8 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                     media="(max-width: 767px)"
                     srcSet={bannerMobileSrcSet(slide)}
                     sizes={slide.imageMobileSmall ? BANNER_MOBILE_SIZES : undefined}
-                    width={1080}
-                    height={1350}
+                    width={slide.imageMobileWidth ?? 1080}
+                    height={slide.imageMobileHeight ?? 1350}
                   />
                 )}
                 <img
