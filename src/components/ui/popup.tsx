@@ -149,7 +149,7 @@ export default function Popup({ popup }: PopupProps) {
                 />
               </picture>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t/srgb from-black/85 via-black/45 to-transparent" />
 
               {/* A imagem inteira é clicável (mesmo com texto sobreposto). */}
               {active.href &&
@@ -243,7 +243,7 @@ export default function Popup({ popup }: PopupProps) {
 
           <DialogClose
             aria-label="Fechar"
-            className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-xs transition hover:bg-black/70 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
           >
             <X className="h-4 w-4" />
           </DialogClose>

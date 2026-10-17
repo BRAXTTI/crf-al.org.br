@@ -32,7 +32,7 @@ const OUVIDORIA_EMAIL = 'ouvidoria@crf-al.org.br';
 const OUVIDORIA_TELEFONE = '(82) 99971-0247';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
 const manifestationTypes = [
@@ -154,11 +154,11 @@ export default function OmbudsmanPage() {
         {/* Como funciona */}
         <section aria-labelledby="passos-title">
           <SectionTitle id="passos-title" label="Passo a passo" title="Como funciona" text="O atendimento é feito pelo Portal da Transparência, plataforma oficial do CRF-AL, responsável pela guarda e proteção das informações." />
-          <ol className="grid divide-y divide-crfal-gray-100 overflow-hidden rounded-xl border border-crfal-gray-200 shadow-sm sm:grid-cols-2 sm:gap-4 sm:divide-y-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:shadow-none lg:grid-cols-4">
+          <ol className="grid divide-y divide-crfal-gray-100 overflow-hidden rounded-xl border border-crfal-gray-200 shadow-xs sm:grid-cols-2 sm:gap-4 sm:divide-y-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:shadow-none lg:grid-cols-4">
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
-                <li key={step.title} className="relative flex items-start gap-4 bg-white p-4 sm:flex-col sm:gap-0 sm:rounded-xl sm:border sm:border-crfal-gray-200 sm:p-5 sm:shadow-sm">
+                <li key={step.title} className="relative flex items-start gap-4 bg-white p-4 sm:flex-col sm:gap-0 sm:rounded-xl sm:border sm:border-crfal-gray-200 sm:p-5 sm:shadow-xs">
                   <div className="flex shrink-0 items-center justify-between sm:w-full">
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crfal-blue text-white ring-2 ring-crfal-gold/30"><Icon className="h-5 w-5" aria-hidden /></span>
                     <span aria-hidden className="hidden text-[32px] font-bold leading-none tracking-tight text-crfal-gray-200 sm:block">{String(index + 1).padStart(2, '0')}</span>
@@ -180,11 +180,11 @@ export default function OmbudsmanPage() {
         {/* Tipos */}
         <section aria-labelledby="tipos-title">
           <SectionTitle id="tipos-title" label="Tipos de manifestação" title="Qual é o seu caso?" text="Todos os tipos são registrados no mesmo portal. Escolha o que melhor descreve sua demanda no momento do registro." />
-          <ul className="grid gap-px overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-200 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
+          <ul className="grid gap-px overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-200 shadow-xs sm:grid-cols-2 lg:grid-cols-5">
             {manifestationTypes.map((type) => {
               const Icon = type.icon;
               return (
-                <li key={type.id} className="flex items-start gap-4 bg-white p-4 sm:flex-col sm:gap-0 sm:p-5 last:sm:col-span-2 last:lg:col-span-1">
+                <li key={type.id} className="flex items-start gap-4 bg-white p-4 sm:flex-col sm:gap-0 sm:p-5 sm:last:col-span-2 lg:last:col-span-1">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10"><Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden /></span>
                   <div className="min-w-0 sm:flex sm:flex-1 sm:flex-col">
                     <h3 className="text-base font-bold text-crfal-blue-dark sm:mt-4">{type.label}</h3>
@@ -207,7 +207,7 @@ export default function OmbudsmanPage() {
         {/* Privacidade */}
         <section aria-labelledby="privacidade-title">
           <SectionTitle id="privacidade-title" label="Privacidade" title="Como seus dados são tratados" />
-          <div className="overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs">
             <ul className="grid divide-y divide-crfal-gray-100 md:grid-cols-3 md:divide-x md:divide-y-0">
               {privacy.map((item) => {
                 const Icon = item.icon;
@@ -232,7 +232,7 @@ export default function OmbudsmanPage() {
         {/* FAQ */}
         <section aria-labelledby="faq-title">
           <SectionTitle id="faq-title" label="Dúvidas" title="Perguntas frequentes" />
-          <div className="divide-y divide-crfal-gray-100 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm">
+          <div className="divide-y divide-crfal-gray-100 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs">
             {faqs.map((faq, index) => {
               const aberta = faqAberta === index;
               const panelId = `faq-ouvidoria-${index}`;
@@ -244,7 +244,7 @@ export default function OmbudsmanPage() {
                       onClick={() => setFaqAberta(aberta ? null : index)}
                       aria-expanded={aberta}
                       aria-controls={panelId}
-                      className={`relative flex min-h-14 w-full items-center justify-between gap-3 px-5 py-4 text-left text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${aberta ? 'text-crfal-blue before:absolute before:inset-y-3 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}
+                      className={`relative flex min-h-14 w-full items-center justify-between gap-3 px-5 py-4 text-left text-[15px] font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${aberta ? 'text-crfal-blue before:absolute before:inset-y-3 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}
                     >
                       {faq.q}
                       <ChevronDown className={`h-5 w-5 shrink-0 text-crfal-gray-400 transition-transform duration-300 motion-reduce:transition-none ${aberta ? 'rotate-180 text-crfal-blue' : ''}`} aria-hidden />
@@ -262,7 +262,7 @@ export default function OmbudsmanPage() {
         </section>
 
         {/* Fechamento */}
-        <aside className="relative isolate flex flex-col items-start gap-5 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+        <aside className="relative isolate flex flex-col items-start gap-5 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8 lg:flex-row lg:items-center lg:justify-between">
           <MessagesSquare aria-hidden className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 opacity-[0.06]" strokeWidth={1} />
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Pronto para registrar?</p>

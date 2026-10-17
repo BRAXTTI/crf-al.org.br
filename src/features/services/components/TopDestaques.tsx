@@ -92,7 +92,7 @@ function ReelCard({ reel, posicao, onAbrir }: { reel: ReelDestaque; posicao: num
       onFocus={iniciarPrevia}
       onBlur={pararPrevia}
       aria-label={`${posicao}º destaque: ${reel.title}, vídeo de ${reel.duracao}`}
-      className={`group relative block aspect-[9/16] w-full overflow-hidden rounded-2xl bg-crfal-blue-dark text-left shadow-[0_18px_36px_-20px_rgba(11,25,44,0.6)] ring-1 ring-crfal-gray-200 ${motion} hover:-translate-y-1 hover:shadow-[0_26px_44px_-22px_rgba(11,25,44,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2`}
+      className={`group relative block aspect-[9/16] w-full overflow-hidden rounded-2xl bg-crfal-blue-dark text-left shadow-[0_18px_36px_-20px_rgba(11,25,44,0.6)] ring-1 ring-crfal-gray-200 ${motion} hover:-translate-y-1 hover:shadow-[0_26px_44px_-22px_rgba(11,25,44,0.7)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2`}
     >
       <img src={reel.poster} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       <video
@@ -111,7 +111,7 @@ function ReelCard({ reel, posicao, onAbrir }: { reel: ReelDestaque; posicao: num
       <span aria-hidden="true" className="absolute left-3 top-2 text-[40px] font-black leading-none text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] [-webkit-text-stroke:1.5px_#C59B27] sm:text-[48px]">
         {posicao}
       </span>
-      <span aria-hidden="true" className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+      <span aria-hidden="true" className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur-xs">
         <Play className="h-3 w-3 fill-current" /> {reel.duracao}
       </span>
 
@@ -196,8 +196,8 @@ function ReelsViewer({
     }
   };
 
-  const botaoNav = 'hidden h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-30 lg:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-gold';
-  const botaoTopo = 'flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-gold';
+  const botaoNav = 'hidden h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-30 lg:flex focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold';
+  const botaoTopo = 'flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold';
 
   return (
     <div
@@ -232,7 +232,7 @@ function ReelsViewer({
           <div className="h-full w-1/3" onClick={() => irPara(atual + 1)} />
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/60 to-transparent px-3 pb-8 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 bg-linear-to-b/srgb from-black/60 to-transparent px-3 pb-8 pt-[max(0.75rem,env(safe-area-inset-top))]">
           <div className="flex gap-1">
             {REELS_DESTAQUE.map((r, i) => (
               <span key={r.id} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/30">
@@ -261,12 +261,12 @@ function ReelsViewer({
         </div>
 
         {(reel.tutorialId || reel.href) && (
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-10">
+          <div className="absolute inset-x-0 bottom-0 bg-linear-to-t/srgb from-black/70 to-transparent px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-10">
             {reel.tutorialId ? (
               <button
                 type="button"
                 onClick={() => onVerTutorial(reel.tutorialId!)}
-                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-gold"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold"
               >
                 <ListChecks className="h-4 w-4" aria-hidden="true" /> Ver o passo a passo
               </button>
@@ -274,7 +274,7 @@ function ReelsViewer({
               <Link
                 to={reel.href!}
                 onClick={onFechar}
-                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-gold"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold"
               >
                 {reel.hrefLabel} <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>

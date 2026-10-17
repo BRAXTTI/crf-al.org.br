@@ -67,7 +67,7 @@ function InfoRow({ icon: Icon, rotulo, valor }: { icon: typeof Calendar; rotulo:
         <p className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-400 ">
           {rotulo}
         </p>
-        <p className="text-sm text-neutral-700  break-words">{valor}</p>
+        <p className="text-sm text-neutral-700  wrap-break-word">{valor}</p>
       </div>
     </div>
   );

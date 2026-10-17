@@ -7,7 +7,7 @@ function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
 }
 
 /** Proporção fixa das capas (as do CFF são 395×560), para que capas e miniaturas que a reutilizam tenham sempre a mesma altura. */
-export const CFF_COVER_ASPECT = 'aspect-[395/560]';
+export const CFF_COVER_ASPECT = 'aspect-395/560';
 
 /** Colunas como no site do CFF: 1 capa no celular, 2 no tablet, 4 no desktop, centralizadas. */
 export const cffColClass = 'w-2/3 px-3 sm:w-1/2 sm:px-4 md:w-5/12 lg:w-1/4 lg:px-3.5';
@@ -27,9 +27,9 @@ export function CffPublicationCard({ collection, index }: { collection: CffColle
       rel="noopener noreferrer"
       title="Ver publicação"
       aria-label={`${publicationLabel(collection, index)} (${pdf ? 'PDF no site do Conselho Federal de Farmácia' : 'página externa'}, abre em uma nova aba)`}
-      className="group relative block overflow-hidden rounded-xl bg-white shadow-[0_3px_20px_rgba(0,51,102,0.1)] transition duration-300 ease-in-out hover:-translate-y-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group relative block overflow-hidden rounded-xl bg-white shadow-[0_3px_20px_rgba(0,51,102,0.1)] transition duration-300 ease-in-out hover:-translate-y-2.5 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
-      <div className="relative overflow-hidden bg-gradient-to-br from-crfal-blue-dark via-crfal-blue to-crfal-blue-light">
+      <div className="relative overflow-hidden bg-linear-to-br/srgb from-crfal-blue-dark via-crfal-blue to-crfal-blue-light">
         <img
           src={item.cover || CFF_COVER_FALLBACK}
           alt=""
@@ -37,7 +37,7 @@ export function CffPublicationCard({ collection, index }: { collection: CffColle
           decoding="async"
           referrerPolicy="no-referrer"
           onError={handleImageError}
-          className={`block ${CFF_COVER_ASPECT} w-full object-cover transition-transform delay-200 duration-[350ms] group-hover:rotate-[5deg] group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none`}
+          className={`block ${CFF_COVER_ASPECT} w-full object-cover transition-transform delay-200 duration-350 group-hover:rotate-[5deg] group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:transform-none`}
         />
         <span
           aria-hidden="true"

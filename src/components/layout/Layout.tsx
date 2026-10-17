@@ -10,7 +10,7 @@ export default function Layout() {
       <ScrollRestoration />
       <HashScroll />
       <Header />
-      <main id="conteudo" tabIndex={-1} className="outline-none">
+      <main id="conteudo" tabIndex={-1} className="outline-hidden">
         <Outlet />
       </main>
       <Footer />

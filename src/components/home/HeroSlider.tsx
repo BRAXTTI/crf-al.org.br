@@ -45,11 +45,11 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   const nextIndex = slides.length > 0 ? (activeIndex + 1) % slides.length : 0;
 
   // Só baixa o slide ativo e o próximo; os já exibidos continuam montados para o fade.
-  // `isActive` também entra na condição: o efeito abaixo só marca o slide depois do render.
   const [shown, setShown] = useState(() => new Set([0]));
-  useEffect(() => {
-    setShown((prev) => (prev.has(activeIndex) ? prev : new Set(prev).add(activeIndex)));
-  }, [activeIndex]);
+  // Registra cada novo índice antes do commit, inclusive quando `items` muda.
+  if (!shown.has(activeIndex)) {
+    setShown(new Set(shown).add(activeIndex));
+  }
 
   useEffect(() => {
     if (isReducedMotion || isPaused || slides.length <= 1) {
@@ -82,7 +82,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
       {/* H1 fixo da home (as artes podem ou não ter texto). */}
       <h1 className="sr-only">Conselho Regional de Farmácia do Estado de Alagoas</h1>
 
-      <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-[16/5]">
+      <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-16/5">
       {slides.map((slide, index) => {
         const isActive = index === activeIndex;
         const hasOverlay = Boolean(slide.title || slide.subtitle || slide.ctaLabel);
@@ -124,7 +124,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
 
             {hasOverlay && (
               <>
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
+                <div className="absolute inset-0 bg-linear-to-r/srgb from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
                 <div className="container-crfal relative z-10 flex h-full items-center">
                   <div className="max-w-2xl">
                     {slide.title && (

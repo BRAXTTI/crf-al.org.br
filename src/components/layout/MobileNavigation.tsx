@@ -7,7 +7,7 @@ import { CRF_EM_CASA_URL, TRANSPARENCIA_URL } from '@/config/site';
 import { isNavItemActive, isNavSubItemActive, type NavItem } from '@/config/navigation';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue';
 
 export default function MobileNavigation({ open, onOpenChange, triggerRef, items, socialLinks, onOpenSearch }: {
   open: boolean;
@@ -32,7 +32,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent variant="drawer" showCloseButton={false} id="mobile-navigation" onCloseAutoFocus={event => { event.preventDefault(); triggerRef.current?.focus(); }}>
-        <div className="relative isolate flex shrink-0 items-center justify-between gap-4 overflow-hidden border-b-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark px-5 py-4 text-white">
+        <div className="relative isolate flex shrink-0 items-center justify-between gap-4 overflow-hidden border-b-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark px-5 py-4 text-white">
           <div aria-hidden className="pointer-events-none absolute -right-10 -top-16 -z-10 h-40 w-40 rounded-full bg-crfal-blue-light/30 blur-3xl" />
           <Link to="/" onClick={close} className="rounded-lg focus-visible:outline-white">
             <img src="/images/logo-crf-branca.webp" alt="CRF-AL, página inicial" className="h-10 w-auto object-contain" />
@@ -47,7 +47,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
             <button
               type="button"
               onClick={() => { close(); onOpenSearch(); }}
-              className="mb-4 flex min-h-12 w-full items-center gap-3 rounded-full border border-crfal-gray-200 bg-white px-4 text-left text-sm text-crfal-gray-600 shadow-sm hover:border-crfal-blue/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue"
+              className="mb-4 flex min-h-12 w-full items-center gap-3 rounded-full border border-crfal-gray-200 bg-white px-4 text-left text-sm text-crfal-gray-600 shadow-xs hover:border-crfal-blue/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue"
             >
               <Search className="h-5 w-5 text-crfal-blue" aria-hidden="true" />
               Buscar páginas e serviços
@@ -58,7 +58,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
             {serviceProfiles.map(profile => {
               const Icon = profile.icon;
               return (
-                <Link key={profile.id} to={profile.href} onClick={close} className="flex min-h-[76px] flex-col items-center justify-center gap-1.5 rounded-xl border border-crfal-gray-200 bg-white px-1 text-crfal-blue hover:border-crfal-blue/30 hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue">
+                <Link key={profile.id} to={profile.href} onClick={close} className="flex min-h-[76px] flex-col items-center justify-center gap-1.5 rounded-xl border border-crfal-gray-200 bg-white px-1 text-crfal-blue hover:border-crfal-blue/30 hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue">
                   <Icon className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
                   <span className="text-[11px] font-semibold">{profile.label}</span>
                 </Link>
@@ -66,7 +66,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
             })}
           </nav>
 
-          <nav aria-label="Navegação principal mobile" className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-sm">
+          <nav aria-label="Navegação principal mobile" className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-xs">
             <NavLink to="/" end onClick={close} className={({ isActive }) => `flex min-h-14 items-center gap-3 px-5 text-base font-semibold ${focusRing} ${isActive ? 'text-crfal-blue' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}>
               <Home className="h-5 w-5 text-crfal-blue" aria-hidden="true" />Página inicial
             </NavLink>
@@ -117,7 +117,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
                               {column.items.map(sub => {
                                 const Icon = sub.icon;
                                 const active = isNavSubItemActive(sub, pathname);
-                                const subClass = `relative flex min-h-12 items-center gap-3 rounded-xl px-3 py-2 text-[15px] font-medium ${focusRing} ${active ? 'bg-white font-semibold text-crfal-blue shadow-sm before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-gray-700 hover:bg-white'}`;
+                                const subClass = `relative flex min-h-12 items-center gap-3 rounded-xl px-3 py-2 text-[15px] font-medium ${focusRing} ${active ? 'bg-white font-semibold text-crfal-blue shadow-xs before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-gray-700 hover:bg-white'}`;
                                 const icon = (
                                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-1 ${active ? 'bg-crfal-blue text-white ring-crfal-gold/50' : 'bg-white text-crfal-blue ring-crfal-gray-200'}`}>
                                     <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
@@ -150,7 +150,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
             })}
           </nav>
 
-          <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" onClick={close} className="relative isolate my-4 flex min-h-14 items-center justify-between gap-3 overflow-hidden rounded-2xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark px-5 py-3 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2">
+          <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" onClick={close} className="relative isolate my-4 flex min-h-14 items-center justify-between gap-3 overflow-hidden rounded-2xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark px-5 py-3 text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2">
             <span className="flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/40"><User className="h-5 w-5" aria-hidden="true" /></span>
               <span>

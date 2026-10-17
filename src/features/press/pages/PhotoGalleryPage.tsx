@@ -21,13 +21,13 @@ export default function PhotoGalleryPage() {
         {isPending || isError || albums.length === 0 ? <GalleryState loading={isPending} error={isError} onRetry={() => void refetch()} /> : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {albums.map((album) => (
-              <Link key={album.id} to={`/imprensa/galeria-de-fotos/${album.slug}`} className="group overflow-hidden rounded-xl border border-crfal-gray-200 bg-white transition-colors hover:border-crfal-blue/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 motion-reduce:transition-none">
-                <div className="relative aspect-[4/3] overflow-hidden bg-crfal-gray-100">
+              <Link key={album.id} to={`/imprensa/galeria-de-fotos/${album.slug}`} className="group overflow-hidden rounded-xl border border-crfal-gray-200 bg-white transition-colors hover:border-crfal-blue/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 motion-reduce:transition-none">
+                <div className="relative aspect-4/3 overflow-hidden bg-crfal-gray-100">
                   {album.cover ? <img src={album.cover.thumbnail} alt="" loading="lazy" decoding="async" width={album.cover.width} height={album.cover.height} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none" /> : <Images className="absolute inset-0 m-auto h-12 w-12 text-crfal-gray-400" aria-hidden="true" />}
                   <span className="absolute bottom-3 right-3 rounded-md bg-crfal-blue-dark/90 px-3 py-1.5 text-xs font-semibold text-white">{album.count} {album.count === 1 ? 'foto' : 'fotos'}</span>
                 </div>
                 <div className="p-5">
-                  <h2 className="break-words font-display text-lg font-semibold leading-snug text-crfal-blue">{album.title}</h2>
+                  <h2 className="wrap-break-word font-display text-lg font-semibold leading-snug text-crfal-blue">{album.title}</h2>
                   <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-crfal-blue">Ver álbum <ArrowRight className="h-4 w-4" aria-hidden="true" /></span>
                 </div>
               </Link>

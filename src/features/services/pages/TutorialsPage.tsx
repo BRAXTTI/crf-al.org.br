@@ -26,7 +26,7 @@ import {
 const CRF_EM_CASA_URL = 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
 type Filtro = 'todos' | TutorialPerfil;
@@ -183,8 +183,8 @@ export default function TutorialsPage() {
         <TopDestaques onVerTutorial={verTutorialDoReel} />
 
         {/* Perfil e busca */}
-        <div className="sticky top-[var(--header-offset)] z-30 glass-light flex flex-col gap-3 rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4 lg:flex-row lg:items-center">
-          <div role="group" aria-label="Filtrar por perfil" className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="sticky top-(--header-offset) z-30 glass-light flex flex-col gap-3 rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4 lg:flex-row lg:items-center">
+          <div role="group" aria-label="Filtrar por perfil" className="flex gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
             {FILTROS.map((f) => {
               const ativo = filtro === f.id;
               const Icon = f.icon;
@@ -196,7 +196,7 @@ export default function TutorialsPage() {
                   aria-pressed={ativo}
                   className={`inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-[13px] font-semibold ${motion} ${focusRing} ${
                     ativo
-                      ? 'border-crfal-blue bg-crfal-blue text-white shadow-sm'
+                      ? 'border-crfal-blue bg-crfal-blue text-white shadow-xs'
                       : 'border-crfal-gray-200 bg-white text-crfal-gray-700 hover:border-crfal-blue/40 hover:text-crfal-blue'
                   }`}
                 >
@@ -219,7 +219,7 @@ export default function TutorialsPage() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar tutorial, ex.: afastamento"
-              className="min-h-[48px] w-full appearance-none rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-none focus:ring-2 focus:ring-crfal-blue-light/40 [&::-webkit-search-cancel-button]:appearance-none"
+              className="min-h-[48px] w-full appearance-none rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40 [&::-webkit-search-cancel-button]:appearance-none"
             />
             {busca && (
               <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600">
@@ -262,7 +262,7 @@ export default function TutorialsPage() {
                       <h2 id={headingId} className="mt-1 text-[22px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[24px]">{categoria}</h2>
                       <span aria-hidden="true" className="mb-4 mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
 
-                      <ul className="divide-y divide-crfal-gray-200 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm">
+                      <ul className="divide-y divide-crfal-gray-200 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs">
                         {itens.map((tutorial) => {
                           const ativo = selecionado?.id === tutorial.id;
                           return (
@@ -290,7 +290,7 @@ export default function TutorialsPage() {
               {/* Painel do tutorial (desktop) */}
               {isDesktop && selecionado && (
                 <div id="painel-tutorial" className="scroll-mt-[calc(var(--header-offset)+6.5rem)] lg:col-span-7">
-                  <div className="sticky top-[calc(var(--header-offset)+6.5rem)] max-h-[calc(100dvh-var(--header-offset)-8rem)] overflow-y-auto rounded-2xl [scrollbar-width:thin]">
+                  <div className="sticky top-[calc(var(--header-offset)+6.5rem)] max-h-[calc(100dvh-var(--header-offset)-8rem)] overflow-y-auto rounded-2xl scrollbar-thin">
                     <TutorialDetail key={selecionado.id} tutorial={selecionado} />
                   </div>
                 </div>
@@ -298,7 +298,7 @@ export default function TutorialsPage() {
             </div>
           )}
 
-          <aside className="mt-12 flex flex-col items-start gap-4 rounded-xl bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <aside className="mt-12 flex flex-col items-start gap-4 rounded-xl bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Não encontrou seu serviço?</p>
               <p className="mt-1 text-lg font-bold">Documentos e formulários de todos os pedidos estão na Central de Requerimentos.</p>
@@ -333,7 +333,7 @@ function TutorialRow({
       {...(expandivel
         ? { 'aria-expanded': ativo, 'aria-controls': `tutorial-${tutorial.id}` }
         : { 'aria-current': ativo ? ('true' as const) : undefined })}
-      className={`group relative flex w-full items-center gap-4 p-4 text-left sm:p-5 ${motion} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${
+      className={`group relative flex w-full items-center gap-4 p-4 text-left sm:p-5 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${
         ativo ? 'bg-crfal-blue-lighter/70' : 'hover:bg-crfal-blue-lighter/40'
       }`}
     >
@@ -416,14 +416,14 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
       className={`overflow-hidden bg-white motion-safe:animate-fade-in ${embutido ? '' : 'rounded-2xl border border-crfal-gray-200 shadow-[0_24px_48px_-28px_rgba(11,25,44,0.45)]'}`}
     >
       {/* Cabeçalho */}
-      <header className="relative isolate overflow-hidden border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-5 sm:p-6">
+      <header className="relative isolate overflow-hidden border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-5 sm:p-6">
         <Icon className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />
         <button
           type="button"
           onClick={copiarLink}
           aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste tutorial'}
           title="Copiar link"
-          className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+          className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60"
         >
           {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" /> : <Link2 className="h-5 w-5" />}
           <span className="hidden sm:inline" aria-hidden="true">{linkCopiado ? 'Copiado' : 'Copiar link'}</span>
@@ -469,11 +469,11 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
             <button
               type="button"
               onClick={() => setTocando(true)}
-              className="group relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden bg-[radial-gradient(ellipse_at_top_right,rgba(0,102,204,0.35),transparent_60%),radial-gradient(ellipse_at_bottom_left,rgba(197,155,39,0.14),transparent_55%)] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-gold"
+              className="group relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden bg-[radial-gradient(ellipse_at_top_right,rgba(0,102,204,0.35),transparent_60%),radial-gradient(ellipse_at_bottom_left,rgba(197,155,39,0.14),transparent_55%)] text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-gold"
             >
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
+                className="pointer-events-none absolute inset-0 opacity-[0.07] bg-[linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] bg-size-[48px_48px] mask-[radial-gradient(ellipse_at_center,black,transparent_75%)]"
               />
               <span className={`relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-crfal-blue shadow-xl ring-4 ring-crfal-gold/40 group-hover:scale-105 group-hover:ring-crfal-gold/70 sm:h-20 sm:w-20 ${motion}`}>
                 <Play className="ml-1 h-7 w-7 fill-current sm:h-8 sm:w-8" aria-hidden="true" />
@@ -536,7 +536,7 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
               <li key={index}>
                 <label className="group/passo flex cursor-pointer gap-4">
                   <input type="checkbox" checked={feito} onChange={() => alternarPasso(index)} className="peer sr-only" />
-                  <span className="flex flex-col items-center peer-focus-visible:[&>span:first-child]:ring-crfal-blue">
+                  <span className="flex flex-col items-center [&>span:first-child]:peer-focus-visible:ring-crfal-blue">
                     <span
                       aria-hidden="true"
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-2 ${motion} ${
@@ -641,14 +641,14 @@ function MotionVideo({ motion: video, titulo }: { motion: TutorialMotion; titulo
     <div className="relative isolate overflow-hidden bg-crfal-blue-dark bg-[radial-gradient(ellipse_at_top_right,rgba(0,102,204,0.35),transparent_60%),radial-gradient(ellipse_at_bottom_left,rgba(197,155,39,0.14),transparent_55%)]">
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.07] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.07] bg-[linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] bg-size-[48px_48px] mask-[radial-gradient(ellipse_at_center,black,transparent_75%)]"
       />
 
       {isDesktop ? (
         // Desktop: o vídeo toca dentro da moldura de iPhone, imitando a tela do celular.
         <div className="flex justify-center px-6 py-8">
           <div className="relative w-[260px] xl:w-[280px]">
-            <div className="absolute left-[5%] top-[3.488%] h-[93.023%] w-[90%] overflow-hidden bg-black [border-radius:12.22%/6.875%]">
+            <div className="absolute left-[5%] top-[3.488%] h-[93.023%] w-[90%] overflow-hidden bg-black rounded-[12.22%/6.875%]">
               {elementoVideo('block h-full w-full object-cover')}
             </div>
             <img
@@ -662,10 +662,10 @@ function MotionVideo({ motion: video, titulo }: { motion: TutorialMotion; titulo
                 type="button"
                 onClick={assistir}
                 aria-label={`Assistir ao vídeo (${video.duracao})`}
-                className="group absolute inset-[3.5%_5%] flex flex-col items-center justify-center gap-3 rounded-[12%/7%] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-gold"
+                className="group absolute inset-[3.5%_5%] flex flex-col items-center justify-center gap-3 rounded-[12%/7%] text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold"
               >
                 {botaoPlay(true)}
-                <span className="rounded-full bg-crfal-blue-dark/80 px-3 py-1 text-xs font-semibold backdrop-blur-sm">{video.duracao}</span>
+                <span className="rounded-full bg-crfal-blue-dark/80 px-3 py-1 text-xs font-semibold backdrop-blur-xs">{video.duracao}</span>
               </button>
             )}
           </div>
@@ -675,12 +675,12 @@ function MotionVideo({ motion: video, titulo }: { motion: TutorialMotion; titulo
         <div className="flex items-center gap-4 p-4 sm:p-5">
           {/* Toque na miniatura também abre o vídeo; o botão ao lado é o alvo acessível. */}
           <div onClick={tocando ? undefined : assistir} className="w-[84px] shrink-0 cursor-pointer overflow-hidden rounded-xl bg-black ring-1 ring-white/20">
-            {elementoVideo('block aspect-[9/16] w-full object-cover')}
+            {elementoVideo('block aspect-9/16 w-full object-cover')}
           </div>
           <button
             type="button"
             onClick={assistir}
-            className="group flex min-h-[44px] flex-1 items-center gap-3 text-left text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-gold"
+            className="group flex min-h-[44px] flex-1 items-center gap-3 text-left text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold"
           >
             {botaoPlay(false)}
             <span>

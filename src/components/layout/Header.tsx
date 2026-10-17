@@ -99,7 +99,7 @@ export default function Header() {
   };
 
   const navLinkBase =
-    'relative flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-2 text-[14px] font-semibold xl:gap-1.5 xl:px-3 xl:text-[14.5px] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue';
+    'relative flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-2 text-[14px] font-semibold xl:gap-1.5 xl:px-3 xl:text-[14.5px] transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue';
 
   const renderSocial = (
     itemClassName: string,
@@ -132,25 +132,25 @@ export default function Header() {
 
   return (
     <>
-    <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-crfal-blue focus:shadow-lg lg:hidden">Ir para o conteúdo</a>
+    <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-60 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-crfal-blue focus:shadow-lg lg:hidden">Ir para o conteúdo</a>
     <header className="fixed top-0 left-0 right-0 z-50">
       {/* Faixa utilitária (desktop): some ao rolar. */}
       <div className={`hidden overflow-hidden bg-crfal-blue-dark text-white/75 transition-[height] duration-300 motion-reduce:transition-none lg:block ${scrolled ? 'h-0' : 'h-8'}`} aria-hidden={scrolled || undefined}>
         <div className="container-crfal flex h-8 items-center justify-between text-[12.5px]">
           <ul className="flex items-center gap-5">
-            <li><a href="#conteudo" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">Ir para o conteúdo</a></li>
+            <li><a href="#conteudo" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/70">Ir para o conteúdo</a></li>
             <li>
-              <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" tabIndex={scrolled ? -1 : undefined} className="inline-flex items-center gap-1.5 rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+              <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" tabIndex={scrolled ? -1 : undefined} className="inline-flex items-center gap-1.5 rounded hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/70">
                 <Info className="h-3.5 w-3.5 text-crfal-gold" aria-hidden />Acesso à Informação<span className="sr-only">(abre em uma nova aba)</span>
               </a>
             </li>
             <li>
-              <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">Transparência<span className="sr-only">(abre em uma nova aba)</span></a>
+              <a href={TRANSPARENCIA_URL} target="_blank" rel="noopener noreferrer" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/70">Transparência<span className="sr-only">(abre em uma nova aba)</span></a>
             </li>
-            <li><Link to="/servicos/ouvidoria" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">Ouvidoria</Link></li>
+            <li><Link to="/servicos/ouvidoria" tabIndex={scrolled ? -1 : undefined} className="rounded hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/70">Ouvidoria</Link></li>
           </ul>
           {renderSocial(
-            'flex h-7 w-7 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+            'flex h-7 w-7 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/70',
             'h-3.5 w-3.5',
             'flex items-center gap-0.5',
             undefined,
@@ -175,7 +175,7 @@ export default function Header() {
               <span aria-hidden="true" className="relative block h-5 w-6">
                 <span className={`absolute left-0 top-0 h-0.5 w-6 bg-current transition-transform duration-200 motion-reduce:transition-none ${isMobileMenuOpen ? 'translate-y-[9px] rotate-45' : ''}`} />
                 <span className={`absolute left-0 top-[9px] h-0.5 w-6 bg-current transition-opacity duration-200 motion-reduce:transition-none ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
-                <span className={`absolute bottom-0 left-0 h-0.5 w-6 bg-current transition-transform duration-200 motion-reduce:transition-none ${isMobileMenuOpen ? '-translate-y-[9px] -rotate-45' : ''}`} />
+                <span className={`absolute bottom-0 left-0 h-0.5 w-6 bg-current transition-transform duration-200 motion-reduce:transition-none ${isMobileMenuOpen ? 'translate-y-[-9px] -rotate-45' : ''}`} />
               </span>
             </button>
 
@@ -227,7 +227,7 @@ export default function Header() {
                 onClick={() => { searchTriggerRef.current = desktopSearchRef.current; setIsSearchOpen(true); }}
                 aria-label="Buscar páginas e serviços (Ctrl ou ⌘ + K)"
                 title="Buscar (Ctrl/⌘ + K)"
-                className="flex h-11 w-11 items-center justify-center rounded-full text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue"
               >
                 <Search className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -235,7 +235,7 @@ export default function Header() {
                 href={CRF_EM_CASA_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-crfal-blue px-4 text-sm font-bold text-white shadow-[0_6px_16px_-6px_rgba(0,51,102,0.55)] transition-colors hover:bg-crfal-blue-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
+                className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-crfal-blue px-4 text-sm font-bold text-white shadow-[0_6px_16px_-6px_rgba(0,51,102,0.55)] transition-colors hover:bg-crfal-blue-dark focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 ring-1 ring-crfal-gold/50"><User className="h-3.5 w-3.5" aria-hidden="true" /></span>
                 CRF AL em Casa
@@ -266,7 +266,7 @@ export default function Header() {
                 key={label}
                 to={href}
                 onClick={() => { setIsMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                className="group relative flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-crfal-blue-dark after:absolute after:inset-x-6 after:bottom-[-8px] after:h-0.5 after:rounded-full after:bg-crfal-gold after:opacity-0 after:transition-opacity active:after:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue focus-visible:after:opacity-100"
+                className="group relative flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-crfal-blue-dark after:absolute after:inset-x-6 after:bottom-[-8px] after:h-0.5 after:rounded-full after:bg-crfal-gold after:opacity-0 after:transition-opacity active:after:opacity-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue focus-visible:after:opacity-100"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10 transition-colors group-active:bg-crfal-blue group-active:text-white">
                   <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden="true" />
@@ -314,7 +314,7 @@ function DesktopNavEntry({
 }) {
   const panelId = `mega-menu-${index}`;
   const currentMark = isCurrent
-    ? 'after:absolute after:inset-x-2 after:-bottom-[16px] xl:after:inset-x-3 after:h-0.5 after:rounded-full after:bg-crfal-gold'
+    ? 'after:absolute after:inset-x-2 after:bottom-[-16px] xl:after:inset-x-3 after:h-0.5 after:rounded-full after:bg-crfal-gold'
     : '';
   const stateClass = isOpen ? 'bg-crfal-blue-lighter text-crfal-blue' : isCurrent ? 'text-crfal-blue' : 'text-crfal-blue-dark/80 hover:bg-crfal-blue-lighter/70 hover:text-crfal-blue';
 
@@ -354,7 +354,7 @@ function DesktopNavEntry({
       {isOpen && (
         <div id={panelId} className={`absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2 ${widthClass}`}>
           <div className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-[0_28px_60px_-16px_rgba(11,25,44,0.45)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-safe:duration-200">
-            <div aria-hidden className="h-0.5 bg-gradient-to-r from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
+            <div aria-hidden className="h-0.5 bg-linear-to-r/srgb from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
             <div className={`grid gap-2 p-3 ${columnCount > 1 ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_280px]' : 'grid-cols-[minmax(0,1fr)_250px]'}`}>
               {item.columns.map((column) => (
                 <div key={column.title} className="p-3">
@@ -366,7 +366,7 @@ function DesktopNavEntry({
                     {column.items.map((sub) => {
                       const Icon = sub.icon;
                       const active = isNavSubItemActive(sub, pathname);
-                      const linkClass = `group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue motion-reduce:transition-none ${active ? 'bg-crfal-blue-lighter/70' : 'hover:bg-crfal-gray-50'}`;
+                      const linkClass = `group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue motion-reduce:transition-none ${active ? 'bg-crfal-blue-lighter/70' : 'hover:bg-crfal-gray-50'}`;
                       const content = (
                         <>
                           <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ring-1 transition-colors duration-150 ${active ? 'bg-crfal-blue text-white ring-crfal-gold/50' : 'bg-crfal-blue-lighter text-crfal-blue ring-crfal-blue/10 group-hover:bg-crfal-blue group-hover:text-white'}`}>
@@ -401,7 +401,7 @@ function DesktopNavEntry({
               ))}
 
               {item.feature && (
-                <aside className="relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-5 text-white">
+                <aside className="relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-5 text-white">
                   <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 -z-10 h-40 w-40 rounded-full bg-crfal-blue-light/30 blur-3xl" />
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">{item.feature.eyebrow}</p>
                   <p className="mt-2 text-lg font-bold leading-snug">{item.feature.title}</p>
@@ -411,14 +411,14 @@ function DesktopNavEntry({
                       href={item.feature.cta.href}
                       target={item.feature.cta.href.startsWith('http') ? '_blank' : undefined}
                       rel={item.feature.cta.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                      className="group flex min-h-10 w-full items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue"
+                      className="group flex min-h-10 w-full items-center justify-between gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue"
                     >
                       <span className="truncate">{item.feature.cta.label}</span>
                       {item.feature.cta.href.startsWith('http') ? <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden /> : <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />}
                       {item.feature.cta.href.startsWith('http') && <span className="sr-only">(abre em uma nova aba)</span>}
                     </a>
                     {item.feature.secondary && (
-                      <a href={item.feature.secondary.href} target="_blank" rel="noopener noreferrer" className="flex min-h-10 w-full items-center justify-between gap-2 rounded-full border border-white/30 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                      <a href={item.feature.secondary.href} target="_blank" rel="noopener noreferrer" className="flex min-h-10 w-full items-center justify-between gap-2 rounded-full border border-white/30 px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white">
                         <span className="truncate">{item.feature.secondary.label}</span>
                         <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
                         <span className="sr-only">(abre em uma nova aba)</span>

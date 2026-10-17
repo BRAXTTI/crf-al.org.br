@@ -7,7 +7,7 @@ import { plenaryYears, type PlenaryMeeting } from '@/config/plenarias';
 import { SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const externalLinkClass = `inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-dark hover:underline ${focusRing}`;
 
 /** Data de hoje em Maceió, no formato YYYY-MM-DD. */
@@ -136,7 +136,7 @@ export default function PlenariasPage() {
           <p><strong className="font-bold">Agenda demonstrativa.</strong> Datas, horários e locais são exemplos e não correspondem à programação oficial do CRF-AL.</p>
         </div>}
 
-        {next && <section aria-labelledby="next-meeting-title" className="relative isolate mb-8 overflow-hidden rounded-2xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8">
+        {next && <section aria-labelledby="next-meeting-title" className="relative isolate mb-8 overflow-hidden rounded-2xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8">
           <CalendarClock className="pointer-events-none absolute -right-6 -top-6 -z-10 h-44 w-44 text-white opacity-[0.06]" aria-hidden />
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-5">
@@ -151,7 +151,7 @@ export default function PlenariasPage() {
               </div>
             </div>
             {next.agendaUrl
-              ? <a href={next.agendaUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 w-fit items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-gold focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue"><FileText className="h-4 w-4" aria-hidden />Ver pauta do dia<ExternalLink className="h-3.5 w-3.5" aria-hidden /><span className="sr-only"> (abre em nova aba)</span></a>
+              ? <a href={next.agendaUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 w-fit items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue"><FileText className="h-4 w-4" aria-hidden />Ver pauta do dia<ExternalLink className="h-3.5 w-3.5" aria-hidden /><span className="sr-only"> (abre em nova aba)</span></a>
               : <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/85 ring-1 ring-white/15"><FileText className="h-4 w-4" aria-hidden />Pauta a divulgar</p>}
           </div>
         </section>}

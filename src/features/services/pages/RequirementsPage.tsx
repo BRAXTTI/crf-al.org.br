@@ -60,7 +60,7 @@ const PROFILES = [
 ] as const;
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
 function buscarItens(menu: readonly MenuCategory[], termo: string) {
@@ -256,7 +256,7 @@ function RequirementsContent() {
   const chipClass = (ativo: boolean) =>
     `inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-[13px] font-semibold ${motion} ${focusRing} ${
       ativo
-        ? 'border-crfal-blue bg-crfal-blue text-white shadow-sm'
+        ? 'border-crfal-blue bg-crfal-blue text-white shadow-xs'
         : 'border-crfal-gray-200 bg-white text-crfal-gray-700 hover:border-crfal-blue/40 hover:text-crfal-blue'
     }`;
   const chipCount = (ativo: boolean) =>
@@ -285,7 +285,7 @@ function RequirementsContent() {
 
       <main className="container-crfal py-8 md:py-12">
         {/* Barra de perfil, busca e categorias */}
-        <div className="sticky top-[var(--header-offset)] z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
+        <div className="sticky top-(--header-offset) z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div role="group" aria-label="Selecionar perfil" className="grid shrink-0 grid-cols-2 gap-1 rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 p-1">
               {PROFILES.map((profile) => {
@@ -320,7 +320,7 @@ function RequirementsContent() {
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar requerimento, ex.: certidão"
-                className="min-h-[48px] w-full appearance-none rounded-full border [&::-webkit-search-cancel-button]:appearance-none border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-none focus:ring-2 focus:ring-crfal-blue-light/40"
+                className="min-h-[48px] w-full appearance-none rounded-full border [&::-webkit-search-cancel-button]:appearance-none border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40"
               />
               {busca && (
                 <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600">
@@ -330,7 +330,7 @@ function RequirementsContent() {
             </div>
           </div>
 
-          <div role="group" aria-label="Filtrar por categoria" className="mt-3 flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div role="group" aria-label="Filtrar por categoria" className="mt-3 flex gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
             <button type="button" onClick={() => setCategoria('todas')} aria-pressed={categoria === 'todas'} className={chipClass(categoria === 'todas')}>
               Todas <span className={chipCount(categoria === 'todas')}>{totalPerfil}</span>
             </button>
@@ -390,7 +390,7 @@ function RequirementsContent() {
                     </div>
                   </div>
 
-                  <ul className="grid gap-px overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-200 shadow-sm lg:grid-cols-2">
+                  <ul className="grid gap-px overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-200 shadow-xs lg:grid-cols-2">
                     {cat.items.map((item) => {
                       const Icon = item.icon;
                       return (
@@ -398,7 +398,7 @@ function RequirementsContent() {
                           <button
                             type="button"
                             onClick={() => handleSelectItem(item)}
-                            className={`group flex h-full w-full items-center gap-4 p-4 text-left hover:bg-crfal-blue-lighter/50 sm:p-5 ${motion} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}
+                            className={`group flex h-full w-full items-center gap-4 p-4 text-left hover:bg-crfal-blue-lighter/50 sm:p-5 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}
                           >
                             <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10 group-hover:bg-crfal-blue group-hover:text-white group-hover:ring-crfal-gold/50 ${motion}`}>
                               <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
@@ -424,7 +424,7 @@ function RequirementsContent() {
             </div>
           )}
 
-          <aside className="mt-12 flex flex-col items-start gap-4 rounded-xl bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <aside className="mt-12 flex flex-col items-start gap-4 rounded-xl bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Atendimento online</p>
               <p className="mt-1 text-lg font-bold">Os requerimentos são enviados pelo CRF AL em Casa.</p>
@@ -448,14 +448,14 @@ function RequirementsContent() {
         >
           {selectedItem && (
             <>
-              <div className="relative isolate shrink-0 overflow-hidden border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-5 sm:p-6">
+              <div className="relative isolate shrink-0 overflow-hidden border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-5 sm:p-6">
                 {(() => { const Icon = selectedItem.icon; return <Icon className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />; })()}
                 <div className="absolute right-3 top-3 flex items-center gap-1">
-                  <button type="button" onClick={copiarLink} aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste requerimento'} title="Copiar link" className="inline-flex items-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+                  <button type="button" onClick={copiarLink} aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste requerimento'} title="Copiar link" className="inline-flex items-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
                     {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" /> : <Link2 className="h-5 w-5" />}
                     <span className="hidden sm:inline" aria-hidden="true">{linkCopiado ? 'Copiado' : 'Copiar link'}</span>
                   </button>
-                  <button type="button" onClick={() => handleOpenChange(false)} aria-label="Fechar detalhes" className="rounded-full p-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+                  <button type="button" onClick={() => handleOpenChange(false)} aria-label="Fechar detalhes" className="rounded-full p-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
@@ -483,12 +483,12 @@ function RequirementsContent() {
                     </span>
                   )}
                   {selectedItem.fluxogramaUrl && !mostraFluxograma && (
-                    <button type="button" onClick={() => setMostraFluxograma(true)} className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+                    <button type="button" onClick={() => setMostraFluxograma(true)} className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
                       <Workflow className="h-3.5 w-3.5" aria-hidden="true" /> Ver fluxograma
                     </button>
                   )}
                   {videoEmbedUrl && (
-                    <button type="button" onClick={() => setShowVideoModal(true)} className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+                    <button type="button" onClick={() => setShowVideoModal(true)} className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
                       <Play className="h-3.5 w-3.5" aria-hidden="true" /> Ver tutorial em vídeo
                     </button>
                   )}
@@ -503,7 +503,7 @@ function RequirementsContent() {
                     </button>
                   </div>
                   <div className="min-h-0 flex-1 overflow-auto bg-crfal-gray-50 p-4 sm:p-6">
-                    <img src={selectedItem.fluxogramaUrl} alt={`Fluxograma do requerimento ${selectedItem.title}`} className="mx-auto h-auto w-full rounded-xl border border-crfal-gray-200 bg-white object-contain shadow-sm" />
+                    <img src={selectedItem.fluxogramaUrl} alt={`Fluxograma do requerimento ${selectedItem.title}`} className="mx-auto h-auto w-full rounded-xl border border-crfal-gray-200 bg-white object-contain shadow-xs" />
                   </div>
                 </div>
               ) : (
@@ -533,7 +533,7 @@ function RequirementsContent() {
                               document.getElementById(`${tabsId}-${next}-tab`)?.focus();
                             }
                           }}
-                          className={`-mb-px flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${
+                          className={`-mb-px flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3.5 text-sm font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${
                             ativo ? 'border-crfal-gold text-crfal-blue' : 'border-transparent text-crfal-gray-600 hover:text-crfal-blue'
                           }`}
                         >
@@ -629,7 +629,7 @@ function RequirementsContent() {
 
       {showVideoModal && selectedItem && videoEmbedUrl &&
         createPortal(
-          <div className="pointer-events-auto fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4" onClick={() => setShowVideoModal(false)}>
+          <div className="pointer-events-auto fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-4" onClick={() => setShowVideoModal(false)}>
             <div role="dialog" aria-modal="true" aria-label={`Tutorial: ${selectedItem.title}`} className="w-full max-w-2xl animate-scale-in overflow-hidden rounded-xl bg-white" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between border-b border-crfal-gray-200 p-4">
                 <h3 className="font-bold text-crfal-blue">Tutorial: {selectedItem.title}</h3>

@@ -9,7 +9,7 @@ import { MANUAL_CRF_EM_CASA, type ManualSecao } from '@/data/manual-crf-em-casa'
 
 const PATH = '/servicos/manual-crf-em-casa';
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
 function prefersReducedMotion() {
@@ -68,7 +68,7 @@ function VideoDemonstracao({ secao }: { secao: ManualSecao }) {
       playsInline
       preload={reduzido ? 'metadata' : 'auto'}
       controls={reduzido}
-      className="block aspect-[4/3] h-auto w-full rounded-xl bg-crfal-blue-lighter/40 object-cover shadow-sm"
+      className="block aspect-4/3 h-auto w-full rounded-xl bg-crfal-blue-lighter/40 object-cover shadow-xs"
     />
   );
 }
@@ -77,7 +77,7 @@ function VideoDemonstracao({ secao }: { secao: ManualSecao }) {
 function Demonstracao({ secao }: { secao: ManualSecao }) {
   if (secao.video) return <VideoDemonstracao secao={secao} />;
   return (
-    <div className="flex aspect-[16/10] flex-col items-center justify-center gap-3 rounded-xl bg-crfal-blue-lighter/40 px-6 text-center">
+    <div className="flex aspect-16/10 flex-col items-center justify-center gap-3 rounded-xl bg-crfal-blue-lighter/40 px-6 text-center">
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-crfal-blue ring-1 ring-crfal-blue/10"><ImagePlay className="h-6 w-6" aria-hidden /></span>
       <p className="text-sm font-semibold text-crfal-blue-dark">Demonstração em breve</p>
       <p className="sr-only">{secao.videoAlt}</p>
@@ -136,7 +136,7 @@ export default function ManualCrfEmCasaPage() {
       />
 
       <main className="container-crfal py-10 md:py-14">
-        <nav id="manual-sumario" tabIndex={-1} aria-labelledby="sumario-title" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm focus:outline-none sm:p-6">
+        <nav id="manual-sumario" tabIndex={-1} aria-labelledby="sumario-title" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs focus:outline-hidden sm:p-6">
           <p className={goldLabel}>Neste manual</p>
           <h2 id="sumario-title" className="mt-1.5 text-lg font-bold text-crfal-blue">Escolha um tópico</h2>
           <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -153,7 +153,7 @@ export default function ManualCrfEmCasaPage() {
 
         <div className="mt-8 space-y-6 md:mt-10 md:space-y-8">
           {MANUAL_CRF_EM_CASA.map((secao, index) => (
-            <section key={secao.id} id={secao.id} aria-labelledby={`${secao.id}-title`} className="scroll-mt-[calc(var(--header-offset)+24px)] rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-sm sm:p-8">
+            <section key={secao.id} id={secao.id} aria-labelledby={`${secao.id}-title`} className="scroll-mt-[calc(var(--header-offset)+24px)] rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-xs sm:p-8">
               <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.1fr)] lg:gap-6">
                 <div className="min-w-0">
                   <p className={goldLabel}>Tópico {String(index + 1).padStart(2, '0')}</p>
@@ -182,17 +182,17 @@ export default function ManualCrfEmCasaPage() {
           ))}
         </div>
 
-        <section aria-labelledby="manual-ajuda-title" className="mt-10 overflow-hidden rounded-2xl bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8">
+        <section aria-labelledby="manual-ajuda-title" className="mt-10 overflow-hidden rounded-2xl bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
               <h2 id="manual-ajuda-title" className="text-xl font-bold">Precisa de um serviço específico?</h2>
               <p className="mt-1.5 max-w-xl text-[15px] leading-relaxed text-white/80">Os tutoriais mostram o passo a passo de cada serviço, e os requerimentos listam os documentos necessários.</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link to="/servicos/tutoriais" className={`inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue-lighter ${motion} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
+              <Link to="/servicos/tutoriais" className={`inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue-lighter ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
                 <PlayCircle className="h-4 w-4" aria-hidden /> Tutoriais
               </Link>
-              <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-5 text-sm font-bold text-white hover:border-white hover:bg-white/10 ${motion} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
+              <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-5 text-sm font-bold text-white hover:border-white hover:bg-white/10 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
                 CRF AL em Casa <ArrowUpRight className="h-4 w-4" aria-hidden />
                 <span className="sr-only">(abre em uma nova aba)</span>
               </a>

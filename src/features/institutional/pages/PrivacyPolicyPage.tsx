@@ -28,7 +28,7 @@ const ATENDIMENTO_EMAIL = 'atendimento@crf-al.org.br';
 const ESIC_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#sic/home';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 const linkClass = `font-semibold text-crfal-blue underline decoration-crfal-blue/30 underline-offset-2 hover:decoration-crfal-blue ${focusRing} rounded-sm`;
 
@@ -382,12 +382,12 @@ export default function PrivacyPolicyPage() {
                 key={title}
                 className={
                   index === 0
-                    ? 'relative overflow-hidden rounded-2xl bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-5 text-white shadow-sm sm:col-span-2 lg:col-span-1'
-                    : 'rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-sm'
+                    ? 'relative overflow-hidden rounded-2xl bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-5 text-white shadow-xs sm:col-span-2 lg:col-span-1'
+                    : 'rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-xs'
                 }
               >
                 {index === 0 && <span aria-hidden className="absolute inset-x-0 top-0 h-0.5 bg-crfal-gold" />}
-                {index === 0 && <Icon className="pointer-events-none absolute -bottom-6 -right-6 h-28 w-28 text-white/[0.06]" />}
+                {index === 0 && <Icon className="pointer-events-none absolute -bottom-6 -right-6 h-28 w-28 text-white/6" />}
                 <span className={`flex h-10 w-10 items-center justify-center rounded-full ${index === 0 ? 'bg-white/10 text-crfal-gold ring-1 ring-crfal-gold/50' : 'bg-crfal-blue-lighter text-crfal-blue'}`}>
                   <Icon className="h-5 w-5" aria-hidden />
                 </span>
@@ -399,7 +399,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <div className="mt-10 grid gap-6 lg:mt-12 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
-          <nav aria-labelledby="sumario-title" className="h-fit rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm lg:sticky lg:top-[calc(var(--header-offset)+24px)]">
+          <nav aria-labelledby="sumario-title" className="h-fit rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs lg:sticky lg:top-[calc(var(--header-offset)+24px)]">
             <p id="sumario-title" className={goldLabel}>Nesta política</p>
             <ol className="mt-3 grid gap-1 sm:grid-cols-2 lg:grid-cols-1">
               {SECOES.map((secao, index) => {
@@ -430,7 +430,7 @@ export default function PrivacyPolicyPage() {
                 key={secao.id}
                 id={secao.id}
                 aria-labelledby={`${secao.id}-title`}
-                className="scroll-mt-[calc(var(--header-offset)+24px)] rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-sm sm:p-8"
+                className="scroll-mt-[calc(var(--header-offset)+24px)] rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-xs sm:p-8"
               >
                 <p className={goldLabel}>{String(index + 1).padStart(2, '0')}</p>
                 <h2 id={`${secao.id}-title`} className="mt-1 text-[20px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[22px]">{secao.title}</h2>

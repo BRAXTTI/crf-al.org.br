@@ -55,7 +55,7 @@ export default function Footer() {
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
+                  <MapPin className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Sede</p>
                     <p>Rua Oldemburgo da Silva Paranhos, 290 - Farol, Maceió - AL, 57055-320</p>
@@ -63,7 +63,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
+                  <MapPin className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Seccional</p>
                     <p>Rua Delmiro Gouveia, 1382 - sala 01 - 1°andar - Sen. Teotônio Vilela, Arapiraca - AL, 57312-415</p>
@@ -71,7 +71,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
+                  <Clock className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Horário de Funcionamento</p>
                     <p>Segunda a Sexta: 09h às 17h (sem pausa para o almoço)</p>
@@ -79,7 +79,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-[#C59B27] flex-shrink-0 mt-0.5" />
+                  <Phone className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Canais de Atendimento</p>
                     <a
@@ -101,7 +101,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-                <span className="w-1 h-6 bg-[#C59B27] rounded-full" />
+                <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Links Rápidos
               </h3>
               <ul className="space-y-3">
@@ -123,7 +123,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-                <span className="w-1 h-6 bg-[#C59B27] rounded-full" />
+                <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Serviços
               </h3>
               <ul className="space-y-3">
@@ -145,7 +145,7 @@ export default function Footer() {
 
             <div>
               <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-                <span className="w-1 h-6 bg-[#C59B27] rounded-full" />
+                <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Redes Sociais
               </h3>
 

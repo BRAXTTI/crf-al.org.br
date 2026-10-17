@@ -88,7 +88,7 @@ function SecaoTitulo({ id, titulo, contador }: { id: string; titulo: string; con
       </span>
       <div
         aria-hidden
-        className="hidden h-px flex-1 bg-gradient-to-r from-crfal-gray-200 to-transparent  sm:block"
+        className="hidden h-px flex-1 bg-linear-to-r/srgb from-crfal-gray-200 to-transparent  sm:block"
       />
     </div>
   );
@@ -111,9 +111,9 @@ function BannerEvento({ evento, className = '' }: { evento: Evento; className?: 
   return (
     <div
       aria-hidden
-      className={`absolute inset-0 bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] transition-transform duration-700 ease-out group-hover:scale-105 ${className}`}
+      className={`absolute inset-0 bg-linear-to-br/srgb from-crfal-blue via-crfal-blue-dark to-[#002a4a] transition-transform duration-700 ease-out group-hover:scale-105 ${className}`}
     >
-      <div className="absolute inset-0 opacity-15 [background-image:radial-gradient(rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:22px_22px]" />
+      <div className="absolute inset-0 opacity-15 bg-[radial-gradient(rgba(255,255,255,0.6)_1px,transparent_1px)] bg-size-[22px_22px]" />
       <CalendarDays className="absolute right-5 top-5 h-16 w-16 text-white/15" />
     </div>
   );
@@ -132,14 +132,14 @@ function EventoCard({ evento, index }: { evento: Evento; index: number }) {
       className="group relative flex animate-in flex-col overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-card duration-500 fill-mode-backwards fade-in slide-in-from-bottom-3 transition-all hover:-translate-y-1.5 hover:border-crfal-blue/25 hover:shadow-card-hover  "
       style={{ animationDelay: `${index * 70}ms` }}
     >
-      <div className="relative aspect-[16/9] overflow-hidden">
+      <div className="relative aspect-video overflow-hidden">
         <BannerEvento evento={evento} />
         {evento.status === 'cancelado' && (
           <div aria-hidden className="absolute inset-0 bg-white/40" />
         )}
 
         {badge && (
-          <div className="absolute left-4 top-4 flex h-14 w-14 flex-col items-center justify-center rounded-xl border border-black/5 bg-white/95 shadow-lg backdrop-blur-sm">
+          <div className="absolute left-4 top-4 flex h-14 w-14 flex-col items-center justify-center rounded-xl border border-black/5 bg-white/95 shadow-lg backdrop-blur-xs">
             <span className="font-display text-xl font-bold leading-none text-crfal-blue">
               {badge.dia}
             </span>
@@ -150,13 +150,13 @@ function EventoCard({ evento, index }: { evento: Evento; index: number }) {
         )}
 
         <span
-          className={`absolute right-4 top-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${statusConfig.bg} ${statusConfig.text}`}
+          className={`absolute right-4 top-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-xs ${statusConfig.bg} ${statusConfig.text}`}
         >
           <StatusIcon className="h-3 w-3" />
           {STATUS_LABELS[evento.status]}
         </span>
 
-        <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+        <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1 text-xs font-medium text-white backdrop-blur-xs">
           <ModalidadeIcon className="h-3.5 w-3.5" />
           {MODALIDADE_LABELS[evento.modalidade]}
         </span>
@@ -172,7 +172,7 @@ function EventoCard({ evento, index }: { evento: Evento; index: number }) {
         >
           <Link
             to={`/eventos/${evento.slug}`}
-            className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light"
+            className="after:absolute after:inset-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light"
           >
             {evento.titulo}
           </Link>
@@ -236,7 +236,7 @@ function LinhaArquivo({ evento }: { evento: Evento }) {
   return (
     <Link
       to={`/eventos/${evento.slug}`}
-      className={`group relative flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-crfal-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue-light  sm:px-5 ${
+      className={`group relative flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-crfal-gray-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue-light  sm:px-5 ${
         cancelado ? 'opacity-80' : ''
       }`}
     >
@@ -288,7 +288,7 @@ function LinhaArquivo({ evento }: { evento: Evento }) {
 function CardSkeleton() {
   return (
     <div className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white  ">
-      <div className="aspect-[16/9] animate-pulse bg-crfal-gray-100 " />
+      <div className="aspect-video animate-pulse bg-crfal-gray-100 " />
       <div className="space-y-3 p-5">
         <div className="h-5 w-3/4 animate-pulse rounded bg-crfal-gray-100 " />
         <div className="h-3.5 w-full animate-pulse rounded bg-crfal-gray-100 " />
@@ -424,14 +424,14 @@ export default function EventosPage() {
               <section aria-labelledby="destaque-titulo">
                 <SecaoTitulo id="destaque-titulo" titulo="Próximo evento" contador={1} />
                 <article className="group relative grid overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-card transition-all duration-500 hover:shadow-card-hover   md:grid-cols-2">
-                  <div className="relative aspect-[16/10] overflow-hidden sm:aspect-[16/8] md:aspect-auto md:min-h-[340px]">
+                  <div className="relative aspect-16/10 overflow-hidden sm:aspect-16/8 md:aspect-auto md:min-h-[340px]">
                     <BannerEvento evento={destaque} />
                     <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-crfal-gold px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
                       <Sparkles className="h-3.5 w-3.5" />
                       Destaque
                     </span>
                     {rotuloContagemDestaque && (
-                      <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-bold text-crfal-blue shadow-lg backdrop-blur-sm">
+                      <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-bold text-crfal-blue shadow-lg backdrop-blur-xs">
                         <Clock className="h-4 w-4" />
                         {rotuloContagemDestaque}
                       </span>
@@ -457,7 +457,7 @@ export default function EventosPage() {
                     <h3 className="font-display text-2xl font-semibold leading-tight text-neutral-800  md:text-3xl">
                       <Link
                         to={`/eventos/${destaque.slug}`}
-                        className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light"
+                        className="after:absolute after:inset-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light"
                       >
                         {destaque.titulo}
                       </Link>
@@ -508,7 +508,7 @@ export default function EventosPage() {
             )}
 
             {/* Barra de filtros */}
-            <div className="sticky top-[var(--header-offset)] z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
+            <div className="sticky top-(--header-offset) z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative lg:max-w-xs lg:flex-1">
                   <label htmlFor="busca-evento" className="sr-only">Buscar evento</label>
@@ -519,7 +519,7 @@ export default function EventosPage() {
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
                     placeholder="Buscar evento..."
-                    className="w-full min-h-[44px] rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-neutral-800 transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-none focus:ring-2 focus:ring-crfal-blue-light/40   "
+                    className="w-full min-h-[44px] rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-neutral-800 transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40   "
                   />
                   {busca && (
                     <button
@@ -535,14 +535,14 @@ export default function EventosPage() {
                 <div
                   role="group"
                   aria-label="Filtrar por status"
-                  className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                  className="flex gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
                 >
                   {filtros.map((filtro) => (
                     <button
                       key={filtro.value}
                       onClick={() => setFiltroStatus(filtro.value)}
                       aria-pressed={filtroStatus === filtro.value}
-                      className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                      className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                         filtroStatus === filtro.value
                           ? 'bg-crfal-blue text-white shadow-md'
                           : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-crfal-gray-200 hover:text-crfal-blue   '
@@ -565,7 +565,7 @@ export default function EventosPage() {
                 <div
                   role="group"
                   aria-label="Filtrar por modalidade"
-                  className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:ml-auto"
+                  className="flex gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden lg:ml-auto"
                 >
                   {modalidades.map((modalidade) => {
                     const ativo = filtroModalidade === modalidade.value;
@@ -576,7 +576,7 @@ export default function EventosPage() {
                         key={modalidade.value}
                         onClick={() => setFiltroModalidade(modalidade.value)}
                         aria-pressed={ativo}
-                        className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                        className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                           ativo
                             ? 'border-crfal-blue bg-crfal-blue text-white'
                             : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue   '

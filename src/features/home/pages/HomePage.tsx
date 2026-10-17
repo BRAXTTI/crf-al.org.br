@@ -14,7 +14,7 @@ export default function HomePage() {
         description="CRFAL — Conselho Regional de Farmácia do Estado de Alagoas. Fiscalização, registros, serviços e informações para profissionais e estabelecimentos farmacêuticos em Alagoas."
         path="/"
       />
-      <div className="pt-[var(--home-header-offset)]">
+      <div className="pt-(--home-header-offset)">
         <div className="container-crfal pb-6 pt-5 sm:pb-8 sm:pt-8">
           <ServiceAccessCards />
           <HeroSlider />

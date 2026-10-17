@@ -103,7 +103,7 @@ const mapsLink = (busca: string) => `https://www.google.com/maps/search/?api=1&q
 const wazeLink = (busca: string) => `https://waze.com/ul?q=${encodeURIComponent(busca)}&navigate=yes`;
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
 /** Expediente: segunda a sexta, das 9h às 17h, no horário de Maceió (não considera feriados). */
@@ -215,7 +215,7 @@ export default function ContactPage() {
         <section aria-labelledby="canais-title">
           <SectionTitle id="canais-title" label="Atendimento geral" title="Canais de atendimento" text="Para dúvidas gerais, comece por aqui. Seg. a sex., das 9h às 17h." />
           <div className="grid gap-4 md:grid-cols-3">
-            <a href={waLink(ATENDIMENTO.whatsapp)} target="_blank" rel="noopener noreferrer" className={`group relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white shadow-lg shadow-crfal-blue/10 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:hover:translate-y-0 ${motion} ${focusRing}`}>
+            <a href={waLink(ATENDIMENTO.whatsapp)} target="_blank" rel="noopener noreferrer" className={`group relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white shadow-lg shadow-crfal-blue/10 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:hover:translate-y-0 ${motion} ${focusRing}`}>
               <MessageCircle aria-hidden className="pointer-events-none absolute -bottom-6 -right-6 -z-10 h-32 w-32 opacity-[0.07]" strokeWidth={1} />
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40"><MessageCircle className="h-5 w-5" aria-hidden /></span>
               <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Mais rápido</p>
@@ -228,7 +228,7 @@ export default function ContactPage() {
               <span className="sr-only">(abre em uma nova aba)</span>
             </a>
 
-            <div className="flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-xs">
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10"><Phone className="h-5 w-5" aria-hidden /></span>
               <p className={`mt-4 ${goldLabel}`}>Ligação</p>
               <p className="mt-1 text-lg font-bold text-crfal-blue-dark">Telefone</p>
@@ -241,7 +241,7 @@ export default function ContactPage() {
               </a>
             </div>
 
-            <div className="flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-xs">
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10"><Mail className="h-5 w-5" aria-hidden /></span>
               <p className={`mt-4 ${goldLabel}`}>Mensagem</p>
               <p className="mt-1 text-lg font-bold text-crfal-blue-dark">E-mail</p>
@@ -259,13 +259,13 @@ export default function ContactPage() {
         {/* Qual setor procurar */}
         <section aria-labelledby="atalhos-title">
           <SectionTitle id="atalhos-title" label="Antes de entrar em contato" title="Qual setor procurar?" text="Muitas demandas se resolvem online. Escolha o assunto e vá direto ao lugar certo." />
-          <ul className="grid gap-px overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-200 shadow-sm sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-px overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-200 shadow-xs sm:grid-cols-2 lg:grid-cols-3">
             {ATALHOS.map((atalho) => {
               const Icon = atalho.icon;
               const external = atalho.href.startsWith('http');
               return (
                 <li key={atalho.necessidade} className="bg-white">
-                  <SmartLink href={atalho.href} className={`group flex h-full items-center gap-4 p-4 hover:bg-crfal-blue-lighter/50 sm:p-5 ${motion} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}>
+                  <SmartLink href={atalho.href} className={`group flex h-full items-center gap-4 p-4 hover:bg-crfal-blue-lighter/50 sm:p-5 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}>
                     <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10 group-hover:bg-crfal-blue group-hover:text-white group-hover:ring-crfal-gold/50 ${motion}`}>
                       <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden />
                     </span>
@@ -299,7 +299,7 @@ export default function ContactPage() {
           <SectionTitle id="locais-title" label="Atendimento presencial" title="Onde estamos" text="Seg. a sex., das 9h às 17h, sem pausa para o almoço." />
           <div className="grid gap-4 md:grid-cols-2">
             {LOCAIS.map((local) => (
-              <article key={local.id} className="flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-sm">
+              <article key={local.id} className="flex flex-col rounded-xl border border-crfal-gray-200 bg-white p-6 shadow-xs">
                 <div className="flex items-start gap-4">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10"><MapPin className="h-5 w-5" aria-hidden /></span>
                   <div className="min-w-0 flex-1">
@@ -325,7 +325,7 @@ export default function ContactPage() {
         </section>
 
         {/* Fechamento: Ouvidoria */}
-        <aside className="relative isolate flex flex-col items-start gap-5 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <aside className="relative isolate flex flex-col items-start gap-5 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <HeadphonesIcon aria-hidden className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 opacity-[0.06]" strokeWidth={1} />
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Não resolveu?</p>
@@ -348,12 +348,12 @@ function ContactGroup({ title, items }: { title: string; items: ContactInfo[] })
         {title}
         <span aria-hidden className="h-px flex-1 bg-crfal-gray-200" />
       </p>
-      <ul className="divide-y divide-crfal-gray-100 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm">
+      <ul className="divide-y divide-crfal-gray-100 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs">
         {items.map((c) => {
           const Icon = c.icon;
           const actionClass = `inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold ${motion} ${focusRing}`;
           return (
-            <li key={c.id} id={`setor-${c.id}`} className="scroll-mt-[calc(var(--header-offset)+1.5rem)] p-4 data-[alvo]:bg-crfal-blue-lighter/40 sm:p-5">
+            <li key={c.id} id={`setor-${c.id}`} className="scroll-mt-[calc(var(--header-offset)+1.5rem)] p-4 data-alvo:bg-crfal-blue-lighter/40 sm:p-5">
               <div className="flex items-start gap-4">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10">
                   <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden />

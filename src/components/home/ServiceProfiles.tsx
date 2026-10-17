@@ -26,7 +26,7 @@ export default function ServiceProfiles() {
               <nav
                 key={profile.id}
                 aria-labelledby={`services-${profile.id}`}
-                className="relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark text-white shadow-lg shadow-crfal-blue/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-crfal-blue/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                className="relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark text-white shadow-lg shadow-crfal-blue/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-crfal-blue/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
                 <Icon className="pointer-events-none absolute -bottom-8 -right-8 -z-10 h-44 w-44 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />
 

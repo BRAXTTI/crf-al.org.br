@@ -16,7 +16,7 @@ function CollectionSection({ collection, shaded }: { collection: CffCollection; 
       <div className="container-crfal">
         <header className="mx-auto mb-10 text-center">
           <h2 id={`${collection.slug}-title`} className="text-2xl font-bold leading-snug text-crfal-blue-dark sm:text-[27px]">{collection.title}</h2>
-          <span aria-hidden="true" className="mx-auto mt-6 block h-0.5 w-[3.25rem] rounded-full bg-crfal-gold" />
+          <span aria-hidden="true" className="mx-auto mt-6 block h-0.5 w-13 rounded-full bg-crfal-gold" />
         </header>
         <ul className="-mx-3 flex flex-wrap justify-center sm:-mx-4 lg:-mx-3.5">
           {collection.items.map((item, index) => (
@@ -42,7 +42,7 @@ function pageList(page: number, total: number): (number | '…')[] {
 
 function Pagination({ page, total, onChange }: { page: number; total: number; onChange: (page: number) => void }) {
   if (total <= 1) return null;
-  const circle = 'flex h-9 min-w-9 items-center justify-center rounded-full border px-2 text-[15px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+  const circle = 'flex h-9 min-w-9 items-center justify-center rounded-full border px-2 text-[15px] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
   const idle = `${circle} border-crfal-gray-300 bg-white text-crfal-gray-600 hover:border-crfal-blue hover:text-crfal-blue disabled:pointer-events-none disabled:opacity-40`;
   return (
     <nav aria-label="Páginas de publicações" className="container-crfal pb-12 pt-2">

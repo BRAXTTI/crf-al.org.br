@@ -119,7 +119,7 @@ function BioModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children}
-      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl [&>[data-slot=dialog-close]]:flex [&>[data-slot=dialog-close]]:h-11 [&>[data-slot=dialog-close]]:w-11 [&>[data-slot=dialog-close]]:items-center [&>[data-slot=dialog-close]]:justify-center">
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl *:data-[slot=dialog-close]:flex *:data-[slot=dialog-close]:h-11 *:data-[slot=dialog-close]:w-11 *:data-[slot=dialog-close]:items-center *:data-[slot=dialog-close]:justify-center">
         <DialogHeader className="shrink-0 border-b border-crfal-gray-200 p-5 pr-16 text-left sm:p-6 sm:pr-16">
           <span className="mb-2 inline-flex w-fit items-center rounded-md bg-red-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-700 lg:text-red-600">
             {membro.cargo}
@@ -160,13 +160,13 @@ function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
     <BioModal membro={membro} open={isOpen} onOpenChange={setIsOpen}>
       <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-white shadow-card transition-shadow duration-300 hover:shadow-card-hover max-lg:border max-lg:border-crfal-gray-200">
         <div
-          className={`absolute inset-y-0 z-10 hidden w-1.5 bg-gradient-to-b from-red-600 via-crfal-blue to-crfal-blue-dark lg:block ${
+          className={`absolute inset-y-0 z-10 hidden w-1.5 bg-linear-to-b/srgb from-red-600 via-crfal-blue to-crfal-blue-dark lg:block ${
             flip ? 'right-0' : 'left-0'
           }`}
           aria-hidden
         />
         <div className={`grid flex-1 grid-cols-[80px_minmax(0,1fr)] items-start gap-x-4 gap-y-4 p-4 lg:flex lg:items-stretch lg:gap-0 lg:p-0 ${flip ? 'lg:flex-row-reverse' : ''}`}>
-          <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-crfal-blue to-crfal-blue-dark lg:aspect-auto lg:min-h-[240px] lg:w-[210px] lg:rounded-none">
+          <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-xl bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark lg:aspect-auto lg:min-h-[240px] lg:w-[210px] lg:rounded-none">
             {membro.foto ? (
               <img
                 src={membro.foto}
@@ -202,7 +202,7 @@ function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
                     <button
                       type="button"
                       aria-label={`Ler mais sobre ${membro.nome}`}
-                      className="col-span-2 -my-2 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-sm font-semibold text-crfal-blue transition-colors duration-300 hover:text-crfal-blue-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 lg:my-0 lg:mt-3"
+                      className="col-span-2 -my-2 inline-flex min-h-11 w-fit items-center gap-1 rounded-md text-sm font-semibold text-crfal-blue transition-colors duration-300 hover:text-crfal-blue-dark focus:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 lg:my-0 lg:mt-3"
                     >
                       Ler mais
                       <ChevronRight className="h-4 w-4" />
@@ -217,7 +217,7 @@ function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
                 className="col-span-2 mt-auto inline-flex min-h-11 min-w-0 items-center gap-2 rounded-lg bg-crfal-blue-lighter/60 px-3 py-2.5 text-sm font-medium text-crfal-blue transition-colors duration-300 hover:bg-crfal-blue-lighter focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 lg:w-fit lg:rounded-none lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-4 lg:font-normal lg:text-crfal-gray-500 lg:hover:bg-transparent lg:hover:text-crfal-blue"
               >
                 <Mail className="h-4 w-4 shrink-0" />
-                <span className="min-w-0 break-words">{membro.email}</span>
+                <span className="min-w-0 wrap-break-word">{membro.email}</span>
               </a>
             )}
           </div>
@@ -230,12 +230,12 @@ function DirectorCard({ membro, flip }: { membro: Membro; flip: boolean }) {
 function MemberCard({ membro, index, isVisible }: { membro: Membro; index: number; isVisible: boolean }) {
   return (
     <article
-      className={`group overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-crfal-blue/30 hover:shadow-card-hover    ${
+      className={`group overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-crfal-blue/30 hover:shadow-card-hover    ${
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       }`}
       style={{ transitionDelay: isVisible ? `${index * 80}ms` : '0ms' }}
     >
-      <div className="relative aspect-[4/4.4] overflow-hidden bg-gradient-to-br from-crfal-blue to-crfal-blue-dark">
+      <div className="relative aspect-[4/4.4] overflow-hidden bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark">
         {membro.foto ? (
           <img
             src={membro.foto}
@@ -247,8 +247,8 @@ function MemberCard({ membro, index, isVisible }: { membro: Membro; index: numbe
             <UserCircle className="h-20 w-20 text-white/50" />
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent p-4 pt-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
+        <div className="absolute inset-x-0 bottom-0 bg-linear-to-t/srgb from-black/70 via-black/25 to-transparent p-4 pt-10">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-xs">
             <Award className="h-3 w-3" />
             {membro.cargo}
           </span>
@@ -330,7 +330,7 @@ export default function BoardPage() {
                   isDisabled
                     ? 'cursor-not-allowed bg-crfal-gray-100 text-crfal-gray-600 lg:text-crfal-gray-400 lg:opacity-60'
                     : secaoAtiva === secao.id
-                      ? 'col-span-2 bg-crfal-blue text-white shadow-sm'
+                      ? 'col-span-2 bg-crfal-blue text-white shadow-xs'
                       : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-neutral-200   '
                 }`}
               >

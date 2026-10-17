@@ -147,14 +147,14 @@ export default function PageHero({
   return (
     <section
       id={id}
-      className={`relative overflow-hidden bg-gradient-to-br from-crfal-blue via-crfal-blue-dark to-[#002a4a] pb-14 pt-28 md:pb-20 lg:pt-44 xl:flex xl:aspect-[8/3] xl:flex-col xl:justify-center ${backgroundImageMobile ? 'min-h-[111.111vw] md:min-h-0' : ''} ${className ?? ''}`}
+      className={`relative overflow-hidden bg-linear-to-br/srgb from-crfal-blue via-crfal-blue-dark to-[#002a4a] pb-14 pt-28 md:pb-20 lg:pt-44 xl:flex xl:aspect-8/3 xl:flex-col xl:justify-center ${backgroundImageMobile ? 'min-h-[111.111vw] md:min-h-0' : ''} ${className ?? ''}`}
     >
       {backgroundImage && (
         <>
           <picture
             className={
               backgroundImageMobile
-                ? 'absolute inset-x-0 top-0 block aspect-[9/10] overflow-hidden md:hidden xl:inset-0 xl:aspect-auto xl:block'
+                ? 'absolute inset-x-0 top-0 block aspect-9/10 overflow-hidden md:hidden xl:inset-0 xl:aspect-auto xl:block'
                 : 'absolute inset-0 hidden xl:block'
             }
           >
@@ -170,7 +170,7 @@ export default function PageHero({
           </picture>
           {/* Overlay: escurece a esquerda (texto) e revela a arte à direita. */}
           <div
-            className="absolute inset-0 bg-gradient-to-r from-crfal-blue-dark/95 via-crfal-blue-dark/85 to-crfal-blue-dark/35"
+            className="absolute inset-0 bg-linear-to-r/srgb from-crfal-blue-dark/95 via-crfal-blue-dark/85 to-crfal-blue-dark/35"
             aria-hidden
           />
         </>
@@ -184,7 +184,7 @@ export default function PageHero({
         <div className={hasAside ? 'grid items-center gap-8 md:grid-cols-2' : undefined}>
           <div>
             {eyebrow && (
-              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-sm">
+              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-xs">
                 {EyebrowIcon && <EyebrowIcon className="h-3.5 w-3.5" />}
                 {eyebrow}
               </span>
@@ -214,7 +214,7 @@ export default function PageHero({
 /* -------------------------------------------------------------------------- */
 
 const GRID_TEXTURE =
-  'bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:48px_48px]';
+  'bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-size-[48px_48px]';
 
 function isLinkActive(link: SectionNavLink, pathname: string) {
   if (link.external) return false;
@@ -264,11 +264,11 @@ function CompactHero({
   }, [pathname]);
 
   return (
-    <section id={id} className={`relative isolate mt-[var(--page-header-offset)] overflow-hidden rounded-b-2xl bg-crfal-blue-dark text-white sm:rounded-b-3xl ${className ?? ''}`}>
+    <section id={id} className={`relative isolate mt-(--page-header-offset) overflow-hidden rounded-b-2xl bg-crfal-blue-dark text-white sm:rounded-b-3xl ${className ?? ''}`}>
       {/* Fundo: gradiente, textura fina, brilho e arte da taça como assinatura discreta. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A2A4F] via-crfal-blue-dark to-[#071222]" />
-        <div className={`absolute inset-0 ${GRID_TEXTURE} [mask-image:radial-gradient(ellipse_at_top_right,black_10%,transparent_70%)]`} />
+        <div className="absolute inset-0 bg-linear-to-br/srgb from-[#0A2A4F] via-crfal-blue-dark to-[#071222]" />
+        <div className={`absolute inset-0 ${GRID_TEXTURE} mask-[radial-gradient(ellipse_at_top_right,black_10%,transparent_70%)]`} />
         <div className="absolute -right-24 -top-32 h-[420px] w-[420px] rounded-full bg-crfal-blue-light/25 blur-[120px]" />
         <div className="absolute -bottom-40 left-1/4 h-72 w-72 rounded-full bg-crfal-gold/10 blur-[110px]" />
         {backgroundImage && (
@@ -276,10 +276,10 @@ function CompactHero({
             src={backgroundImage}
             alt=""
             decoding="async"
-            className="absolute inset-y-0 right-0 hidden h-full w-[52%] object-contain object-right opacity-35 [mask-image:linear-gradient(to_right,transparent,black_45%)] lg:block"
+            className="absolute inset-y-0 right-0 hidden h-full w-[52%] object-contain object-right opacity-35 mask-[linear-gradient(to_right,transparent,black_45%)] lg:block"
           />
         )}
-        <div className="absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-crfal-gold/60 to-transparent" />
+        <div className="absolute inset-x-10 bottom-0 h-px bg-linear-to-r/srgb from-transparent via-crfal-gold/60 to-transparent" />
       </div>
 
       <div className="container-crfal relative">
@@ -336,10 +336,10 @@ function CompactHero({
 
         {sectionNav && (
           <nav aria-label={`Páginas de ${sectionNav.label}`} className="border-t border-white/10 pb-1 sm:px-2">
-            <div ref={tabsRef} className="-mx-4 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+            <div ref={tabsRef} className="-mx-4 flex gap-1 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
               {sectionNav.links.map((link: SectionNavLink) => {
                 const active = isLinkActive(link, pathname);
-                const cls = `relative inline-flex min-h-12 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 first:pl-0 sm:text-sm ${
+                const cls = `relative inline-flex min-h-12 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-[13px] font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 first:pl-0 sm:text-sm ${
                   active
                     ? 'text-white after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-crfal-gold first:after:left-0'
                     : 'text-white/60 hover:text-white'
@@ -399,7 +399,7 @@ export function PageHeroAction({
   icon?: ComponentType<{ className?: string }>;
 }) {
   const isExternal = external ?? /^(https?:|mailto:|tel:)/.test(href);
-  const cls = `group inline-flex min-h-11 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark motion-reduce:transition-none ${
+  const cls = `group inline-flex min-h-11 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark motion-reduce:transition-none ${
     variant === 'primary' ? 'bg-white text-crfal-blue hover:bg-crfal-blue-lighter' : 'border border-white/30 text-white hover:border-white hover:bg-white/10'
   }`;
   const content = (

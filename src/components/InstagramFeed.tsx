@@ -45,7 +45,7 @@ function PostCard({ item }: { item: InstagramItem }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${label.slice(0, 160)} (abre o Instagram em uma nova aba)`}
-      className="group flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-crfal-gray-200 shadow-sm transition-shadow duration-300 hover:shadow-xl hover:shadow-crfal-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
+      className="group flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-crfal-gray-200 shadow-xs transition-shadow duration-300 hover:shadow-xl hover:shadow-crfal-blue/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
     >
       <div className={`relative isolate ${CFF_COVER_ASPECT} overflow-hidden bg-crfal-blue-dark`}>
         <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" onError={handleImageError} className="absolute inset-0 -z-10 h-full w-full scale-150 object-cover opacity-60 blur-2xl" />
@@ -75,10 +75,10 @@ function FollowCard() {
       href={INSTAGRAM_PROFILE_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative isolate flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue p-5 text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
+      className="group relative isolate flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue p-5 text-white shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
     >
-      <img src="/images/instagram-card-background-v1.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-right-bottom group-hover:scale-105 ${motion}`} />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-crfal-blue-dark via-crfal-blue/85 to-crfal-blue/50" />
+      <img src="/images/instagram-card-background-v1.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" className={`pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-bottom-right group-hover:scale-105 ${motion}`} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-t/srgb from-crfal-blue-dark via-crfal-blue/85 to-crfal-blue/50" />
       <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/50">
         <Instagram className="h-5 w-5" aria-hidden="true" />
       </span>
@@ -96,7 +96,7 @@ function FollowCard() {
 }
 
 /** Trilho: carrossel com deslize no celular, grade de 4 colunas a partir de 768px — mesma largura e espaçamento das capas de Publicações do CFF. */
-const trackClass = '-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-2 [scrollbar-width:none] sm:-mx-6 sm:gap-8 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 md:pb-0 lg:gap-10 [&::-webkit-scrollbar]:hidden';
+const trackClass = '-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-2 scrollbar-none sm:-mx-6 sm:gap-8 sm:scroll-px-6 sm:px-6 md:mx-0 md:grid md:grid-cols-4 md:overflow-visible md:px-0 md:pb-0 lg:gap-10 [&::-webkit-scrollbar]:hidden';
 const slotClass = 'w-[calc(50%-0.5rem)] shrink-0 snap-start sm:w-[calc(50%-1rem)] md:w-auto';
 
 export default function InstagramFeed({
@@ -119,7 +119,7 @@ export default function InstagramFeed({
             <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
             <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-crfal-gray-600">{description}</p>
           </div>
-          <a href={INSTAGRAM_PROFILE_URL} target="_blank" rel="noopener noreferrer" className="group inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
+          <a href={INSTAGRAM_PROFILE_URL} target="_blank" rel="noopener noreferrer" className="group inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
             Seguir {HANDLE}
             <ArrowUpRight className={`h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${motion}`} aria-hidden="true" />
             <span className="sr-only">(abre em uma nova aba)</span>

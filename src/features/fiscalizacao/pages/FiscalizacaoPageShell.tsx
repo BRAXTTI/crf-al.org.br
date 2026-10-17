@@ -26,7 +26,7 @@ function ContatoSetor({ className = '' }: { className?: string }) {
   return (
     <aside
       aria-labelledby="contato-fiscalizacao"
-      className={`relative isolate overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-gradient-to-br from-crfal-blue to-crfal-blue-dark p-6 text-white ${className}`}
+      className={`relative isolate overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white ${className}`}
     >
       <ShieldCheck aria-hidden className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-36 w-36 opacity-[0.06]" strokeWidth={1} />
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Fale com o setor</p>
@@ -88,7 +88,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, meta, 
         <div className="container-crfal py-6 md:py-10">
           <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
             <div className="space-y-6 lg:col-span-8">
-              <article className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm md:p-8 lg:p-10 [&>h2]:mt-10 [&>h2]:mb-4 [&>h2]:border-t [&>h2]:border-crfal-gray-200 [&>h2]:pt-8 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-crfal-blue [&>h2]:after:mt-2.5 [&>h2]:after:block [&>h2]:after:h-0.5 [&>h2]:after:w-10 [&>h2]:after:rounded-full [&>h2]:after:bg-crfal-gold [&>h2]:after:content-[''] [&>h2]:md:text-2xl [&>h2:first-of-type]:mt-0 [&>h2:first-of-type]:border-0 [&>h2:first-of-type]:pt-0 [&>p]:mb-4 [&>p]:leading-7 [&>p]:text-neutral-700 [&>p]:md:leading-8 [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-neutral-700 [&>li]:leading-7">
+              <article className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs md:p-8 lg:p-10 [&>h2]:mt-10 [&>h2]:mb-4 [&>h2]:border-t [&>h2]:border-crfal-gray-200 [&>h2]:pt-8 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-crfal-blue [&>h2]:after:mt-2.5 [&>h2]:after:block [&>h2]:after:h-0.5 [&>h2]:after:w-10 [&>h2]:after:rounded-full [&>h2]:after:bg-crfal-gold [&>h2]:after:content-[''] md:[&>h2]:text-2xl [&>h2:first-of-type]:mt-0 [&>h2:first-of-type]:border-0 [&>h2:first-of-type]:pt-0 [&>p]:mb-4 [&>p]:leading-7 [&>p]:text-neutral-700 md:[&>p]:leading-8 [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-neutral-700 [&>li]:leading-7">
                 {children}
               </article>
 
@@ -98,7 +98,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, meta, 
 
             <aside className="hidden lg:col-span-4 lg:block">
               <div className="sticky top-[calc(var(--header-offset)+1.5rem)] space-y-5">
-                <nav aria-labelledby="menu-fiscalizacao" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-sm">
+                <nav aria-labelledby="menu-fiscalizacao" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs">
                   <h2 id="menu-fiscalizacao" className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
                     Menu da Fiscalização
                   </h2>

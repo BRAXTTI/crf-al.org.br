@@ -27,7 +27,7 @@ export default function CffPublications() {
               <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
               <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-crfal-gray-600">Revistas, guias de prática clínica, notas técnicas e relatórios do Conselho Federal.</p>
             </div>
-            <Link to={CFF_PUBLICATIONS_PATH} className="group inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
+            <Link to={CFF_PUBLICATIONS_PATH} className="group inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
               Ver todas <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true" />
             </Link>
           </div>

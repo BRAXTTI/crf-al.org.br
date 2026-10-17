@@ -49,7 +49,7 @@ export default function ProcessoAdministrativoFiscalPage() {
         {fluxo.map((etapa) => (
           <div key={etapa.step} className="flex gap-4">
             <div className="flex flex-col items-center">
-              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${etapa.color} text-sm font-bold text-white shadow-sm`}>
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br/srgb ${etapa.color} text-sm font-bold text-white shadow-xs`}>
                 {etapa.step}
               </span>
               {etapa.step < fluxo.length && (
