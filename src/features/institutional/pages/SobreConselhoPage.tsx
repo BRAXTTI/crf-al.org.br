@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroAction } from '@/components/block/page-hero';
+import { TRANSPARENCIA_URL } from '@/config/site';
 import {
   Target,
   Eye,
@@ -14,9 +16,17 @@ import {
   Building2,
   FileCheck,
   Music,
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Landmark,
+  CalendarDays,
+  MessageSquare,
 } from 'lucide-react';
 
 /* ─── DATA ──────────────────────────────────────────────────────────── */
+
+const FUNDACAO = 1960;
 
 const milestones = [
   {
@@ -56,7 +66,7 @@ const milestones = [
   },
 ];
 
-const mvv = [
+const missaoVisao = [
   {
     id: 'missao',
     titulo: 'Missão',
@@ -73,72 +83,82 @@ const mvv = [
     descricao:
       'Ser uma instituição facilitadora na regularização de serviços administrativos para farmacêuticos, técnicos e empresas, através de processos modernos e com excelência, buscando orientar, capacitar e valorizar a prestação de serviços farmacêuticos no estado de Alagoas.',
   },
-  {
-    id: 'valores',
-    titulo: 'Valores',
-    subtitulo: 'Nossos princípios fundamentais',
-    Icon: Heart,
-    descricao:
-      'Paixão pelo farmacêutico. Resolutividade e inovação. Gestão participativa. Ética e transparência. Qualidade de vida dos colaboradores. Relação saudável com a comunidade.',
-  },
 ];
 
+const valores = [
+  'Paixão pelo farmacêutico',
+  'Resolutividade e inovação',
+  'Gestão participativa',
+  'Ética e transparência',
+  'Qualidade de vida dos colaboradores',
+  'Relação saudável com a comunidade',
+];
+
+/** Cada atribuição leva à página do site onde o serviço acontece. */
 const atribuicoes = [
   {
     Icon: FileCheck,
-    num: '01',
     title: 'Registro Profissional',
     description:
       'Inscrição e habilitação de farmacêuticos e técnicos, com emissão de carteira de identidade profissional.',
+    href: '/servicos/requerimentos?perfil=pessoa-fisica',
+    cta: 'Requerimentos para farmacêuticos',
   },
   {
     Icon: Shield,
-    num: '02',
     title: 'Fiscalização',
     description:
       'Fiscalizar o exercício farmacêutico em farmácias, drogarias, laboratórios e distribuidoras de todo o estado.',
+    href: '/fiscalizacao',
+    cta: 'Conheça a Fiscalização',
   },
   {
     Icon: Scale,
-    num: '03',
     title: 'Ética Profissional',
     description:
       'Aplicar o Código de Ética Farmacêutica, processar e julgar infrações éticas dos profissionais inscritos.',
+    href: '/legislacao',
+    cta: 'Consultar a legislação',
   },
   {
     Icon: Building2,
-    num: '04',
     title: 'Autorização de Funcionamento',
     description:
       'Conceder e revogar autorização de funcionamento de estabelecimentos farmacêuticos em Alagoas.',
+    href: '/servicos/requerimentos?perfil=pessoa-juridica',
+    cta: 'Requerimentos para empresas',
   },
   {
     Icon: GraduationCap,
-    num: '05',
     title: 'Educação Continuada',
     description:
       'Promover cursos, seminários, congressos e eventos de capacitação para toda a classe farmacêutica.',
+    href: '/eventos',
+    cta: 'Ver eventos',
   },
   {
     Icon: Users,
-    num: '06',
     title: 'Representação da Classe',
     description:
       'Representar os farmacêuticos alagoanos perante órgãos públicos, entidades e a sociedade civil.',
+    href: '/instituicao/diretoria',
+    cta: 'Conheça a Diretoria',
   },
   {
     Icon: Award,
-    num: '07',
     title: 'Defesa Profissional',
     description:
       'Defender os direitos dos profissionais inscritos e coibir o exercício ilegal da farmácia.',
+    href: '/servicos/ouvidoria',
+    cta: 'Fazer uma denúncia',
   },
   {
     Icon: BookOpen,
-    num: '08',
     title: 'Orientação e Informação',
     description:
       'Orientar farmacêuticos, empresas e a sociedade sobre normas, regulações e boas práticas.',
+    href: '/servicos/tutoriais',
+    cta: 'Ver tutoriais',
   },
 ];
 
@@ -199,13 +219,41 @@ const hinoEstrofes = [
   },
 ];
 
-/* ─── HOOK ──────────────────────────────────────────────────────────── */
+const sumario = [
+  { id: 'historia', label: 'História' },
+  { id: 'missao-visao-valores', label: 'Missão, Visão e Valores' },
+  { id: 'atribuicoes', label: 'Atribuições' },
+  { id: 'hino', label: 'Hino Farmacêutico' },
+];
 
+const saibaMais: { href: string; title: string; description: string; Icon: ComponentType<{ className?: string }>; external?: boolean }[] = [
+  { href: '/instituicao/diretoria', title: 'Diretoria e Conselho', description: 'Quem compõe a gestão atual', Icon: Users },
+  { href: '/instituicao/plenarias', title: 'Plenárias', description: 'Agenda, pautas e atas', Icon: CalendarDays },
+  { href: TRANSPARENCIA_URL, title: 'Portal da Transparência', description: 'Contas, contratos e licitações', Icon: Landmark, external: true },
+  { href: '/contato', title: 'Fale Conosco', description: 'Canais e setores de atendimento', Icon: MessageSquare },
+];
+
+/* ─── HELPERS ───────────────────────────────────────────────────────── */
+
+const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+const anchorOffset = 'scroll-mt-[calc(var(--header-offset)+24px)]';
+
+/**
+ * Revela a seção ao entrar na tela. Com movimento reduzido (ou sem
+ * IntersectionObserver), o conteúdo já começa visível.
+ */
 function useInView(threshold = 0.08) {
   const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
+  const [inView, setInView] = useState(
+    () =>
+      typeof window === 'undefined' ||
+      !('IntersectionObserver' in window) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 
   useEffect(() => {
+    if (inView) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -217,9 +265,41 @@ function useInView(threshold = 0.08) {
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [threshold]);
+  }, [inView, threshold]);
 
   return { ref, inView };
+}
+
+const reveal = (inView: boolean) =>
+  `transition-all duration-700 motion-reduce:transition-none ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`;
+
+function SectionHeader({
+  id,
+  label,
+  title,
+  children,
+  inverted = false,
+  center = false,
+}: {
+  id: string;
+  label: string;
+  title: string;
+  children?: ReactNode;
+  inverted?: boolean;
+  center?: boolean;
+}) {
+  return (
+    <div className={`max-w-2xl ${center ? 'mx-auto text-center' : ''}`}>
+      <p className={inverted ? 'text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold' : goldLabel}>{label}</p>
+      <h2 id={id} className={`mt-2 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl ${inverted ? 'text-white' : 'text-crfal-blue'}`}>
+        {title}
+      </h2>
+      <span aria-hidden className={`mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold ${center ? 'mx-auto' : ''}`} />
+      {children && (
+        <p className={`mt-4 text-base leading-relaxed ${inverted ? 'text-white/80' : 'text-crfal-gray-600'}`}>{children}</p>
+      )}
+    </div>
+  );
 }
 
 /* ─── COMPONENT ─────────────────────────────────────────────────────── */
@@ -229,16 +309,16 @@ export default function SobreConselhoPage() {
   const { ref: mvvRef, inView: mvvInView } = useInView();
   const { ref: atribRef, inView: atribInView } = useInView();
   const { ref: hinoRef, inView: hinoInView } = useInView();
+  const anos = new Date().getFullYear() - FUNDACAO;
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <SEO
         title="Sobre o Conselho"
         description="Conheça a história e a trajetória do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas, suas atribuições e papel na saúde pública alagoana."
         path="/instituicao/sobre-conselho"
       />
 
-      {/* ── HERO ─────────────────────────────────────────────────────── */}
       <PageHero
         id="sobre-conselho"
         breadcrumb={[
@@ -249,214 +329,243 @@ export default function SobreConselhoPage() {
         title="Sobre o Conselho"
         section="instituicao"
         lead="A história, a missão e as atribuições do CRF-AL na defesa da profissão farmacêutica e da saúde pública em Alagoas."
+        meta={[
+          { value: anos, label: 'anos de história' },
+          { value: atribuicoes.length, label: 'atribuições legais' },
+          { value: 'Lei 3.820/1960', label: 'base legal' },
+        ]}
+        actions={
+          <>
+            <PageHeroAction href="/instituicao/diretoria" icon={Users}>Conheça a Diretoria</PageHeroAction>
+            <PageHeroAction href="#atribuicoes" variant="secondary">O que o CRF-AL faz</PageHeroAction>
+          </>
+        }
       />
 
-      {/* ── HISTÓRIA ─────────────────────────────────────────────────── */}
-      <section className="relative py-12 sm:py-16 md:py-24 bg-white  overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-end overflow-hidden pointer-events-none select-none" aria-hidden>
-          <span className="font-bold text-crfal-blue/4  text-[26vw] leading-none pr-4">
-            AL
-          </span>
-        </div>
+      <div className="container-crfal space-y-3 py-6 sm:py-10">
+        {/* ── SUMÁRIO ──────────────────────────────────────────────────── */}
+        <nav aria-label="Nesta página" className="flex flex-wrap items-center gap-2 pb-3 sm:pb-5">
+          <span className={`${goldLabel} mr-1 w-full sm:w-auto`}>Nesta página</span>
+          {sumario.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={`inline-flex min-h-10 items-center rounded-full border border-crfal-gray-200 bg-white px-4 text-sm font-medium text-crfal-blue transition-colors hover:border-crfal-blue hover:bg-crfal-blue-lighter motion-reduce:transition-none ${focusRing}`}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
-        <div ref={histRef} className="container-crfal relative z-10">
-          <div className={`mb-10 transition-all duration-700 ${histInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <p className="text-amber-600  text-[11px] font-bold tracking-[0.22em] uppercase mb-3">
-              Nossa Trajetória
-            </p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-crfal-blue  leading-tight">
-              História do CRF-AL
-            </h2>
-            <div className="mt-4 w-14 h-1 bg-amber-500 rounded-full" />
-          </div>
+        {/* ── HISTÓRIA ─────────────────────────────────────────────────── */}
+        <section id="historia" aria-labelledby="historia-title" className={`section-panel ${anchorOffset}`}>
+          <div ref={histRef} className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+            <div className={`${reveal(histInView)} lg:sticky lg:top-[calc(var(--header-offset)+32px)] lg:self-start`}>
+              <SectionHeader id="historia-title" label="Nossa trajetória" title="História do CRF-AL" />
+              <p className="mt-5 text-base leading-relaxed text-crfal-gray-700 sm:text-lg">
+                O <strong className="font-semibold text-crfal-blue">Conselho Regional de Farmácia do Estado de Alagoas — CRF-AL</strong> é a autarquia federal responsável pela fiscalização e regulamentação do exercício da profissão farmacêutica em Alagoas.
+              </p>
+              <p className="mt-4 text-base leading-relaxed text-crfal-gray-600">
+                Ao longo de mais de seis décadas, fortaleceu sua presença como defensor da ética, da qualidade técnica e da valorização do farmacêutico alagoano, contribuindo para a saúde pública do estado.
+              </p>
+            </div>
 
-          <div className={`max-w-3xl mb-14 transition-all duration-700 delay-150 ${histInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <p className="text-crfal-gray-600  text-base sm:text-lg leading-relaxed">
-              O{' '}
-              <strong className="text-crfal-blue ">
-                Conselho Regional de Farmácia do Estado de Alagoas — CRF-AL
-              </strong>{' '}
-              é a autarquia federal responsável pela fiscalização e regulamentação do exercício da profissão farmacêutica em Alagoas. Ao longo de mais de seis décadas, fortaleceu sua presença como defensor intransigente da ética, da qualidade técnica e da valorização do farmacêutico alagoano, contribuindo decisivamente para a saúde pública do estado.
-            </p>
-          </div>
-
-          <div className="relative pl-8 sm:pl-14 md:pl-20">
-            <div className="absolute left-2.5 sm:left-5 md:left-8 top-3 bottom-3 w-px bg-linear-to-b/srgb from-amber-400 via-crfal-blue/60 to-crfal-blue/10" />
-            <div className="space-y-7">
+            <ol className="relative space-y-4 pl-8 sm:pl-10">
+              <span aria-hidden className="absolute left-[7px] top-3 bottom-3 w-px bg-linear-to-b/srgb from-crfal-gold via-crfal-blue/40 to-crfal-blue/10 sm:left-[11px]" />
               {milestones.map((m, i) => (
-                <div
+                <li
                   key={m.year}
-                  className={`relative transition-all duration-700 ${histInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}
-                  style={{ transitionDelay: `${280 + i * 110}ms` }}
+                  className={`relative transition-all duration-700 motion-reduce:transition-none ${histInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6'}`}
+                  style={{ transitionDelay: `${150 + i * 90}ms` }}
                 >
-                  <div className={`absolute left-[-22px] sm:left-[-37px] md:left-[-48px] top-5 w-4 h-4 rounded-full border-2 z-10 ${
-                    m.highlight
-                      ? 'bg-amber-400 border-amber-500 shadow-[0_0_14px_rgba(245,158,11,0.55)]'
-                      : 'bg-crfal-blue  border-white '
-                  }`} />
-                  <div className={`bg-white  border rounded-xl p-5 sm:p-6 hover:-translate-y-0.5 hover:shadow-card transition-all duration-300 ${
-                    m.highlight ? 'border-amber-200 ' : 'border-crfal-gray-200 '
-                  }`}>
-                    <div className="flex flex-wrap items-center gap-3 mb-2.5">
-                      <span className={`text-2xl sm:text-3xl font-bold leading-none ${
-                        m.highlight ? 'text-amber-500 ' : 'text-crfal-blue '
-                      }`}>
+                  <span
+                    aria-hidden
+                    className={`absolute -left-8 top-6 h-4 w-4 rounded-full border-2 sm:-left-10 sm:top-6 sm:ml-1 ${
+                      m.highlight ? 'border-white bg-crfal-gold ring-4 ring-crfal-gold/25' : 'border-white bg-crfal-blue ring-1 ring-crfal-blue/20'
+                    }`}
+                  />
+                  <article className={`rounded-xl border p-5 sm:p-6 ${m.highlight ? 'border-crfal-gold/40 bg-[#FBF7EC]' : 'border-crfal-gray-200 bg-white'}`}>
+                    <div className="mb-2 flex flex-wrap items-center gap-3">
+                      <span className={`text-2xl font-bold leading-none tracking-tight sm:text-3xl ${m.highlight ? 'text-[#8A6A12]' : 'text-crfal-blue'}`}>
                         {m.year}
                       </span>
                       {m.highlight && (
-                        <span className="text-[10px] font-bold tracking-[0.14em] uppercase text-amber-600  border border-amber-300  rounded-full px-2.5 py-0.5">
+                        <span className="rounded-full bg-crfal-gold/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A6A12] ring-1 ring-crfal-gold/40">
                           Fundação
                         </span>
                       )}
                     </div>
-                    <h3 className="font-semibold text-neutral-800  text-base sm:text-lg mb-2">{m.title}</h3>
-                    <p className="text-crfal-gray-500  text-sm sm:text-base leading-relaxed">{m.description}</p>
-                  </div>
-                </div>
+                    <h3 className="mb-1.5 text-base font-semibold text-crfal-gray-900 sm:text-lg">{m.title}</h3>
+                    <p className="text-sm leading-relaxed text-crfal-gray-600 sm:text-base">{m.description}</p>
+                  </article>
+                </li>
               ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* ── MISSÃO, VISÃO E VALORES ──────────────────────────────────── */}
+        <section
+          id="missao-visao-valores"
+          aria-labelledby="mvv-title"
+          className={`relative isolate overflow-hidden rounded-2xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark px-4 py-9 text-white sm:rounded-3xl sm:px-6 sm:py-12 md:px-8 lg:px-12 lg:py-14 ${anchorOffset}`}
+        >
+          <Target className="pointer-events-none absolute -right-10 -top-10 -z-10 h-64 w-64 text-white opacity-[0.05]" aria-hidden />
+          <div ref={mvvRef}>
+            <div className={reveal(mvvInView)}>
+              <SectionHeader id="mvv-title" label="Propósito e direção" title="Missão, Visão e Valores" inverted />
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ── MISSÃO, VISÃO E VALORES ──────────────────────────────────── */}
-      <section className="relative py-12 sm:py-16 md:py-24 bg-linear-to-br/srgb from-crfal-blue via-crfal-blue-dark to-[#002a4a] overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none" aria-hidden>
-          <div className="absolute top-0 right-0 w-80 h-80 bg-crfal-blue-light/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-        </div>
-
-        <div ref={mvvRef} className="container-crfal relative z-10">
-          <div className={`mb-12 transition-all duration-700 ${mvvInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <p className="text-amber-400 text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Propósito e Direção</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">Missão, Visão e Valores</h2>
-            <div className="mt-4 w-14 h-1 bg-amber-400 rounded-full" />
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-5 lg:gap-7">
-            {mvv.map((item, i) => {
-              const Icon = item.Icon;
-              return (
-                <div
-                  key={item.id}
-                  className={`group relative bg-white/10 backdrop-blur-xs border border-white/20 rounded-xl p-5 sm:p-7 hover:bg-white/15 hover:-translate-y-1 transition-all duration-500 ${
-                    mvvInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                  }`}
-                  style={{ transitionDelay: `${200 + i * 140}ms` }}
-                >
-                  <div className="absolute top-0 left-6 right-6 h-px bg-linear-to-r/srgb from-transparent via-amber-400/50 to-transparent" />
-                  <div className="w-12 h-12 bg-white/15 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-1">{item.titulo}</h3>
-                  <p className="text-white/45 text-[11px] font-bold uppercase tracking-widest mb-4">{item.subtitulo}</p>
-                  <p className="text-white/80 text-sm sm:text-base leading-relaxed">{item.descricao}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── ATRIBUIÇÕES ──────────────────────────────────────────────── */}
-      <section className="py-12 sm:py-16 md:py-24 bg-crfal-gray-50 ">
-        <div ref={atribRef} className="container-crfal">
-          <div className={`mb-12 transition-all duration-700 ${atribInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <p className="text-amber-600  text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Competências Legais</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-crfal-blue  leading-tight">Atribuições do CRF-AL</h2>
-            <div className="mt-4 w-14 h-1 bg-amber-500 rounded-full" />
-            <p className="mt-5 max-w-2xl text-crfal-gray-600  text-base leading-relaxed">
-              Com base na Lei Federal nº 3.820/1960 e legislações complementares, o CRF-AL exerce as seguintes competências em prol da sociedade e da classe farmacêutica alagoana.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {atribuicoes.map((item, i) => {
-              const Icon = item.Icon;
-              return (
-                <div
-                  key={item.num}
-                  className={`group bg-white  border border-crfal-gray-200  rounded-xl p-5 sm:p-6 hover:border-crfal-blue/30 hover:shadow-card hover:-translate-y-1 transition-all duration-500 ${
-                    atribInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                  }`}
-                  style={{ transitionDelay: `${120 + i * 65}ms` }}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-crfal-blue/10  rounded-xl flex items-center justify-center shrink-0 group-hover:bg-crfal-blue group-hover:scale-110 transition-all duration-300">
-                      <Icon className="w-5 h-5 text-crfal-blue  group-hover:text-white transition-colors duration-300" />
-                    </div>
-                    <span className="text-3xl font-bold text-neutral-100  leading-none select-none">{item.num}</span>
-                  </div>
-                  <h3 className="font-semibold text-neutral-800  text-sm sm:text-base mb-2">{item.title}</h3>
-                  <p className="text-crfal-gray-500  text-xs sm:text-sm leading-relaxed">{item.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── HINO FARMACÊUTICO ────────────────────────────────────────── */}
-      <section className="py-12 sm:py-16 md:py-24 bg-white  overflow-hidden">
-        <div ref={hinoRef} className="container-crfal">
-          <div className={`text-center mb-12 transition-all duration-700 ${hinoInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <p className="text-amber-600  text-[11px] font-bold tracking-[0.22em] uppercase mb-3">Tradição e Orgulho</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-crfal-blue  leading-tight">Hino Farmacêutico</h2>
-            <div className="mt-4 mx-auto w-14 h-1 bg-amber-500 rounded-full" />
-            <p className="mt-5 max-w-xl mx-auto text-crfal-gray-600  text-base leading-relaxed">
-              Entoado nas solenidades da classe farmacêutica brasileira, o Hino Farmacêutico celebra a missão, os valores e o orgulho de uma profissão dedicada à vida.
-            </p>
-          </div>
-
-          <div className={`max-w-2xl mx-auto transition-all duration-700 delay-300 ${hinoInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="relative bg-linear-to-br/srgb from-amber-50 via-orange-50/60 to-amber-50    border border-amber-200/70  rounded-xl p-5 sm:p-10 overflow-hidden shadow-xl">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.045] " aria-hidden>
-                {[18, 26, 34, 42, 50, 58, 66, 74, 82].map((top) => (
-                  <div key={top} className="absolute left-0 right-0 h-px bg-amber-900 " style={{ top: `${top}%` }} />
-                ))}
-              </div>
-              <div className="absolute -bottom-6 -right-6 opacity-[0.07] pointer-events-none" aria-hidden>
-                <Music className="w-40 h-40 text-amber-800 " />
-              </div>
-
-              <div className="flex items-center gap-4 mb-6 sm:mb-8 relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500/20  rounded-xl flex items-center justify-center shrink-0">
-                  <Music className="w-5 h-5 sm:w-6 sm:h-6 text-amber-700 " />
-                </div>
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-amber-900 ">Hino Farmacêutico</h3>
-                  <p className="text-amber-700/55  text-xs sm:text-sm">Tradição da Classe Farmacêutica Brasileira</p>
-                </div>
-              </div>
-
-              <div className="space-y-6 relative">
-                {hinoEstrofes.map((estrofe, i) => (
-                  <div
-                    key={i}
-                    className={`transition-all duration-500 ${hinoInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'} ${
-                      estrofe.tipo === 'refrao' ? 'pl-5 border-l-2 border-amber-400 ' : ''
-                    }`}
-                    style={{ transitionDelay: `${400 + i * 90}ms` }}
+            <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+              {missaoVisao.map((item, i) => {
+                const Icon = item.Icon;
+                return (
+                  <article
+                    key={item.id}
+                    className={`rounded-xl border border-white/15 bg-white/[0.07] p-5 transition-all duration-700 motion-reduce:transition-none sm:p-7 ${mvvInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                    style={{ transitionDelay: `${150 + i * 120}ms` }}
                   >
-                    {estrofe.tipo === 'refrao' && (
-                      <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-amber-600  mb-2">Refrão</p>
-                    )}
-                    {estrofe.linhas.map((linha, j) => (
-                      <p key={j} className={`leading-relaxed ${
-                        estrofe.tipo === 'refrao'
-                          ? 'text-amber-900  font-semibold text-sm sm:text-base italic'
-                          : 'text-neutral-700  text-sm sm:text-base'
-                      }`}>
-                        {linha}
-                      </p>
-                    ))}
+                    <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/60">
+                      <Icon className="h-5 w-5 text-white" aria-hidden />
+                    </span>
+                    <h3 className="text-xl font-bold sm:text-2xl">{item.titulo}</h3>
+                    <p className="mb-4 mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">{item.subtitulo}</p>
+                    <p className="text-sm leading-relaxed text-white/85 sm:text-base">{item.descricao}</p>
+                  </article>
+                );
+              })}
+
+              <article
+                className={`rounded-xl border border-white/15 bg-white/[0.07] p-5 transition-all duration-700 motion-reduce:transition-none sm:p-7 md:col-span-2 lg:col-span-1 ${mvvInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+                style={{ transitionDelay: '390ms' }}
+              >
+                <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/60">
+                  <Heart className="h-5 w-5 text-white" aria-hidden />
+                </span>
+                <h3 className="text-xl font-bold sm:text-2xl">Valores</h3>
+                <p className="mb-4 mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Nossos princípios fundamentais</p>
+                <ul className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-1">
+                  {valores.map((valor) => (
+                    <li key={valor} className="flex items-start gap-2.5 text-sm leading-snug text-white/85 sm:text-base">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-crfal-gold" aria-hidden />
+                      {valor}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        {/* ── ATRIBUIÇÕES ──────────────────────────────────────────────── */}
+        <section id="atribuicoes" aria-labelledby="atribuicoes-title" className={`section-panel ${anchorOffset}`}>
+          <div ref={atribRef}>
+            <div className={reveal(atribInView)}>
+              <SectionHeader id="atribuicoes-title" label="Competências legais" title="Atribuições do CRF-AL">
+                Com base na Lei Federal nº 3.820/1960 e legislações complementares, o CRF-AL exerce as seguintes competências em prol da sociedade e da classe farmacêutica alagoana.
+              </SectionHeader>
+            </div>
+
+            <ul className="mt-10 grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+              {atribuicoes.map((item, i) => {
+                const Icon = item.Icon;
+                return (
+                  <li
+                    key={item.title}
+                    className={`transition-all duration-700 motion-reduce:transition-none ${atribInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+                    style={{ transitionDelay: `${100 + i * 50}ms` }}
+                  >
+                    <Link
+                      to={item.href}
+                      className={`group flex h-full flex-col rounded-xl border border-crfal-gray-200 bg-white p-5 transition-[border-color,box-shadow] duration-300 hover:border-crfal-blue/40 hover:shadow-card motion-reduce:transition-none sm:p-6 ${focusRing}`}
+                    >
+                      <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-crfal-blue-lighter ring-1 ring-crfal-gold/40 transition-colors group-hover:bg-crfal-blue motion-reduce:transition-none">
+                        <Icon className="h-5 w-5 text-crfal-blue transition-colors group-hover:text-white motion-reduce:transition-none" aria-hidden />
+                      </span>
+                      <h3 className="mb-1.5 text-base font-semibold text-crfal-gray-900">{item.title}</h3>
+                      <p className="text-sm leading-relaxed text-crfal-gray-600">{item.description}</p>
+                      <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-crfal-blue">
+                        {item.cta}
+                        <ArrowRight className="h-4 w-4 text-[#8A6A12] transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden />
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+
+        {/* ── HINO FARMACÊUTICO ────────────────────────────────────────── */}
+        <section id="hino" aria-labelledby="hino-title" className={`section-panel ${anchorOffset}`}>
+          <div ref={hinoRef}>
+            <div className={reveal(hinoInView)}>
+              <SectionHeader id="hino-title" label="Tradição e orgulho" title="Hino Farmacêutico" center>
+                Entoado nas solenidades da classe farmacêutica brasileira, o Hino Farmacêutico celebra a missão, os valores e o orgulho de uma profissão dedicada à vida.
+              </SectionHeader>
+            </div>
+
+            <figure className={`relative mx-auto mt-10 max-w-2xl overflow-hidden rounded-xl border border-crfal-gold/40 bg-[#FBF7EC] p-6 sm:p-10 ${reveal(hinoInView)} delay-200`}>
+              <Music className="pointer-events-none absolute -bottom-6 -right-6 h-40 w-40 text-[#8A6A12] opacity-[0.07]" aria-hidden />
+              <figcaption className="relative mb-6 flex items-center gap-3 sm:mb-8">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-crfal-gold/15 ring-1 ring-crfal-gold/50">
+                  <Music className="h-5 w-5 text-[#8A6A12]" aria-hidden />
+                </span>
+                <span className={goldLabel}>Letra · Tradição da classe farmacêutica brasileira</span>
+              </figcaption>
+
+              <div className="relative space-y-6">
+                {hinoEstrofes.map((estrofe, i) => (
+                  <div key={i} className={estrofe.tipo === 'refrao' ? 'border-l-2 border-crfal-gold pl-5' : ''}>
+                    {estrofe.tipo === 'refrao' && <p className={`${goldLabel} mb-2`}>Refrão</p>}
+                    <p className={`whitespace-pre-line leading-relaxed ${estrofe.tipo === 'refrao' ? 'text-sm font-semibold italic text-crfal-gray-900 sm:text-base' : 'text-sm text-crfal-gray-700 sm:text-base'}`}>
+                      {estrofe.linhas.join('\n')}
+                    </p>
                   </div>
                 ))}
               </div>
-            </div>
+            </figure>
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* ── SAIBA MAIS ───────────────────────────────────────────────── */}
+        <section aria-labelledby="saiba-mais-title" className="section-panel">
+          <SectionHeader id="saiba-mais-title" label="Continue navegando" title="Conheça mais o CRF-AL" />
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {saibaMais.map(({ href, title, description, Icon, external }) => {
+              const cls = `group flex h-full items-center gap-4 rounded-xl border border-crfal-gray-200 bg-white p-4 transition-colors hover:border-crfal-blue/40 hover:bg-crfal-blue-lighter/50 motion-reduce:transition-none ${focusRing}`;
+              const content = (
+                <>
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter ring-1 ring-crfal-gold/40">
+                    <Icon className="h-5 w-5 text-crfal-blue" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold text-crfal-gray-900 sm:text-base">{title}</span>
+                    <span className="block text-sm text-crfal-gray-600">{description}</span>
+                  </span>
+                  {external ? (
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-[#8A6A12] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                  ) : (
+                    <ArrowRight className="h-4 w-4 shrink-0 text-[#8A6A12] transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden />
+                  )}
+                </>
+              );
+              return (
+                <li key={href}>
+                  {external ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+                      {content}
+                      <span className="sr-only"> (abre em nova aba)</span>
+                    </a>
+                  ) : (
+                    <Link to={href} className={cls}>{content}</Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </div>
     </div>
   );
 }
