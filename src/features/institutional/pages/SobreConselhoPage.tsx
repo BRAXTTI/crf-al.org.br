@@ -531,7 +531,7 @@ export default function SobreConselhoPage() {
         {/* ── SAIBA MAIS ───────────────────────────────────────────────── */}
         <section aria-labelledby="saiba-mais-title" className="section-panel">
           <SectionHeader id="saiba-mais-title" label="Continue navegando" title="Conheça mais o CRF-AL" />
-          <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {saibaMais.map(({ href, title, description, Icon, external }) => {
               const cls = `group flex h-full items-center gap-4 rounded-xl border border-crfal-gray-200 bg-white p-4 transition-colors hover:border-crfal-blue/40 hover:bg-crfal-blue-lighter/50 motion-reduce:transition-none ${focusRing}`;
               const content = (
