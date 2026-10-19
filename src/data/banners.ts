@@ -48,14 +48,14 @@ export interface Banner {
   ctaLabel?: string;
 }
 
+// Ordem: o CRF AL em Casa já está no card logo acima do slider, então fica por último na rotação.
 export const banners: Banner[] = [
   {
-    image: '/images/banners/banner-5-nova-proporcao-desktop.webp',
-    imageMobile: '/images/banners/banner5-mobile.webp',
-    imageMobileSmall: '/images/banners/banner5-mobile-720.webp',
-    alt: 'CRF/AL em Casa. Seus requerimentos de forma simples, rápida e 100% online. Acesse o CRF AL em Casa.',
-    href: CRF_EM_CASA_URL,
-    external: true,
+    image: '/images/banners/banner-4-nova-resolucao-final-desktop.webp',
+    imageMobile: '/images/banners/banner4-mobile.webp',
+    imageMobileSmall: '/images/banners/banner4-mobile-720.webp',
+    alt: 'Há mais de seis décadas na defesa do âmbito profissional dos farmacêuticos alagoanos. Conheça o CRF/AL.',
+    href: '/instituicao/sobre-conselho',
   },
   {
     image: '/images/banners/banner-golpe-nova-resolucao-desktop.webp',
@@ -67,18 +67,19 @@ export const banners: Banner[] = [
     href: '/imprensa/noticias/crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp',
   },
   {
-    image: '/images/banners/banner-4-nova-resolucao-final-desktop.webp',
-    imageMobile: '/images/banners/banner4-mobile.webp',
-    imageMobileSmall: '/images/banners/banner4-mobile-720.webp',
-    alt: 'Há mais de seis décadas na defesa do âmbito profissional dos farmacêuticos alagoanos. Conheça o CRF/AL.',
-    href: '/instituicao/sobre-conselho',
-  },
-  {
     image: '/images/banners/banner6-nova-proporcao-desktop.webp',
     imageMobile: '/images/banners/banner6-mobile.webp',
     imageMobileSmall: '/images/banners/banner6-mobile-720.webp',
     alt: 'Ouvidoria do CRF/AL: sua voz faz parte. Um canal direto entre você e o Conselho para sugestões, elogios, solicitações, reclamações e denúncias. Valorizando a profissão. Protegendo a sociedade.',
     href: OUVIDORIA_URL,
+    external: true,
+  },
+  {
+    image: '/images/banners/banner-5-nova-proporcao-desktop.webp',
+    imageMobile: '/images/banners/banner5-mobile.webp',
+    imageMobileSmall: '/images/banners/banner5-mobile-720.webp',
+    alt: 'CRF/AL em Casa. Seus requerimentos de forma simples, rápida e 100% online. Acesse o CRF AL em Casa.',
+    href: CRF_EM_CASA_URL,
     external: true,
   },
 ];

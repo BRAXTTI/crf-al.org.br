@@ -89,9 +89,6 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
       aria-roledescription="carrossel"
       aria-label="Destaques"
     >
-      {/* H1 fixo da home (as artes podem ou não ter texto). */}
-      <h1 className="sr-only">Conselho Regional de Farmácia do Estado de Alagoas</h1>
-
       {/* Anuncia a troca só quando o usuário controla o carrossel, não durante a rotação automática. */}
       <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-16/5" aria-live={isRotating ? 'off' : 'polite'}>
       {slides.map((slide, index) => {

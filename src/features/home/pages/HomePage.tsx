@@ -17,6 +17,8 @@ export default function HomePage() {
       />
       <div className="pt-(--home-header-offset)">
         <div className="container-crfal pb-6 pt-5 sm:pb-8 sm:pt-8">
+          {/* H1 fixo da home, antes dos cards e do slider (as artes podem ou não ter texto). */}
+          <h1 className="sr-only">Conselho Regional de Farmácia do Estado de Alagoas</h1>
           <ServiceAccessCards />
           <HeroSlider />
         </div>
