@@ -5,34 +5,11 @@ import PageHero from '@/components/block/page-hero';
 import { PAGE_METADATA } from '@/config/page-metadata';
 import { plenaryYears, type PlenaryMeeting } from '@/config/plenarias';
 import { SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
+import { countdown, daysUntil, formatDate, todayInMaceio, weekday } from '@/lib/maceio';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const externalLinkClass = `inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-dark hover:underline ${focusRing}`;
-
-/** Data de hoje em Maceió, no formato YYYY-MM-DD. */
-function todayInMaceio() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Maceio' }).format(new Date());
-}
-
-function formatDate(date: string, options: Intl.DateTimeFormatOptions) {
-  return new Date(`${date}T12:00:00Z`).toLocaleDateString('pt-BR', { ...options, timeZone: 'UTC' });
-}
-
-function weekday(date: string) {
-  const text = formatDate(date, { weekday: 'long' });
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-function daysUntil(date: string, today: string) {
-  return Math.round((Date.parse(`${date}T12:00:00Z`) - Date.parse(`${today}T12:00:00Z`)) / 86_400_000);
-}
-
-function countdown(days: number) {
-  if (days === 0) return 'Hoje';
-  if (days === 1) return 'Amanhã';
-  return `Em ${days} dias`;
-}
 
 function DocumentLink({ href, children }: { href: string; children: React.ReactNode }) {
   return <a href={href} target="_blank" rel="noopener noreferrer" className={externalLinkClass}>{children}<ExternalLink className="h-3.5 w-3.5" aria-hidden /><span className="sr-only"> (abre em nova aba)</span></a>;

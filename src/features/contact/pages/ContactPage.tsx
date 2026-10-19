@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
+import { useStatusAtendimento } from '@/lib/maceio';
 
 /* -------------------------------------------------------------------------- */
 /* Dados                                                                       */
@@ -105,29 +106,6 @@ const wazeLink = (busca: string) => `https://waze.com/ul?q=${encodeURIComponent(
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
-
-/** Expediente: segunda a sexta, das 9h às 17h, no horário de Maceió (não considera feriados). */
-function statusAtendimento(agora: Date) {
-  const partes = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Maceio', weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(agora);
-  const dia = partes.find((p) => p.type === 'weekday')?.value ?? 'Mon';
-  const hora = Number(partes.find((p) => p.type === 'hour')?.value ?? 0) % 24;
-  const minuto = Number(partes.find((p) => p.type === 'minute')?.value ?? 0);
-  const minutos = hora * 60 + minuto;
-  const util = !['Sat', 'Sun'].includes(dia);
-  if (util && minutos >= 9 * 60 && minutos < 17 * 60) return { aberto: true, texto: 'Aberto agora · fecha às 17h' };
-  if (util && minutos < 9 * 60) return { aberto: false, texto: 'Fechado · abre hoje às 9h' };
-  if (dia === 'Fri' || dia === 'Sat' || dia === 'Sun') return { aberto: false, texto: 'Fechado · abre segunda às 9h' };
-  return { aberto: false, texto: 'Fechado · abre amanhã às 9h' };
-}
-
-function useStatusAtendimento() {
-  const [status, setStatus] = useState(() => statusAtendimento(new Date()));
-  useEffect(() => {
-    const timer = window.setInterval(() => setStatus(statusAtendimento(new Date())), 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
-  return status;
-}
 
 function CopyButton({ value, label, className = '' }: { value: string; label: string; className?: string }) {
   const [copiado, setCopiado] = useState(false);

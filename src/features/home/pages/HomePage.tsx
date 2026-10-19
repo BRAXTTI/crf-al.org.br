@@ -5,6 +5,7 @@ import Publications from '@/components/home/Publications';
 import CffPublications from '@/components/home/CffPublications';
 import SEO from '@/components/SEO';
 import ServiceAccessCards from '@/components/home/ServiceAccessCards';
+import AgoraNoConselho from '@/components/home/AgoraNoConselho';
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
           <HeroSlider />
         </div>
       </div>
+      <AgoraNoConselho />
       <ServiceProfiles />
       <Publications />
       <CffPublications />
