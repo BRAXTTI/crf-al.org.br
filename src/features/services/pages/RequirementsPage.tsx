@@ -5,6 +5,7 @@ import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
+import { CRF_EM_CASA_URL } from '@/config/site';
 import {
   DEFAULT_IMPORTANT_OBSERVATION,
   TODOS_OS_REQUERIMENTOS,
@@ -51,7 +52,6 @@ function normalizar(texto: string): string {
 }
 
 const TODOS_OS_ITENS = TODOS_OS_REQUERIMENTOS;
-const CRF_EM_CASA_URL = 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf';
 
 type ProfileType = 'individual' | 'corporate';
 

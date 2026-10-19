@@ -7,6 +7,7 @@ import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import TopDestaques from '@/features/services/components/TopDestaques';
 import { tutoriais, type Tutorial, type TutorialMotion, type TutorialPerfil } from '@/data/servicos';
 import { getRequerimento } from '@/data/requerimentos';
+import { CRF_EM_CASA_URL } from '@/config/site';
 import {
   ArrowRight,
   Building2,
@@ -23,7 +24,6 @@ import {
   X,
 } from 'lucide-react';
 
-const CRF_EM_CASA_URL = 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -49,7 +49,7 @@ const doPerfil = (t: Tutorial, filtro: Filtro) => filtro === 'todos' || t.perfil
 const TOTAL_VIDEOS = tutoriais.filter(temVideo).length;
 
 function normalizar(texto: string) {
-  return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 const DESKTOP_QUERY = '(min-width: 1024px)';
@@ -160,7 +160,7 @@ export default function TutorialsPage() {
     <div className="min-h-screen">
       <SEO
         title="Tutoriais"
-        description="Tutoriais e guias passo a passo para os serviços do CRFAL — aprenda como realizar seus registros, renovações e demais serviços online de forma simples."
+        description="Passo a passo dos serviços do CRF AL em Casa para farmacêuticos e empresas: inscrição, responsabilidade técnica, certidões, anuidade e mais, com vídeos."
         path="/servicos/tutoriais"
       />
       <PageHero
@@ -183,8 +183,8 @@ export default function TutorialsPage() {
         <TopDestaques onVerTutorial={verTutorialDoReel} />
 
         {/* Perfil e busca */}
-        <div className="sticky top-(--header-offset) z-30 glass-light flex flex-col gap-3 rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4 lg:flex-row lg:items-center">
-          <div role="group" aria-label="Filtrar por perfil" className="flex gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
+        <div className="sticky top-(--header-offset) z-30 glass-light flex flex-col gap-2 rounded-2xl border border-white/70 p-2 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:gap-3 sm:p-3 lg:flex-row lg:items-center lg:p-4">
+          <div role="group" aria-label="Filtrar por perfil" className="flex gap-2 overflow-x-auto scrollbar-none [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] [&::-webkit-scrollbar]:hidden sm:[mask-image:none]">
             {FILTROS.map((f) => {
               const ativo = filtro === f.id;
               const Icon = f.icon;
@@ -219,11 +219,11 @@ export default function TutorialsPage() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar tutorial, ex.: afastamento"
-              className="min-h-[48px] w-full appearance-none rounded-full border border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40 [&::-webkit-search-cancel-button]:appearance-none"
+              className="min-h-11 w-full appearance-none rounded-full border border-crfal-gray-200 lg:min-h-12 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40 [&::-webkit-search-cancel-button]:appearance-none"
             />
             {busca && (
-              <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600">
-                <X className="h-4 w-4" />
+              <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className={`absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600 ${focusRing}`}>
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -239,11 +239,13 @@ export default function TutorialsPage() {
           {visiveis.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white px-6 py-14 text-center">
               <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300" aria-hidden="true" />
-              <h2 className="text-lg font-bold text-crfal-blue-dark">Nenhum tutorial encontrado</h2>
-              <p className="mt-1 text-sm text-crfal-gray-600">Tente outro termo ou veja todos os requerimentos.</p>
+              <h2 className="text-lg font-bold text-crfal-blue-dark">
+                {busca.trim() ? <>Nenhum tutorial para “{busca.trim()}”{filtro !== 'todos' && <> em {PERFIS[filtro].label}</>}</> : 'Nenhum tutorial encontrado'}
+              </h2>
+              <p className="mx-auto mt-1 max-w-md text-sm text-crfal-gray-600">Tente outra palavra, como “inscrição” ou “anuidade”. Os documentos de todos os pedidos estão na Central de Requerimentos.</p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
-                <button type="button" onClick={limparFiltros} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-crfal-blue-dark ${focusRing}`}>
-                  Limpar filtros
+                <button type="button" onClick={filtro !== 'todos' ? () => alterarFiltro('todos') : limparFiltros} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-crfal-blue-dark ${focusRing}`}>
+                  {filtro !== 'todos' ? 'Buscar em todos os perfis' : 'Limpar busca'}
                 </button>
                 <Link to="/servicos/requerimentos" className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
                   Central de Requerimentos <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -274,7 +276,7 @@ export default function TutorialsPage() {
                                 onClick={() => selecionar(ativo && !isDesktop ? null : tutorial.id)}
                               />
                               {ativo && !isDesktop && (
-                                <div id={`tutorial-${tutorial.id}`} className="scroll-mt-[calc(var(--header-offset)+13rem)] border-t border-crfal-gray-200">
+                                <div id={`tutorial-${tutorial.id}`} className="scroll-mt-[calc(var(--header-offset)+8.5rem)] border-t border-crfal-gray-200">
                                   <TutorialDetail key={tutorial.id} tutorial={tutorial} embutido />
                                 </div>
                               )}
@@ -302,7 +304,9 @@ export default function TutorialsPage() {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Não encontrou seu serviço?</p>
               <p className="mt-1 text-lg font-bold">Documentos e formulários de todos os pedidos estão na Central de Requerimentos.</p>
-              <p className="mt-1 text-sm text-white/75">Dúvidas sobre o sistema: tecnologia@crf-al.org.br</p>
+              <p className="mt-1 text-sm text-white/75">
+                Dúvidas sobre o sistema: <a href="mailto:tecnologia@crf-al.org.br" className="rounded font-semibold text-white underline underline-offset-4 hover:text-crfal-gold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">tecnologia@crf-al.org.br</a>
+              </p>
             </div>
             <Link to="/servicos/requerimentos" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/30 px-5 py-3 text-sm font-bold transition-colors hover:border-white hover:bg-white hover:text-crfal-blue focus-visible:outline-white">
               Ver requerimentos <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -355,7 +359,7 @@ function TutorialRow({
           <span>{PERFIS[tutorial.perfil].label}</span>
           <span className="inline-flex items-center gap-1">
             <ListChecks className="h-3.5 w-3.5 text-[#8A6A12]" aria-hidden="true" />
-            {tutorial.steps.length} passos
+            {tutorial.steps.length} {tutorial.steps.length === 1 ? 'passo' : 'passos'}
           </span>
           {temVideo(tutorial) && (
             <span className="inline-flex items-center gap-1">
@@ -416,21 +420,22 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
       className={`overflow-hidden bg-white motion-safe:animate-fade-in ${embutido ? '' : 'rounded-2xl border border-crfal-gray-200 shadow-[0_24px_48px_-28px_rgba(11,25,44,0.45)]'}`}
     >
       {/* Cabeçalho */}
-      <header className="relative isolate overflow-hidden border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-5 sm:p-6">
+      <header className="relative isolate overflow-hidden border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-4 sm:p-6">
         <Icon className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />
         <button
           type="button"
           onClick={copiarLink}
           aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste tutorial'}
           title="Copiar link"
-          className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60"
+          className="absolute right-2 top-2 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full p-2 text-xs font-semibold sm:right-3 sm:top-3 text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60"
         >
-          {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" /> : <Link2 className="h-5 w-5" />}
+          {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" aria-hidden="true" /> : <Link2 className="h-5 w-5" aria-hidden="true" />}
           <span className="hidden sm:inline" aria-hidden="true">{linkCopiado ? 'Copiado' : 'Copiar link'}</span>
         </button>
+        <span role="status" className="sr-only">{linkCopiado ? 'Link do tutorial copiado.' : ''}</span>
 
         <div className="flex items-start gap-4 pr-12 sm:pr-32">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40 sm:h-14 sm:w-14">
+          <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40 sm:flex">
             <Icon className="h-6 w-6 text-white sm:h-7 sm:w-7" strokeWidth={1.5} aria-hidden="true" />
           </span>
           <div className="min-w-0">
@@ -438,9 +443,9 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
             <h2 id={titleId} className="mt-0.5 text-lg font-bold leading-snug tracking-tight text-white sm:text-[22px]">{tutorial.title}</h2>
           </div>
         </div>
-        <p className="mt-3 text-sm leading-relaxed text-white/80">{tutorial.description}</p>
+        <p className="mt-2 text-sm leading-relaxed text-white/80 sm:mt-3">{tutorial.description}</p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
             <PerfilIcon className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" /> {PERFIS[tutorial.perfil].label}
           </span>
@@ -508,7 +513,9 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
           <div className="min-w-0">
             <p className={goldLabel}>Passo a passo</p>
             <p className="mt-1 text-sm font-semibold text-crfal-blue-dark">
-              {feitos.length > 0 ? `${feitos.length} de ${total} passos concluídos` : `${total} passos · marque conforme avança`}
+              {feitos.length > 0
+                ? `${feitos.length} de ${total} ${total === 1 ? 'passo concluído' : 'passos concluídos'}`
+                : `${total} ${total === 1 ? 'passo' : 'passos'} · marque conforme avança`}
             </p>
             <div
               className="mt-1.5 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-crfal-gray-100"
@@ -516,13 +523,14 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
               aria-valuemin={0}
               aria-valuemax={total}
               aria-valuenow={feitos.length}
+              aria-valuetext={`${feitos.length} de ${total}`}
               aria-label="Passos concluídos"
             >
               <div className="h-full rounded-full bg-crfal-gold transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${progresso}%` }} />
             </div>
           </div>
           {feitos.length > 0 && (
-            <button type="button" onClick={() => setFeitos([])} className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue ${focusRing}`}>
+            <button type="button" onClick={() => setFeitos([])} className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue sm:min-h-9 ${focusRing}`}>
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Recomeçar
             </button>
           )}
@@ -543,7 +551,7 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
                         feito ? 'bg-crfal-gold text-crfal-blue-dark ring-crfal-gold/40' : 'bg-crfal-blue text-white ring-crfal-gold/30 group-hover/passo:ring-crfal-gold/70'
                       }`}
                     >
-                      {feito ? <Check className="h-4 w-4" strokeWidth={3} /> : index + 1}
+                      {feito ? <Check className="h-4 w-4" strokeWidth={3} aria-hidden="true" /> : index + 1}
                     </span>
                     {!ultimo && <span aria-hidden="true" className={`mt-1 block h-full w-px ${feito ? 'bg-crfal-gold/60' : 'bg-crfal-gray-200'}`} />}
                   </span>
