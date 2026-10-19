@@ -335,7 +335,7 @@ function RequirementsContent() {
             </div>
           </div>
 
-          <div role="group" aria-label="Filtrar por categoria" className="mt-3 flex gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
+          <div role="group" aria-label="Filtrar por categoria" className="mt-3 flex gap-2 overflow-x-auto scrollbar-none [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:overflow-visible lg:[mask-image:none]">
             <button type="button" onClick={() => setCategoria('todas')} aria-pressed={categoria === 'todas'} className={chipClass(categoria === 'todas')}>
               Todas <span className={chipCount(categoria === 'todas')}>{totalPerfil}</span>
             </button>
@@ -470,21 +470,21 @@ function RequirementsContent() {
         >
           {selectedItem && (
             <>
-              <div className="relative isolate shrink-0 overflow-hidden border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-5 sm:p-6">
+              <div className="relative isolate shrink-0 overflow-hidden border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-4 sm:p-6">
                 {(() => { const Icon = selectedItem.icon; return <Icon className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />; })()}
-                <div className="absolute right-3 top-3 flex items-center gap-1">
-                  <button type="button" onClick={copiarLink} aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste requerimento'} title="Copiar link" className="inline-flex items-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
+                <div className="absolute right-2 top-2 flex items-center sm:right-3 sm:top-3 sm:gap-1">
+                  <button type="button" onClick={copiarLink} aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste requerimento'} title="Copiar link" className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
                     {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" aria-hidden="true" /> : <Link2 className="h-5 w-5" aria-hidden="true" />}
                     <span className="hidden sm:inline" aria-hidden="true">{linkCopiado ? 'Copiado' : 'Copiar link'}</span>
                   </button>
                   <span role="status" className="sr-only">{linkCopiado ? 'Link do requerimento copiado.' : ''}</span>
-                  <button type="button" onClick={() => handleOpenChange(false)} aria-label="Fechar detalhes" className="rounded-full p-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
+                  <button type="button" onClick={() => handleOpenChange(false)} aria-label="Fechar detalhes" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
                     <X className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
-                <div className="flex items-start gap-4 pr-24 sm:pr-36">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40 sm:h-14 sm:w-14">
+                <div className="flex items-start gap-4 pr-20 sm:pr-36">
+                  <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40 sm:flex">
                     {(() => { const Icon = selectedItem.icon; return <Icon className="h-6 w-6 text-white sm:h-7 sm:w-7" strokeWidth={1.5} aria-hidden="true" />; })()}
                   </span>
                   <div className="min-w-0">
@@ -492,9 +492,9 @@ function RequirementsContent() {
                     <DialogTitle className="mt-0.5 text-lg font-bold leading-snug tracking-tight text-white sm:text-[22px]">{selectedItem.title}</DialogTitle>
                   </div>
                 </div>
-                <DialogDescription className="mt-3 text-sm leading-relaxed text-white/80">{selectedItem.description}</DialogDescription>
+                <DialogDescription className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/80 sm:mt-3 sm:line-clamp-none">{selectedItem.description}</DialogDescription>
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
                   {selectedItem.prazo && (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
                       <Clock className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" /> Prazo: {selectedItem.prazo}
@@ -506,12 +506,12 @@ function RequirementsContent() {
                     </span>
                   )}
                   {selectedItem.fluxogramaUrl && !mostraFluxograma && (
-                    <button type="button" onClick={() => setMostraFluxograma(true)} className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
+                    <button type="button" onClick={() => setMostraFluxograma(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60 motion-reduce:transition-none sm:min-h-8">
                       <Workflow className="h-3.5 w-3.5" aria-hidden="true" /> Ver fluxograma
                     </button>
                   )}
                   {videoEmbedUrl && (
-                    <button type="button" onClick={() => setShowVideoModal(true)} className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
+                    <button type="button" onClick={() => setShowVideoModal(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-crfal-blue focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60 motion-reduce:transition-none sm:min-h-8">
                       <Play className="h-3.5 w-3.5" aria-hidden="true" /> Ver tutorial em vídeo
                     </button>
                   )}
@@ -521,7 +521,7 @@ function RequirementsContent() {
               {mostraFluxograma && selectedItem.fluxogramaUrl ? (
                 <div className="flex min-h-0 flex-1 flex-col">
                   <div className="flex items-center justify-between border-b border-crfal-gray-200 px-5 py-3">
-                    <button type="button" onClick={() => setMostraFluxograma(false)} className={`inline-flex min-h-[36px] items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue hover:text-crfal-blue-dark ${focusRing}`}>
+                    <button type="button" onClick={() => setMostraFluxograma(false)} className={`inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue hover:text-crfal-blue-dark ${focusRing}`}>
                       <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Voltar aos detalhes
                     </button>
                   </div>
@@ -556,7 +556,7 @@ function RequirementsContent() {
                               document.getElementById(`${tabsId}-${next}-tab`)?.focus();
                             }
                           }}
-                          className={`-mb-px flex flex-1 items-center justify-center gap-2 border-b-2 px-3 py-3.5 text-sm font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${
+                          className={`-mb-px flex min-h-12 flex-1 items-center justify-center gap-2 whitespace-nowrap border-b-2 px-2 py-3 text-sm font-semibold transition-colors motion-reduce:transition-none sm:px-3 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${
                             ativo ? 'border-crfal-gold text-crfal-blue' : 'border-transparent text-crfal-gray-600 hover:text-crfal-blue'
                           }`}
                         >
@@ -583,19 +583,19 @@ function RequirementsContent() {
                         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-semibold text-crfal-blue-dark">
-                              {marcados.length} de {totalDocs} documentos reunidos
+                              {marcados.length} de {totalDocs} {totalDocs === 1 ? 'documento reunido' : 'documentos reunidos'}
                             </p>
-                            <div className="mt-1.5 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-crfal-gray-100" role="progressbar" aria-valuemin={0} aria-valuemax={totalDocs} aria-valuenow={marcados.length} aria-label="Documentos reunidos">
+                            <div className="mt-1.5 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-crfal-gray-100" role="progressbar" aria-valuemin={0} aria-valuemax={totalDocs} aria-valuenow={marcados.length} aria-valuetext={`${marcados.length} de ${totalDocs}`} aria-label="Documentos reunidos">
                               <div className="h-full rounded-full bg-crfal-gold transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${progresso}%` }} />
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
                             {marcados.length > 0 && (
-                              <button type="button" onClick={limparChecklist} className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue ${focusRing}`}>
+                              <button type="button" onClick={limparChecklist} className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue sm:min-h-9 ${focusRing}`}>
                                 <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Desmarcar todos
                               </button>
                             )}
-                            <button type="button" onClick={() => setImpressaoBloqueada(!imprimirLista(selectedItem, observacoesSelecionadas))} className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-blue hover:bg-crfal-blue-lighter ${focusRing}`}>
+                            <button type="button" onClick={() => setImpressaoBloqueada(!imprimirLista(selectedItem, observacoesSelecionadas))} className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-blue hover:bg-crfal-blue-lighter sm:min-h-9 ${focusRing}`}>
                               <Printer className="h-3.5 w-3.5" aria-hidden="true" /> Imprimir lista
                             </button>
                           </div>
@@ -638,14 +638,14 @@ function RequirementsContent() {
                     )}
                   </div>
 
-                  <div className="flex shrink-0 flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:p-5">
+                  <div className="flex shrink-0 items-center gap-2 border-t border-crfal-gray-200 bg-crfal-gray-50 p-3 sm:flex-wrap sm:gap-3 sm:p-5">
                     <ArrowFillButton href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer">
                       Acessar CRF AL em Casa
                       <span className="sr-only"> (abre em nova aba)</span>
                     </ArrowFillButton>
                     {selectedItem.downloadUrl && (
-                      <a href={selectedItem.downloadUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border-2 border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white ${focusRing}`}>
-                        <Download className="h-4 w-4" aria-hidden="true" /> Baixar formulário
+                      <a href={selectedItem.downloadUrl} target="_blank" rel="noopener noreferrer" title="Baixar formulário" className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border-2 border-crfal-blue px-3 py-2.5 sm:px-5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white ${focusRing}`}>
+                        <Download className="h-4 w-4" aria-hidden="true" /> <span className="sr-only sm:not-sr-only">Baixar formulário</span>
                         <span className="sr-only"> (abre em nova aba)</span>
                       </a>
                     )}
