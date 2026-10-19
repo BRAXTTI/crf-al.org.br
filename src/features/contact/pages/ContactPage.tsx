@@ -24,6 +24,7 @@ import {
 import SEO from '@/components/SEO';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { useStatusAtendimento } from '@/lib/maceio';
+import { BOLETOS_URL } from '@/config/site';
 
 /* -------------------------------------------------------------------------- */
 /* Dados                                                                       */
@@ -82,7 +83,6 @@ const LOCAIS = [
   },
 ];
 
-const BOLETOS_URL = 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/consulta/boletos/inicial.jsf';
 
 const ATALHOS: { necessidade: string; destino: string; href: string; icon: ElementType }[] = [
   { necessidade: 'Certidões e requerimentos', destino: 'Central de Requerimentos', href: '/servicos/requerimentos', icon: FileText },

@@ -30,6 +30,10 @@ export const PRE_INSCRICAO_PF_URL =
 export const PRE_INSCRICAO_PJ_URL =
   'https://crfal-emcasa.cisantec.com.br/crf-em-casa/precadastro/estabelecimento/inicial.jsf';
 
+/** Impressão de anuidades do ano corrente no CRF AL em Casa, sem login. */
+export const BOLETOS_URL =
+  'https://crfal-emcasa.cisantec.com.br/crf-em-casa/consulta/boletos/inicial.jsf';
+
 /** Portal de transparência (Implanta), usado em várias seções do site. */
 export const TRANSPARENCIA_URL =
   'https://crf-al.implanta.net.br/portaltransparencia/';

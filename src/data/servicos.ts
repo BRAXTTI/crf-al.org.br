@@ -13,6 +13,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { getRequerimento, perfilDoRequerimento } from '@/data/requerimentos';
+import { BOLETOS_URL } from '@/config/site';
 
 export type TutorialPerfil = 'pessoa-fisica' | 'pessoa-juridica';
 
@@ -49,6 +50,8 @@ interface TutorialAutoatendimento extends TutorialBase {
   prazo?: string;
   steps: string[];
   videoUrl?: string;
+  /** Página do CRF AL em Casa que inicia o serviço; sem ela, o botão leva ao login. */
+  acesso?: { url: string; label: string };
 }
 
 type TutorialSource = TutorialVinculado | TutorialAutoatendimento;
@@ -209,17 +212,18 @@ const fontes: TutorialSource[] = [
     id: 'emitir-boletos',
     icon: ReceiptText,
     title: 'Emitir Boletos e Anuidades',
-    description: 'Emita a segunda via de anuidades e parcelas sem precisar fazer login.',
+    description: 'Emita o boleto da anuidade do ano, sem precisar fazer login. Parcelamentos e acordos têm um caminho próprio.',
     category: 'Protocolos e Boletos',
     perfil: 'ambos',
     prazo: 'Imediato',
     motion: { src: '/images/tutoriais/boletos.mp4', poster: '/images/tutoriais/boletos-poster.webp', duracao: '0:30' },
+    acesso: { url: BOLETOS_URL, label: 'Emitir boleto' },
     steps: [
-      'Abra a tela de acesso do CRF AL em Casa.',
-      'No Painel de Controle, clique em "Impressão Parcelamentos/Acordo".',
-      'Selecione o tipo (por exemplo, Farmacêutico) e informe sua inscrição e o CPF ou CNPJ.',
-      'Clique em "Consultar" para ver os débitos em aberto.',
-      'Selecione a anuidade ou parcela e imprima o boleto.',
+      'Clique em "Emitir boleto" abaixo para abrir a "Impressão de Anuidades do Ano Corrente", sem login.',
+      'Selecione o tipo (por exemplo, Farmacêutico) e preencha os dados pedidos na tela, como inscrição, CPF e data de nascimento.',
+      'Clique em "Consultar" para ver as anuidades do ano em aberto.',
+      'Selecione a anuidade e imprima o boleto.',
+      'Essa consulta mostra só anuidades do ano ainda não vencidas. Para parcelamentos e acordos, abra a tela de acesso do CRF AL em Casa e clique em "Impressão Parcelamentos/Acordo" no Painel de Controle; para débitos vencidos, entre na área restrita ou fale com o CRF-AL.',
     ],
   },
 ];
