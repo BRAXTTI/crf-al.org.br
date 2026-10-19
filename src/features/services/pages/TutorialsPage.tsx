@@ -309,7 +309,7 @@ export default function TutorialsPage() {
               </p>
             </div>
             <Link to="/servicos/requerimentos" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/30 px-5 py-3 text-sm font-bold transition-colors hover:border-white hover:bg-white hover:text-crfal-blue focus-visible:outline-white">
-              Ver requerimentos <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Ir para a Central de Requerimentos <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </aside>
         </div>
@@ -564,7 +564,7 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
             );
           })}
         </ol>
-
+        <p className="mt-4 text-xs text-crfal-gray-600">As marcações servem para acompanhar e não ficam salvas ao sair da página.</p>
       </div>
 
       <div className="flex flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:p-5">
@@ -669,7 +669,7 @@ function MotionVideo({ motion: video, titulo }: { motion: TutorialMotion; titulo
               <button
                 type="button"
                 onClick={assistir}
-                aria-label={`Assistir ao vídeo (${video.duracao})`}
+                aria-label={`Assistir ao vídeo: ${titulo} (${video.duracao})`}
                 className="group absolute inset-[3.5%_5%] flex flex-col items-center justify-center gap-3 rounded-[12%/7%] text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold"
               >
                 {botaoPlay(true)}

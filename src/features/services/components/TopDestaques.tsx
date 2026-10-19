@@ -37,7 +37,7 @@ export default function TopDestaques({ onVerTutorial }: { onVerTutorial: (tutori
           </h2>
           <span aria-hidden="true" className="mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
         </div>
-        <p className="hidden text-sm text-crfal-gray-600 sm:block">Passe o mouse para ver a prévia</p>
+        <p className="hidden text-sm text-crfal-gray-600 pointer-fine:lg:block">Passe o mouse para ver a prévia</p>
       </div>
 
       <ol className="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:px-0 lg:grid lg:grid-cols-5 lg:gap-4 lg:overflow-visible [&::-webkit-scrollbar]:hidden">
@@ -247,13 +247,13 @@ function ReelsViewer({
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-crfal-gold text-xs font-black text-crfal-blue-dark">{atual + 1}</span>
             <p className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{reel.title}</p>
             <div className="pointer-events-auto flex">
-              <button type="button" onClick={alternarPausa} aria-label={pausado ? 'Continuar' : 'Pausar'} className={botaoTopo}>
+              <button type="button" onClick={alternarPausa} aria-label={pausado ? 'Continuar vídeo' : 'Pausar vídeo'} className={botaoTopo}>
                 {pausado ? <Play className="h-5 w-5 fill-current" /> : <Pause className="h-5 w-5 fill-current" />}
               </button>
               <button type="button" onClick={() => setMudo((m) => !m)} aria-label={mudo ? 'Ativar som' : 'Desativar som'} className={botaoTopo}>
                 {mudo ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
               </button>
-              <button ref={fecharRef} type="button" onClick={onFechar} aria-label="Fechar" className={botaoTopo}>
+              <button ref={fecharRef} type="button" onClick={onFechar} aria-label="Fechar vídeos" className={botaoTopo}>
                 <X className="h-6 w-6" />
               </button>
             </div>

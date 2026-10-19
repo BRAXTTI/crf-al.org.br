@@ -76,14 +76,13 @@ export const individualMenu: MenuCategory[] = [
           'Exame de comprovação de tipo sanguíneo',
         ],
         instrucoes: [
-          'Acesse o portal do CRF AL em Casa',
-          'Clique em "Pré Inscrição Pessoa Física"',
-          'Preencha o formulário atentamente',
-          'Anexe os documentos necessários',
-          'Imprima seu protocolo e leve sua documentação original na sede/seccional do CRF-AL',
-          'Aguarde a análise da sua documentação pelo CRF-AL',
-          'Após a análise e aprovação em plenária, você receberá um e-mail avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição',
-          'Efetue o pagamento, aguarde a compensação do pagamento para receber a confirmação da sua inscrição',
+          'Abra a pré-inscrição pelo botão "Fazer pré-inscrição" ou, no CRF AL em Casa, clique em "Pré Inscrição Pessoa Física".',
+          'Preencha o formulário atentamente.',
+          'Anexe os documentos necessários.',
+          'Imprima o protocolo e leve a documentação original à sede ou seccional do CRF-AL.',
+          'Aguarde a análise da sua documentação pelo CRF-AL.',
+          'Após a análise e aprovação em plenária, você receberá um e-mail avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição.',
+          'Pague o boleto e aguarde a compensação para receber a confirmação da sua inscrição.',
         ],
         observacoesImportantes: [
           'Leve os documentos originais na sede/seccional para conferência após o protocolo online.',
@@ -110,7 +109,7 @@ export const individualMenu: MenuCategory[] = [
           'Exame de comprovação de tipo sanguíneo',
         ],
         instrucoes: [
-          'Acesse o CRF AL em Casa como Pessoa Física.',
+          'Faça login no CRF AL em Casa como Pessoa Física.',
           'Clique em "Formulários e Requerimentos".',
           'Baixe o formulário "Solicitação de Carteira Definitiva, Segunda Via ou Cédula de Identidade".',
           'Preencha o formulário seguindo as instruções do próprio documento.',
@@ -344,7 +343,7 @@ export const corporateMenu: MenuCategory[] = [
           'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
-          'Acesse o CRF AL em Casa como Pessoa Jurídica.',
+          'Faça login no CRF AL em Casa como Pessoa Jurídica.',
           "Clique no ícone de 'Solicitação de RT'.",
           'Preencha os campos necessários.',
           'Anexe a documentação que comprove o vínculo empregatício.',
@@ -362,7 +361,7 @@ export const corporateMenu: MenuCategory[] = [
           'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
-          'Acesse o CRF AL em Casa como Pessoa Jurídica.',
+          'Faça login no CRF AL em Casa como Pessoa Jurídica.',
           "Clique no ícone de 'Solicitação de RT'.",
           'Preencha os campos necessários.',
           'Anexe a documentação que comprove o vínculo empregatício.',
@@ -380,7 +379,7 @@ export const corporateMenu: MenuCategory[] = [
           'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
-          'Acesse o CRF AL em Casa como Pessoa Jurídica.',
+          'Faça login no CRF AL em Casa como Pessoa Jurídica.',
           "Clique no ícone de 'Solicitação de RT'.",
           'Preencha os campos necessários.',
           'Anexe a documentação que comprove o vínculo empregatício.',
@@ -488,7 +487,7 @@ export const corporateMenu: MenuCategory[] = [
           'Procuração e documentos do representante (quando aplicável)',
         ],
         instrucoes: [
-          'Acesse o CRF AL em Casa como Pessoa Jurídica.',
+          'Faça login no CRF AL em Casa como Pessoa Jurídica.',
           'Na seção Fiscalização, clique em "Defesa de Infração".',
           'Selecione o auto de infração ao qual a defesa se refere.',
           'Anexe a defesa do auto de infração assinada digitalmente.',
