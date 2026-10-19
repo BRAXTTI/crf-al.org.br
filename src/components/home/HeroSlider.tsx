@@ -24,8 +24,11 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   const slides = useMemo(() => items.filter((banner) => banner.image), [items]);
 
   const [current, setCurrent] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isReducedMotion] = useState(
+  // Pausa enquanto o ponteiro ou o foco estão no carrossel (WCAG 2.2.2).
+  const [isHovered, setIsHovered] = useState(false);
+  const [hasFocus, setHasFocus] = useState(false);
+  // Com movimento reduzido, começa pausado; o botão de reprodução ainda permite iniciar.
+  const [isPaused, setIsPaused] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -52,13 +55,15 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   }
 
   useEffect(() => {
-    if (isReducedMotion || isPaused || slides.length <= 1) {
+    if (isPaused || isHovered || hasFocus || slides.length <= 1) {
       clearInterval(intervalRef.current ?? undefined);
       return;
     }
     intervalRef.current = setInterval(next, AUTOPLAY_MS);
     return () => clearInterval(intervalRef.current ?? undefined);
-  }, [current, isPaused, isReducedMotion, next, slides.length]);
+  }, [current, isPaused, isHovered, hasFocus, next, slides.length]);
+
+  const isRotating = !isPaused && !isHovered && !hasFocus && slides.length > 1;
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -74,7 +79,12 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
     <section
       className="w-full"
       onKeyDown={handleKeyDown}
-      tabIndex={0}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setHasFocus(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHasFocus(false);
+      }}
       role="region"
       aria-roledescription="carrossel"
       aria-label="Destaques"
@@ -82,7 +92,8 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
       {/* H1 fixo da home (as artes podem ou não ter texto). */}
       <h1 className="sr-only">Conselho Regional de Farmácia do Estado de Alagoas</h1>
 
-      <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-16/5">
+      {/* Anuncia a troca só quando o usuário controla o carrossel, não durante a rotação automática. */}
+      <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-16/5" aria-live={isRotating ? 'off' : 'polite'}>
       {slides.map((slide, index) => {
         const isActive = index === activeIndex;
         const hasOverlay = Boolean(slide.title || slide.subtitle || slide.ctaLabel);
@@ -91,9 +102,10 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
         return (
           <div
             key={slide.image}
-            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            className="absolute inset-0 transition-opacity duration-1000 ease-in-out motion-reduce:transition-none"
             style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 1 : 0 }}
-            aria-hidden={!isActive}
+            // Slides escondidos saem da ordem de tabulação e da árvore de acessibilidade.
+            inert={!isActive}
             {...(isActive
               ? { role: 'group', 'aria-roledescription': 'slide', 'aria-label': `Slide ${index + 1} de ${slides.length}` }
               : {})}
@@ -154,6 +166,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                         fillTextColor="#0B192C"
                       >
                         {slide.ctaLabel}
+                        {isExternal && <span className="sr-only"> (abre em nova aba)</span>}
                       </ArrowFillButton>
                     )}
                   </div>
@@ -167,8 +180,8 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                 href={slide.href}
                 target={isExternal ? '_blank' : undefined}
                 rel={isExternal ? 'noopener noreferrer' : undefined}
-                aria-label={slide.alt}
-                className="absolute inset-0 z-10"
+                aria-label={isExternal ? `${slide.alt} (abre em nova aba)` : slide.alt}
+                className="absolute inset-0 z-10 rounded-xl focus-visible:outline-hidden focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-crfal-gold"
               />
             )}
           </div>
@@ -179,18 +192,18 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
         <>
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center glass-light rounded-full text-crfal-blue shadow-card transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+            className="absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center glass-light rounded-full text-crfal-blue shadow-card transition-all duration-300 hover:scale-110 hover:bg-white motion-reduce:transition-none motion-reduce:hover:scale-100 md:flex focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
             aria-label="Slide anterior"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
 
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center glass-light rounded-full text-crfal-blue shadow-card transition-all duration-300 hover:scale-110 hover:bg-white md:flex"
+            className="absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center glass-light rounded-full text-crfal-blue shadow-card transition-all duration-300 hover:scale-110 hover:bg-white motion-reduce:transition-none motion-reduce:hover:scale-100 md:flex focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
             aria-label="Próximo slide"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
 
         </>
@@ -203,9 +216,9 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                 <button
                   key={slide.image}
                   onClick={() => goTo(index)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-crfal-blue-lighter"
+                  className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
                   aria-current={index === activeIndex ? "true" : undefined}
-                  aria-label={`Ir para slide ${index + 1}`}
+                  aria-label={`Ir para slide ${index + 1} de ${slides.length}`}
                 >
                   <span aria-hidden="true" className={`h-2.5 rounded-full transition-all ${index === activeIndex ? "w-7 bg-crfal-blue" : "w-2.5 bg-crfal-gray-400"}`} />
                 </button>
@@ -213,11 +226,20 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
             </div>
 
             <button
-              onClick={() => setIsPaused(!isPaused)}
-              className="flex h-11 w-11 items-center justify-center rounded-full text-crfal-blue transition-colors hover:bg-crfal-blue-lighter"
-              aria-label={isPaused ? 'Retomar reprodução' : 'Pausar reprodução'}
+              onClick={() => {
+                // Retomar vale mesmo com o foco ou o ponteiro no carrossel.
+                if (isRotating) {
+                  setIsPaused(true);
+                } else {
+                  setIsPaused(false);
+                  setHasFocus(false);
+                  setIsHovered(false);
+                }
+              }}
+              className="flex h-11 w-11 items-center justify-center rounded-full text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
+              aria-label={isRotating ? 'Pausar reprodução' : 'Retomar reprodução'}
             >
-              {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
+              {!isRotating ? <Play className="h-3.5 w-3.5" aria-hidden="true" /> : <Pause className="h-3.5 w-3.5" aria-hidden="true" />}
             </button>
           </div>
       )}
