@@ -24,6 +24,14 @@ function formatDate(ms?: number) {
   return new Date(ms).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', timeZone: 'America/Maceio' });
 }
 
+/** Rótulo acessível: sem emoji e cortado no fim de uma palavra. */
+function accessibleLabel(text: string, max = 160) {
+  const clean = text.replace(/[\p{Extended_Pictographic}\u{FE0F}\u{200D}]/gu, '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), 0) || max).replace(/[\s,.;:–-]+$/, '')}…`;
+}
+
 function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
   event.currentTarget.onerror = null;
   event.currentTarget.src = IMG_FALLBACK;
@@ -44,7 +52,7 @@ function PostCard({ item }: { item: InstagramItem }) {
       href={item.link}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${label.slice(0, 160)} (abre o Instagram em uma nova aba)`}
+      aria-label={`${accessibleLabel(label)} (abre o Instagram em uma nova aba)`}
       className="group flex h-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-crfal-gray-200 shadow-xs transition-shadow duration-300 hover:shadow-xl hover:shadow-crfal-blue/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
     >
       <div className={`relative isolate ${CFF_COVER_ASPECT} overflow-hidden bg-crfal-blue-dark`}>
@@ -103,7 +111,7 @@ export default function InstagramFeed({
   title = 'O CRF-AL mais perto de você',
   description = 'Acompanhe os eventos, as ações do Conselho e o dia a dia da profissão farmacêutica.',
 }: InstagramFeedProps) {
-  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed', 3], queryFn: ({ signal }) => fetchInstagram(signal), staleTime: 10 * 60 * 1000, retry: 1 });
+  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed', POSTS], queryFn: ({ signal }) => fetchInstagram(signal), staleTime: 10 * 60 * 1000, retry: 1 });
   const items = data ?? [];
 
   return (

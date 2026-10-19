@@ -33,7 +33,7 @@ export default function ServiceProfiles() {
             <h2 id="services-by-profile-title" className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[32px]">Como podemos ajudar você?</h2>
             <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
           </div>
-          <Link to="/servicos/requerimentos" className="group inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-crfal-blue sm:self-auto">
+          <Link to="/servicos/requerimentos" className="group inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-crfal-blue rounded-md hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
             Ver todos os requerimentos
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true" />
           </Link>

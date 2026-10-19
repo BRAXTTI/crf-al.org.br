@@ -193,7 +193,7 @@ export default function Header() {
                 />
               </picture>
               <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-3 leading-tight xl:block">
-                <span className="block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Conselho Regional de Farmácia</span>
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Conselho Regional de Farmácia</span>
                 <span className="block text-[15px] font-bold text-crfal-blue-dark">Estado de Alagoas</span>
               </span>
             </Link>

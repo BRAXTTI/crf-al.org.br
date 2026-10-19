@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { getPostCategory, getPostImage, stripHTML } from '@/services/wordpress/client';
 import { usePosts } from '@/services/wordpress/hooks';
 import type { WPPost } from '@/services/wordpress/types';
+import { formatDate } from '@/lib/maceio';
 
 const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect width='600' height='400' fill='%23E6F0F8'/%3E%3C/svg%3E";
 const GENERIC_CATEGORIES = new Set(['blog', 'geral', 'notícias', 'sem categoria']);
@@ -28,7 +29,8 @@ function NewsImage({ post, className = '' }: { post: WPPost; className?: string 
 function NewsDate({ date }: { date: string }) {
   return (
     <time dateTime={date} className="text-[11px] font-semibold uppercase tracking-[0.12em] text-crfal-gray-600">
-      {new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+      {/* A data do WordPress já é a hora local de Maceió: formata só o dia, sem conversão de fuso. */}
+      {formatDate(date.slice(0, 10), { day: '2-digit', month: 'long', year: 'numeric' })}
     </time>
   );
 }
@@ -84,7 +86,7 @@ export default function Publications() {
               <Link to={`/imprensa/noticias/${featured.slug}`} className={`group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs hover:-translate-y-0.5 hover:shadow-xl hover:shadow-crfal-blue/10 motion-reduce:hover:translate-y-0 ${motionClass} ${focusClass}`}>
                 <div className="relative">
                   <NewsImage post={featured} className="aspect-16/10" />
-                  <span className="absolute left-4 top-4 glass-chip rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-crfal-gold ring-1 ring-crfal-gold/40">Em destaque</span>
+                  <span className="absolute left-4 top-4 rounded-full bg-crfal-blue-dark px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-crfal-gold shadow-sm ring-1 ring-crfal-gold/40">Em destaque</span>
                 </div>
                 <div className="flex flex-1 flex-col items-start border-t-2 border-crfal-gold p-6 sm:p-8">
                   <div className="mb-3 flex flex-wrap items-center gap-3">
