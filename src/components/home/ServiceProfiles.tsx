@@ -1,8 +1,28 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronRight } from 'lucide-react';
 import { serviceProfiles } from '@/config/service-profiles';
 
+const STORAGE_KEY = 'crfal:perfil-home';
+
+/** Perfil escolhido no celular, lembrado só neste aparelho. */
+function usePerfilSalvo() {
+  const [perfil, setPerfil] = useState(() => {
+    try {
+      const salvo = window.localStorage.getItem(STORAGE_KEY);
+      if (serviceProfiles.some(profile => profile.id === salvo)) return salvo as string;
+    } catch { /* armazenamento indisponível */ }
+    return serviceProfiles[0].id;
+  });
+  const escolher = (id: string) => {
+    setPerfil(id);
+    try { window.localStorage.setItem(STORAGE_KEY, id); } catch { /* armazenamento indisponível */ }
+  };
+  return [perfil, escolher] as const;
+}
+
 export default function ServiceProfiles() {
+  const [perfil, escolherPerfil] = usePerfilSalvo();
   return (
     <section aria-labelledby="services-by-profile-title" className="py-2 sm:py-3">
       <div className="container-crfal">
@@ -19,14 +39,35 @@ export default function ServiceProfiles() {
           </Link>
         </div>
 
+        {/* Abaixo de 1024px, um perfil por vez: o seletor substitui os três painéis empilhados. */}
+        <div role="group" aria-label="Escolha o perfil" className="mb-4 flex rounded-full bg-crfal-blue-lighter p-1 lg:hidden">
+          {serviceProfiles.map(profile => {
+            const Icon = profile.icon;
+            const ativo = profile.id === perfil;
+            return (
+              <button
+                key={profile.id}
+                type="button"
+                aria-pressed={ativo}
+                aria-controls={`services-panel-${profile.id}`}
+                onClick={() => escolherPerfil(profile.id)}
+                className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-[13px] font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none sm:text-sm ${ativo ? 'bg-crfal-blue text-white shadow-sm' : 'text-crfal-blue hover:bg-white/70'}`}
+              >
+                <Icon className="h-4 w-4 shrink-0 max-[399px]:hidden" strokeWidth={1.75} aria-hidden="true" />
+                {profile.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="grid gap-5 lg:grid-cols-3 lg:gap-6">
           {serviceProfiles.map(profile => {
             const Icon = profile.icon;
             return (
-              <nav
+              <div
                 key={profile.id}
-                aria-labelledby={`services-${profile.id}`}
-                className="relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark text-white shadow-lg shadow-crfal-blue/10 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-crfal-blue/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                id={`services-panel-${profile.id}`}
+                className={`relative isolate flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark text-white shadow-lg shadow-crfal-blue/10 lg:flex ${profile.id === perfil ? 'flex' : 'hidden'}`}
               >
                 <Icon className="pointer-events-none absolute -bottom-8 -right-8 -z-10 h-44 w-44 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />
 
@@ -74,7 +115,7 @@ export default function ServiceProfiles() {
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true" />
                   </Link>
                 </div>
-              </nav>
+              </div>
             );
           })}
         </div>

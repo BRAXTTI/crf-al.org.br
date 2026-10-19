@@ -20,7 +20,7 @@ import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { CRF_EM_CASA_URL, TRANSPARENCIA_URL } from '@/config/site';
 
 const PATH = '/politica-de-privacidade';
-const ATUALIZACAO = '14 de outubro de 2026';
+const ATUALIZACAO = '19 de outubro de 2026';
 /** Encarregado pelo tratamento de dados pessoais (art. 41 da LGPD). */
 const ENCARREGADO = { nome: 'Thailanderson Rocha', email: 'tecnologia@crf-al.org.br' };
 const OUVIDORIA_EMAIL = 'ouvidoria@crf-al.org.br';
@@ -73,7 +73,7 @@ const COOKIES: { icon: ComponentType<{ className?: string }>; tipo: string; fina
   {
     icon: HardDrive,
     tipo: 'Armazenamento local',
-    finalidade: 'Lembrar os documentos marcados no checklist dos requerimentos e não repetir um aviso já fechado. Fica só no seu navegador.',
+    finalidade: 'Lembrar os documentos marcados no checklist dos requerimentos, o perfil escolhido na página inicial (Empresas, Farmacêuticos ou Cidadão) e não repetir um aviso já fechado. Fica só no seu navegador.',
     duracao: 'Até você limpar os dados do navegador (avisos: 1 dia)',
   },
 ];
