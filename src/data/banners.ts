@@ -78,7 +78,7 @@ export const banners: Banner[] = [
     image: '/images/banners/banner-5-nova-proporcao-desktop.webp',
     imageMobile: '/images/banners/banner5-mobile.webp',
     imageMobileSmall: '/images/banners/banner5-mobile-720.webp',
-    alt: 'CRF/AL em Casa. Seus requerimentos de forma simples, rápida e 100% online. Acesse o CRF AL em Casa.',
+    alt: 'CRF AL em Casa. Seus requerimentos de forma simples, rápida e 100% online. Acesse o CRF AL em Casa.',
     href: CRF_EM_CASA_URL,
     external: true,
   },

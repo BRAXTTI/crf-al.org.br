@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
@@ -40,6 +40,7 @@ import {
   Printer,
   RotateCcw,
   ArrowRight,
+  ArrowUpRight,
 } from 'lucide-react';
 
 function normalizar(texto: string): string {
@@ -98,9 +99,10 @@ function escapeHtml(texto: string) {
   return texto.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
 
-function imprimirLista(item: RequirementItem, observacoes: string[]) {
+/** Abre a lista para impressão; retorna `false` quando o navegador bloqueia a nova janela. */
+function imprimirLista(item: RequirementItem, observacoes: string[]): boolean {
   const janela = window.open('', '_blank', 'width=820,height=900');
-  if (!janela) return;
+  if (!janela) return false;
   const docs = item.documentos.map((d) => `<li>${escapeHtml(d)}</li>`).join('');
   const passos = item.instrucoes.map((d) => `<li>${escapeHtml(d)}</li>`).join('');
   const obs = observacoes.map((d) => `<p>${escapeHtml(d)}</p>`).join('');
@@ -114,6 +116,7 @@ ${item.prazo ? `<p><strong>Prazo:</strong> ${escapeHtml(item.prazo)}</p>` : ''}
   janela.document.close();
   janela.focus();
   janela.print();
+  return true;
 }
 
 /* ---------- Página ---------- */
@@ -143,6 +146,7 @@ function RequirementsContent() {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [marcados, setMarcados] = useState<number[]>(() => (selectedItem ? lerChecklist(selectedItem.id) : []));
   const [linkCopiado, setLinkCopiado] = useState(false);
+  const [impressaoBloqueada, setImpressaoBloqueada] = useState(false);
   const tabsId = useId();
 
   const videoEmbedUrl = useMemo(() => getYouTubeEmbedUrl(selectedItem?.videoUrl), [selectedItem?.videoUrl]);
@@ -207,6 +211,7 @@ function RequirementsContent() {
     setShowVideoModal(false);
     setMarcados(lerChecklist(item.id));
     setLinkCopiado(false);
+    setImpressaoBloqueada(false);
     setItemParam(item.id);
   }, [setItemParam]);
 
@@ -269,7 +274,7 @@ function RequirementsContent() {
     <div className="min-h-screen">
       <SEO
         title="Requerimentos"
-        description="Acesse todos os requerimentos do CRFAL para pessoa física e jurídica — registro, renovação, certidões e muito mais para profissionais farmacêuticos em Alagoas."
+        description="Documentos e passos de cada requerimento do CRF-AL para farmacêuticos e empresas: inscrição, certidões, registro de estabelecimentos, responsabilidade técnica e mais."
         path="/servicos/requerimentos"
       />
 
@@ -277,7 +282,7 @@ function RequirementsContent() {
         variant="compact"
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Serviços' }, { label: 'Requerimentos' }]}
         section="servicos"
-        lead="Documentos, instruções e formulários de cada requerimento, organizados para farmacêuticos e empresas."
+        lead="Confira os documentos e os passos de cada requerimento antes de enviá-lo pelo CRF AL em Casa."
         title="Central de Requerimentos"
         meta={[{ value: totalPerfil, label: `requerimentos para ${activeProfile.audience}` }, { value: currentMenu.length, label: 'categorias' }]}
         actions={<PageHeroAction href={CRF_EM_CASA_URL}>Acessar CRF AL em Casa</PageHeroAction>}
@@ -323,8 +328,8 @@ function RequirementsContent() {
                 className="min-h-[48px] w-full appearance-none rounded-full border [&::-webkit-search-cancel-button]:appearance-none border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40"
               />
               {busca && (
-                <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600">
-                  <X className="h-4 w-4" />
+                <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className={`absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600 ${focusRing}`}>
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -365,17 +370,32 @@ function RequirementsContent() {
           {totalResultados === 0 ? (
             <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white px-6 py-14 text-center">
               <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300" aria-hidden="true" />
-              <h2 className="text-lg font-bold text-crfal-blue-dark">Nenhum requerimento encontrado em {activeProfile.label}</h2>
-              <p className="mt-1 text-sm text-crfal-gray-600">Tente outro termo ou limpe os filtros selecionados.</p>
+              <h2 className="text-lg font-bold text-crfal-blue-dark">
+                {busca.trim() ? <>Nenhum requerimento para “{busca.trim()}” em {activeProfile.label}</> : <>Nenhum requerimento em {activeProfile.label} nesta categoria</>}
+              </h2>
+              <p className="mx-auto mt-1 max-w-md text-sm text-crfal-gray-600">
+                {categoria !== 'todas'
+                  ? 'A busca considera só a categoria selecionada. Tente em todas as categorias ou use outra palavra, como “certidão” ou “inscrição”.'
+                  : 'Tente outra palavra, como “certidão” ou “inscrição”. Se não encontrar o que precisa, fale com o atendimento.'}
+              </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
                 {resultadosOutroPerfil > 0 && (
                   <button type="button" onClick={() => handleTypeChange(otherProfile.id, true)} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-crfal-blue-dark ${focusRing}`}>
                     Ver {resultadosOutroPerfil} em {otherProfile.label} <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </button>
                 )}
-                <button type="button" onClick={limparFiltros} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
-                  Limpar filtros
-                </button>
+                {categoria !== 'todas' ? (
+                  <button type="button" onClick={() => setCategoria('todas')} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
+                    Buscar em todas as categorias
+                  </button>
+                ) : (
+                  <button type="button" onClick={limparFiltros} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
+                    Limpar busca
+                  </button>
+                )}
+                <Link to="/contato" className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+                  Falar com o atendimento <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
               </div>
             </div>
           ) : (
@@ -428,10 +448,12 @@ function RequirementsContent() {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Atendimento online</p>
               <p className="mt-1 text-lg font-bold">Os requerimentos são enviados pelo CRF AL em Casa.</p>
-              <p className="mt-1 text-sm text-white/75">Dúvidas sobre o sistema: tecnologia@crf-al.org.br</p>
+              <p className="mt-1 text-sm text-white/75">
+                Dúvidas sobre o sistema: <a href="mailto:tecnologia@crf-al.org.br" className="rounded font-semibold text-white underline underline-offset-4 hover:text-crfal-gold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">tecnologia@crf-al.org.br</a>
+              </p>
             </div>
             <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/30 px-5 py-3 text-sm font-bold transition-colors hover:border-white hover:bg-white hover:text-crfal-blue focus-visible:outline-white">
-              Acessar CRF AL em Casa <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Acessar CRF AL em Casa <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
               <span className="sr-only">(abre em uma nova aba)</span>
             </a>
           </aside>
@@ -452,11 +474,12 @@ function RequirementsContent() {
                 {(() => { const Icon = selectedItem.icon; return <Icon className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />; })()}
                 <div className="absolute right-3 top-3 flex items-center gap-1">
                   <button type="button" onClick={copiarLink} aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste requerimento'} title="Copiar link" className="inline-flex items-center gap-1.5 rounded-full p-2 text-xs font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
-                    {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" /> : <Link2 className="h-5 w-5" />}
+                    {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" aria-hidden="true" /> : <Link2 className="h-5 w-5" aria-hidden="true" />}
                     <span className="hidden sm:inline" aria-hidden="true">{linkCopiado ? 'Copiado' : 'Copiar link'}</span>
                   </button>
+                  <span role="status" className="sr-only">{linkCopiado ? 'Link do requerimento copiado.' : ''}</span>
                   <button type="button" onClick={() => handleOpenChange(false)} aria-label="Fechar detalhes" className="rounded-full p-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">
-                    <X className="h-5 w-5" />
+                    <X className="h-5 w-5" aria-hidden="true" />
                   </button>
                 </div>
 
@@ -569,10 +592,10 @@ function RequirementsContent() {
                           <div className="flex items-center gap-1">
                             {marcados.length > 0 && (
                               <button type="button" onClick={limparChecklist} className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue ${focusRing}`}>
-                                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Limpar
+                                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Desmarcar todos
                               </button>
                             )}
-                            <button type="button" onClick={() => imprimirLista(selectedItem, observacoesSelecionadas)} className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-blue hover:bg-crfal-blue-lighter ${focusRing}`}>
+                            <button type="button" onClick={() => setImpressaoBloqueada(!imprimirLista(selectedItem, observacoesSelecionadas))} className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-blue hover:bg-crfal-blue-lighter ${focusRing}`}>
                               <Printer className="h-3.5 w-3.5" aria-hidden="true" /> Imprimir lista
                             </button>
                           </div>
@@ -593,6 +616,11 @@ function RequirementsContent() {
                             );
                           })}
                         </ul>
+                        {impressaoBloqueada && (
+                          <p role="alert" className="mt-3 rounded-lg border border-amber-200 bg-amber-50/70 px-4 py-3 text-[13px] leading-relaxed text-amber-900">
+                            O navegador bloqueou a janela de impressão. Permita pop-ups para este site e toque em “Imprimir lista” de novo.
+                          </p>
+                        )}
                         <p className="mt-2 text-xs text-crfal-gray-600">As marcações ficam salvas apenas neste navegador.</p>
                       </div>
                     ) : (
@@ -613,10 +641,12 @@ function RequirementsContent() {
                   <div className="flex shrink-0 flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:p-5">
                     <ArrowFillButton href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer">
                       Acessar CRF AL em Casa
+                      <span className="sr-only"> (abre em nova aba)</span>
                     </ArrowFillButton>
                     {selectedItem.downloadUrl && (
                       <a href={selectedItem.downloadUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border-2 border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white ${focusRing}`}>
                         <Download className="h-4 w-4" aria-hidden="true" /> Baixar formulário
+                        <span className="sr-only"> (abre em nova aba)</span>
                       </a>
                     )}
                   </div>
@@ -634,7 +664,7 @@ function RequirementsContent() {
               <div className="flex items-center justify-between border-b border-crfal-gray-200 p-4">
                 <h3 className="font-bold text-crfal-blue">Tutorial: {selectedItem.title}</h3>
                 <button type="button" onClick={() => setShowVideoModal(false)} className="rounded-lg p-2 transition-colors hover:bg-crfal-gray-100" aria-label="Fechar vídeo">
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
               <div className="aspect-video bg-black">

@@ -48,7 +48,7 @@ export interface MenuCategory {
 }
 
 export const DEFAULT_IMPORTANT_OBSERVATION =
-  'Caso tenha duvidas quanto ao processo de envio ou manuseio do nosso sistema online CRF AL em Casa envie um email para tecnologia@crf-al.org.br e responderemos em ate 01 (um) dia Útil.';
+  'Dúvidas sobre o envio ou sobre o uso do CRF AL em Casa? Escreva para tecnologia@crf-al.org.br. Respondemos em até 1 dia útil.';
 
 export const individualMenu: MenuCategory[] = [
   {
@@ -59,7 +59,7 @@ export const individualMenu: MenuCategory[] = [
         id: 'primeira-inscricao-profissional-provisoria',
         icon: UserPlus,
         title: 'Primeira Inscrição Profissional (Provisória)',
-        description: 'Serviço realizado pelo CRF-AL em Casa para primeira inscrição profissional provisória.',
+        description: 'Serviço realizado pelo CRF AL em Casa para primeira inscrição profissional provisória.',
         documentos: [
           '03 fotos 3x4 coloridas e recentes (entregar na sede/seccional)',
           'Certidão ou declaração de conclusão do curso de Bacharelado em Farmácia',
@@ -73,13 +73,13 @@ export const individualMenu: MenuCategory[] = [
           'Exame de comprovação de tipo sanguíneo',
         ],
         instrucoes: [
-          'Acesse o portal do CRF em Casa',
+          'Acesse o portal do CRF AL em Casa',
           'Clique em "Pré Inscrição Pessoa Física"',
           'Preencha o formulário atentamente',
           'Anexe os documentos necessários',
-          'Imprima seu protocolo e leve sua documentação original na sede/seccional do CRFAL',
-          'Aguarde a análise da sua documentação pelo CRFAL',
-          'Após a análise e aprovação em plenária, você receberá um email avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição',
+          'Imprima seu protocolo e leve sua documentação original na sede/seccional do CRF-AL',
+          'Aguarde a análise da sua documentação pelo CRF-AL',
+          'Após a análise e aprovação em plenária, você receberá um e-mail avisando a aprovação da sua inscrição e um boleto para o pagamento da taxa de inscrição',
           'Efetue o pagamento, aguarde a compensação do pagamento para receber a confirmação da sua inscrição',
         ],
         observacoesImportantes: [
@@ -93,7 +93,7 @@ export const individualMenu: MenuCategory[] = [
         id: 'inscricao-profissional-definitiva',
         icon: BadgeCheck,
         title: 'Inscrição Definitiva',
-        description: 'Serviço realizado pelo CRF-AL em Casa para inscrição profissional definitiva.',
+        description: 'Serviço realizado pelo CRF AL em Casa para inscrição profissional definitiva.',
         documentos: [
           '03 fotos 3x4 coloridas e recentes (entregar na sede/seccional)',
           'Diploma do curso de Bacharelado em Farmácia (entregar na sede/seccional)',
@@ -176,8 +176,8 @@ export const individualMenu: MenuCategory[] = [
         instrucoes: [
           'Preencha todos os campos do requerimento.',
           'Traceje os campos não utilizados e evite rasuras.',
-          'Anexe os documentos listados no formulário oficial no CRF AL em Casa (se necessario).',
-          'Salve o Protocolo e acompanhe o tramite na opção de "Protocolos Web"',
+          'Anexe os documentos listados no formulário oficial no CRF AL em Casa (se necessário).',
+          'Salve o Protocolo e acompanhe o trâmite na opção de "Protocolos Web"',
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: `${WP_UPLOADS_URL}/2024/03/Requerimento-Inscricao-profissional-carteira-definitiva-segunda-via-de-carteira-definitiva-cedula.docx`,
@@ -193,7 +193,7 @@ export const individualMenu: MenuCategory[] = [
           'Regularidade financeira e cadastral',
         ],
         instrucoes: [
-          'Acesse o CRF-AL em Casa.',
+          'Acesse o CRF AL em Casa.',
           'Solicite a certidão no menu de serviços/certidões.',
           'Verifique possíveis pendências antes da emissão.',
         ],
@@ -218,7 +218,7 @@ export const individualMenu: MenuCategory[] = [
         instrucoes: [
           'Preencha o requerimento corretamente.',
           'Anexe os documentos solicitados no formulário.',
-          'Protocole no CRF-AL em casa e acompanhe o trâmite na opção de "Protocolos Web".',
+          'Protocole no CRF AL em Casa e acompanhe o trâmite na opção de "Protocolos Web".',
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: `${WP_UPLOADS_URL}/2024/03/Requerimento-de-transferencia-para-outro-regional.docx`,
@@ -321,7 +321,7 @@ export const corporateMenu: MenuCategory[] = [
           'Preencha o requerimento com todos os campos obrigatórios.',
           'Anexe os documentos de constituição e as declarações exigidas.',
           'Confirme os critérios de elegibilidade do estabelecimento antes do protocolo.',
-          'Protocole no CRF-AL em casa e acompanhe análise técnica.',
+          'Protocole no CRF AL em Casa e acompanhe análise técnica.',
           'Informação sujeita à validação manual: critérios adicionais podem ser exigidos.',
         ],
         prazo: 'Conforme análise do CRF-AL',
@@ -342,7 +342,7 @@ export const corporateMenu: MenuCategory[] = [
           'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
-          'Acesse o CRF em Casa como Pessoa Jurídica.',
+          'Acesse o CRF AL em Casa como Pessoa Jurídica.',
           "Clique no ícone de 'Solicitação de RT'.",
           'Preencha os campos necessários.',
           'Anexe a documentação que comprove o vínculo empregatício.',
@@ -360,7 +360,7 @@ export const corporateMenu: MenuCategory[] = [
           'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
-          'Acesse o CRF em Casa como Pessoa Jurídica.',
+          'Acesse o CRF AL em Casa como Pessoa Jurídica.',
           "Clique no ícone de 'Solicitação de RT'.",
           'Preencha os campos necessários.',
           'Anexe a documentação que comprove o vínculo empregatício.',
@@ -378,7 +378,7 @@ export const corporateMenu: MenuCategory[] = [
           'Documento que comprove o vínculo empregatício',
         ],
         instrucoes: [
-          'Acesse o CRF em Casa como Pessoa Jurídica.',
+          'Acesse o CRF AL em Casa como Pessoa Jurídica.',
           "Clique no ícone de 'Solicitação de RT'.",
           'Preencha os campos necessários.',
           'Anexe a documentação que comprove o vínculo empregatício.',
@@ -406,7 +406,7 @@ export const corporateMenu: MenuCategory[] = [
           'Preencha o requerimento completo e sem rasuras.',
           'Traceje os campos não utilizados.',
           'Anexe o documento de vínculo atualizado.',
-          'Protocole no CRF-AL em casa e acompanhe em Protocolos Web.',
+          'Protocole no CRF AL em Casa e acompanhe em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: `${WP_UPLOADS_URL}/2024/08/Declaracao-de-horarios.docx`,
@@ -429,7 +429,7 @@ export const corporateMenu: MenuCategory[] = [
         instrucoes: [
           'Preencha o requerimento com os dados da matriz e filial.',
           'Anexe vínculo profissional atualizado.',
-          'Protocole no CRF-AL em casa e acompanhe a atualização cadastral em Protocolos Web.',
+          'Protocole no CRF AL em Casa e acompanhe a atualização cadastral em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: `${WP_UPLOADS_URL}/2024/02/Requerimento-para-Transferencia-de-RT-entre-MATRIZ_FILIAL.docx`,
@@ -464,7 +464,7 @@ export const corporateMenu: MenuCategory[] = [
         instrucoes: [
           'Preencha o formulário DAP com os dados atualizados.',
           'Anexe os comprovantes exigidos.',
-          'Protocole no CRF-AL em casa e acompanhe em Protocolos Web.',
+          'Protocole no CRF AL em Casa e acompanhe em Protocolos Web.',
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: `${WP_UPLOADS_URL}/2024/09/Declaracao-de-Atividade-Profissional-DAP.docx`,
