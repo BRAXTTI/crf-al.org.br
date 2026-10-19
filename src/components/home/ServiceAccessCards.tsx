@@ -4,11 +4,13 @@ import { CRF_EM_CASA_URL } from '@/config/site';
 
 const cardClass = 'group relative flex min-h-[104px] items-center overflow-hidden bg-crfal-blue p-5 text-white transition-shadow first:rounded-t-xl last:rounded-b-xl last:bg-crfal-blue-light focus-visible:z-10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white motion-reduce:transition-none sm:p-7 md:min-h-[196px] md:flex-col md:items-start md:rounded-xl md:shadow-card md:hover:shadow-card-hover md:last:bg-crfal-blue md:focus-visible:ring-crfal-blue md:focus-visible:ring-offset-4 md:focus-visible:ring-offset-background';
 
-function CardContent({ title, description, image, action, external = false }: {
+function CardContent({ title, description, image, action, shortAction, external = false }: {
   title: string;
   description: string;
   image: string;
   action: string;
+  /** Rótulo do botão abaixo de 768px, onde a descrição some. */
+  shortAction: string;
   external?: boolean;
 }) {
   const Arrow = external ? ArrowUpRight : ArrowRight;
@@ -20,7 +22,7 @@ function CardContent({ title, description, image, action, external = false }: {
         <h2 className="min-w-0 max-w-76 text-lg font-bold leading-tight sm:text-2xl sm:leading-8 md:text-2xl">{title}</h2>
         <p className="mb-5 mt-2 hidden max-w-76 text-sm leading-relaxed text-white/90 md:block">{description}</p>
         <span className="inline-flex min-h-11 shrink-0 items-center gap-3 rounded-full bg-white px-4 py-2 text-xs font-bold text-crfal-blue transition-colors group-hover:bg-crfal-blue-lighter motion-reduce:transition-none sm:text-sm md:mt-auto md:rounded-lg">
-          <span className="md:hidden">Acessar</span><span className="hidden md:inline">{action}</span><Arrow className="hidden h-4 w-4 md:block" aria-hidden="true" />
+          <span className="md:hidden">{shortAction}</span><span className="hidden md:inline">{action}</span><Arrow className="h-4 w-4" aria-hidden="true" />
         </span>
         {external && <span className="sr-only">Abre em uma nova aba.</span>}
       </div>
@@ -32,10 +34,10 @@ export default function ServiceAccessCards() {
   return (
     <section aria-label="Acesso aos serviços" className="mb-5 grid rounded-xl md:grid-cols-2 md:gap-5">
       <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className={cardClass}>
-        <CardContent title="CRF em Casa" description="Acesse sua área de atendimento online." image="/images/crf-em-casa-card-v3.webp" action="Acessar o sistema" external />
+        <CardContent title="CRF AL em Casa" description="Acesse sua área de atendimento online." image="/images/crf-em-casa-card-v3.webp" action="Acessar o sistema" shortAction="Entrar" external />
       </a>
       <Link to="/servicos/requerimentos" className={cardClass}>
-        <CardContent title="Serviços e Requerimentos" description="Consulte documentos e orientações para profissionais e estabelecimentos." image="/images/servicos-requerimentos-card-v2.webp" action="Consultar serviços" />
+        <CardContent title="Serviços e Requerimentos" description="Consulte documentos e orientações para profissionais e estabelecimentos." image="/images/servicos-requerimentos-card-v2.webp" action="Consultar serviços" shortAction="Consultar" />
       </Link>
     </section>
   );

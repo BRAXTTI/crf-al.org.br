@@ -8,7 +8,7 @@ export const serviceProfiles = [
   {
     id: 'empresas', label: 'Empresas', icon: Building2, href: corporate,
     description: 'Registro, responsabilidade técnica e regularização de estabelecimentos.',
-    action: 'Ver requerimentos',
+    action: 'Requerimentos para Empresas',
     services: [
       { label: 'Registro de estabelecimentos', href: `${corporate}&categoria=registro-inicial` },
       { label: 'Responsabilidade técnica', href: `${corporate}&categoria=responsabilidade-tecnica` },
@@ -20,7 +20,7 @@ export const serviceProfiles = [
   {
     id: 'farmaceuticos', label: 'Farmacêuticos', icon: PillBottle, href: individual,
     description: 'Inscrição, certidões e serviços da sua vida profissional.',
-    action: 'Ver requerimentos',
+    action: 'Requerimentos para Farmacêuticos',
     services: [
       { label: 'Inscrições profissionais', href: `${individual}&categoria=inscricoes-pf` },
       { label: 'Carteira profissional e certidões', href: `${individual}&categoria=carteira-certidoes-pf` },
