@@ -560,8 +560,8 @@ function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; em
       </div>
 
       <div className="flex flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:p-5">
-        <ArrowFillButton href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer">
-          Acessar CRF AL em Casa
+        <ArrowFillButton href={tutorial.acesso?.url ?? CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer">
+          {tutorial.acesso?.label ?? 'Acessar CRF AL em Casa'}
           <span className="sr-only"> (abre em uma nova aba)</span>
         </ArrowFillButton>
       </div>

@@ -24,6 +24,12 @@ export const INSTAGRAM_PROFILE_URL =
 export const CRF_EM_CASA_URL =
   'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf';
 
+/** Pré-inscrição no CRF AL em Casa, sem login: profissional (pessoa física) e estabelecimento (pessoa jurídica). */
+export const PRE_INSCRICAO_PF_URL =
+  'https://crfal-emcasa.cisantec.com.br/crf-em-casa/precadastro/profissional/inicial.jsf';
+export const PRE_INSCRICAO_PJ_URL =
+  'https://crfal-emcasa.cisantec.com.br/crf-em-casa/precadastro/estabelecimento/inicial.jsf';
+
 /** Portal de transparência (Implanta), usado em várias seções do site. */
 export const TRANSPARENCIA_URL =
   'https://crf-al.implanta.net.br/portaltransparencia/';

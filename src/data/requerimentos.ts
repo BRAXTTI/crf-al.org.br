@@ -20,6 +20,7 @@ import {
   LEGACY_WP_UPLOADS_URL,
   WP_UPLOADS_URL,
 } from '@/services/wordpress/client';
+import { PRE_INSCRICAO_PF_URL, PRE_INSCRICAO_PJ_URL } from '@/config/site';
 
 /**
  * Fonte única dos requerimentos. A página de Requerimentos e a de Tutoriais
@@ -37,6 +38,8 @@ export interface RequirementItem {
   taxaAplicavel?: string;
   prazo?: string;
   downloadUrl?: string;
+  /** Página do CRF AL em Casa que inicia este requerimento; sem ela, o botão leva ao login. */
+  acesso?: { url: string; label: string };
   fluxogramaUrl?: string;
   videoUrl?: string;
 }
@@ -86,7 +89,7 @@ export const individualMenu: MenuCategory[] = [
           'Leve os documentos originais na sede/seccional para conferência após o protocolo online.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf',
+        acesso: { url: PRE_INSCRICAO_PF_URL, label: 'Fazer pré-inscrição' },
         fluxogramaUrl: '/images/fluxograma-primeira-inscricao-crfal.webp',
       },
       {
@@ -120,7 +123,6 @@ export const individualMenu: MenuCategory[] = [
           'Leve os documentos originais na sede/seccional para conferência após o protocolo online.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf',
         videoUrl: 'https://youtu.be/P6TfpvT-pqk?t=13',
       },
       {
@@ -198,7 +200,6 @@ export const individualMenu: MenuCategory[] = [
           'Verifique possíveis pendências antes da emissão.',
         ],
         prazo: 'Emissão imediata (sem pendências)',
-        downloadUrl: 'https://crfal-emcasa.cisantec.com.br/crf-em-casa/login.jsf',
       },
     ],
   },
@@ -273,6 +274,7 @@ export const corporateMenu: MenuCategory[] = [
         ],
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2026/04/Contratacao-de-RT-e-Declaracao-de-outras-atividades_ATUALIZADO.docx`,
+        acesso: { url: PRE_INSCRICAO_PJ_URL, label: 'Fazer pré-inscrição' },
       },
       {
         id: 'registro-inicial-servico-publico',

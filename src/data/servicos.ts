@@ -60,6 +60,8 @@ export interface Tutorial extends TutorialBase {
   videoUrl?: string;
   /** Presente quando o tutorial espelha um requerimento. */
   requerimentoId?: string;
+  /** Página do CRF AL em Casa que inicia o serviço (vem do requerimento). */
+  acesso?: { url: string; label: string };
 }
 
 const fontes: TutorialSource[] = [
@@ -232,6 +234,7 @@ function resolver(fonte: TutorialSource): Tutorial {
     prazo: requerimento.prazo,
     steps: requerimento.instrucoes,
     videoUrl: requerimento.videoUrl,
+    acesso: requerimento.acesso,
   };
 }
 

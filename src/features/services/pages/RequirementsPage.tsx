@@ -267,6 +267,32 @@ function RequirementsContent() {
   const chipCount = (ativo: boolean) =>
     `rounded-full px-1.5 text-[11px] font-bold ${ativo ? 'bg-white/20 text-white' : 'bg-crfal-gray-100 text-crfal-gray-600'}`;
 
+  const seletorPerfil = (className: string) => (
+    <div role="group" aria-label="Selecionar perfil" className={`grid shrink-0 grid-cols-2 gap-1 rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 p-1 ${className}`}>
+      {PROFILES.map((profile) => {
+        const ProfileIcon = profile.icon;
+        const ativo = activeType === profile.id;
+        return (
+          <button
+            key={profile.id}
+            type="button"
+            onClick={() => handleTypeChange(profile.id)}
+            aria-pressed={ativo}
+            className={`flex min-h-[52px] items-center gap-2.5 rounded-xl px-3 py-1.5 text-left sm:px-4 ${motion} ${focusRing} ${
+              ativo ? 'bg-crfal-blue text-white shadow-md' : 'text-crfal-gray-700 hover:bg-white hover:text-crfal-blue'
+            }`}
+          >
+            <ProfileIcon className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+            <span className="flex flex-col leading-tight">
+              <span className="text-sm font-bold">{profile.label}</span>
+              <span className={`text-[11px] ${ativo ? 'text-white/75' : 'text-crfal-gray-600'}`}>{profile.sublabel}</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   const totalDocs = selectedItem?.documentos.length ?? 0;
   const progresso = totalDocs ? Math.round((marcados.length / totalDocs) * 100) : 0;
 
@@ -289,32 +315,13 @@ function RequirementsContent() {
       />
 
       <main className="container-crfal py-8 md:py-12">
-        {/* Barra de perfil, busca e categorias */}
-        <div className="sticky top-(--header-offset) z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
+        {/* No celular, o perfil fica fora da barra fixa: só busca e categorias acompanham a rolagem. */}
+        {seletorPerfil('mb-3 lg:hidden')}
+
+        {/* Barra fixa: busca e categorias (e o perfil a partir de 1024px) */}
+        <div className="sticky top-(--header-offset) z-30 glass-light rounded-2xl border border-white/70 p-2 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-3 lg:p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-            <div role="group" aria-label="Selecionar perfil" className="grid shrink-0 grid-cols-2 gap-1 rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 p-1">
-              {PROFILES.map((profile) => {
-                const ProfileIcon = profile.icon;
-                const ativo = activeType === profile.id;
-                return (
-                  <button
-                    key={profile.id}
-                    type="button"
-                    onClick={() => handleTypeChange(profile.id)}
-                    aria-pressed={ativo}
-                    className={`flex min-h-[52px] items-center gap-2.5 rounded-xl px-3 py-1.5 text-left sm:px-4 ${motion} ${focusRing} ${
-                      ativo ? 'bg-crfal-blue text-white shadow-md' : 'text-crfal-gray-700 hover:bg-white hover:text-crfal-blue'
-                    }`}
-                  >
-                    <ProfileIcon className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
-                    <span className="flex flex-col leading-tight">
-                      <span className="text-sm font-bold">{profile.label}</span>
-                      <span className={`text-[11px] ${ativo ? 'text-white/75' : 'text-crfal-gray-600'}`}>{profile.sublabel}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            {seletorPerfil('hidden lg:grid')}
 
             <div className="relative lg:ml-auto lg:max-w-sm lg:flex-1">
               <label htmlFor="busca-requerimento" className="sr-only">Buscar requerimento</label>
@@ -325,7 +332,7 @@ function RequirementsContent() {
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar requerimento, ex.: certidão"
-                className="min-h-[48px] w-full appearance-none rounded-full border [&::-webkit-search-cancel-button]:appearance-none border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40"
+                className="min-h-11 w-full appearance-none rounded-full border lg:min-h-12 [&::-webkit-search-cancel-button]:appearance-none border-crfal-gray-200 bg-white py-2.5 pl-11 pr-11 text-sm text-crfal-blue-dark transition-colors placeholder:text-crfal-gray-400 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40"
               />
               {busca && (
                 <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className={`absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-crfal-gray-400 transition-colors hover:bg-crfal-gray-100 hover:text-crfal-gray-600 ${focusRing}`}>
@@ -335,7 +342,7 @@ function RequirementsContent() {
             </div>
           </div>
 
-          <div role="group" aria-label="Filtrar por categoria" className="mt-3 flex gap-2 overflow-x-auto scrollbar-none [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:overflow-visible lg:[mask-image:none]">
+          <div role="group" aria-label="Filtrar por categoria" className="mt-2 flex gap-2 sm:mt-3 overflow-x-auto scrollbar-none [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] [&::-webkit-scrollbar]:hidden lg:flex-wrap lg:overflow-visible lg:[mask-image:none]">
             <button type="button" onClick={() => setCategoria('todas')} aria-pressed={categoria === 'todas'} className={chipClass(categoria === 'todas')}>
               Todas <span className={chipCount(categoria === 'todas')}>{totalPerfil}</span>
             </button>
@@ -639,8 +646,8 @@ function RequirementsContent() {
                   </div>
 
                   <div className="flex shrink-0 items-center gap-2 border-t border-crfal-gray-200 bg-crfal-gray-50 p-3 sm:flex-wrap sm:gap-3 sm:p-5">
-                    <ArrowFillButton href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer">
-                      Acessar CRF AL em Casa
+                    <ArrowFillButton href={selectedItem.acesso?.url ?? CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer">
+                      {selectedItem.acesso?.label ?? 'Acessar CRF AL em Casa'}
                       <span className="sr-only"> (abre em nova aba)</span>
                     </ArrowFillButton>
                     {selectedItem.downloadUrl && (
