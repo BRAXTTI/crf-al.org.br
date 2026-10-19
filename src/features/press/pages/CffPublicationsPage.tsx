@@ -1,26 +1,39 @@
 import { useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ArrowUpRight, Landmark } from 'lucide-react';
+import { ArrowUpRight, ChevronsRight, Landmark } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
-import { cffColClass, CffCoverSkeleton, CffPublicationCard } from '@/features/press/cff';
+import { CffCoverSkeleton, CffPublicationCard } from '@/features/press/cff';
 import { CFF_PUBLICATIONS_PATH, CFF_PUBLICATIONS_URL, useCffPublications, type CffCollection } from '@/features/press/cff-data';
 
 /** Como no site do CFF: duas coleções por página. */
 const PER_PAGE = 2;
 const externalNote = <span className="sr-only"> (abre em uma nova aba)</span>;
 
+/**
+ * No celular e no tablet pequeno cada coleção vira um carrossel horizontal (deslizar, com a próxima capa
+ * aparecendo na borda) em vez de empilhar uma capa por linha; do md em diante volta à grade centralizada.
+ * O padding vertical evita cortar a sombra dos cartões pelo overflow.
+ */
+const collectionListClass = '-mx-4 flex snap-x snap-mandatory scroll-px-1 overflow-x-auto px-1 pb-4 pt-3 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-2 sm:px-2 md:-mx-4 md:flex-wrap md:justify-center md:overflow-visible md:p-0 lg:-mx-3.5 [&::-webkit-scrollbar]:hidden [&>li]:shrink-0 [&>li]:snap-start';
+const collectionItemClass = 'w-[62%] px-3 sm:w-[38%] sm:px-4 md:mb-10 md:w-5/12 lg:mb-12 lg:w-1/4 lg:px-3.5';
+
 function CollectionSection({ collection, shaded }: { collection: CffCollection; shaded: boolean }) {
   return (
     <section aria-labelledby={`${collection.slug}-title`} className={`py-12 md:py-14 ${shaded ? 'bg-crfal-gray-50' : 'bg-white'}`}>
       <div className="container-crfal">
-        <header className="mx-auto mb-10 text-center">
+        <header className="mx-auto mb-6 text-center md:mb-10">
           <h2 id={`${collection.slug}-title`} className="text-2xl font-bold leading-snug text-crfal-blue-dark sm:text-[27px]">{collection.title}</h2>
           <span aria-hidden="true" className="mx-auto mt-6 block h-0.5 w-13 rounded-full bg-crfal-gold" />
+          {collection.items.length > 1 && (
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-[13px] text-crfal-gray-600 md:hidden">
+              {collection.items.length} publicações · deslize para ver <ChevronsRight className="h-4 w-4 text-crfal-blue" aria-hidden="true" />
+            </p>
+          )}
         </header>
-        <ul className="-mx-3 flex flex-wrap justify-center sm:-mx-4 lg:-mx-3.5">
+        <ul className={collectionListClass}>
           {collection.items.map((item, index) => (
-            <li key={item.link} className={`${cffColClass} mb-10 lg:mb-12`}>
+            <li key={item.link} className={collectionItemClass}>
               <CffPublicationCard collection={collection} index={index} />
             </li>
           ))}
@@ -108,7 +121,7 @@ export default function CffPublicationsPage() {
           </div>
         ) : isLoading ? (
           <div className="container-crfal py-14">
-            <ul className="-mx-3 flex flex-wrap justify-center sm:-mx-4 lg:-mx-3.5" aria-busy="true"><CffCoverSkeleton count={8} /></ul>
+            <ul className={collectionListClass} aria-busy="true"><CffCoverSkeleton count={8} /></ul>
           </div>
         ) : (
           <>
