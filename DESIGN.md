@@ -23,7 +23,7 @@ Rawline, hospedada localmente, para títulos e texto. Azul #003366, azul escuro 
 
 ## Movimento
 
-Entrada ao rolar via `Reveal` (`src/components/ui/reveal.tsx`) e `useInView` (`src/hooks/useInView.ts`), com IntersectionObserver: fade e deslize de 24px em 600ms, uma única vez. Nunca aplicar acima da dobra nem no slider. Escalonamento entre itens de no máximo 240ms; nos perfis da home, somente em desktop. Manter o painel montado desde o esqueleto para não repetir a entrada quando os dados chegarem. Desativado com movimento reduzido; sem IntersectionObserver, o conteúdo já começa visível.
+Entrada ao rolar via `Reveal` (`src/components/ui/reveal.tsx`) e `useInView` (`src/hooks/useInView.ts`), com IntersectionObserver (`threshold` 0, margem inferior de -6%), uma única vez. Antes de revelar, vidro fosco: o conteúdo continua visível, com blur de 5px, 60% de opacidade e 12px abaixo (no celular, até 767px: 3px, 60% e 8px), para a página nunca parecer terminar num vão vazio; ao entrar na tela fica nítido em 700ms (550ms no celular) e permanece assim, sem `filter` nem `translate` depois de revelado. Nunca usar opacidade 0 nesse estado. O que já está acima da dobra (ou acima da tela, após um salto por âncora) nasce nítido, sem piscar desfocado. Blocos foscos dentro de outro bloco fosco não somam o efeito; o escalonamento (`--reveal-delay`) vale só na entrada. Nunca animar com `opacity-0` próprio dentro dessas seções. Não aplicar no slider. Escalonamento entre itens de no máximo 240ms; nos perfis da home, somente em desktop. Manter o painel montado desde o esqueleto para não repetir a entrada quando os dados chegarem. Desativado com movimento reduzido; sem IntersectionObserver, o conteúdo já começa visível.
 
 ## Cabeçalhos de serviços
 

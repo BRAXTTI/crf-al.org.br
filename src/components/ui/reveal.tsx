@@ -15,14 +15,13 @@ export function Reveal<T extends keyof HTMLElementTagNameMap = 'div'>({
   children,
   ...props
 }: RevealProps<T>) {
-  const { ref, inView } = useInView<HTMLElementTagNameMap[T]>();
+  const { ref, revealProps } = useInView<HTMLElementTagNameMap[T]>();
 
   return createElement(as ?? 'div', {
     ...props,
     ref,
     className,
     style: { ...style, '--reveal-delay': `${delay}ms` } as CSSProperties,
-    'data-reveal': '',
-    'data-revealed': inView ? '' : undefined,
+    ...revealProps,
   }, children);
 }
