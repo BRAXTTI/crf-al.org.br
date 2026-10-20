@@ -11,7 +11,7 @@ import {
 } from '@/services/wordpress/client';
 import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { NEWS_COVER_SIZES } from '@/services/wordpress/image-set';
-import { usePost, usePostBySlug, useRelatedPosts } from '@/services/wordpress/hooks';
+import { usePost, usePostBySlug, useRelatedPosts } from '@/services/wordpress/news-hooks';
 import ShareButtons from '../components/ShareButtons';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 
@@ -252,7 +252,7 @@ export default function NewsDetailPage() {
           <div className="container-crfal py-6 md:py-8">
             <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
               {/* Article */}
-              <main className="lg:col-span-8">
+              <div className="lg:col-span-8">
                 <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
                   {cover && (
                     <img
@@ -282,7 +282,7 @@ export default function NewsDetailPage() {
                   />
                 </div>
               </article>
-            </main>
+            </div>
 
             {/* Sidebar */}
             <aside className="lg:col-span-4">

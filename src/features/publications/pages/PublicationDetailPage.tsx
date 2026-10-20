@@ -1,6 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { usePostBySlug } from '@/services/wordpress/hooks';
+import { usePostBySlug } from '@/services/wordpress/news-hooks';
 
 /**
  * Rota legada `/publicacao/:slug` — existe apenas para redirecionar

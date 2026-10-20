@@ -2,7 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Images } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
-import { usePhotoAlbums } from '@/services/wordpress/hooks';
+import { usePhotoAlbums } from '@/services/wordpress/gallery-hooks';
 import GalleryState from '../components/GalleryState';
 
 export default function PhotoGalleryPage() {

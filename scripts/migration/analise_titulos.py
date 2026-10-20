@@ -1,7 +1,6 @@
+import argparse
 import re
 import xml.etree.ElementTree as ET
-
-XML_FILE = 'crf-al.WordPress.2026-08-31.xml'
 
 NS = {
     'wp': 'http://wordpress.org/export/1.2/',
@@ -17,7 +16,10 @@ def contar_palavras(texto):
 
 
 def main():
-    tree = ET.parse(XML_FILE)
+    parser = argparse.ArgumentParser(description='Analisa títulos de notícias publicadas em um export WXR.')
+    parser.add_argument('xml', help='Caminho do XML exportado pelo WordPress')
+    args = parser.parse_args()
+    tree = ET.parse(args.xml)
     root = tree.getroot()
 
     noticias = []

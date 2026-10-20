@@ -1,3 +1,4 @@
+import { SETOR_CONTATOS } from '@/config/contact';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
@@ -28,8 +29,8 @@ import {
 
 const OUVIDORIA_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#ouv/home';
 const ESIC_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#sic/home';
-const OUVIDORIA_EMAIL = 'ouvidoria@crf-al.org.br';
-const OUVIDORIA_TELEFONE = '(82) 99971-0247';
+const OUVIDORIA_EMAIL = SETOR_CONTATOS.ouvidoria.email;
+const OUVIDORIA_TELEFONE = SETOR_CONTATOS.ouvidoria.telefone;
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -124,7 +125,7 @@ export default function OmbudsmanPage() {
         }
       />
 
-      <main className="container-crfal space-y-12 py-10 md:space-y-16 md:py-14">
+      <div className="container-crfal space-y-12 py-10 md:space-y-16 md:py-14">
         {/* Antes de registrar */}
         <section aria-labelledby="antes-title" className="relative overflow-hidden rounded-xl border border-crfal-gold/40 bg-[#FBF7EC] p-5 sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -277,7 +278,7 @@ export default function OmbudsmanPage() {
             <span className="sr-only">(abre em uma nova aba)</span>
           </a>
         </aside>
-      </main>
+      </div>
     </div>
   );
 }

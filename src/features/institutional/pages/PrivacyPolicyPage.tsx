@@ -371,7 +371,7 @@ export default function PrivacyPolicyPage() {
         }
       />
 
-      <main className="container-crfal py-10 md:py-14">
+      <div className="container-crfal py-10 md:py-14">
         <section aria-labelledby="avisos-title">
           <p className={goldLabel}>Em resumo</p>
           <h2 id="avisos-title" className="mt-1.5 text-[22px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[26px]">O essencial sobre sua privacidade</h2>
@@ -446,7 +446,7 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

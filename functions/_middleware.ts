@@ -34,11 +34,7 @@ interface OgData {
   preloadSrcset?: string;
 }
 
-interface PagesContext {
-  request: Request;
-  next: () => Promise<Response>;
-  waitUntil: (promise: Promise<unknown>) => void;
-}
+type PagesContext = EventContext<unknown, string, Record<string, unknown>>;
 
 function decodeEntities(value: string): string {
   return value
@@ -126,7 +122,10 @@ const DEFAULT_IMAGE = `${SITE_URL}/images/og-image.jpg`;
 const SITE_NAME = 'Conselho Regional de Farmácia do Estado de Alagoas';
 
 async function resolveAlbum(slug: string): Promise<OgData | null> {
-  const search = new URLSearchParams({ rest_route: `/crfal/v1/photo-albums/${slug}` });
+  const search = new URLSearchParams({
+    rest_route: `/crfal/v1/photo-albums/${slug}`,
+    _fields: 'title,description,slug,cover',
+  });
   const album = await fetchJson<{ title: string; description?: string; slug: string; cover?: { src: string } }>(
     `${EVENTS_WP}/index.php?${search}`, true
   );

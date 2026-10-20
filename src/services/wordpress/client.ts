@@ -1,5 +1,6 @@
+import { HttpError, requestJson } from '../http';
 import { mediaImageSet, type ImageSet } from './image-set';
-import type { CRFEvent, CRFInstagramPost, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
+import type { CRFEvent, WPEmbedded, WPEventListing, WPPost, WPPostsPage } from './types';
 
 /**
  * WordPress "novo" (wordpress.crf-al.org.br): eventos e demais recursos.
@@ -12,60 +13,17 @@ export const WP_UPLOADS_URL = `${WP_SITE_URL}/wp-content/uploads`;
 
 export const LEGACY_WP_UPLOADS_URL = 'https://www.crf-al.org.br/app/uploads';
 
-const DEFAULT_TIMEOUT_MS = 15_000;
-
 /** URL no estilo `index.php?rest_route=` (usada pelo WP de eventos). */
 function restUrl(route: string, params: Record<string, string> = {}): string {
   const search = new URLSearchParams(params).toString();
   return `${WP_SITE_URL}/index.php?rest_route=${route}${search ? `&${search}` : ''}`;
 }
 
-async function wpRequest(url: string, signal?: AbortSignal): Promise<Response> {
-  const controller = new AbortController();
-  let timedOut = false;
-
-  const timeoutId = setTimeout(() => {
-    timedOut = true;
-    controller.abort();
-  }, DEFAULT_TIMEOUT_MS);
-
-  const onAbort = () => controller.abort();
-  if (signal?.aborted) {
-    controller.abort();
-  } else {
-    signal?.addEventListener('abort', onAbort, { once: true });
-  }
-
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) {
-      throw new Error(`A API do WordPress respondeu com status ${response.status}.`);
-    }
-    return response;
-  } catch (error) {
-    // Cancelamento do chamador (ex.: TanStack Query abortou a query): propaga o
-    // AbortError original em vez de mascará-lo como timeout.
-    if (signal?.aborted) throw error;
-    if (timedOut) {
-      throw new Error('A requisição ao WordPress excedeu o tempo limite.');
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
-    signal?.removeEventListener('abort', onAbort);
-  }
-}
-
-async function wpJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await wpRequest(url, signal);
-  return (await response.json()) as T;
-}
-
 export async function fetchPosts(
   options: { page?: number; perPage?: number; signal?: AbortSignal } = {}
 ): Promise<WPPostsPage> {
   const { page = 1, perPage = 10, signal } = options;
-  return wpJson<WPPostsPage>(`/api/news?page=${page}&per_page=${perPage}`, signal);
+  return requestJson<WPPostsPage>(`/api/news?page=${page}&per_page=${perPage}`, { signal });
 }
 
 export async function fetchPostById(id: number, signal?: AbortSignal): Promise<WPPost> {
@@ -75,10 +33,12 @@ export async function fetchPostById(id: number, signal?: AbortSignal): Promise<W
 }
 
 export async function fetchPostBySlug(slug: string, signal?: AbortSignal): Promise<WPPost | null> {
-  const response = await fetch(`/api/news?slug=${encodeURIComponent(slug)}`, { signal });
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`A API de notícias respondeu com status ${response.status}.`);
-  return response.json();
+  try {
+    return await requestJson<WPPost>(`/api/news?slug=${encodeURIComponent(slug)}`, { signal });
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return null;
+    throw error;
+  }
 }
 
 /** Decodifica entidades HTML (ex.: `&ccedil;` -> `ç`) em texto puro vindo do WordPress. */
@@ -89,23 +49,23 @@ export function decodeHTMLEntities(value: string): string {
   return textarea.value;
 }
 
-/** Lista as publicações do feed do Instagram (Smash Balloon) em formato enxuto. */
-export async function fetchInstagramFeed(signal?: AbortSignal): Promise<CRFInstagramPost[]> {
-  const posts = await wpJson<CRFInstagramPost[]>(
-    restUrl('/crfal/v1/instagram', { limit: '12' }),
-    signal
-  );
-  return Array.isArray(posts) ? posts.filter((post) => post && post.image) : [];
-}
-
 /** Lista todos os eventos (publicados e encerrados) vindos do WP Event Manager. */
 export async function fetchEvents(signal?: AbortSignal): Promise<CRFEvent[]> {
-  return wpJson<CRFEvent[]>(restUrl('/crfal/v1/events'), signal);
+  return requestJson<CRFEvent[]>(restUrl('/crfal/v1/events'), { signal });
 }
 
 /** Busca um evento individual (com conteúdo completo e meta) pelo id. */
 export async function fetchEventById(id: number, signal?: AbortSignal): Promise<WPEventListing> {
-  return wpJson<WPEventListing>(restUrl(`/wp/v2/event_listing/${id}`, { _embed: '1' }), signal);
+  return requestJson<WPEventListing>(restUrl(`/wp/v2/event_listing/${id}`, { _embed: '1' }), { signal });
+}
+
+/** Permite abrir eventos publicados sem esperar pela listagem de relacionados. */
+export async function fetchEventBySlug(slug: string, signal?: AbortSignal): Promise<WPEventListing | null> {
+  const events = await requestJson<WPEventListing[]>(
+    restUrl('/wp/v2/event_listing', { slug, _embed: '1', per_page: '1' }),
+    { signal },
+  );
+  return events[0] ?? null;
 }
 
 export async function fetchRelatedPosts(

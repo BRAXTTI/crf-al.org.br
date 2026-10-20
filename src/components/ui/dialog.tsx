@@ -52,7 +52,7 @@ function DialogContent({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
-  variant?: 'default' | 'drawer'
+  variant?: 'default' | 'drawer' | 'fullscreen'
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -60,7 +60,9 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          variant === 'drawer'
+          variant === 'fullscreen'
+            ? "fixed inset-0 z-[200] flex items-center justify-center outline-hidden"
+            : variant === 'drawer'
             ? "fixed inset-y-0 right-0 z-70 flex h-dvh w-[min(100%,420px)] flex-col bg-background shadow-2xl outline-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-right-full duration-300 motion-reduce:animate-none"
             : "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-card duration-200 outline-hidden sm:max-w-lg",
           className
@@ -87,19 +89,6 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-header"
       className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
-      {...props}
-    />
-  )
-}
-
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
       {...props}
     />
   )
@@ -136,7 +125,6 @@ export {
   DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogOverlay,
   DialogPortal,

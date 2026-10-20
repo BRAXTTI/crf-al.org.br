@@ -1,0 +1,60 @@
+import assert from 'node:assert/strict';
+import { moduleUrl } from './load-typescript.mjs';
+
+const httpUrl = await moduleUrl('../src/services/http.ts');
+const { requestJson, HttpError } = await import(httpUrl);
+const client = await import(await moduleUrl('../src/services/wordpress/client.ts', {
+  "'../http'": JSON.stringify(httpUrl),
+  "'./image-set'": JSON.stringify(await moduleUrl('../src/services/wordpress/image-set.ts')),
+  'import.meta.env.VITE_WP_SITE_URL': JSON.stringify('https://wordpress.example'),
+}));
+const originalFetch = globalThis.fetch;
+try {
+  globalThis.fetch = async () => Response.json({ ok: true });
+  assert.deepEqual(await requestJson('/test'), { ok: true });
+  for (const status of [404, 503]) {
+    globalThis.fetch = async () => new Response(null, { status });
+    await assert.rejects(requestJson('/test'), error => error instanceof HttpError && error.status === status);
+  }
+  globalThis.fetch = async () => new Response(null, { status: 404 });
+  assert.equal(await client.fetchPostBySlug('missing'), null);
+  globalThis.fetch = async () => new Response(null, { status: 503 });
+  await assert.rejects(client.fetchPostBySlug('existing'), error => error.status === 503);
+
+  let receivedSignal;
+  globalThis.fetch = async (_url, { signal }) => {
+    receivedSignal = signal;
+    signal.throwIfAborted();
+    // Headers chegam imediatamente, mas o corpo só termina depois do prazo.
+    return {
+      ok: true,
+      json: () => new Promise((resolve, reject) => {
+        signal.throwIfAborted();
+        const timer = setTimeout(() => resolve({ late: true }), 200);
+        signal.addEventListener('abort', () => { clearTimeout(timer); reject(signal.reason); }, { once: true });
+      }),
+    };
+  };
+  await assert.rejects(requestJson('/slow-body', { timeoutMs: 10 }), error => error.name === 'TimeoutError');
+  const controller = new AbortController();
+  const pending = requestJson('/cancelled', { signal: controller.signal });
+  controller.abort();
+  await assert.rejects(pending, error => error.name === 'AbortError');
+  assert.ok(receivedSignal.aborted);
+  await assert.rejects(requestJson('/already-cancelled', { signal: controller.signal }), error => error.name === 'AbortError');
+
+  let request;
+  globalThis.fetch = async url => {
+    request = new URL(url);
+    return Response.json([{ id: 123, slug: 'evento-de-teste', event_details: { online: true } }]);
+  };
+  assert.equal((await client.fetchEventBySlug('evento-de-teste')).id, 123);
+  assert.equal(request.searchParams.get('rest_route'), '/wp/v2/event_listing');
+  assert.equal(request.searchParams.get('slug'), 'evento-de-teste');
+  assert.equal(request.searchParams.get('_embed'), '1');
+  globalThis.fetch = async () => Response.json([]);
+  assert.equal(await client.fetchEventBySlug('missing'), null);
+  console.log('HTTP: erros, cancelamento, timeout durante o corpo e evento por slug validados.');
+} finally {
+  globalThis.fetch = originalFetch;
+}

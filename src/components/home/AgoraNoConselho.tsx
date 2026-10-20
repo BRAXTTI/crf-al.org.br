@@ -4,7 +4,7 @@ import { ArrowRight, ArrowUpRight, CalendarDays, Clock, Landmark } from 'lucide-
 import { plenaryYears } from '@/config/plenarias';
 import { mapEvent, formatarData } from '@/features/events/utils';
 import { countdown, daysUntil, formatDate, todayInMaceio, useStatusAtendimento, weekday } from '@/lib/maceio';
-import { useEvents } from '@/services/wordpress/hooks';
+import { useEvents } from '@/services/wordpress/event-hooks';
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const actionClass = `group inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-light motion-reduce:transition-none ${focusRing}`;

@@ -1,17 +1,17 @@
 import path from "path"
 import react from "@vitejs/plugin-react"
-import { defineConfig, type Plugin } from "vite"
+import { defineConfig, loadEnv, type Plugin } from "vite"
 import { getInstagramItems } from "./functions/api/_parse"
 import { newsApi } from "./functions/_news"
 import { getCffPublications } from "./functions/api/_cff"
 
 /**
  * Em dev, o Vite não executa as Pages Functions. Este middleware replica
- * `/api/instagram` localmente, para o carrossel nativo funcionar igual à produção.
+ * as APIs de notícias, CFF e Instagram localmente.
  */
-function instagramDevApi(): Plugin {
+function portalDevApi(feedUrl?: string): Plugin {
   return {
-    name: "instagram-dev-api",
+    name: "portal-dev-api",
     configureServer(server) {
       server.middlewares.use("/api/news", async (req, res) => {
         const response = await newsApi(new Request(`http://localhost/api/news${req.url ?? ''}`, { method: req.method }))
@@ -30,7 +30,7 @@ function instagramDevApi(): Plugin {
       })
       server.middlewares.use("/api/instagram", async (_req, res) => {
         try {
-          const items = await getInstagramItems(process.env.VITE_INSTAGRAM_FEED_URL)
+          const items = await getInstagramItems(feedUrl)
           res.setHeader("content-type", "application/json; charset=utf-8")
           res.end(JSON.stringify({ items }))
         } catch (error) {
@@ -44,9 +44,11 @@ function instagramDevApi(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_')
+  return {
   base: '/',
-  plugins: [react(), instagramDevApi()],
+  plugins: [react(), portalDevApi(env.VITE_INSTAGRAM_FEED_URL)],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -68,4 +70,5 @@ export default defineConfig({
       },
     },
   },
+  }
 });

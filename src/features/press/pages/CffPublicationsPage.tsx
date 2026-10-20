@@ -84,7 +84,7 @@ export default function CffPublicationsPage() {
 
   const changePage = (next: number) => {
     setParams(next > 1 ? { pagina: String(next) } : {});
-    listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    listRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
   };
 
   return (
@@ -104,7 +104,7 @@ export default function CffPublicationsPage() {
         actions={<PageHeroAction href={CFF_PUBLICATIONS_URL} variant="secondary">Site do CFF</PageHeroAction>}
       />
 
-      <main ref={listRef} className="scroll-mt-24">
+      <div ref={listRef} className="scroll-mt-24">
         {isError ? (
           <div className="container-crfal py-14">
             <div className="rounded-xl border border-dashed border-crfal-gray-300 bg-white px-6 py-14 text-center">
@@ -136,7 +136,7 @@ export default function CffPublicationsPage() {
             </div>
           </>
         )}
-      </main>
+      </div>
     </div>
   );
 }

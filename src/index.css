@@ -79,55 +79,13 @@
   --font-display:
     Rawline, Rawline Fallback, ui-sans-serif, system-ui, sans-serif;
 
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-caret-blink: caret-blink 1.25s ease-out infinite;
   --animate-slide-up: slide-up 0.5s ease-out;
-  --animate-slide-down: slide-down 0.5s ease-out;
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
-  --animate-float: float 3s ease-in-out infinite;
 
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
-  }
-  @keyframes caret-blink {
-    0%,
-    70%,
-    100% {
-      opacity: 1;
-    }
-    20%,
-    50% {
-      opacity: 0;
-    }
-  }
   @keyframes slide-up {
     from {
       transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-  @keyframes slide-down {
-    from {
-      transform: translateY(-20px);
       opacity: 0;
     }
     to {
@@ -151,15 +109,6 @@
     to {
       transform: scale(1);
       opacity: 1;
-    }
-  }
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
     }
   }
 }
@@ -228,20 +177,8 @@
            transition-all duration-300 hover:bg-crfal-blue hover:text-white;
 }
 
-@utility btn-gold {
-  @apply bg-[#c59b27] text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-[#a9821f] hover:shadow-lg;
-}
-
-@utility section-title {
-  @apply text-3xl md:text-4xl font-bold text-crfal-blue mb-4;
-}
-
 @utility card-hover {
   @apply transition-all duration-300 hover:-translate-y-3 hover:shadow-card-hover;
-}
-
-@utility text-gradient {
-  @apply bg-linear-to-r/srgb from-crfal-blue to-crfal-blue-light bg-clip-text text-transparent;
 }
 
 @utility glass-blue {
@@ -307,26 +244,6 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-}
-
-@utility animation-delay-100 {
-  animation-delay: 100ms;
-}
-
-@utility animation-delay-200 {
-  animation-delay: 200ms;
-}
-
-@utility animation-delay-300 {
-  animation-delay: 300ms;
-}
-
-@utility animation-delay-400 {
-  animation-delay: 400ms;
-}
-
-@utility animation-delay-500 {
-  animation-delay: 500ms;
 }
 
 @layer base {
@@ -577,5 +494,19 @@
     opacity: 1;
     translate: none;
     transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
   }
 }

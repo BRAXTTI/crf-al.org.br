@@ -27,7 +27,7 @@ Entrada ao rolar via `Reveal` (`src/components/ui/reveal.tsx`) e `useInView` (`s
 
 ## Cabeçalhos de serviços
 
-`src/components/block/page-hero.tsx` é o componente compartilhado; a variante `compact` (padrão) é um cabeçalho editorial escuro. Estrutura: breadcrumb completo com separadores dourados (no celular, vira o link “← <página anterior>”), rótulo dourado da seção com traço de 24px (vem de `section`, `eyebrow` ou do breadcrumb), título de 30/40/48px com tracking -0,02em e entrada suave (desativada com movimento reduzido), frase de apoio (`lead`, uma frase útil, até 2 linhas no desktop), dados em linha (`meta`: número em negrito branco e rótulo em minúsculas, separados por pontos dourados a partir de 640px) e ações (`actions` com `PageHeroAction`: primária branca, secundária vazada; à direita no desktop, abaixo do texto no celular). Fundo: gradiente azul, textura de grade de 48px com máscara radial, brilhos azul e dourado desfocados, arte da taça (`page-hero-desktop-v3.webp`) só a partir de 1024px, com 35% de opacidade e máscara, e fio dourado de 1px na base. Sem estatísticas em caixas: `PageHeroStats` existe só por compatibilidade e renderiza o mesmo formato de `meta`. Esconder números que ainda não carregaram (nunca mostrar 0 ou —).
+`src/components/block/page-hero.tsx` é o componente compartilhado; apresenta um cabeçalho editorial escuro. Estrutura: breadcrumb completo com separadores dourados (no celular, vira o link “← <página anterior>”), rótulo dourado da seção com traço de 24px (vem de `section`, `eyebrow` ou do breadcrumb), título de 30/40/48px com tracking -0,02em e entrada suave (desativada com movimento reduzido), frase de apoio (`lead`, uma frase útil, até 2 linhas no desktop), dados em linha (`meta`: número em negrito branco e rótulo em minúsculas, separados por pontos dourados a partir de 640px) e ações (`actions` com `PageHeroAction`: primária branca, secundária vazada; à direita no desktop, abaixo do texto no celular). Fundo: gradiente azul, textura de grade de 48px com máscara radial, brilhos azul e dourado desfocados, arte da taça (`page-hero-desktop-v3.webp`) só a partir de 1024px, com 35% de opacidade e máscara, e fio dourado de 1px na base. Os dados curtos são exibidos em linha pela prop `meta`. Esconder números que ainda não carregaram (nunca mostrar 0 ou —).
 
 ## Abas por seção
 
@@ -35,11 +35,11 @@ Entrada ao rolar via `Reveal` (`src/components/ui/reveal.tsx`) e `useInView` (`s
 
 ## Arte dos cabeçalhos
 
-`public/images/page-hero-desktop-v3.webp` e `page-hero-mobile-v3.webp`: composição gerada a partir do logo e banner existentes, com taça de Hígia em azul metálico, fitas translúcidas e contornos dourados. Área esquerda escura para títulos; imagem posicionada à direita e overlay escuro para leitura. A arte não contém texto ou logotipo.
+`public/images/page-hero-desktop-v3.webp`: composição gerada a partir do logo e banner existentes, com taça de Hígia em azul metálico, fitas translúcidas e contornos dourados. Área esquerda escura para títulos; imagem posicionada à direita e overlay escuro para leitura. A arte não contém texto ou logotipo.
 
 ## Proporções das artes responsivas
 
-Arte desktop `page-hero-desktop-v3.webp`: encaixada pela altura, à direita, sem cortar a taça. No cabeçalho editorial, a arte não aparece abaixo de 1024px: no celular, o fundo é só gradiente, textura e brilho, para priorizar o conteúdo. `page-hero-mobile-v3.webp` continua disponível para a variante `default`.
+Arte desktop `page-hero-desktop-v3.webp`: encaixada pela altura, à direita, sem cortar a taça. No cabeçalho editorial, a arte não aparece abaixo de 1024px: no celular, o fundo é só gradiente, textura e brilho, para priorizar o conteúdo. O `<picture>` usa fonte desktop com media query; o fallback transparente embutido evita baixar a arte no celular.
 
 ## Instagram na página inicial
 

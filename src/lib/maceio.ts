@@ -1,3 +1,4 @@
+import { EXPEDIENTE } from '@/config/contact';
 import { useEffect, useState } from 'react';
 
 /** Data de hoje em Maceió, no formato YYYY-MM-DD. */
@@ -13,10 +14,10 @@ export function statusAtendimento(agora: Date) {
   const minuto = Number(partes.find((p) => p.type === 'minute')?.value ?? 0);
   const minutos = hora * 60 + minuto;
   const util = !['Sat', 'Sun'].includes(dia);
-  if (util && minutos >= 9 * 60 && minutos < 17 * 60) return { aberto: true, texto: 'Aberto agora · fecha às 17h' };
-  if (util && minutos < 9 * 60) return { aberto: false, texto: 'Fechado · abre hoje às 9h' };
-  if (dia === 'Fri' || dia === 'Sat' || dia === 'Sun') return { aberto: false, texto: 'Fechado · abre segunda às 9h' };
-  return { aberto: false, texto: 'Fechado · abre amanhã às 9h' };
+  if (util && minutos >= EXPEDIENTE.abre * 60 && minutos < EXPEDIENTE.fecha * 60) return { aberto: true, texto: `Aberto agora · fecha às ${EXPEDIENTE.fecha}h` };
+  if (util && minutos < EXPEDIENTE.abre * 60) return { aberto: false, texto: `Fechado · abre hoje às ${EXPEDIENTE.abre}h` };
+  if (dia === 'Fri' || dia === 'Sat' || dia === 'Sun') return { aberto: false, texto: `Fechado · abre segunda às ${EXPEDIENTE.abre}h` };
+  return { aberto: false, texto: `Fechado · abre amanhã às ${EXPEDIENTE.abre}h` };
 }
 
 /** Status do expediente, atualizado a cada minuto. */

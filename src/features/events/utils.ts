@@ -160,3 +160,27 @@ export function formatarDataHora(valor: string): string {
   const hora = valor.slice(11, 16);
   return hora ? `${data} · ${hora}` : data;
 }
+
+/** Rótulo de contagem regressiva ("É hoje!", "Amanhã", "Em X dias"). */
+export function rotuloContagem(data: string): string | null {
+  const ts = parseWPDateTime(data);
+  if (ts === null) return null;
+  const inicio = new Date(ts);
+  const hoje = new Date();
+  if (
+    inicio.getFullYear() === hoje.getFullYear() &&
+    inicio.getMonth() === hoje.getMonth() &&
+    inicio.getDate() === hoje.getDate()
+  ) {
+    return 'É hoje!';
+  }
+  const diffDias = Math.round(
+    (new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate()).getTime() -
+      new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).getTime()) /
+      86_400_000
+  );
+  if (diffDias === 1) return 'Amanhã';
+  if (diffDias > 1) return `Em ${diffDias} dias`;
+  return null;
+}
+

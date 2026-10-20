@@ -1,3 +1,4 @@
+import { requestJson } from '@/services/http';
 import { useQuery } from '@tanstack/react-query';
 
 export interface CffPublication { link: string; cover?: string; edition?: number }
@@ -10,9 +11,7 @@ export const CFF_COVER_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w
 const slugify = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 async function fetchCffPublications(signal: AbortSignal): Promise<CffCollection[]> {
-  const res = await fetch('/api/cff-publicacoes', { signal });
-  if (!res.ok) throw new Error('Falha ao carregar as publicações do CFF');
-  const data = (await res.json()) as { collections?: Omit<CffCollection, 'slug'>[] };
+  const data = await requestJson<{ collections?: Omit<CffCollection, 'slug'>[] }>('/api/cff-publicacoes', { signal });
   const collections = Array.isArray(data.collections) ? data.collections : [];
   return collections
     .map((c) => ({ title: c.title, slug: slugify(c.title), items: (c.items ?? []).filter((item) => /^https?:\/\//.test(item.link)) }))

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, ListChecks, Pause, Play, Volume2, VolumeX, X } from 'lucide-react';
 import { REELS_DESTAQUE, type ReelDestaque } from '@/data/tutoriais-destaque';
@@ -24,7 +24,6 @@ export default function TopDestaques({ onVerTutorial }: { onVerTutorial: (tutori
   const fechar = () => {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     setAberto(null);
-    ultimoCard.current?.focus();
   };
 
   return (
@@ -48,18 +47,19 @@ export default function TopDestaques({ onVerTutorial }: { onVerTutorial: (tutori
         ))}
       </ol>
 
-      {aberto !== null &&
-        createPortal(
+      <Dialog open={aberto !== null} onOpenChange={(open) => { if (!open) fechar(); }}>
+        {aberto !== null && (
           <ReelsViewer
             inicial={aberto}
             onFechar={fechar}
+            onRestaurarFoco={() => ultimoCard.current?.focus()}
             onVerTutorial={(id) => {
               fechar();
               onVerTutorial(id);
             }}
-          />,
-          document.body
+          />
         )}
+      </Dialog>
     </section>
   );
 }
@@ -130,10 +130,12 @@ function ReelCard({ reel, posicao, onAbrir }: { reel: ReelDestaque; posicao: num
 function ReelsViewer({
   inicial,
   onFechar,
+  onRestaurarFoco,
   onVerTutorial,
 }: {
   inicial: number;
   onFechar: () => void;
+  onRestaurarFoco: () => void;
   onVerTutorial: (tutorialId: string) => void;
 }) {
   const [atual, setAtual] = useState(inicial);
@@ -155,25 +157,6 @@ function ReelsViewer({
     },
     [total, onFechar]
   );
-
-  useEffect(() => {
-    fecharRef.current?.focus();
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = overflow;
-    };
-  }, []);
-
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onFechar();
-      else if (e.key === 'ArrowRight') irPara(atual + 1);
-      else if (e.key === 'ArrowLeft') irPara(atual - 1);
-    };
-    window.addEventListener('keydown', aoTeclar);
-    return () => window.removeEventListener('keydown', aoTeclar);
-  }, [atual, irPara, onFechar]);
 
   // Se o celular sair da tela cheia pelo botão “voltar”, fecha junto.
   useEffect(() => {
@@ -200,13 +183,22 @@ function ReelsViewer({
   const botaoTopo = 'flex h-10 w-10 items-center justify-center rounded-full text-white hover:bg-white/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold';
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Destaque ${atual + 1} de ${total}: ${reel.title}`}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black lg:gap-6 lg:bg-crfal-blue-dark/95 lg:backdrop-blur-md motion-safe:animate-fade-in"
+    <DialogContent
+      variant="fullscreen"
+      showCloseButton={false}
+      aria-describedby={undefined}
+      onOpenAutoFocus={(event) => { event.preventDefault(); fecharRef.current?.focus(); }}
+      onCloseAutoFocus={(event) => { event.preventDefault(); onRestaurarFoco(); }}
+      onKeyDown={(event) => {
+        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+          event.preventDefault();
+          irPara(atual + (event.key === 'ArrowRight' ? 1 : -1));
+        }
+      }}
+      className="bg-black lg:gap-6 lg:bg-crfal-blue-dark/95 lg:backdrop-blur-md motion-safe:animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onFechar()}
     >
+      <DialogTitle className="sr-only">Destaque {atual + 1} de {total}: {reel.title}</DialogTitle>
       <button type="button" onClick={() => irPara(atual - 1)} disabled={atual === 0} aria-label="Vídeo anterior" className={botaoNav}>
         <ChevronLeft className="h-6 w-6" />
       </button>
@@ -286,6 +278,6 @@ function ReelsViewer({
       <button type="button" onClick={() => irPara(atual + 1)} disabled={atual === total - 1} aria-label="Próximo vídeo" className={botaoNav}>
         <ChevronRight className="h-6 w-6" />
       </button>
-    </div>
+    </DialogContent>
   );
 }

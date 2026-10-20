@@ -1,3 +1,4 @@
+import { ATENDIMENTO, LOCAIS, SETOR_CONTATOS, HORARIO_ATENDIMENTO } from '@/config/contact';
 import { useEffect, useState, type ElementType, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -53,36 +54,12 @@ const DIRETORIA: ContactInfo[] = [
 ];
 
 const SETORES: ContactInfo[] = [
-  { id: 'fiscalizacao', setor: 'Fiscalização', icon: ShieldCheck, assunto: 'Fiscalizações, autos, defesas e afastamento provisório', email: 'fiscalizacao@crf-al.org.br', telefone: '(82) 99971-0247', whatsapp: '(82) 99999-8624' },
+  { id: 'fiscalizacao', setor: 'Fiscalização', icon: ShieldCheck, assunto: 'Fiscalizações, autos, defesas e afastamento provisório', ...SETOR_CONTATOS.fiscalizacao },
   { id: 'secretaria', setor: 'Secretaria', icon: FileText, assunto: 'Inscrições, registros, certidões e documentos', email: 'secretaria@crf-al.org.br', telefone: '(82) 98181-9050', whatsapp: '(82) 98181-9050' },
-  { id: 'ti', setor: 'Tecnologia da Informação', icon: Laptop, assunto: 'Acesso e dúvidas sobre o CRF AL em Casa', email: 'tecnologia@crf-al.org.br', telefone: '(82) 99355-8888' },
+  { id: 'ti', setor: 'Tecnologia da Informação', icon: Laptop, assunto: 'Acesso e dúvidas sobre o CRF AL em Casa', ...SETOR_CONTATOS.tecnologia },
   { id: 'comunicacao', setor: 'Comunicação', icon: Megaphone, assunto: 'Imprensa, entrevistas e divulgação', email: 'ascom@crf-al.org.br' },
-  { id: 'ouvidoria', setor: 'Ouvidoria', icon: HeadphonesIcon, assunto: 'Reclamações, sugestões, elogios e denúncias', email: 'ouvidoria@crf-al.org.br', link: '/servicos/ouvidoria', linkLabel: 'Portal da Ouvidoria' },
+  { id: 'ouvidoria', setor: 'Ouvidoria', icon: HeadphonesIcon, assunto: 'Reclamações, sugestões, elogios e denúncias', email: SETOR_CONTATOS.ouvidoria.email, link: '/servicos/ouvidoria', linkLabel: 'Portal da Ouvidoria' },
 ];
-
-const ATENDIMENTO = {
-  telefone: '(82) 99971-0247',
-  whatsapp: '(82) 99971-0247',
-  email: 'atendimento@crf-al.org.br',
-};
-
-const LOCAIS = [
-  {
-    id: 'sede',
-    nome: 'Sede',
-    cidade: 'Maceió',
-    endereco: 'Rua Oldemburgo da Silva Paranhos (antiga Rua Goiás), 290 – Farol, Maceió/AL – CEP 57055-320',
-    busca: 'Rua Oldemburgo da Silva Paranhos, 290, Farol, Maceió, AL',
-  },
-  {
-    id: 'seccional',
-    nome: 'Seccional',
-    cidade: 'Arapiraca',
-    endereco: 'Rua Delmiro Gouveia, 1382, sala 01, 1º andar – Sen. Teotônio Vilela, Arapiraca/AL – CEP 57312-415',
-    busca: 'Rua Delmiro Gouveia, 1382, Senador Teotônio Vilela, Arapiraca, AL',
-  },
-];
-
 
 const ATALHOS: { necessidade: string; destino: string; href: string; icon: ElementType }[] = [
   { necessidade: 'Certidões e requerimentos', destino: 'Central de Requerimentos', href: '/servicos/requerimentos', icon: FileText },
@@ -176,7 +153,7 @@ export default function ContactPage() {
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Fale Conosco' }]}
         title="Fale Conosco"
         eyebrow="Atendimento"
-        lead="Fale com o setor certo por telefone, e-mail ou WhatsApp. Atendimento de segunda a sexta, das 9h às 17h."
+        lead={`Fale com o setor certo por telefone, e-mail ou WhatsApp. ${HORARIO_ATENDIMENTO}.`}
         actions={<PageHeroAction href={waLink(ATENDIMENTO.whatsapp)}>WhatsApp do atendimento</PageHeroAction>}
       >
         <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-[13px] font-medium text-white/90">
@@ -188,7 +165,7 @@ export default function ContactPage() {
         </p>
       </PageHero>
 
-      <main className="container-crfal space-y-12 py-10 md:space-y-16 md:py-14">
+      <div className="container-crfal space-y-12 py-10 md:space-y-16 md:py-14">
         {/* Canais de atendimento */}
         <section aria-labelledby="canais-title">
           <SectionTitle id="canais-title" label="Atendimento geral" title="Canais de atendimento" text="Para dúvidas gerais, comece por aqui. Seg. a sex., das 9h às 17h." />
@@ -314,7 +291,7 @@ export default function ContactPage() {
             Ir para a Ouvidoria <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden />
           </Link>
         </aside>
-      </main>
+      </div>
     </div>
   );
 }

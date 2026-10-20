@@ -6,7 +6,17 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '**/._*', '.agents/**', '.claude/**', '.impeccable/**', 'video/**', 'banners-redesign/**']),
+  {
+    files: ['scripts/**/*.{js,mjs,cjs}', '*.{js,mjs,cjs}'],
+    extends: [js.configs.recommended],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['functions/**/*.js'],
+    extends: [js.configs.recommended],
+    languageOptions: { globals: globals.worker },
+  },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

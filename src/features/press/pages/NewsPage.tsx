@@ -2,13 +2,14 @@ import { useState, useRef, useMemo } from 'react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight, Tag, ChevronRight, Filter, Newspaper, ChevronLeft } from 'lucide-react';
+import { Calendar, ArrowRight, Tag, ChevronRight, Newspaper, ChevronLeft } from 'lucide-react';
 import {
   getPostCategory,
-  getPostImage,
+  getPostImageSet,
   stripHTML,
 } from '@/services/wordpress/client';
-import { usePosts } from '@/services/wordpress/hooks';
+import { usePosts } from '@/services/wordpress/news-hooks';
+import type { ImageSet } from '@/services/wordpress/image-set';
 import type { WPPost } from '@/services/wordpress/types';
 
 const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'%3E%3C/svg%3E";
@@ -17,7 +18,7 @@ interface Publication {
   id: string;
   title: string;
   excerpt: string;
-  image: string;
+  image?: ImageSet;
   date: string;
   tag: string;
   tagColor: string;
@@ -44,21 +45,13 @@ function getTagColor(tagName: string) {
   return map[tagName] || 'bg-crfal-blue';
 }
 
-const filterTags = [
-  { label: 'Todas', value: 'all', color: 'bg-crfal-blue' },
-  { label: 'Notícias', value: 'Notícias', color: 'bg-blue-500' },
-  { label: 'Institucional', value: 'Institucional', color: 'bg-purple-500' },
-  { label: 'Cursos', value: 'Cursos', color: 'bg-green-500' },
-  { label: 'Eventos', value: 'Eventos', color: 'bg-orange-500' },
-];
-
 function mapWPPost(post: WPPost): Publication {
   const categoryName = getPostCategory(post);
   return {
     id: `${post.newsSource}:${post.id}`,
     title: stripHTML(post.title.rendered),
     excerpt: stripHTML(post.excerpt.rendered),
-    image: getPostImage(post) || IMG_FALLBACK,
+    image: getPostImageSet(post),
     date: formatDate(post.date),
     tag: categoryName,
     tagColor: getTagColor(categoryName),
@@ -139,7 +132,6 @@ function Pagination({
 }
 
 export default function NewsPage() {
-  const [activeTag, setActiveTag] = useState('all');
   const [page, setPage] = useState(1);
   const { data, isLoading, isFetching, isError, refetch } = usePosts(page, PER_PAGE);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -150,14 +142,8 @@ export default function NewsPage() {
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    setActiveTag('all');
-    gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    gridRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
   };
-
-  const filteredPublications =
-    activeTag === 'all'
-      ? publications
-      : publications.filter((pub) => pub.tag === activeTag);
 
   return (
     <div className="min-h-screen">
@@ -179,27 +165,6 @@ export default function NewsPage() {
       />
 
       <div className="container-crfal py-10 md:py-16" ref={gridRef}>
-        <div className="flex flex-wrap gap-2 mb-10">
-          <div className="flex items-center gap-2 mr-2 text-crfal-gray-500">
-            <Filter className="w-4 h-4" />
-            <span className="text-sm font-medium">Filtrar:</span>
-          </div>
-          {filterTags.map((tag) => (
-            <button
-              key={tag.value}
-              onClick={() => setActiveTag(tag.value)}
-              aria-pressed={activeTag === tag.value}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeTag === tag.value
-                  ? `${tag.color} text-white shadow-card`
-                  : 'bg-white border border-crfal-gray-200 text-crfal-gray-600 hover:border-crfal-blue/30 hover:text-crfal-blue'
-              }`}
-            >
-              {tag.label}
-            </button>
-          ))}
-        </div>
-
         {isLoading ? (
           <div className="text-center py-20 text-crfal-gray-500">
             <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -215,16 +180,16 @@ export default function NewsPage() {
               Tentar novamente
             </button>
           </div>
-        ) : filteredPublications.length === 0 ? (
+        ) : publications.length === 0 ? (
           <div className="text-center py-20">
             <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-neutral-700 mb-2">Nenhuma notícia encontrada</h3>
-            <p className="text-crfal-gray-500 text-sm">Não há notícias na categoria selecionada.</p>
+            <p className="text-crfal-gray-500 text-sm">Não há notícias publicadas no momento.</p>
           </div>
         ) : (
           <div className={isFetching ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
             <div className="grid gap-5 xl:grid-cols-2" aria-busy={isFetching}>
-              {filteredPublications.map((pub) => (
+              {publications.map((pub) => (
                 <article key={pub.id} className="h-full">
                   <Link
                     to={pub.href}
@@ -232,12 +197,14 @@ export default function NewsPage() {
                   >
                     <div className="relative aspect-video shrink-0 overflow-hidden bg-crfal-gray-100 sm:aspect-auto sm:w-48 lg:w-56">
                       <img
-                        src={pub.image}
+                        src={pub.image?.src ?? IMG_FALLBACK}
+                        srcSet={pub.image?.srcSet}
+                        sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) 192px, 224px"
                         alt=""
                         loading="lazy"
                         decoding="async"
                         className="h-full w-full object-contain sm:absolute sm:inset-0"
-                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = IMG_FALLBACK; }}
+                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.srcset = ""; e.currentTarget.src = IMG_FALLBACK; }}
                       />
                     </div>
                     <div className="flex flex-1 flex-col items-start p-5 sm:p-6">

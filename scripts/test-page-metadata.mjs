@@ -8,13 +8,18 @@ const canonical='https://institucional.crf-al.org.br';
 const htmlDecode=s=>s.replaceAll('&amp;','&').replaceAll('&quot;','"').replaceAll('&lt;','<').replaceAll('&gt;','>');
 function meta(html,key){const tags=[...html.matchAll(/<meta\b[^>]*>/g)].map(m=>m[0]).filter(t=>t.includes(`property="${key}"`)||t.includes(`name="${key}"`));assert.equal(tags.length,1,`${key}: exactly one tag`);return htmlDecode(tags[0].match(/content="([^"]*)"/)[1]);}
 const routes=fs.readFileSync('src/router/app-router.tsx','utf8');
-for(const match of routes.matchAll(/\{ path: '([^':*]+)', element: (?!<Navigate)/g)){const path='/'+match[1];if(path==='/instituicao/missao-visao')continue;assert.ok(PAGE_METADATA[path],`route coverage ${path}`);}
+for(const match of routes.matchAll(/\{ path: '([^':*]+)', (?:element: (?!<Navigate)|lazy: )/g)){const path='/'+match[1];if(path==='/instituicao/missao-visao')continue;assert.ok(PAGE_METADATA[path],`route coverage ${path}`);}
 for(const [path,expected] of Object.entries(PAGE_METADATA)){
  const response=await fetch(base+path+'?utm_source=test');assert.equal(response.status,200,path);const html=await response.text();assert.equal(meta(html,'og:title'),expected.title+' | CRFAL',path);assert.equal(meta(html,'description'),expected.description,path);assert.equal(meta(html,'og:url'),canonical+(path==='/'?'':path));assert.equal(meta(html,'og:image'),canonical+'/images/og-image.jpg');assert.equal((html.match(/rel="canonical"/g)||[]).length,1);assert.ok(html.includes('data-page-metadata="true"'));
 }
-const albumPath='/imprensa/galeria-de-fotos/entrega-de-carteiras-arapiraca';
+const albumsResponse = await fetch('https://wordpress.crf-al.org.br/index.php?rest_route=/crfal/v1/photo-albums&per_page=1');
+assert.equal(albumsResponse.status, 200, 'Origem da galeria disponível');
+const { albums } = await albumsResponse.json();
+assert.ok(albums?.length, 'Smoke test requer ao menos um álbum publicado');
+const album = albums[0];
+const albumPath = '/imprensa/galeria-de-fotos/' + album.slug;
 for(const ua of ['Mozilla/5.0','WhatsApp/2.0','facebookexternalhit/1.1']){
- const response=await fetch(base+albumPath,{headers:{'user-agent':ua}});const html=await response.text();assert.equal(response.status,200);assert.equal(meta(html,'og:title'),'ENTREGA DE CARTEIRAS - ARAPIRACA | CRFAL');assert.ok(meta(html,'og:image').includes('/wp-content/uploads/'));assert.equal(meta(html,'og:url'),canonical+albumPath);
+ const response=await fetch(base+albumPath,{headers:{'user-agent':ua}});const html=await response.text();assert.equal(response.status,200);assert.equal(meta(html,'og:title'),album.title + ' | CRFAL');if(album.cover)assert.equal(meta(html,'og:image'),album.cover.src);assert.equal(meta(html,'og:url'),canonical+albumPath);
 }
 const missing=await fetch(base+'/imprensa/galeria-de-fotos/album-inexistente-metadata-test');assert.equal(missing.status,404);assert.equal(meta(await missing.text(),'robots'),'noindex, nofollow');
 const redirect=await fetch(base+'/instituicao/missao-visao',{redirect:'manual'});assert.equal(redirect.status,301);assert.equal(redirect.headers.get('location'),canonical+'/instituicao/sobre-conselho');

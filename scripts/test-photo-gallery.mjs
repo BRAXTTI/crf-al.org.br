@@ -1,11 +1,10 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import ts from 'typescript';
+import { moduleUrl } from './load-typescript.mjs';
 
-const source = (await readFile(new URL('../src/services/wordpress/gallery.ts', import.meta.url), 'utf8'))
-  .replace('import.meta.env.VITE_WP_SITE_URL', JSON.stringify('https://wordpress.example/'));
-const js = ts.transpile(source, { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 });
-const { fetchPhotoAlbums, fetchPhotoAlbum, GalleryApiError } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
+const { fetchPhotoAlbums, fetchPhotoAlbum, GalleryApiError } = await import(await moduleUrl('../src/services/wordpress/gallery.ts', {
+  'import.meta.env.VITE_WP_SITE_URL': JSON.stringify('https://wordpress.example/'),
+  "'../http'": JSON.stringify(await moduleUrl('../src/services/http.ts')),
+}));
 const originalFetch = globalThis.fetch;
 try {
   const controller = new AbortController();
@@ -20,7 +19,17 @@ try {
   assert.equal(request.url.searchParams.get('rest_route'), '/crfal/v1/photo-albums');
   assert.equal(request.url.searchParams.get('page'), '3');
   assert.equal(request.url.searchParams.get('per_page'), '12');
+
+  // Cancelamento do chamador durante a requisição chega ao fetch.
+  globalThis.fetch = (url, options) => {
+    request = { url: new URL(url), signal: options.signal };
+    return new Promise((_resolve, reject) => {
+      options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true });
+    });
+  };
+  const pending = fetchPhotoAlbums(1, controller.signal);
   controller.abort();
+  await assert.rejects(pending, error => error.name === 'AbortError');
   assert.equal(request.signal.aborted, true, 'Caller cancellation propagates to the request');
 
   globalThis.fetch = async (url) => {

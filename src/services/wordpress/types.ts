@@ -79,21 +79,6 @@ export interface WPPostsPage {
   totalPages: number;
 }
 
-/** Publicação do feed do Instagram, retornada pela rota customizada `crfal/v1/instagram`. */
-export interface CRFInstagramPost {
-  id: string;
-  /** URL da imagem exibida no card (capa, no caso de vídeo/carrossel). */
-  image: string;
-  /** Link da publicação no Instagram. */
-  permalink: string;
-  /** Legenda sem HTML (pode ser vazia). */
-  caption: string;
-  username: string;
-  type: 'image' | 'video' | 'carousel';
-  /** Data ISO do post (pode ser vazia). */
-  timestamp: string;
-}
-
 /** Evento do WP Event Manager, retornado pela rota customizada `crfal/v1/events`. */
 export interface CRFEvent {
   id: number;

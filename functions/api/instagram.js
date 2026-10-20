@@ -4,6 +4,7 @@ import { DEFAULT_FEED_URL, getInstagramItems } from './_parse';
 const FRESH_TTL_SECONDS = 900;
 const BACKUP_TTL_SECONDS = 86400;
 
+/** @param {unknown} body */
 function jsonResponse(body, status = 200, stale = false) {
   return new Response(JSON.stringify(body), {
     status,
@@ -16,6 +17,7 @@ function jsonResponse(body, status = 200, stale = false) {
   });
 }
 
+/** @param {EventContext<{ INSTAGRAM_FEED_URL?: string }, string, Record<string, unknown>>} context */
 export async function onRequestGet(context) {
   const { request, env } = context;
   const feedUrl = env.INSTAGRAM_FEED_URL || DEFAULT_FEED_URL;
@@ -26,6 +28,7 @@ export async function onRequestGet(context) {
   cacheUrl.searchParams.set('version', '3');
   const cacheKey = new Request(cacheUrl, { method: 'GET' });
   const cached = await cache.match(cacheKey);
+  /** @type {{ items: import('./_parse').InstagramFeedItem[], fetchedAt: number } | undefined} */
   let backup;
   if (cached) {
     try {

@@ -4,7 +4,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { usePhotoAlbum } from '@/services/wordpress/hooks';
+import { usePhotoAlbum } from '@/services/wordpress/gallery-hooks';
 import { GalleryApiError } from '@/services/wordpress/gallery';
 import type { PhotoAlbum } from '@/services/wordpress/types';
 import GalleryState from '../components/GalleryState';
@@ -62,12 +62,12 @@ export default function PhotoAlbumPage() {
   const { data, isPending, isError, error, refetch } = usePhotoAlbum(slug);
   return (
     <div className="min-h-screen">
-      <SEO title={data?.title ?? 'Álbum de Fotos'} description={data?.description || 'Confira as fotos dos eventos e ações do CRF-AL.'} path={`/imprensa/galeria-de-fotos/${slug}`} image={data?.cover?.src} noindex={isError} />
+      <SEO title={data?.title ?? 'Álbum de Fotos'} description={data?.description || 'Confira as fotos dos eventos e ações do CRF-AL.'} path={`/imprensa/galeria-de-fotos/${slug}`} image={data?.cover?.src} noindex={error instanceof GalleryApiError && error.status === 404} />
       <PageHero title={data?.title ?? 'Álbum de Fotos'} breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos' }, { label: 'Álbum' }]} section="imprensa" eyebrow="Álbum de fotos" meta={data?.count ? [{ value: data.count, label: 'fotos no álbum' }] : undefined} />
       <section className="container-crfal py-10 md:py-16" aria-label="Fotos do álbum">
         <Link to="/imprensa/galeria-de-fotos" className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-crfal-blue hover:underline focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-crfal-blue"><ArrowLeft className="h-4 w-4" aria-hidden="true" />Voltar para os álbuns</Link>
         {data?.description && <p className="mb-8 max-w-3xl leading-relaxed text-crfal-gray-600">{data.description}</p>}
-        {isPending || isError ? <GalleryState loading={isPending} error={isError} notFound={error instanceof GalleryApiError && error.status === 404} onRetry={() => void refetch()} /> : data ? <AlbumPhotos key={data.id} album={data} /> : <GalleryState />}
+        {!data && (isPending || isError) ? <GalleryState loading={isPending} error={isError} notFound={error instanceof GalleryApiError && error.status === 404} onRetry={() => void refetch()} /> : data ? <AlbumPhotos key={data.id} album={data} /> : <GalleryState />}
       </section>
     </div>
   );

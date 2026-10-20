@@ -1,7 +1,6 @@
 import type { ComponentType } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import HomePage from '@/features/home/pages/HomePage';
 import NotFoundPage from '@/features/not-found/pages/NotFoundPage';
 
 /** Rota carregada sob demanda: cada página vira um chunk próprio. */
@@ -11,10 +10,9 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
-    // Primeira visita direto numa rota lazy: nada a mostrar até o chunk chegar.
-    HydrateFallback: () => null,
+    HydrateFallback: () => <div role="status" className="flex min-h-screen items-center justify-center text-crfal-blue">Carregando página…</div>,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, lazy: page(() => import('@/features/home/pages/HomePage')) },
       { path: 'instituicao', lazy: page(() => import('@/features/institutional/pages/InstitutionalPage')) },
       { path: 'instituicao/sobre-conselho', lazy: page(() => import('@/features/institutional/pages/SobreConselhoPage')) },
       { path: 'instituicao/missao-visao', element: <Navigate to="/instituicao/sobre-conselho" replace /> },

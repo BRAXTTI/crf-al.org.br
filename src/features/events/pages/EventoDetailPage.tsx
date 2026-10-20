@@ -18,7 +18,7 @@ import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { getPostImage, stripHTML } from '@/services/wordpress/client';
 import { sanitizeWP } from '@/services/wordpress/sanitize';
-import { useEventById, useEvents } from '@/services/wordpress/hooks';
+import { useEventById, useEventBySlug, useEvents } from '@/services/wordpress/event-hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
 import type { WPEventListing } from '@/services/wordpress/types';
 import {
@@ -83,12 +83,15 @@ export default function EventoDetailPage() {
   } = useEvents();
 
   const resumo = useMemo(() => (lista ?? []).find((evento) => evento.slug === slug), [lista, slug]);
-  const {
-    data: eventoCompleto,
-    isLoading: carregandoEvento,
-    isError: erroEvento,
-    refetch: recarregarEvento,
-  } = useEventById(resumo?.id ?? Number.NaN);
+  const porSlug = useEventBySlug(slug ?? '');
+  // O WordPress pode omitir eventos expirados da coleção nativa.
+  // Preserve o acesso por ID quando a listagem customizada ainda os oferece.
+  const usarId = Boolean(resumo) && (porSlug.data === null || porSlug.isError);
+  const porId = useEventById(usarId ? resumo!.id : Number.NaN);
+  const eventoCompleto = porSlug.data ?? porId.data;
+  const carregandoEvento = porSlug.isLoading || porId.isLoading;
+  const erroEvento = usarId ? porId.isError : porSlug.isError;
+  const recarregarEvento = () => usarId ? porId.refetch() : porSlug.refetch();
 
   const evento: Evento | null = useMemo(() => {
     if (eventoCompleto) return mapEvent(paraCRFEvent(eventoCompleto, resumo?.banner));
@@ -105,13 +108,13 @@ export default function EventoDetailPage() {
       .slice(0, 3);
   }, [lista, evento]);
 
-  if (erroLista) {
+  if (!evento && (erroLista || erroEvento) && !carregandoEvento) {
     return (
       <div className="min-h-screen  flex items-center justify-center px-4">
         <div className="max-w-xl w-full bg-white  rounded-xl border border-red-200  p-8 text-center">
           <p className="text-red-600  mb-4">Não foi possível carregar o evento agora.</p>
           <button
-            onClick={() => recarregarLista()}
+            onClick={() => { void recarregarLista(); void recarregarEvento(); }}
             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full border border-crfal-blue text-crfal-blue hover:bg-crfal-blue hover:text-white transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
@@ -122,7 +125,7 @@ export default function EventoDetailPage() {
     );
   }
 
-  if (carregandoLista) {
+  if (!evento && (carregandoLista || carregandoEvento)) {
     return (
       <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">
@@ -133,7 +136,7 @@ export default function EventoDetailPage() {
     );
   }
 
-  if (!resumo || !evento) {
+  if (!evento) {
     return (
       <div className="min-h-screen  flex items-center justify-center px-4">
         <div className="text-center">

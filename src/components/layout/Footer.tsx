@@ -1,3 +1,4 @@
+import { ATENDIMENTO, LOCAIS, HORARIO_ATENDIMENTO, telefoneHref } from '@/config/contact';
 import {
   MapPin,
   Phone,
@@ -58,7 +59,7 @@ export default function Footer() {
                   <MapPin className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Sede</p>
-                    <p>Rua Oldemburgo da Silva Paranhos, 290 - Farol, Maceió - AL, 57055-320</p>
+                    <p>{LOCAIS[0].endereco}</p>
                   </div>
                 </div>
 
@@ -66,7 +67,7 @@ export default function Footer() {
                   <MapPin className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Seccional</p>
-                    <p>Rua Delmiro Gouveia, 1382 - sala 01 - 1°andar - Sen. Teotônio Vilela, Arapiraca - AL, 57312-415</p>
+                    <p>{LOCAIS[1].endereco}</p>
                   </div>
                 </div>
 
@@ -74,7 +75,7 @@ export default function Footer() {
                   <Clock className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Horário de Funcionamento</p>
-                    <p>Segunda a Sexta: 09h às 17h (sem pausa para o almoço)</p>
+                    <p>{HORARIO_ATENDIMENTO} (sem pausa para o almoço)</p>
                   </div>
                 </div>
 
@@ -83,16 +84,16 @@ export default function Footer() {
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Canais de Atendimento</p>
                     <a
-                      href="tel:+5582999710247"
+                      href={telefoneHref(ATENDIMENTO.telefone)}
                       className="block hover:text-white transition-colors"
                     >
-                      82 9 9971-0247
+                      {ATENDIMENTO.telefone}
                     </a>
                     <a
-                      href="mailto:atendimento@crf-al.org.br"
+                      href={`mailto:${ATENDIMENTO.email}`}
                       className="block hover:text-white transition-colors"
                     >
-                      atendimento@crf-al.org.br
+                      {ATENDIMENTO.email}
                     </a>
                   </div>
                 </div>

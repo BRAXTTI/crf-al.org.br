@@ -135,7 +135,7 @@ export default function ManualCrfEmCasaPage() {
         }
       />
 
-      <main className="container-crfal py-10 md:py-14">
+      <div className="container-crfal py-10 md:py-14">
         <nav id="manual-sumario" tabIndex={-1} aria-labelledby="sumario-title" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs focus:outline-hidden sm:p-6">
           <p className={goldLabel}>Neste manual</p>
           <h2 id="sumario-title" className="mt-1.5 text-lg font-bold text-crfal-blue">Escolha um tópico</h2>
@@ -199,7 +199,7 @@ export default function ManualCrfEmCasaPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       <VoltarAoTopo />
     </div>

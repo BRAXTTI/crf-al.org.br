@@ -23,3 +23,14 @@ crf-al.WordPress.*.xml
 
 # Local Cloudflare runtime artifacts
 .wrangler/
+
+# local / material de trabalho
+._*
+.claude/settings.local.json
+.claude/launch.json
+.claude/agents/
+.claude/skills/
+.impeccable/
+_atas-recebidas/
+banners-redesign/
+video/

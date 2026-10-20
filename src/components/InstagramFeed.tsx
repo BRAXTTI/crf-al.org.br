@@ -4,21 +4,14 @@ import { ArrowUpRight, Copy, Instagram, Play } from 'lucide-react';
 import { INSTAGRAM_PROFILE_URL } from '@/config/site';
 import { CFF_COVER_ASPECT } from '@/features/press/cff';
 
-type MediaType = 'image' | 'video' | 'carousel';
-interface InstagramItem { link: string; image: string; caption?: string; date?: number; type?: MediaType }
+import { fetchInstagram, type InstagramItem, type MediaType } from '@/services/instagram';
+
 interface InstagramFeedProps { title?: string; description?: string }
 
 const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23E6F0F8'/%3E%3C/svg%3E";
 const POSTS = 4;
 const HANDLE = `@${INSTAGRAM_PROFILE_URL.replace(/\/+$/, '').split('/').pop() || 'crfal'}`;
 const motion = 'transition duration-300 motion-reduce:transition-none';
-
-async function fetchInstagram(signal: AbortSignal): Promise<InstagramItem[]> {
-  const res = await fetch('/api/instagram', { signal });
-  if (!res.ok) throw new Error('Falha ao carregar o Instagram');
-  const data = (await res.json()) as { items?: InstagramItem[] };
-  return Array.isArray(data.items) ? data.items.filter(item => item.link && item.image).slice(0, POSTS) : [];
-}
 
 function formatDate(ms?: number) {
   if (!ms) return undefined;
@@ -112,7 +105,7 @@ export default function InstagramFeed({
   title = 'O CRF-AL mais perto de você',
   description = 'Acompanhe os eventos, as ações do Conselho e o dia a dia da profissão farmacêutica.',
 }: InstagramFeedProps) {
-  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed', POSTS], queryFn: ({ signal }) => fetchInstagram(signal), staleTime: 10 * 60 * 1000, retry: 1 });
+  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed', POSTS], queryFn: ({ signal }) => fetchInstagram(signal, POSTS), staleTime: 10 * 60 * 1000, retry: 1 });
   const items = data ?? [];
 
   return (

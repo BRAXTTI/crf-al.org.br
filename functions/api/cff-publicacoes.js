@@ -4,6 +4,7 @@ import { getCffPublications } from './_cff';
 const FRESH_TTL_SECONDS = 6 * 3600;
 const BACKUP_TTL_SECONDS = 7 * 86400;
 
+/** @param {unknown} body */
 function jsonResponse(body, status = 200, stale = false) {
   return new Response(JSON.stringify(body), {
     status,
@@ -15,11 +16,13 @@ function jsonResponse(body, status = 200, stale = false) {
   });
 }
 
+/** @param {EventContext<unknown, string, Record<string, unknown>>} context */
 export async function onRequestGet(context) {
   const { request } = context;
   const cache = caches.default;
   const cacheKey = new Request(new URL('/api/cff-publicacoes?version=1', request.url), { method: 'GET' });
 
+  /** @type {{ collections: import('./_cff').CffCollection[], fetchedAt: number } | undefined} */
   let backup;
   const cached = await cache.match(cacheKey);
   if (cached) {

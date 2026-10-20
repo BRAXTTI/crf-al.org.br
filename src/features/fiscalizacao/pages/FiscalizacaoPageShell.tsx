@@ -1,3 +1,4 @@
+import { SETOR_CONTATOS } from '@/config/contact';
 import { ArrowUpRight, Mail, MessageCircle, Phone, ShieldCheck } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import SEO from '@/components/SEO';
@@ -17,8 +18,8 @@ interface FiscalizacaoPageShellProps {
 // O menu lateral usa as mesmas páginas e rótulos do menu principal.
 const quickLinks = NAV_ITEMS.find((item) => item.href === '/fiscalizacao')?.columns?.flatMap((column) => column.items) ?? [];
 
-const SETOR_EMAIL = 'fiscalizacao@crf-al.org.br';
-const SETOR_TELEFONE = '(82) 99971-0247';
+const SETOR_EMAIL = SETOR_CONTATOS.fiscalizacao.email;
+const SETOR_TELEFONE = SETOR_CONTATOS.fiscalizacao.telefone;
 const SETOR_WHATSAPP = '(82) 99999-8624';
 const digits = (value: string) => value.replace(/\D/g, '');
 
