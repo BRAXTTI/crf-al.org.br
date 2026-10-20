@@ -1,3 +1,4 @@
+import { Reveal } from '@/components/ui/reveal';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronRight } from 'lucide-react';
@@ -26,7 +27,7 @@ export default function ServiceProfiles() {
   return (
     <section aria-labelledby="services-by-profile-title" className="py-2 sm:py-3">
       <div className="container-crfal">
-        <div className="section-panel">
+        <Reveal className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Central de serviços</p>
@@ -61,13 +62,14 @@ export default function ServiceProfiles() {
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3 lg:gap-6">
-          {serviceProfiles.map(profile => {
+          {serviceProfiles.map((profile, indice) => {
             const Icon = profile.icon;
             return (
-              <div
+              <Reveal
                 key={profile.id}
+                delay={indice * 80}
                 id={`services-panel-${profile.id}`}
-                className={`relative isolate flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark text-white shadow-lg shadow-crfal-blue/10 lg:flex ${profile.id === perfil ? 'flex' : 'hidden'}`}
+                className={`max-lg:[--reveal-delay:0ms]! relative isolate flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark text-white shadow-lg shadow-crfal-blue/10 lg:flex ${profile.id === perfil ? 'flex' : 'hidden'}`}
               >
                 <Icon className="pointer-events-none absolute -bottom-8 -right-8 -z-10 h-44 w-44 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />
 
@@ -115,11 +117,11 @@ export default function ServiceProfiles() {
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true" />
                   </Link>
                 </div>
-              </div>
+              </Reveal>
             );
           })}
         </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

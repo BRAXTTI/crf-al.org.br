@@ -21,6 +21,10 @@ Portal em português brasileiro para profissionais farmacêuticos e estabelecime
 
 Rawline, hospedada localmente, para títulos e texto. Azul #003366, azul escuro #0B192C, dourado #C59B27 e superfícies #F8FAFC seguem os tokens existentes. Manter foco visível e contraste WCAG AA.
 
+## Movimento
+
+Entrada ao rolar via `Reveal` (`src/components/ui/reveal.tsx`) e `useInView` (`src/hooks/useInView.ts`), com IntersectionObserver: fade e deslize de 24px em 600ms, uma única vez. Nunca aplicar acima da dobra nem no slider. Escalonamento entre itens de no máximo 240ms; nos perfis da home, somente em desktop. Manter o painel montado desde o esqueleto para não repetir a entrada quando os dados chegarem. Desativado com movimento reduzido; sem IntersectionObserver, o conteúdo já começa visível.
+
 ## Cabeçalhos de serviços
 
 `src/components/block/page-hero.tsx` é o componente compartilhado; a variante `compact` (padrão) é um cabeçalho editorial escuro. Estrutura: breadcrumb completo com separadores dourados (no celular, vira o link “← <página anterior>”), rótulo dourado da seção com traço de 24px (vem de `section`, `eyebrow` ou do breadcrumb), título de 30/40/48px com tracking -0,02em e entrada suave (desativada com movimento reduzido), frase de apoio (`lead`, uma frase útil, até 2 linhas no desktop), dados em linha (`meta`: número em negrito branco e rótulo em minúsculas, separados por pontos dourados a partir de 640px) e ações (`actions` com `PageHeroAction`: primária branca, secundária vazada; à direita no desktop, abaixo do texto no celular). Fundo: gradiente azul, textura de grade de 48px com máscara radial, brilhos azul e dourado desfocados, arte da taça (`page-hero-desktop-v3.webp`) só a partir de 1024px, com 35% de opacidade e máscara, e fio dourado de 1px na base. Sem estatísticas em caixas: `PageHeroStats` existe só por compatibilidade e renderiza o mesmo formato de `meta`. Esconder números que ainda não carregaram (nunca mostrar 0 ou —).

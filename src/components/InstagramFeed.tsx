@@ -1,3 +1,4 @@
+import { Reveal } from '@/components/ui/reveal';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, Copy, Instagram, Play } from 'lucide-react';
 import { INSTAGRAM_PROFILE_URL } from '@/config/site';
@@ -117,7 +118,7 @@ export default function InstagramFeed({
   return (
     <section className="py-2 sm:py-3" aria-labelledby="instagram-title">
       <div className="container-crfal">
-        <div className="section-panel">
+        <Reveal className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
@@ -163,7 +164,7 @@ export default function InstagramFeed({
             <FollowCard />
           </div>
         )}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

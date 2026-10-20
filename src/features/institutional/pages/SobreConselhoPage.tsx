@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import type { ComponentType, CSSProperties, ReactNode } from 'react';
+import { useInView } from '@/hooks/useInView';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
@@ -239,40 +240,6 @@ const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const anchorOffset = 'scroll-mt-[calc(var(--header-offset)+24px)]';
 
-/**
- * Revela a seção ao entrar na tela. Com movimento reduzido (ou sem
- * IntersectionObserver), o conteúdo já começa visível.
- */
-function useInView(threshold = 0.08) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(
-    () =>
-      typeof window === 'undefined' ||
-      !('IntersectionObserver' in window) ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-
-  useEffect(() => {
-    if (inView) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [inView, threshold]);
-
-  return { ref, inView };
-}
-
-const reveal = (inView: boolean) =>
-  `transition-all duration-700 motion-reduce:transition-none ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`;
-
 function SectionHeader({
   id,
   label,
@@ -360,7 +327,7 @@ export default function SobreConselhoPage() {
         {/* ── HISTÓRIA ─────────────────────────────────────────────────── */}
         <section id="historia" aria-labelledby="historia-title" className={`section-panel ${anchorOffset}`}>
           <div ref={histRef} className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
-            <div className={`${reveal(histInView)} lg:sticky lg:top-[calc(var(--header-offset)+32px)] lg:self-start`}>
+            <div data-reveal data-revealed={histInView ? '' : undefined} className="lg:sticky lg:top-[calc(var(--header-offset)+32px)] lg:self-start">
               <SectionHeader id="historia-title" label="Nossa trajetória" title="História do CRF-AL" />
               <p className="mt-5 text-base leading-relaxed text-crfal-gray-700 sm:text-lg">
                 O <strong className="font-semibold text-crfal-blue">Conselho Regional de Farmácia do Estado de Alagoas — CRF-AL</strong> é a autarquia federal responsável pela fiscalização e regulamentação do exercício da profissão farmacêutica em Alagoas.
@@ -376,7 +343,7 @@ export default function SobreConselhoPage() {
                 <li
                   key={m.year}
                   className={`relative transition-all duration-700 motion-reduce:transition-none ${histInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6'}`}
-                  style={{ transitionDelay: `${150 + i * 90}ms` }}
+                  style={{ transitionDelay: `${Math.min(150 + i * 90, 240)}ms` }}
                 >
                   <span
                     aria-hidden
@@ -412,7 +379,7 @@ export default function SobreConselhoPage() {
         >
           <Target className="pointer-events-none absolute -right-10 -top-10 -z-10 h-64 w-64 text-white opacity-[0.05]" aria-hidden />
           <div ref={mvvRef}>
-            <div className={reveal(mvvInView)}>
+            <div data-reveal data-revealed={mvvInView ? '' : undefined}>
               <SectionHeader id="mvv-title" label="Propósito e direção" title="Missão, Visão e Valores" inverted />
             </div>
 
@@ -423,7 +390,7 @@ export default function SobreConselhoPage() {
                   <article
                     key={item.id}
                     className={`rounded-xl border border-white/15 bg-white/[0.07] p-5 transition-all duration-700 motion-reduce:transition-none sm:p-7 ${mvvInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                    style={{ transitionDelay: `${150 + i * 120}ms` }}
+                    style={{ transitionDelay: `${Math.min(150 + i * 120, 240)}ms` }}
                   >
                     <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/60">
                       <Icon className="h-5 w-5 text-white" aria-hidden />
@@ -437,7 +404,7 @@ export default function SobreConselhoPage() {
 
               <article
                 className={`rounded-xl border border-white/15 bg-white/[0.07] p-5 transition-all duration-700 motion-reduce:transition-none sm:p-7 md:col-span-2 lg:col-span-1 ${mvvInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-                style={{ transitionDelay: '390ms' }}
+                style={{ transitionDelay: '240ms' }}
               >
                 <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/60">
                   <Heart className="h-5 w-5 text-white" aria-hidden />
@@ -460,7 +427,7 @@ export default function SobreConselhoPage() {
         {/* ── ATRIBUIÇÕES ──────────────────────────────────────────────── */}
         <section id="atribuicoes" aria-labelledby="atribuicoes-title" className={`section-panel ${anchorOffset}`}>
           <div ref={atribRef}>
-            <div className={reveal(atribInView)}>
+            <div data-reveal data-revealed={atribInView ? '' : undefined}>
               <SectionHeader id="atribuicoes-title" label="Competências legais" title="Atribuições do CRF-AL">
                 Com base na Lei Federal nº 3.820/1960 e legislações complementares, o CRF-AL exerce as seguintes competências em prol da sociedade e da classe farmacêutica alagoana.
               </SectionHeader>
@@ -473,7 +440,7 @@ export default function SobreConselhoPage() {
                   <li
                     key={item.title}
                     className={`transition-all duration-700 motion-reduce:transition-none ${atribInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-                    style={{ transitionDelay: `${100 + i * 50}ms` }}
+                    style={{ transitionDelay: `${Math.min(100 + i * 50, 240)}ms` }}
                   >
                     <Link
                       to={item.href}
@@ -499,13 +466,13 @@ export default function SobreConselhoPage() {
         {/* ── HINO FARMACÊUTICO ────────────────────────────────────────── */}
         <section id="hino" aria-labelledby="hino-title" className={`section-panel ${anchorOffset}`}>
           <div ref={hinoRef}>
-            <div className={reveal(hinoInView)}>
+            <div data-reveal data-revealed={hinoInView ? '' : undefined}>
               <SectionHeader id="hino-title" label="Tradição e orgulho" title="Hino Farmacêutico" center>
                 Entoado nas solenidades da classe farmacêutica brasileira, o Hino Farmacêutico celebra a missão, os valores e o orgulho de uma profissão dedicada à vida.
               </SectionHeader>
             </div>
 
-            <figure className={`relative mx-auto mt-10 max-w-2xl overflow-hidden rounded-xl border border-crfal-gold/40 bg-[#FBF7EC] p-6 sm:p-10 ${reveal(hinoInView)} delay-200`}>
+            <figure data-reveal data-revealed={hinoInView ? '' : undefined} style={{ '--reveal-delay': '200ms' } as CSSProperties} className="relative mx-auto mt-10 max-w-2xl overflow-hidden rounded-xl border border-crfal-gold/40 bg-[#FBF7EC] p-6 sm:p-10">
               <Music className="pointer-events-none absolute -bottom-6 -right-6 h-40 w-40 text-[#8A6A12] opacity-[0.07]" aria-hidden />
               <figcaption className="relative mb-6 flex items-center gap-3 sm:mb-8">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-crfal-gold/15 ring-1 ring-crfal-gold/50">
