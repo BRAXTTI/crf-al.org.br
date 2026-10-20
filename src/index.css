@@ -474,60 +474,50 @@
   border-radius: 2px;
 }
 
-/* Entrada ao rolar: o componente Reveal marca data-revealed quando o
-   elemento entra na tela. Antes disso, vidro fosco — o conteúdo aparece
-   desfocado e um pouco esmaecido (nunca some, para não parecer o fim da
-   página). Revelado, fica sem filter/translate: nada de camada ou
-   contexto de empilhamento permanente. Sem JS de observação, ele já nasce
-   revelado. */
+/* Entrada ao rolar: réplica do fade-up do AOS no site do CFF
+   (site.cff.org.br: duration 700, easing ease-out-quad, delay 250, offset 100,
+   once). O componente Reveal marca data-revealed quando o topo do elemento
+   passa 100px acima da borda de baixo da tela. Antes disso, opacidade 0 e
+   100px abaixo (só no eixo Y, sem estourar a largura no celular); revelado,
+   fica sem translate: nada de camada ou contexto de empilhamento permanente.
+   Sem blur. Sem JS de observação, ele já nasce revelado. */
 [data-reveal] {
-  --reveal-blur: 5px;
-  --reveal-opacity: 0.6;
-  --reveal-shift: 12px;
-  --reveal-duration: 700ms;
-  transition-property: opacity, filter, translate;
-  transition-duration: var(--reveal-duration);
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  --reveal-shift: 100px;
+  --reveal-base-delay: 250ms;
+  transition-property: opacity, translate;
+  transition-duration: 0s;
+  /* ease-out-quad do AOS */
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 [data-reveal]:not([data-revealed]) {
-  opacity: var(--reveal-opacity);
-  filter: blur(var(--reveal-blur));
+  opacity: 0;
   translate: 0 var(--reveal-shift);
 }
 
-/* Dentro de um bloco ainda fosco, o item não soma o próprio efeito; quando o
-   bloco revela, um efeito passa para o outro sem salto. */
+/* Dentro de um bloco ainda oculto, o item não soma o próprio efeito (nem
+   200px de deslocamento); o bloco carrega a entrada dos dois. */
 [data-reveal]:not([data-revealed]) [data-reveal]:not([data-revealed]) {
   opacity: 1;
-  filter: none;
   translate: none;
 }
 
-/* O escalonamento vale só para a entrada. */
+/* Só a entrada anima (once: sem volta). O atraso de 250ms vale para todos;
+   --reveal-delay soma o escalonamento entre itens. */
 [data-reveal][data-revealed] {
-  transition-delay: var(--reveal-delay, 0ms);
+  transition-duration: 700ms;
+  transition-delay: calc(var(--reveal-base-delay) + var(--reveal-delay, 0ms));
 }
 
-/* Já estava na tela ao montar: nítido de saída, sem animar. */
+/* Já estava na tela ao montar: visível de saída, sem animar. */
 [data-reveal][data-reveal-instant] {
   transition: none;
-}
-
-/* Celular: blur menor (mais barato de pintar) e entrada mais curta. */
-@media (max-width: 767px) {
-  [data-reveal] {
-    --reveal-blur: 3px;
-    --reveal-shift: 8px;
-    --reveal-duration: 550ms;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   [data-reveal],
   [data-reveal]:not([data-revealed]) {
     opacity: 1;
-    filter: none;
     translate: none;
     transition: none;
   }

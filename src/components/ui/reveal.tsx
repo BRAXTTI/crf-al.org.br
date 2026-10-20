@@ -3,6 +3,7 @@ import { useInView } from '@/hooks/useInView';
 
 type RevealProps<T extends keyof HTMLElementTagNameMap> = {
   as?: T;
+  /** Escalonamento (ms) somado ao atraso padrão de 250ms da entrada. */
   delay?: number;
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'delay'>;
 
