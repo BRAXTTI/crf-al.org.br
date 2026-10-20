@@ -1,10 +1,15 @@
-import type { ElementType, ReactNode } from 'react';
+import { useState, type ElementType, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, CalendarDays, Clock, Landmark } from 'lucide-react';
+import { BorderBeam } from '@/components/ui/border-beam';
+import { useInView } from '@/hooks/useInView';
 import { plenaryYears } from '@/config/plenarias';
 import { mapEvent, formatarData } from '@/features/events/utils';
 import { countdown, daysUntil, formatDate, todayInMaceio, useStatusAtendimento, weekday } from '@/lib/maceio';
 import { useEvents } from '@/services/wordpress/event-hooks';
+
+const BEAM_DURATION = 5.5; // segundos da única volta do feixe
+const BEAM_SIZE = 280; // px de rastro, ~10% do perímetro do painel no desktop
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const actionClass = `group inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-light motion-reduce:transition-none ${focusRing}`;
@@ -132,10 +137,18 @@ function Evento() {
 /** Sinais do Conselho em funcionamento: expediente, plenária e evento, só com dados reais. */
 export default function AgoraNoConselho() {
   const today = todayInMaceio();
+  // Feixe de uma volta só, na primeira vez que o painel entra na tela; ao terminar, sai de vez.
+  const { ref, inView } = useInView<HTMLDivElement>();
+  const [beamDone, setBeamDone] = useState(
+    () => typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
   return (
     <section aria-labelledby="agora-title" className="pb-2 sm:pb-3">
       <div className="container-crfal">
-        <div className="rounded-2xl border border-crfal-gray-200/80 bg-white px-5 py-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-7 md:px-8 lg:grid lg:grid-cols-[11rem_1fr] lg:items-start lg:gap-10 lg:px-12 lg:py-8">
+        <div ref={ref} className="relative rounded-2xl border border-crfal-gray-200/80 bg-white px-5 py-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-7 md:px-8 lg:grid lg:grid-cols-[11rem_1fr] lg:items-start lg:gap-10 lg:px-12 lg:py-8">
+          {inView && !beamDone && (
+            <BorderBeam duration={BEAM_DURATION} size={BEAM_SIZE} borderWidth={2} colorFrom="#c59b27" colorTo="#66a3e0" iterations={1} onComplete={() => setBeamDone(true)} />
+          )}
           <div className="mb-5 lg:mb-0">
             <h2 id="agora-title" className="text-xl font-bold tracking-tight text-crfal-blue sm:text-[22px]">Agora no CRF-AL</h2>
             <p className="mt-1 text-sm text-crfal-gray-600">

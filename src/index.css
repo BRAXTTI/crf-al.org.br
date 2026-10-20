@@ -82,6 +82,7 @@
   --animate-slide-up: slide-up 0.5s ease-out;
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
+  --animate-border-beam: border-beam 6s linear infinite;
 
   @keyframes slide-up {
     from {
@@ -99,6 +100,15 @@
     }
     to {
       opacity: 1;
+    }
+  }
+  /* Feixe da borda (BorderBeam): percorre o offset-path rect() do cartão. */
+  @keyframes border-beam {
+    from {
+      offset-distance: var(--beam-from, 0%);
+    }
+    to {
+      offset-distance: var(--beam-to, 100%);
     }
   }
   @keyframes scale-in {

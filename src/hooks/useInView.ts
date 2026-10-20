@@ -93,5 +93,5 @@ export function useInView<T extends Element = HTMLDivElement>({
     'data-reveal-instant': instant ? '' : undefined,
   };
 
-  return { ref, revealProps };
+  return { ref, inView, revealProps };
 }
