@@ -1,76 +1,160 @@
-import type { CSSProperties } from 'react';
+import { useId, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 
 type BorderBeamProps = {
-  /** Lado do feixe, em px. */
-  size?: number;
-  /** Segundos por volta completa. */
-  duration?: number;
-  /** Segundos já percorridos ao montar. */
-  delay?: number;
+  /** Comprimento do rastro, em fração do perímetro medido do pai. */
+  length?: number;
+  /** Velocidade constante da cabeça, em px/s (a duração sai do perímetro). */
+  speed?: number;
+  /** Cor da cabeça. */
   colorFrom?: string;
+  /** Cor do meio do rastro, que some até a cauda. */
   colorTo?: string;
-  className?: string;
-  style?: CSSProperties;
-  reverse?: boolean;
-  /** Ponto de partida, em % do perímetro. */
-  initialOffset?: number;
+  /** Espessura do núcleo, em px; deve igualar a borda do pai. */
   borderWidth?: number;
-  /** Voltas antes de parar; padrão: sem fim. */
-  iterations?: number;
-  /** Chamado ao fim da última volta (só com `iterations` finito). */
+  /** Sem fim; por padrão dá uma única volta e chama `onComplete`. */
+  loop?: boolean;
   onComplete?: () => void;
+  className?: string;
 };
 
+/** Trechos do rastro; quanto mais, mais contínuo o degradê ao longo do caminho. */
+const SEGMENTS = 32;
+
+type Geometry = { width: number; height: number; radius: number };
+
+function hexToRgb(hex: string) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function mix(from: string, to: string, t: number) {
+  const a = hexToRgb(from);
+  const b = hexToRgb(to);
+  return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(' ')})`;
+}
+
+/** Opacidade ao longo do rastro: u = 0 na cabeça, 1 na cauda. */
+const alphaAt = (u: number) => (1 - u) ** 1.3;
+
+/** Cor ao longo do rastro: cabeça na cor inicial, passa à final até o meio. */
+const colorAt = (from: string, to: string, u: number) => mix(from, to, Math.min(Math.max((u - 0.15) / 0.35, 0), 1));
+
 /**
- * Feixe de luz que percorre a borda do elemento pai (padrão Magic UI), via
- * `offset-path: rect()` e a animação CSS `border-beam` (sem o `motion.div`,
- * que pesaria ~45 kB na home). O pai precisa de `position: relative` e raio.
- * Sem suporte a `rect()` no `offset-path` (Safari < 17.2), o feixe não
- * aparece. A volta começa no canto superior esquerdo, em sentido horário.
+ * Trechos lado a lado, sem sobreposição (para as cores não se misturarem): `start` é a distância
+ * da cabeça do feixe até a ponta do trecho.
+ */
+function beamSegments(trail: number, colorFrom: string, colorTo: string) {
+  const step = trail / SEGMENTS;
+  return Array.from({ length: SEGMENTS }, (_, j) => {
+    const u = (j + 0.5) / SEGMENTS;
+    return { start: step * j, dash: step, color: colorAt(colorFrom, colorTo, u), opacity: alphaAt(u) };
+  });
+}
+
+/**
+ * Feixe de luz que percorre a borda do elemento pai (padrão Magic UI), desenhado como traço SVG
+ * sobre a própria borda: um `<rect>` com o raio medido do pai, em sentido horário a partir do
+ * canto superior esquerdo. A cabeça anda em velocidade constante (traço tracejado e animação
+ * `border-beam` linear, sem easing nem freio nos cantos). O pai precisa de `position: relative`.
  */
 export function BorderBeam({
-  className,
-  size = 50,
-  delay = 0,
-  duration = 6,
-  colorFrom = '#c59b27',
-  colorTo = '#0066cc',
-  style,
-  reverse = false,
-  initialOffset = 0,
+  length = 0.22,
+  speed = 325,
+  colorFrom = '#ed3237',
+  colorTo = '#0092d5',
   borderWidth = 1,
-  iterations = Infinity,
+  loop = false,
   onComplete,
+  className,
 }: BorderBeamProps) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const done = useRef(false);
+  const glowId = useId();
+  const [geometry, setGeometry] = useState<Geometry | null>(null);
+
+  // Tamanho da caixa de borda e raio do pai, medidos de novo a cada redimensionamento.
+  useLayoutEffect(() => {
+    const parent = svgRef.current?.parentElement;
+    if (!parent) return;
+    const measure = () => {
+      const { width, height } = parent.getBoundingClientRect();
+      const radius = parseFloat(getComputedStyle(parent).borderTopLeftRadius) || 0;
+      setGeometry((prev) =>
+        prev && prev.width === width && prev.height === height && prev.radius === radius ? prev : { width, height, radius }
+      );
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(parent);
+    return () => observer.disconnect();
+  }, []);
+
+  // Linha central da borda: meia espessura para dentro da caixa de borda.
+  const inset = borderWidth / 2;
+  const w = geometry ? Math.max(geometry.width - borderWidth, 0) : 0;
+  const h = geometry ? Math.max(geometry.height - borderWidth, 0) : 0;
+  const r = geometry ? Math.min(Math.max(geometry.radius - inset, 0), w / 2, h / 2) : 0;
+  const perimeter = 2 * (w - 2 * r) + 2 * (h - 2 * r) + 2 * Math.PI * r;
+  const trail = perimeter * length;
+  // Uma volta: a cabeça percorre o perímetro e a cauda termina de entrar no ponto de partida.
+  const travel = loop ? perimeter : perimeter + trail;
+  const duration = travel / speed;
+  const segments = beamSegments(trail, colorFrom, colorTo);
+
   return (
-    <div
+    <svg
+      ref={svgRef}
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 hidden rounded-[inherit] border-(length:--border-beam-width) border-transparent mask-[linear-gradient(transparent,transparent),linear-gradient(#000,#000)] [mask-clip:padding-box,border-box] [mask-composite:intersect] supports-[offset-path:rect(0_auto_auto_0)]:block"
-      style={{ '--border-beam-width': `${borderWidth}px` } as CSSProperties}
+      className={cn('pointer-events-none absolute overflow-visible motion-reduce:hidden', className)}
+      style={{ inset: -borderWidth }}
+      width={geometry?.width ?? 0}
+      height={geometry?.height ?? 0}
+      onAnimationEnd={(event) => {
+        if (loop || done.current || !(event.target instanceof SVGRectElement)) return;
+        done.current = true;
+        onComplete?.();
+      }}
     >
-      <div
-        className={cn(
-          'absolute aspect-square animate-border-beam bg-linear-to-l from-(--color-from) via-(--color-to) to-transparent motion-reduce:hidden',
-          reverse && '[animation-direction:reverse]',
-          className,
-        )}
-        onAnimationEnd={(event) => {
-          if (event.target === event.currentTarget) onComplete?.();
-        }}
-        style={{
-          width: size,
-          offsetPath: `rect(0 auto auto 0 round ${size}px)`,
-          animationDuration: `${duration}s`,
-          animationDelay: `${-delay}s`,
-          animationIterationCount: Number.isFinite(iterations) ? iterations : 'infinite',
-          '--beam-from': `${initialOffset}%`,
-          '--beam-to': `${100 + initialOffset}%`,
-          '--color-from': colorFrom,
-          '--color-to': colorTo,
-          ...style,
-        } as CSSProperties}
-      />
-    </div>
+      {perimeter > 0 && (
+        <>
+          <defs>
+            {/* Brilho neon justo e discreto, na cor de cada trecho (lê como ~3–4px); uma camada só, para o vermelho não arder no branco. */}
+            <filter id={glowId} filterUnits="userSpaceOnUse" x={-8} y={-8} width={w + 16 + borderWidth} height={h + 16 + borderWidth}>
+              <feGaussianBlur in="SourceGraphic" stdDeviation={1.5} result="glow" />
+              <feMerge>
+                <feMergeNode in="glow" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <g filter={`url(#${CSS.escape(glowId)})`} fill="none" strokeWidth={borderWidth}>
+            {segments.map(({ start, dash, color, opacity }, i) => (
+              <rect
+                key={i}
+                x={inset}
+                y={inset}
+                width={w}
+                height={h}
+                rx={r}
+                pathLength={perimeter}
+                stroke={color}
+                strokeOpacity={opacity}
+                strokeDasharray={`${dash} ${loop ? perimeter - dash : travel}`}
+                className="animate-border-beam"
+                style={{
+                  animationDuration: `${duration}s`,
+                  animationIterationCount: loop ? 'infinite' : 1,
+                  animationFillMode: 'both',
+                  '--beam-from': `${start + dash}px`,
+                  '--beam-to': `${start + dash - travel}px`,
+                } as CSSProperties}
+              />
+            ))}
+          </g>
+        </>
+      )}
+    </svg>
   );
 }

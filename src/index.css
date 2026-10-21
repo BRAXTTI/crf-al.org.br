@@ -102,13 +102,13 @@
       opacity: 1;
     }
   }
-  /* Feixe da borda (BorderBeam): percorre o offset-path rect() do cartão. */
+  /* Feixe da borda (BorderBeam): desloca o traço tracejado do <rect> SVG, em ritmo linear. */
   @keyframes border-beam {
     from {
-      offset-distance: var(--beam-from, 0%);
+      stroke-dashoffset: var(--beam-from, 0);
     }
     to {
-      offset-distance: var(--beam-to, 100%);
+      stroke-dashoffset: var(--beam-to, 0);
     }
   }
   @keyframes scale-in {
