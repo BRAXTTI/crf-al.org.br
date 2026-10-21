@@ -60,7 +60,7 @@ function beamSegments(trail: number, colorFrom: string, colorTo: string) {
  */
 export function BorderBeam({
   length = 0.22,
-  speed = 325,
+  speed = 935,
   colorFrom = '#ed3237',
   colorTo = '#0092d5',
   borderWidth = 1,

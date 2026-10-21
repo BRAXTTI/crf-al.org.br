@@ -9,7 +9,7 @@ import { countdown, daysUntil, formatDate, todayInMaceio, useStatusAtendimento, 
 import { useEvents } from '@/services/wordpress/event-hooks';
 
 const BEAM_LENGTH = 0.22; // rastro do feixe, em fração do perímetro medido do painel
-const BEAM_SPEED = 325; // px/s constantes: ~8,5s por volta no painel de ~1216×190px do desktop (a altura varia com o conteúdo)
+const BEAM_SPEED = 935; // px/s constantes: ~3s por volta no painel de ~1216×209px do desktop (perímetro ~2806px; a altura varia com o conteúdo)
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const actionClass = `group inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-light motion-reduce:transition-none ${focusRing}`;
@@ -145,17 +145,16 @@ export default function AgoraNoConselho() {
   return (
     <section aria-labelledby="agora-title" className="pb-2 sm:pb-3">
       <div className="container-crfal">
-        {/* Título e data centralizados acima do painel, fora da borda por onde passa o feixe. */}
-        <header className="mb-4 text-center sm:mb-5">
-          <h2 id="agora-title" className="text-xl font-semibold tracking-tight text-crfal-blue sm:text-[22px]">Agora no CRF-AL</h2>
-          <p className="mt-1 text-sm text-crfal-gray-600">
-            <time dateTime={today}>{weekday(today)}, {formatDate(today, { day: 'numeric', month: 'long' })}</time>
-          </p>
-        </header>
-        <div ref={ref} className="relative rounded-2xl border border-crfal-gray-200/80 bg-white px-5 py-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-7 md:px-8 lg:px-12 lg:py-8">
+        <div ref={ref} className="relative rounded-2xl border border-crfal-gray-200/80 bg-white px-5 py-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-7 md:px-8 lg:grid lg:grid-cols-[11rem_1fr] lg:items-start lg:gap-10 lg:px-12 lg:py-8">
           {inView && !beamDone && (
             <BorderBeam length={BEAM_LENGTH} speed={BEAM_SPEED} colorFrom="#ed3237" colorTo="#0092d5" onComplete={() => setBeamDone(true)} />
           )}
+          <div className="mb-5 lg:mb-0">
+            <h2 id="agora-title" className="text-xl font-bold tracking-tight text-crfal-blue sm:text-[22px]">Agora no CRF-AL</h2>
+            <p className="mt-1 text-sm text-crfal-gray-600">
+              <time dateTime={today}>{weekday(today)}, {formatDate(today, { day: 'numeric', month: 'long' })}</time>
+            </p>
+          </div>
           <ul className="divide-y divide-crfal-gray-200 lg:grid lg:grid-cols-3 lg:divide-x lg:divide-y-0">
             <Atendimento />
             <Plenaria today={today} />
