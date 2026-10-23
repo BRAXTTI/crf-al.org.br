@@ -14,12 +14,23 @@ type BorderBeamProps = {
   borderWidth?: number;
   /** Sem fim; por padrão dá uma única volta e chama `onComplete`. */
   loop?: boolean;
+  /** Trechos do rastro; menos trechos, menos trabalho por quadro. */
+  segments?: number;
+  /**
+   * Brilho do feixe: `blur` (filtro SVG, mais fiel, refeito a cada quadro) ou `halo` (traço largo
+   * e translúcido por baixo, sem filtro, mais leve para celulares).
+   */
+  glow?: 'blur' | 'halo';
   onComplete?: () => void;
   className?: string;
 };
 
 /** Trechos do rastro; quanto mais, mais contínuo o degradê ao longo do caminho. */
 const SEGMENTS = 32;
+
+/** Halo sem filtro: largura (px) e opacidade relativa do traço de baixo. */
+const HALO_WIDTH = 3;
+const HALO_OPACITY = 0.3;
 
 type Geometry = { width: number; height: number; radius: number };
 
@@ -44,10 +55,10 @@ const colorAt = (from: string, to: string, u: number) => mix(from, to, Math.min(
  * Trechos lado a lado, sem sobreposição (para as cores não se misturarem): `start` é a distância
  * da cabeça do feixe até a ponta do trecho.
  */
-function beamSegments(trail: number, colorFrom: string, colorTo: string) {
-  const step = trail / SEGMENTS;
-  return Array.from({ length: SEGMENTS }, (_, j) => {
-    const u = (j + 0.5) / SEGMENTS;
+function beamSegments(trail: number, colorFrom: string, colorTo: string, count: number) {
+  const step = trail / count;
+  return Array.from({ length: count }, (_, j) => {
+    const u = (j + 0.5) / count;
     return { start: step * j, dash: step, color: colorAt(colorFrom, colorTo, u), opacity: alphaAt(u) };
   });
 }
@@ -65,6 +76,8 @@ export function BorderBeam({
   colorTo = '#0092d5',
   borderWidth = 1,
   loop = false,
+  segments: segmentCount = SEGMENTS,
+  glow = 'blur',
   onComplete,
   className,
 }: BorderBeamProps) {
@@ -101,7 +114,7 @@ export function BorderBeam({
   // Uma volta: a cabeça percorre o perímetro e a cauda termina de entrar no ponto de partida.
   const travel = loop ? perimeter : perimeter + trail;
   const duration = travel / speed;
-  const segments = beamSegments(trail, colorFrom, colorTo);
+  const segments = beamSegments(trail, colorFrom, colorTo, segmentCount);
 
   return (
     <svg
@@ -119,39 +132,44 @@ export function BorderBeam({
     >
       {perimeter > 0 && (
         <>
-          <defs>
-            {/* Brilho neon justo e discreto, na cor de cada trecho (lê como ~3–4px); uma camada só, para o vermelho não arder no branco. */}
-            <filter id={glowId} filterUnits="userSpaceOnUse" x={-8} y={-8} width={w + 16 + borderWidth} height={h + 16 + borderWidth}>
-              <feGaussianBlur in="SourceGraphic" stdDeviation={1.5} result="glow" />
-              <feMerge>
-                <feMergeNode in="glow" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          <g filter={`url(#${CSS.escape(glowId)})`} fill="none" strokeWidth={borderWidth}>
-            {segments.map(({ start, dash, color, opacity }, i) => (
-              <rect
-                key={i}
-                x={inset}
-                y={inset}
-                width={w}
-                height={h}
-                rx={r}
-                pathLength={perimeter}
-                stroke={color}
-                strokeOpacity={opacity}
-                strokeDasharray={`${dash} ${loop ? perimeter - dash : travel}`}
-                className="animate-border-beam"
-                style={{
-                  animationDuration: `${duration}s`,
-                  animationIterationCount: loop ? 'infinite' : 1,
-                  animationFillMode: 'both',
-                  '--beam-from': `${start + dash}px`,
-                  '--beam-to': `${start + dash - travel}px`,
-                } as CSSProperties}
-              />
-            ))}
+          {glow === 'blur' && (
+            <defs>
+              {/* Brilho neon justo e discreto, na cor de cada trecho (lê como ~3–4px); uma camada só, para o vermelho não arder no branco. */}
+              <filter id={glowId} filterUnits="userSpaceOnUse" x={-8} y={-8} width={w + 16 + borderWidth} height={h + 16 + borderWidth}>
+                <feGaussianBlur in="SourceGraphic" stdDeviation={1.5} result="glow" />
+                <feMerge>
+                  <feMergeNode in="glow" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+          )}
+          <g filter={glow === 'blur' ? `url(#${CSS.escape(glowId)})` : undefined} fill="none">
+            {(glow === 'halo' ? [HALO_WIDTH, borderWidth] : [borderWidth]).map((strokeWidth, layer, layers) =>
+              segments.map(({ start, dash, color, opacity }, i) => (
+                <rect
+                  key={`${layer}-${i}`}
+                  x={inset}
+                  y={inset}
+                  width={w}
+                  height={h}
+                  rx={r}
+                  pathLength={perimeter}
+                  stroke={color}
+                  strokeWidth={strokeWidth}
+                  strokeOpacity={layer < layers.length - 1 ? opacity * HALO_OPACITY : opacity}
+                  strokeDasharray={`${dash} ${loop ? perimeter - dash : travel}`}
+                  className="animate-border-beam"
+                  style={{
+                    animationDuration: `${duration}s`,
+                    animationIterationCount: loop ? 'infinite' : 1,
+                    animationFillMode: 'both',
+                    '--beam-from': `${start + dash}px`,
+                    '--beam-to': `${start + dash - travel}px`,
+                  } as CSSProperties}
+                />
+              ))
+            )}
           </g>
         </>
       )}
