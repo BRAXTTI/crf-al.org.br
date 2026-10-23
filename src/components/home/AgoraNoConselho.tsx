@@ -1,4 +1,4 @@
-import { useState, type ElementType, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ElementType, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, CalendarDays, Clock, Landmark } from 'lucide-react';
 import { BorderBeam } from '@/components/ui/border-beam';
@@ -10,6 +10,38 @@ import { useEvents } from '@/services/wordpress/event-hooks';
 
 const BEAM_LENGTH = 0.22; // rastro do feixe, em fração do perímetro medido do painel
 const BEAM_SPEED = 935; // px/s constantes: ~3s por volta no painel de ~1216×209px do desktop (perímetro ~2806px; a altura varia com o conteúdo)
+// Celular: painel empilhado (~350×520px, perímetro ~1700px); mais devagar, ~3,5s por volta, e sem filtro de desfoque.
+const BEAM_SPEED_MOBILE = 560;
+const BEAM_SEGMENTS_MOBILE = 20;
+const DESKTOP_QUERY = '(min-width: 1024px)';
+
+/**
+ * No celular, o feixe só parte com o painel inteiro na tela (ou o máximo que couber, se for mais
+ * alto que ela), para a volta toda ser vista. No desktop segue o `useInView` de sempre.
+ */
+function useFullyInView<T extends Element>(enabled: boolean) {
+  const ref = useRef<T>(null);
+  const [inView, setInView] = useState(() => typeof window === 'undefined' || !('IntersectionObserver' in window));
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!enabled || inView || !el) return;
+    const threshold = Math.min(1, (window.innerHeight / Math.max(el.getBoundingClientRect().height, 1)) * 0.98);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.intersectionRatio >= threshold - 0.001) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [enabled, inView]);
+
+  return { ref, inView };
+}
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const actionClass = `group inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-light motion-reduce:transition-none ${focusRing}`;
@@ -138,7 +170,10 @@ function Evento() {
 export default function AgoraNoConselho() {
   const today = todayInMaceio();
   // Feixe de uma volta só, na primeira vez que o painel entra na tela; ao terminar, sai de vez.
-  const { ref, inView } = useInView<HTMLDivElement>();
+  const [isDesktop] = useState(() => typeof window === 'undefined' || window.matchMedia(DESKTOP_QUERY).matches);
+  const desktop = useInView<HTMLDivElement>();
+  const mobile = useFullyInView<HTMLDivElement>(!isDesktop);
+  const { ref, inView } = isDesktop ? desktop : mobile;
   const [beamDone, setBeamDone] = useState(
     () => typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
@@ -147,7 +182,15 @@ export default function AgoraNoConselho() {
       <div className="container-crfal">
         <div ref={ref} className="relative rounded-2xl border border-crfal-gray-200/80 bg-white px-5 py-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-7 md:px-8 lg:grid lg:grid-cols-[11rem_1fr] lg:items-start lg:gap-10 lg:px-12 lg:py-8">
           {inView && !beamDone && (
-            <BorderBeam length={BEAM_LENGTH} speed={BEAM_SPEED} colorFrom="#ed3237" colorTo="#0092d5" onComplete={() => setBeamDone(true)} />
+            <BorderBeam
+              length={BEAM_LENGTH}
+              speed={isDesktop ? BEAM_SPEED : BEAM_SPEED_MOBILE}
+              segments={isDesktop ? undefined : BEAM_SEGMENTS_MOBILE}
+              glow={isDesktop ? 'blur' : 'halo'}
+              colorFrom="#ed3237"
+              colorTo="#0092d5"
+              onComplete={() => setBeamDone(true)}
+            />
           )}
           <div className="mb-5 lg:mb-0">
             <h2 id="agora-title" className="text-xl font-bold tracking-tight text-crfal-blue sm:text-[22px]">Agora no CRF-AL</h2>
