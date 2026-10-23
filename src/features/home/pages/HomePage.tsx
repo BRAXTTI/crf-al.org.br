@@ -6,6 +6,7 @@ import CffPublications from '@/components/home/CffPublications';
 import SEO from '@/components/SEO';
 import ServiceAccessCards from '@/components/home/ServiceAccessCards';
 import AgoraNoConselho from '@/components/home/AgoraNoConselho';
+import PartnersStrip from '@/components/home/PartnersStrip';
 
 export default function HomePage() {
   return (
@@ -28,6 +29,7 @@ export default function HomePage() {
       <Publications />
       <CffPublications />
       <InstagramFeed />
+      <PartnersStrip />
     </>
   );
 }

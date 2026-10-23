@@ -83,6 +83,7 @@
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
   --animate-border-beam: border-beam 6s linear infinite;
+  --animate-marquee: marquee var(--marquee-duration, 40s) linear infinite;
 
   @keyframes slide-up {
     from {
@@ -109,6 +110,15 @@
     }
     to {
       stroke-dashoffset: var(--beam-to, 0);
+    }
+  }
+  /* Faixa de parceiros: a lista vem duplicada, então -50% fecha a volta sem salto. */
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
     }
   }
   @keyframes scale-in {
