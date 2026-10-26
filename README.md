@@ -54,7 +54,7 @@ As APIs locais de conteúdo usam a origem padrão; validar configurações runti
 
 `functions/_news-archive.ts` contém **somente IDs, slugs e datas** das 2.808 URLs reservadas; não contém corpos nem imagens. `npm run news:archive` atualiza esse inventário a partir do WP antigo; `-- --from-stdin` aceita a exportação validada. Não executar a atualização cegamente durante migração.
 
-A variável opcional `NEWS_ARCHIVE_API_URL` permite apontar para o WP novo, usando a base REST completa que estiver habilitada nele. O padrão atual permanece o legado. Quando configurada, a Function tenta a base nova primeiro e recorre ao legado em erro HTTP/rede/timeout. A configuração participa da chave de cache.
+A variável opcional `NEWS_ARCHIVE_API_URL` permite apontar para o WP novo, usando a base REST completa que estiver habilitada nele (aceita `/wp-json/wp/v2` ou `/index.php?rest_route=/wp/v2`, usado pelo WP novo). O padrão atual permanece o legado. Quando configurada, a Function tenta a base nova primeiro e recorre ao legado em erro HTTP/rede/timeout. A configuração participa da chave de cache.
 
 **Falta migrar e conferir conteúdo, mídia, IDs históricos e slugs.** A base alternativa exige os mesmos IDs e slugs do inventário. Se a importação alterar IDs, será necessário um mapa verificado antes de ativar a variável; IDs/slugs divergentes e listas incompletas disparam fallback, mas a validação editorial do corpo e das mídias continua indispensável. Confirmar também a exposição REST dos eventos expirados. Validar listagens, detalhes, sitemap e falha da origem nova no preview. Não desligar o legado enquanto houver dependência de conteúdo, mídia ou fallback. O snapshot não é backup do WP. Eventos relacionados no detalhe usam consulta limitada a 3 itens; nenhum catálogo completo é baixado nessa página.
 
@@ -64,7 +64,7 @@ No Cloudflare Pages: comando `npm run build`, saída `dist`, Node 22; Functions 
 
 Antes de promover: CI verde; verificar num preview HTML inicial/JSON-LD, CSP e headers; conferir `/`, notícia publicada, slug ausente (404/noindex), origem indisponível (503/Retry-After), `/publicacao/:slug` (301), `/instituicao/estatuto` (404) e listas noindex. O Vite preview sozinho não comprova esses comportamentos. Reverter pelo deploy anterior no Pages; não fazer redirects em massa sem mapa validado. Depois de atualização de domínio, regenerar os derivados e revisar Search Console e Bulk Redirects.
 
-Logs estruturados de falhas estão nas Functions. Acompanhar em Pages/Cloudflare; uptime, alertas e Web Analytics dependem da conta e consentimento editorial. Não há credenciais no repo. `security.txt` usa o contato real do setor de tecnologia em `config/contact.ts`; renovar o campo Expires anualmente e confirmar o fluxo interno de triagem.
+Logs estruturados de falhas estão nas Functions. Acompanhar em Pages/Cloudflare; o workflow `uptime.yml` verifica HTTP a cada 30 minutos quando habilitado no branch padrão do GitHub (a agenda não é SLA). `npm run test:uptime -- <preview>` permite uma verificação manual. As notificações de falha dependem das preferências da conta GitHub; alertas externos e Web Analytics dependem da conta e consentimento editorial. Os testes offline também conferem destinos internos literais; links externos e expressões dinâmicas exigem verificação no preview. Não há credenciais no repo. `security.txt` usa o contato real do setor de tecnologia em `config/contact.ts`; renovar o campo Expires anualmente e confirmar o fluxo interno de triagem.
 
 ## Conteúdo, segurança e pendências
 

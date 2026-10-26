@@ -81,6 +81,14 @@ try {
   };
   assert.equal((await newsPost(historicalSlug, primaryContext)).id, 107698);
   assert.equal(primaryCalls, 1);
+  globalThis.fetch = async url => {
+    const parsed = new URL(url);
+    assert.equal(parsed.searchParams.get('rest_route'), '/wp/v2/posts/107698');
+    assert.ok(parsed.searchParams.has('_fields'));
+    return Response.json(post(107698, historicalSlug));
+  };
+  assert.equal((await newsPost(historicalSlug, { ...primaryContext, env: { NEWS_ARCHIVE_API_URL: 'https://archive.example/index.php?rest_route=/wp/v2' } })).id, 107698);
+
   globalThis.fetch = async url => new URL(url).hostname === 'archive.example' ? new Response('', { status: 503 }) : mockFetch(url);
   assert.equal((await newsPost(historicalSlug, primaryContext)).slug, historicalSlug, 'Primary failure falls back to legacy');
   globalThis.fetch = mockFetch;

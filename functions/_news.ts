@@ -27,7 +27,9 @@ async function request(source: Source, path: string, params: Record<string, stri
   let response: Response;
   if (primary) {
     try {
-      const url = new URL(`${primary.replace(/\/$/, '')}/${path}`);
+      const url = new URL(primary);
+      if (url.searchParams.has('rest_route')) url.searchParams.set('rest_route', `${url.searchParams.get('rest_route')!.replace(/\/$/, '')}/${path}`);
+      else url.pathname = `${url.pathname.replace(/\/$/, '')}/${path}`;
       for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
       response = await fetch(url, { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
       if (!response.ok) throw new Error(`Archive primary HTTP ${response.status}`);
@@ -57,7 +59,7 @@ interface PublicCache { match: (request: Request) => Promise<Response | undefine
 const FRESH_MS = 60_000;
 async function cached<T>(key: string, context: NewsContext | undefined, load: () => Promise<T>): Promise<T> {
   const cache = (globalThis as typeof globalThis & { caches?: { default?: PublicCache } }).caches?.default;
-  const request = new Request(`${SITE_URL}/__news/v3/${context?.env?.NEWS_ARCHIVE_API_URL ?? 'legacy'}/${key}`);
+  const request = new Request(`${SITE_URL}/__news/v3/${encodeURIComponent(context?.env?.NEWS_ARCHIVE_API_URL ?? 'legacy')}/${key}`);
   const store = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': 'public, max-age=600' } }));
   const hit = cache && context ? await cache.match(request) : undefined;
   if (hit) {
