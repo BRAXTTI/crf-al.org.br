@@ -4,11 +4,13 @@ import type { WPPost, WPPostsPage } from '../src/services/wordpress/types';
 
 export const NEWS_CATEGORY_SLUG = 'noticias-do-portal';
 type Source = 'legacy' | 'current';
-type Entry = { id: number; slug: string; date: string; date_gmt: string; modified?: string; newsSource: Source };
+type Entry = { id: number; slug: string; date: string; date_gmt: string; modified?: string; title?: { rendered: string }; newsSource: Source };
 const archive: Entry[] = NEWS_ARCHIVE.map(post => ({ ...post, newsSource: 'legacy' }));
 const reserved = new Map(archive.map(post => [post.slug, post]));
 const archivedById = new Map(archive.map(post => [post.id, post]));
 const fields = 'id,date,modified,slug,link,title,excerpt,content,_links,_embedded';
+
+function hasTitle(post: { title?: { rendered: string } }): boolean { return Boolean(post.title?.rendered.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()); }
 
 function endpoint(source: Source, path: string, params: Record<string, string> = {}) {
   const url = new URL(source === 'legacy' ? `https://www.crf-al.org.br/wp-json/wp/v2/${path}` : 'https://wordpress.crf-al.org.br/index.php');
@@ -90,7 +92,7 @@ export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
     let pages = 1;
     let total = 0;
     for (let page = 1; page <= pages; page++) {
-      const response = (await request('current', 'posts', { categories: String(category), per_page: '100', page: String(page), _fields: 'id,slug,date,date_gmt,modified' }))!;
+      const response = (await request('current', 'posts', { categories: String(category), per_page: '100', page: String(page), _fields: 'id,slug,date,date_gmt,modified,title' }))!;
       const pageCount = Number(response.headers.get('x-wp-totalpages'));
       total = Number(response.headers.get('x-wp-total'));
       if (!Number.isInteger(pageCount) || pageCount < 0 || pageCount > 40) throw new Error('News index exceeds supported size');
@@ -101,7 +103,7 @@ export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
     // Historical URLs retain their original owner, even during an origin outage.
     const collisions = rows.filter(post => reserved.has(post.slug) || /^\d+$/.test(post.slug));
     if (collisions.length) console.warn(JSON.stringify({ event: 'news_slug_collision', posts: collisions.map(post => ({ id: post.id, slug: post.slug })) }));
-    return rows.filter(post => !reserved.has(post.slug) && !/^\d+$/.test(post.slug));
+    return rows.filter(post => !reserved.has(post.slug) && !/^\d+$/.test(post.slug) && hasTitle(post));
   });
   return [...archive, ...current].sort((a, b) => b.date_gmt.localeCompare(a.date_gmt) || a.newsSource.localeCompare(b.newsSource) || b.id - a.id);
 }
@@ -110,18 +112,18 @@ export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
 export async function newsSitemapIndex(context?: NewsContext): Promise<Entry[]> {
   return cached('sitemap-index', context, async () => {
     const [index, published] = await Promise.all([newsIndex(context), (async () => {
-      const rows: Array<{ id: number; slug: string }> = [];
+      const rows: Array<{ id: number; slug: string; title?: { rendered: string } }> = [];
       let pages = 1;
       let total = 0;
       for (let page = 1; page <= pages; page++) {
-        const response = (await request('legacy', 'posts', { per_page: '100', page: String(page), _fields: 'id,slug' }, false, context))!;
+        const response = (await request('legacy', 'posts', { per_page: '100', page: String(page), _fields: 'id,slug,title' }, false, context))!;
         pages = Number(response.headers.get('x-wp-totalpages'));
         total = Number(response.headers.get('x-wp-total'));
         if (!Number.isInteger(pages) || pages < 0 || pages > 100 || !Number.isInteger(total)) throw new Error('Invalid archive inventory');
-        rows.push(...await response.json() as Array<{ id: number; slug: string }>);
+        rows.push(...await response.json() as Array<{ id: number; slug: string; title?: { rendered: string } }>);
       }
       if (rows.length !== total) throw new Error('Archive changed during sitemap generation');
-      return new Set(rows.map(row => `${row.id}:${row.slug}`));
+      return new Set(rows.filter(hasTitle).map(row => `${row.id}:${row.slug}`));
     })()]);
     return index.filter(post => post.newsSource === 'current' || published.has(`${post.id}:${post.slug}`));
   });

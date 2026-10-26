@@ -68,7 +68,7 @@ try {
   page = await newsPage(9999, 12);
   assert.equal(page.posts.length, 0);
   const inventoryFetch = globalThis.fetch;
-  globalThis.fetch = async url => new URL(url).hostname === 'www.crf-al.org.br' ? Response.json([{ id: 107698, slug: historicalSlug }], { headers: { 'x-wp-total': '1', 'x-wp-totalpages': '1' } }) : inventoryFetch(url);
+  globalThis.fetch = async url => new URL(url).hostname === 'www.crf-al.org.br' ? Response.json([{ id: 107698, slug: historicalSlug, title: { rendered: 'Título publicado' } }], { headers: { 'x-wp-total': '1', 'x-wp-totalpages': '1' } }) : inventoryFetch(url);
   const sitemap = await newsSitemapIndex();
   assert.deepEqual(sitemap.map(post => post.slug), [historicalSlug], 'Sitemap excludes reserved posts absent from published inventory');
   globalThis.fetch = inventoryFetch;
