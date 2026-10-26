@@ -9,16 +9,18 @@ export async function contentApi(request: Request, context: ContentContext): Pro
   const input = new URL(request.url);
   const slug = input.searchParams.get('slug');
   const id = input.searchParams.get('id');
+  const related = input.searchParams.get('related');
   const page = Number(input.searchParams.get('page') ?? 1);
-  if ((slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) || (id !== null && !/^[1-9]\d*$/.test(id)) || !Number.isSafeInteger(page) || page < 1) return Response.json({ error: 'Parâmetros inválidos.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+  if ((slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) || (id !== null && !/^[1-9]\d*$/.test(id)) || (related !== null && !/^[1-9]\d*$/.test(related)) || !Number.isSafeInteger(page) || page < 1) return Response.json({ error: 'Parâmetros inválidos.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
   const gallery = input.pathname === '/api/gallery';
   const origin = new URL('/index.php', context.env?.WP_SITE_URL || 'https://wordpress.crf-al.org.br');
-  origin.searchParams.set('rest_route', gallery ? `/crfal/v1/photo-albums${slug ? `/${slug}` : ''}` : slug || id ? `/wp/v2/event_listing${id ? `/${id}` : ''}` : '/crfal/v1/events');
+  origin.searchParams.set('rest_route', gallery ? `/crfal/v1/photo-albums${slug ? `/${slug}` : ''}` : slug || id || related ? `/wp/v2/event_listing${id ? `/${id}` : ''}` : '/crfal/v1/events');
+  if (related && !gallery) { origin.searchParams.set('per_page', '3'); origin.searchParams.set('exclude', related); origin.searchParams.set('_embed', '1'); }
   if (gallery && !slug) { origin.searchParams.set('page', String(page)); origin.searchParams.set('per_page', '12'); }
   if (!gallery && (slug || id)) { origin.searchParams.set('_embed', '1'); if (slug) { origin.searchParams.set('slug', slug); origin.searchParams.set('per_page', '1'); } }
   const cache = (globalThis as typeof globalThis & { caches?: { default?: { match: (request: Request) => Promise<Response | undefined>; put: (request: Request, response: Response) => Promise<void> } } }).caches?.default;
   // Origem e parâmetros normalizados fazem parte da chave, isolando ambientes.
-  const calendar = !gallery && !slug && !id && input.searchParams.get('format') === 'ics';
+  const calendar = !gallery && !slug && !id && !related && input.searchParams.get('format') === 'ics';
   const key = new Request(origin.href + (calendar ? '&format=ics' : ''));
   const hit = await cache?.match(key);
   if (hit) return new Response(request.method === 'HEAD' ? null : hit.body, hit);

@@ -123,7 +123,6 @@ export default function EventosPage() {
         noindex
       />
 
-      <a href="/api/events?format=ics" className="container-crfal block py-2 underline">Baixar calendário de eventos (.ics)</a>
       {/* Hero */}
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Eventos' }]}
@@ -134,6 +133,7 @@ export default function EventosPage() {
       />
 
       <div className="container-crfal py-8 md:py-12">
+        <a href="/api/events?format=ics" className="mb-6 inline-flex min-h-11 items-center underline">Baixar calendário de eventos (.ics)</a>
         {isLoading ? (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (

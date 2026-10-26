@@ -17,6 +17,9 @@ try {
   await Promise.all(pending);
   assert.equal(await (await request('/api/events?slug=evento', 'HEAD')).text(), '');
   assert.equal(urls.length, 1, 'HEAD reuses edge cache');
+  assert.equal((await request('/api/events?related=123')).status, 200);
+  assert.equal(urls.at(-1).searchParams.get('per_page'), '3');
+  assert.equal(urls.at(-1).searchParams.get('exclude'), '123');
   assert.equal((await request('/api/events?slug=%2F')).status, 400);
   assert.equal((await request('/api/gallery?page=0')).status, 400);
   assert.equal((await request('/api/events', 'POST')).status, 405);
