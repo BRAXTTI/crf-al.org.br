@@ -1,0 +1,3 @@
+Contact: mailto:tecnologia@crf-al.org.br
+Expires: 2027-10-26T23:59:59Z
+Preferred-Languages: pt-BR

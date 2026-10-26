@@ -218,7 +218,7 @@ function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Resp
 async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
   // Cache metadata only: never retain HTML pointing to an outdated deployment bundle.
   const cache = (caches as CacheStorage & { default: Cache }).default;
-  const key = new Request(`${SITE_URL}/__page-metadata/v4${pathname}`);
+  const key = new Request(`${SITE_URL}/__page-metadata/v5/${encodeURIComponent(context.env?.WP_SITE_URL || '')}/${encodeURIComponent(context.env?.NEWS_ARCHIVE_API_URL || '')}${pathname}`);
   const cached = await cache.match(key);
   if (cached) return cached.json();
   const data = await resolve();

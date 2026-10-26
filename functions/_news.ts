@@ -7,6 +7,7 @@ type Source = 'legacy' | 'current';
 type Entry = { id: number; slug: string; date: string; date_gmt: string; modified?: string; newsSource: Source };
 const archive: Entry[] = NEWS_ARCHIVE.map(post => ({ ...post, newsSource: 'legacy' }));
 const reserved = new Map(archive.map(post => [post.slug, post]));
+const archivedById = new Map(archive.map(post => [post.id, post]));
 const fields = 'id,date,modified,slug,link,title,excerpt,content,_links,_embedded';
 
 function endpoint(source: Source, path: string, params: Record<string, string> = {}) {
@@ -30,6 +31,16 @@ async function request(source: Source, path: string, params: Record<string, stri
       for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
       response = await fetch(url, { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
       if (!response.ok) throw new Error(`Archive primary HTTP ${response.status}`);
+      if (path.startsWith('posts/')) {
+        const expectedId = Number(path.split('/')[1]);
+        const expected = archivedById.get(expectedId);
+        const post = await response.clone().json() as WPPost;
+        if (post.id !== expectedId || expected && post.slug !== expected.slug) throw new Error('Archive primary ID/slug mismatch');
+      } else if (params.include) {
+        const ids = params.include.split(',').map(Number);
+        const posts = await response.clone().json() as WPPost[];
+        if (!Array.isArray(posts) || posts.length !== ids.length || !ids.every(id => posts.some(post => post.id === id && archivedById.get(id)?.slug === post.slug))) throw new Error('Archive primary list incomplete');
+      }
     } catch {
       response = await fetch(endpoint(source, path, params), { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
     }
