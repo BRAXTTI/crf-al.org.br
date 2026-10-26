@@ -1,3 +1,4 @@
+import { ESIC_URL } from '@/config/site';
 import { SETOR_CONTATOS } from '@/config/contact';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -28,7 +29,6 @@ import {
 } from 'lucide-react';
 
 const OUVIDORIA_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#ouv/home';
-const ESIC_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#sic/home';
 const OUVIDORIA_EMAIL = SETOR_CONTATOS.ouvidoria.email;
 const OUVIDORIA_TELEFONE = SETOR_CONTATOS.ouvidoria.telefone;
 

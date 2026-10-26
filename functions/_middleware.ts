@@ -1,24 +1,16 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsIndex, ORIGIN_CACHE } from './_news';
+import { newsPost, newsSitemapIndex, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
 
-const SITE_URL = 'https://institucional.crf-al.org.br';
+import { SITE_URL } from '../src/config/site';
 
 const NEWS_PREFIX = '/imprensa/noticias/';
 
 // Eventos: WordPress novo (rota customizada crfal/v1).
 const EVENTS_WP = 'https://wordpress.crf-al.org.br';
 const EVENTS_PREFIX = '/eventos/';
-const EVENTS_ROUTE = '/crfal/v1/events';
-
-interface CRFEventLite {
-  slug: string;
-  title?: string;
-  excerpt?: string;
-  banner?: string | null;
-}
 
 interface OgData {
   title: string;
@@ -29,12 +21,13 @@ interface OgData {
   publishedAt?: string;
   modifiedAt?: string;
   noindex?: boolean;
+  structuredData?: Record<string, unknown>;
   /** Capa da notícia (LCP): mesmo src/srcset que o `<img>` do NewsDetailPage. */
   preloadImage?: string;
   preloadSrcset?: string;
 }
 
-type PagesContext = EventContext<unknown, string, Record<string, unknown>>;
+type PagesContext = EventContext<{ NEWS_ARCHIVE_API_URL?: string; WP_SITE_URL?: string }, string, Record<string, unknown>>;
 
 function decodeEntities(value: string): string {
   return value
@@ -97,21 +90,24 @@ async function resolveNews(slug: string, context: PagesContext): Promise<OgData 
     ogType: 'article',
     publishedAt: post.date,
     modifiedAt: post.modified,
+    structuredData: { '@type': 'NewsArticle', headline: stripHTML(post.title.rendered), datePublished: post.date, dateModified: post.modified || post.date, image: media?.source_url, mainEntityOfPage: `${SITE_URL}${NEWS_PREFIX}${post.slug}`, publisher: { '@type': 'GovernmentOrganization', name: SITE_NAME, url: SITE_URL } },
     preloadImage: cover?.src,
     preloadSrcset: cover?.srcSet,
   };
 }
 
-async function resolveEvent(slug: string): Promise<OgData | null> {
-  const events = await fetchJson<CRFEventLite[]>(
-    `${EVENTS_WP}/index.php?rest_route=${encodeURIComponent(EVENTS_ROUTE)}`
+async function resolveEvent(slug: string, context: PagesContext): Promise<OgData | null> {
+  const events = await fetchJson<import('../src/services/wordpress/types').WPEventListing[]>(
+    `${context.env?.WP_SITE_URL || EVENTS_WP}/index.php?rest_route=${encodeURIComponent('/wp/v2/event_listing')}&slug=${encodeURIComponent(slug)}&per_page=1&_embed=wp:featuredmedia`
   );
-  const evento = (events ?? []).find((e) => e.slug === slug);
+  const post = events?.[0];
+  const evento = post ? { slug: post.slug, title: post.title.rendered, excerpt: post.excerpt?.rendered, banner: post._embedded?.['wp:featuredmedia']?.[0]?.source_url } : null;
   if (!evento) return null;
   return {
     title: stripHTML(evento.title ?? ''),
     description: stripHTML(evento.excerpt ?? '') || `Detalhes do evento ${stripHTML(evento.title ?? '')} do CRF-AL.`,
     image: evento.banner ?? undefined,
+    structuredData: { '@type': 'Event', name: stripHTML(evento.title ?? ''), url: `${SITE_URL}${EVENTS_PREFIX}${evento.slug}`, startDate: post?.event_details?.startDate, endDate: post?.event_details?.endDate, location: post?.event_details?.location ? { '@type': 'Place', name: post.event_details.location } : undefined },
     canonical: `${SITE_URL}${EVENTS_PREFIX}${evento.slug}`,
     ogType: 'article',
   };
@@ -121,13 +117,13 @@ const GALLERY_PREFIX = '/imprensa/galeria-de-fotos/';
 const DEFAULT_IMAGE = `${SITE_URL}/images/og-image.jpg`;
 const SITE_NAME = 'Conselho Regional de Farmácia do Estado de Alagoas';
 
-async function resolveAlbum(slug: string): Promise<OgData | null> {
+async function resolveAlbum(slug: string, context: PagesContext): Promise<OgData | null> {
   const search = new URLSearchParams({
     rest_route: `/crfal/v1/photo-albums/${slug}`,
     _fields: 'title,description,slug,cover',
   });
   const album = await fetchJson<{ title: string; description?: string; slug: string; cover?: { src: string } }>(
-    `${EVENTS_WP}/index.php?${search}`, true
+    `${context.env?.WP_SITE_URL || EVENTS_WP}/index.php?${search}`, true
   );
   if (!album) return null;
   return {
@@ -160,6 +156,7 @@ export function buildMeta(og: OgData): string {
     meta('twitter:description', og.description || ''),
     meta('twitter:image', image),
     og.noindex ? meta('robots', 'noindex, nofollow') : '',
+    !og.noindex ? `<script data-page-metadata="true" type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': [ ...(og.structuredData ? [og.structuredData] : []), { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL }, ...(og.canonical !== SITE_URL ? [{ '@type': 'ListItem', position: 2, name: og.title, item: og.canonical }] : [])] }] }).replace(/</g, '\\u003c')}</script>` : '',
     `<link data-page-metadata="true" rel="canonical" href="${escapeAttr(og.canonical)}">`,
   ].filter(Boolean).join('\n');
 }
@@ -212,6 +209,7 @@ function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Resp
     .transform(asset);
   // The rewritten body no longer matches the shell's validators.
   const response = new Response(rewritten.body, rewritten);
+  if (og.noindex) response.headers.set('X-Robots-Tag', 'noindex');
   response.headers.delete('ETag');
   response.headers.delete('Last-Modified');
   return response;
@@ -236,7 +234,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
   if (pathname === '/sitemap-news.xml') {
     try {
-      const entries = await newsIndex(context);
+      const entries = await newsSitemapIndex(context);
       const xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + entries.map(post => `<url><loc>${escapeAttr(`${SITE_URL}${NEWS_PREFIX}${post.slug}`)}</loc><lastmod>${escapeAttr((post.modified || post.date).slice(0, 10))}</lastmod></url>`).join('') + '</urlset>';
       return new Response(context.request.method === 'HEAD' ? null : xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=60' } });
     } catch {
@@ -272,7 +270,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     }
     return notFound(asset, pathname);
   }
-  if (staticData) return injectOg(asset, { ...staticData, canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` }, pathname === '/' ? homePreload() : []);
+  if (staticData) return injectOg(asset, { ...staticData, noindex: ['/eventos', '/imprensa/galeria-de-fotos'].includes(pathname), canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` }, pathname === '/' ? homePreload() : []);
   let slug: string;
   try { slug = decodeURIComponent(pathname.slice(prefix!.length)); } catch { return notFound(asset, pathname); }
   if (!slug || slug.includes('/')) return notFound(asset, pathname);
@@ -281,7 +279,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
       const post = await newsPost(slug, context, true);
       return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301) : notFound(asset, pathname);
     }
-    const og = await cachedMetadata(context, pathname, () => prefix === NEWS_PREFIX ? resolveNews(slug, context) : prefix === EVENTS_PREFIX ? resolveEvent(slug) : resolveAlbum(slug));
+    const og = await cachedMetadata(context, pathname, () => prefix === NEWS_PREFIX ? resolveNews(slug, context) : prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
     if (og?.title) return injectOg(asset, og);
     return notFound(asset, pathname);
   } catch (error) {

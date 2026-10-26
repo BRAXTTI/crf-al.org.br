@@ -13,6 +13,7 @@ const imageSetUrl = moduleUrl(await readFile(new URL('../src/services/wordpress/
 const siteUrl = moduleUrl(await readFile(new URL('../src/config/site.ts', import.meta.url), 'utf8'));
 const bannersUrl = moduleUrl((await readFile(new URL('../src/data/banners.ts', import.meta.url), 'utf8')).replace("'../config/site'", JSON.stringify(siteUrl)));
 const source = (await readFile(new URL('../functions/_middleware.ts', import.meta.url), 'utf8'))
+  .replace("'../src/config/site'", JSON.stringify(siteUrl))
   .replace("'../src/data/banners'", JSON.stringify(bannersUrl))
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
@@ -67,16 +68,18 @@ try {
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
   const sitemapPaths = new Set([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => new URL(url).pathname));
   for (const [, path] of routes.matchAll(/\{ path: '([^':*]+)', (?:element|lazy):/g)) {
-    if (!['instituicao/missao-visao', 'imprensa/noticias-cff'].includes(path)) assert.ok(Object.hasOwn(PAGE_METADATA, `/${path}`), `route coverage: ${path}`);
+    if (!['instituicao/missao-visao', 'imprensa/noticias-cff', 'instituicao/estatuto'].includes(path)) assert.ok(Object.hasOwn(PAGE_METADATA, `/${path}`), `route coverage: ${path}`);
   }
   for (const path of Object.keys(PAGE_METADATA)) {
-    assert.ok(sitemapPaths.has(path), `Static sitemap coverage: ${path}`);
+    assert.equal(sitemapPaths.has(path), !['/eventos', '/imprensa/galeria-de-fotos'].includes(path), `Static sitemap coverage: ${path}`);
     assert.equal((await request(path)).status, 200, path);
     if (path !== '/') assert.equal((await request(`${path}/?utm_source=test`)).status, 200, path);
   }
+  for (const path of ['/eventos', '/imprensa/galeria-de-fotos']) assert.equal((await request(path)).headers.get('X-Robots-Tag'), 'noindex');
+  assert.ok(!sitemapPaths.has('/instituicao/estatuto'));
   assert.equal(fetches, 0, 'Static pages must not query WordPress');
 
-  for (const path of ['/pagina-inexistente', '/constructor', '/__proto__', '/404', '/eventos/slug/extra', '/imprensa/noticias/%ZZ', '/imprensa/noticias/%2F', '/imprensa/galeria-de-fotos/slug/extra']) {
+  for (const path of ['/instituicao/estatuto', '/pagina-inexistente', '/constructor', '/__proto__', '/404', '/eventos/slug/extra', '/imprensa/noticias/%ZZ', '/imprensa/noticias/%2F', '/imprensa/galeria-de-fotos/slug/extra']) {
     await expectMissing(path);
   }
   for (const path of ['/assets/missing.js', '/images/missing.webp', '/fonts/missing.woff2', '/api/missing']) await expectMissing(path, true);

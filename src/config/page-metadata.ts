@@ -16,10 +16,6 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "title": "Diretoria",
     "description": "Conheça a diretoria e os membros do Conselho Regional de Farmácia do Estado de Alagoas (CRFAL) — gestão atual e suas responsabilidades."
   },
-  "/instituicao/estatuto": {
-    "title": "Estatuto",
-    "description": "Acesse o estatuto do Conselho Regional de Farmácia do Estado de Alagoas (CRFAL) — normas, regimentos e regulamentos internos."
-  },
   "/instituicao/plenarias": {
     "title": "Plenárias",
     "description": "Acompanhe a agenda das reuniões plenárias do CRF-AL e consulte as pautas, atas e transmissões disponibilizadas pelo Conselho."
@@ -60,6 +56,8 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "title": "Galeria de Fotos",
     "description": "Registros fotográficos dos eventos, encontros e ações do Conselho Regional de Farmácia de Alagoas."
   },
+  "/acesso-a-informacao": { title: "Acesso à Informação", description: "Acesso ao Portal da Transparência, e-SIC e informações públicas do CRF-AL." },
+  "/acessibilidade": { title: "Acessibilidade", description: "Recursos de navegação por teclado e acessibilidade do portal CRF-AL." },
   "/contato": {
     "title": "Contato",
     "description": "Entre em contato com o CRFAL — Conselho Regional de Farmácia do Estado de Alagoas. Fale com nossos setores por e-mail, telefone ou WhatsApp."

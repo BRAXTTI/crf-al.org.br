@@ -120,8 +120,10 @@ export default function EventosPage() {
         title="Eventos"
         description="Confira a agenda de eventos do CRF-AL — Conselho Regional de Farmácia do Estado de Alagoas. Congressos, palestras, capacitações e ações sociais."
         path="/eventos"
+        noindex
       />
 
+      <a href="/api/events?format=ics" className="container-crfal block py-2 underline">Baixar calendário de eventos (.ics)</a>
       {/* Hero */}
       <PageHero
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa' }, { label: 'Eventos' }]}
