@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import { moduleUrl } from './load-typescript.mjs';
+const { contentApi } = await import(await moduleUrl('../functions/_content.ts', { "'../src/lib/calendar'": JSON.stringify(await moduleUrl('../src/lib/calendar.ts')), "'../src/config/site'": JSON.stringify(await moduleUrl('../src/config/site.ts')) }));
+const saved = { fetch: globalThis.fetch, caches: globalThis.caches, error: console.error };
+let urls = [];
+let pending = [];
+const stored = new Map();
+const context = { env: { WP_SITE_URL: 'https://wordpress.example' }, waitUntil: promise => pending.push(promise) };
+const request = (path, method = 'GET') => contentApi(new Request(`https://portal.example${path}`, { method }), context);
+try {
+  globalThis.caches = { default: { match: async key => stored.get(key.url)?.clone(), put: async (key, value) => stored.set(key.url, value) } };
+  globalThis.fetch = async url => { urls.push(new URL(url)); return Response.json([{ slug: 'evento' }]); };
+  assert.equal((await request('/api/events?slug=evento')).status, 200);
+  assert.equal(urls[0].searchParams.get('rest_route'), '/wp/v2/event_listing');
+  assert.equal(urls[0].searchParams.get('slug'), 'evento');
+  assert.equal(urls[0].searchParams.get('per_page'), '1');
+  await Promise.all(pending);
+  assert.equal(await (await request('/api/events?slug=evento', 'HEAD')).text(), '');
+  assert.equal(urls.length, 1, 'HEAD reuses edge cache');
+  assert.equal((await request('/api/events?slug=%2F')).status, 400);
+  assert.equal((await request('/api/gallery?page=0')).status, 400);
+  assert.equal((await request('/api/events', 'POST')).status, 405);
+  assert.equal((await request('/api/gallery?slug=album')).status, 200);
+  assert.equal(urls.at(-1).searchParams.get('rest_route'), '/crfal/v1/photo-albums/album');
+  globalThis.fetch = async () => Response.json([{ id: 1, slug: 'evento', title: 'Título, teste', startDate: '2026-10-26 09:00:00', endDate: '', location: 'Maceió', cancelled: true }]);
+  const calendar = await request('/api/events?format=ics');
+  assert.match(calendar.headers.get('Content-Type'), /text\/calendar/);
+  const ics = await calendar.text();
+  assert.match(ics, /DTSTART:20261026T120000Z/);
+  assert.match(ics, /STATUS:CANCELLED/);
+  assert.match(ics, /BEGIN:VCALENDAR/);
+  globalThis.fetch = async () => new Response('', { status: 404 });
+  assert.equal((await request('/api/gallery?slug=missing')).status, 404);
+  console.error = () => {};
+  const failed = await request('/api/events');
+  assert.equal(failed.status, 503, 'Missing collection is an integration failure');
+  assert.equal(failed.headers.get('Retry-After'), '60');
+  assert.equal(failed.headers.get('Cache-Control'), 'no-store');
+  globalThis.fetch = async () => { throw new Error('offline'); };
+  assert.equal((await request('/api/gallery')).status, 503);
+  console.log('Content API: rotas permitidas, slug, validação, cache, HEAD, 404 e 503 validados offline.');
+} finally {
+  globalThis.fetch = saved.fetch; globalThis.caches = saved.caches; console.error = saved.error;
+}

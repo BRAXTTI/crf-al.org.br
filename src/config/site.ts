@@ -1,12 +1,5 @@
-/**
- * Configuração central de URL do site.
- * Defina `VITE_SITE_URL` no build (Cloudflare Pages) para trocar o domínio
- * sem alterar código. O padrão é o subdomínio institucional.
- * `import.meta.env?.`: este arquivo também roda na Pages Function (sem Vite).
- */
-export const SITE_URL = (
-  import.meta.env?.VITE_SITE_URL ?? 'https://institucional.crf-al.org.br'
-).replace(/\/$/, '');
+/** Fonte única do domínio canônico; compartilhada pelo build e pelas Functions. */
+export const SITE_URL = 'https://institucional.crf-al.org.br';
 
 export const SITE_NAME = 'CRFAL - Conselho Regional de Farmácia do Estado de Alagoas';
 
@@ -52,3 +45,6 @@ export const SOCIAL_LINKS = [
   { label: 'Facebook', href: 'https://www.facebook.com/crfal' },
   { label: 'X', href: 'https://x.com/crfal' },
 ] as const;
+
+/** Pedido de informação pública: destino já usado pela Ouvidoria. */
+export const ESIC_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#sic/home';

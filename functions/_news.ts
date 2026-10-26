@@ -1,3 +1,4 @@
+import { SITE_URL } from '../src/config/site';
 import { NEWS_ARCHIVE } from './_news-archive';
 import type { WPPost, WPPostsPage } from '../src/services/wordpress/types';
 
@@ -20,8 +21,19 @@ function endpoint(source: Source, path: string, params: Record<string, string> =
 // the origin, otherwise it would re-store old data with a new timestamp.
 export const ORIGIN_CACHE = { cf: { cacheTtlByStatus: { '200-299': 60, '404': 60, '500-599': 0 }, cacheEverything: true } } as RequestInit;
 
-async function request(source: Source, path: string, params: Record<string, string> = {}, missing = false): Promise<Response | null> {
-  const response = await fetch(endpoint(source, path, params), { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
+async function request(source: Source, path: string, params: Record<string, string> = {}, missing = false, context?: NewsContext): Promise<Response | null> {
+  const primary = source === 'legacy' ? context?.env?.NEWS_ARCHIVE_API_URL : undefined;
+  let response: Response;
+  if (primary) {
+    try {
+      const url = new URL(`${primary.replace(/\/$/, '')}/${path}`);
+      for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+      response = await fetch(url, { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
+      if (!response.ok) throw new Error(`Archive primary HTTP ${response.status}`);
+    } catch {
+      response = await fetch(endpoint(source, path, params), { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
+    }
+  } else response = await fetch(endpoint(source, path, params), { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
   if (missing && response.status === 404) return null;
   if (!response.ok) throw new Error(`News ${source} HTTP ${response.status}`);
   return response;
@@ -29,12 +41,12 @@ async function request(source: Source, path: string, params: Record<string, stri
 
 // Cache only successful public data. No module-level mutable request state.
 // Entries live 10 min; after 60 s they are served stale and refreshed in the background.
-interface NewsContext { waitUntil: (promise: Promise<unknown>) => void }
+interface NewsContext { env?: { NEWS_ARCHIVE_API_URL?: string }; waitUntil: (promise: Promise<unknown>) => void }
 interface PublicCache { match: (request: Request) => Promise<Response | undefined>; put: (request: Request, response: Response) => Promise<void>; delete?: (request: Request) => Promise<unknown> }
 const FRESH_MS = 60_000;
 async function cached<T>(key: string, context: NewsContext | undefined, load: () => Promise<T>): Promise<T> {
   const cache = (globalThis as typeof globalThis & { caches?: { default?: PublicCache } }).caches?.default;
-  const request = new Request(`https://institucional.crf-al.org.br/__news/v2/${key}`);
+  const request = new Request(`${SITE_URL}/__news/v3/${context?.env?.NEWS_ARCHIVE_API_URL ?? 'legacy'}/${key}`);
   const store = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': 'public, max-age=600' } }));
   const hit = cache && context ? await cache.match(request) : undefined;
   if (hit) {
@@ -81,13 +93,34 @@ export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   return [...archive, ...current].sort((a, b) => b.date_gmt.localeCompare(a.date_gmt) || a.newsSource.localeCompare(b.newsSource) || b.id - a.id);
 }
 
+/** Sitemap valida os reservados contra o inventário publicado, sem baixar corpos. */
+export async function newsSitemapIndex(context?: NewsContext): Promise<Entry[]> {
+  return cached('sitemap-index', context, async () => {
+    const [index, published] = await Promise.all([newsIndex(context), (async () => {
+      const rows: Array<{ id: number; slug: string }> = [];
+      let pages = 1;
+      let total = 0;
+      for (let page = 1; page <= pages; page++) {
+        const response = (await request('legacy', 'posts', { per_page: '100', page: String(page), _fields: 'id,slug' }, false, context))!;
+        pages = Number(response.headers.get('x-wp-totalpages'));
+        total = Number(response.headers.get('x-wp-total'));
+        if (!Number.isInteger(pages) || pages < 0 || pages > 100 || !Number.isInteger(total)) throw new Error('Invalid archive inventory');
+        rows.push(...await response.json() as Array<{ id: number; slug: string }>);
+      }
+      if (rows.length !== total) throw new Error('Archive changed during sitemap generation');
+      return new Set(rows.map(row => `${row.id}:${row.slug}`));
+    })()]);
+    return index.filter(post => post.newsSource === 'current' || published.has(`${post.id}:${post.slug}`));
+  });
+}
+
 export async function newsPost(slug: string, context?: NewsContext, metadataOnly = false): Promise<WPPost | null> {
   const postFields = metadataOnly ? fields.replace('content,', '') : fields;
   const embed = metadataOnly ? 'wp:featuredmedia' : 'wp:featuredmedia,wp:term,author';
   return cached(`${metadataOnly ? 'metadata' : 'post'}/${encodeURIComponent(slug)}`, context, async () => {
     const historical = reserved.get(slug);
     if (historical || /^\d+$/.test(slug)) {
-      const response = await request('legacy', `posts/${historical?.id ?? slug}`, { _fields: postFields, _embed: embed }, true);
+      const response = await request('legacy', `posts/${historical?.id ?? slug}`, { _fields: postFields, _embed: embed }, true, context);
       return response ? { ...await response.json() as WPPost, newsSource: 'legacy' } : null;
     }
     const category = await currentCategory(context);
@@ -106,7 +139,7 @@ export async function newsPage(page = 1, perPage = 12, context?: NewsContext): P
     const ids = entries.filter(post => post.newsSource === source).map(post => post.id);
     if (!ids.length) return [];
     return cached<WPPost[]>(`list/${source}/${ids.join(',')}`, context, async () => {
-      const response = await request(source, 'posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', ''), _embed: 'wp:featuredmedia,wp:term' });
+      const response = await request(source, 'posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', ''), _embed: 'wp:featuredmedia,wp:term' }, false, context);
       const posts = await response!.json() as WPPost[];
       if (posts.length !== ids.length) throw new Error('Archive snapshot needs refresh: unpublished or missing news');
       return posts.map(post => ({ ...post, newsSource: source }));
@@ -116,10 +149,28 @@ export async function newsPage(page = 1, perPage = 12, context?: NewsContext): P
   return { posts: entries.map(entry => posts.get(`${entry.newsSource}:${entry.id}`)!), total: index.length, totalPages: Math.ceil(index.length / perPage) };
 }
 
+export async function searchNews(term: string, context?: NewsContext): Promise<WPPost[]> {
+  return cached(`search/${encodeURIComponent(term)}`, context, async () => {
+    const category = await currentCategory(context);
+    const results = await Promise.all((['legacy', 'current'] as const).map(async source => {
+      if (source === 'current' && !category) return [];
+      const response = await request(source, 'posts', { search: term, per_page: '10', _fields: 'id,slug,date,title,excerpt', ...(source === 'current' ? { categories: String(category) } : {}) }, false, context);
+      const posts = await response!.json() as WPPost[];
+      return posts.filter(post => source === 'legacy' ? reserved.get(post.slug)?.id === post.id : !reserved.has(post.slug) && !/^\d+$/.test(post.slug));
+    }));
+    return results.flat().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
+  });
+}
+
 export async function newsApi(request: Request, context?: NewsContext): Promise<Response> {
   if (!['GET', 'HEAD'].includes(request.method)) return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
   const url = new URL(request.url);
   try {
+    const search = url.searchParams.get('search');
+    if (search !== null) {
+      if (search.trim().length < 3 || search.length > 120) return Response.json({ error: 'Busca deve ter entre 3 e 120 caracteres.' }, { status: 400 });
+      return Response.json(await searchNews(search.trim(), context), { headers: { 'Cache-Control': 'public, max-age=60' } });
+    }
     const slug = url.searchParams.get('slug');
     if (slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) return Response.json({ error: 'Slug inválido.' }, { status: 400 });
     const result = slug !== null ? await newsPost(slug, context) : await newsPage(Number(url.searchParams.get('page') ?? 1), Number(url.searchParams.get('per_page') ?? 12), context);

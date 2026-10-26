@@ -22,36 +22,15 @@
     <meta data-page-metadata="true" property="og:type" content="website" />
     <meta data-page-metadata="true" property="og:locale" content="pt_BR" />
     <meta data-page-metadata="true" property="og:site_name" content="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas" />
-    <meta data-page-metadata="true" property="og:image" content="https://institucional.crf-al.org.br/images/og-image.jpg" />
+    <meta data-page-metadata="true" property="og:image" content="%SITE_URL%/images/og-image.jpg" />
     <meta data-page-metadata="true" property="og:image:type" content="image/jpeg" />
     <meta data-page-metadata="true" property="og:image:width" content="1200" />
     <meta data-page-metadata="true" property="og:image:height" content="630" />
     <meta data-page-metadata="true" property="og:image:alt" content="CRFAL — Conselho Regional de Farmácia de Alagoas. Valorizando a profissão. Protegendo a sociedade." />
 
+    <link rel="alternate" type="application/rss+xml" title="Notícias CRF-AL" href="/api/rss" />
     <!-- JSON-LD: Organização -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "GovernmentOrganization",
-      "name": "CRFAL - Conselho Regional de Farmácia do Estado de Alagoas",
-      "alternateName": "CRFAL",
-      "url": "https://institucional.crf-al.org.br",
-      "logo": "https://institucional.crf-al.org.br/images/logo-crf-azul.png",
-      "description": "Órgão de fiscalização do exercício da profissão farmacêutica no estado de Alagoas.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressRegion": "AL",
-        "addressCountry": "BR"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "url": "https://institucional.crf-al.org.br/contato",
-        "availableLanguage": "Portuguese"
-      },
-      "sameAs": []
-    }
-    </script>
+    <script type="application/ld+json">%ORGANIZATION_JSON%</script>
   </head>
   <body>
     <div id="root"></div>
