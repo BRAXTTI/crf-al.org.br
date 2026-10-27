@@ -8,6 +8,7 @@ import {
   Clock,
   ExternalLink,
   MapPin,
+  Monitor,
   RefreshCw,
   Search,
   Sparkles,
@@ -173,7 +174,7 @@ export default function EventosPage() {
               <section aria-labelledby="destaque-titulo">
                 <SecaoTitulo id="destaque-titulo" titulo="Próximo evento" contador={1} />
                 <article className="group relative grid overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-card transition-all duration-500 hover:shadow-card-hover   md:grid-cols-2">
-                  <div className="relative aspect-16/10 overflow-hidden sm:aspect-16/8 md:aspect-auto md:min-h-[340px]">
+                  <div className="relative aspect-16/10 overflow-hidden sm:aspect-16/8 md:aspect-video">
                     <BannerEvento evento={destaque} />
                     <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-crfal-gold px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
                       <Sparkles className="h-3.5 w-3.5" />
@@ -225,7 +226,7 @@ export default function EventosPage() {
                       </p>
                       {destaque.local && (
                         <p className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 shrink-0 text-crfal-blue " />
+                          {destaque.modalidade === 'online' ? <Monitor className="h-4 w-4 shrink-0 text-crfal-blue" aria-hidden /> : <MapPin className="h-4 w-4 shrink-0 text-crfal-blue" aria-hidden />}
                           {destaque.local}
                         </p>
                       )}
