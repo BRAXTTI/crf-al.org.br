@@ -26,7 +26,7 @@ npm run build
 - `src/features/`: páginas e componentes por domínio; HTML vindo do WP passa por DOMPurify.
 - `src/services/wordpress/`: clientes e TanStack Query; requisições de dados usam APIs da mesma origem.
 - `functions/_middleware.ts`: metadados e JSON-LD no HTML inicial, preload LCP, redirects e status. Não criar `_redirects`, `200.html` ou `404.html` na raiz.
-- `/api/news`: notícias novas da categoria `noticias-do-portal` e acervo reservado; cache fresco por 60 s, SWR até 10 min. Erros não são guardados.
+- `/api/news`: notícias novas da categoria `noticias-do-portal` e acervo reservado; índice persistido em `NEWS_INDEX`, atualizado a cada 10 min; respostas de detalhe/lista usam Cache API fresco por 60 s e SWR até 10 min. Erros não são guardados.
 - `/api/events`, `/api/gallery`: proxy de rotas permitidas, cache de respostas bem-sucedidas por 60 s, timeout, parâmetros validados e 503 com Retry-After em falhas de integração. Detalhes consultam slug/ID, sem baixar o catálogo para resolver metadados.
 - `/api/instagram` e `/api/cff-publicacoes`: agregadores existentes. Instagram conserva último resultado válido durante falhas curtas.
 - `wordpress/`: plugin de galeria e instruções de instalação no WP; instalação/ativação é tarefa administrativa externa.
@@ -76,3 +76,37 @@ Logs estruturados de falhas estão nas Functions. Acompanhar em Pages/Cloudflare
 - Produto: a busca inclui notícias (mínimo 3 caracteres), além de páginas e serviços; o feed RSS está em `/api/rss` e o calendário em `/api/events?format=ics`. Dados abertos adicionais dependem de definir conjuntos oficiais e licenças de publicação. Pré-renderização/SSR integral deve ser planejada com o ciclo de atualização do conteúdo.
 - Acessibilidade: página de orientação disponível; há auditoria Lighthouse/axe de uma página estática no CI; falta auditoria humana e axe nos fluxos completos e definição institucional de VLibras/eMAG. Não declarar conformidade sem verificação. Lighthouse em produção/preview representativo continua necessário; orçamento de bundle não mede Core Web Vitals.
 - Recomenda-se manter e revisar `.agents/`, `.cursor/`, `.claude/` e `skills-lock.json` como instruções e ferramentas de colaboração, sem segredos. São versionados e não foram removidos; não fazem parte do bundle público. Algumas instruções históricas podem descrever arquitetura antiga: prevalecem código e README atual.
+
+### Índice de notícias em KV e atualização agendada
+
+`newsIndex()` lê `news:index:v1` no binding `NEWS_INDEX`. O valor contém `storedAt` e `value`, sem TTL: um índice antigo continua disponível mesmo durante indisponibilidade do WordPress. Após 10 min, a leitura agenda refresh em `ctx.waitUntil`. Um namespace vazio faz a primeira construção em primeiro plano; enquanto outro refresh segura o lease, retorna 503/Retry-After até o índice existir. Sem binding, permanece o fallback de construção ao vivo + Cache API (60 s fresco, SWR até 600 s). Falha de KV configurado retorna erro, evitando despejar tráfego no host por indisponibilidade do armazenamento.
+
+A construção usa um pool de quatro requisições, com uma repetição para HTTP 5xx ou timeout de 15 s. Deduplica IDs, aceita totais variáveis e páginas removidas e acompanha páginas novas (limite de 100 páginas). Não é um snapshot transacional do WordPress: alterações durante paginação podem ficar para o próximo refresh. Falhas reais não substituem o último índice válido. Listagens e detalhes usam `_fields`, uma consulta de mídia por conjunto de IDs e categorias paginadas em cache; recompõem `_embedded` para manter capas, srcset, alt e categorias dos consumidores. O autor do detalhe é consultado separadamente e guardado em cache.
+
+O Worker em `workers/news-index-cron/` executa `*/10 * * * *` (UTC) e grava diretamente no mesmo KV, reutilizando a implementação e o mapa histórico das Functions. Escolhemos escrita direta para não expor endpoint de refresh nem distribuir `NEWS_REFRESH_TOKEN`, e para o cron não depender de uma requisição HTTP ao Pages. Publique ambos quando mudar o mapa ou a lógica do índice. O Worker não tem rota HTTP pública.
+
+Há single-flight por isolate e um lease/timestamp de 120 s em `news:index:refresh:v1`, mantido até expirar inclusive após falhas. Isso reduz rajadas e dá intervalo para propagação. **KV tem consistência eventual e não oferece lock atômico**: isolates/regiões ainda podem iniciar coletas simultâneas; quatro conexões é limite por coleta, não global. Exclusão global estrita exigiria Durable Object. O cron é a fonte regular de refresh; `waitUntil` de requisições tem janela limitada após a resposta, portanto a atualização agendada também cobre coletas lentas que ultrapassem essa janela. Monitorar falhas do cron e idade de `storedAt`.
+
+Configuração operacional (comandos documentados, não executados nesta alteração):
+
+1. Confirmar o nome real do projeto Pages e preservar bindings/variáveis já existentes antes de adotar `wrangler.toml` como fonte de configuração. Substituir `name = "crf-al-prod"` se necessário.
+2. Criar namespaces distintos:
+
+   ```sh
+   npx wrangler kv namespace create NEWS_INDEX
+   npx wrangler kv namespace create NEWS_INDEX --preview
+   ```
+
+3. Copiar os IDs retornados: `REPLACE_WITH_PRODUCTION_NEWS_INDEX_ID` em ambos os arquivos Wrangler; `REPLACE_WITH_PREVIEW_NEWS_INDEX_ID` em `preview_id` e em `env.preview.kv_namespaces` do Pages. O `id` de preview deve apontar somente para preview; `preview_id` sozinho não configura deployments de preview. O vínculo ao Pages é declarado por `[[kv_namespaces]]`/`[[env.preview.kv_namespaces]]` e aplicado no próximo deploy. Não há comando separado `pages bind`. Alternativa pelo painel: Workers & Pages → projeto → Settings → Bindings → KV namespace → `NEWS_INDEX`, selecionando produção e preview separadamente.
+4. Quando autorizado a publicar, aplicar o binding no projeto existente e publicar o cron:
+
+   ```sh
+   npm run build
+   npx wrangler pages deploy dist --project-name crf-al-prod --branch <BRANCH_DE_PRODUCAO>
+   npx wrangler pages deploy dist --project-name crf-al-prod --branch feat/noticias-arquivo-wp-novo
+   npx wrangler deploy --config workers/news-index-cron/wrangler.toml
+   ```
+
+   Substituir o projeto e `<BRANCH_DE_PRODUCAO>` pelos valores existentes. A segunda publicação usa o namespace de preview; não agendar o cron de produção contra preview. A integração Git existente também aplica o arquivo no próximo deploy. Nenhum desses comandos deve ser executado com placeholders. O primeiro cron ou acesso preenche o namespace; conferir `storedAt` e logs após ativação. O preview faz refresh por acesso; para desenvolvimento sem KV, usar `npm run dev`.
+
+Referências oficiais consultadas: [bindings de Pages](https://developers.cloudflare.com/pages/functions/bindings/), [configuração Wrangler de Pages](https://developers.cloudflare.com/pages/functions/wrangler-configuration/), [consistência do KV](https://developers.cloudflare.com/kv/concepts/how-kv-works/), [comandos KV](https://developers.cloudflare.com/kv/reference/kv-commands/) e [Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/).
