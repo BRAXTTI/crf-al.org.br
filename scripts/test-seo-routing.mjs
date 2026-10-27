@@ -80,6 +80,9 @@ try {
     assert.ok(sources.includes('https://midias.crf-al.org.br'), `${directive}: permitir mídias após o redirect dos uploads legados`);
     assert.equal(sources.filter(source => source === 'https://midias.crf-al.org.br').length, 1, `${directive}: domínio de mídias sem duplicação`);
   }
+  for (const ext of ['jpg', 'png', 'svg', 'webp']) {
+    assert.match(headers, new RegExp(`/images/\\*\\.${ext}\\n  Cache-Control: public, max-age=86400, stale-while-revalidate=604800\\n`), `Cache de /images/*.${ext}`);
+  }
   const routes = await readFile(new URL('../src/router/app-router.tsx', import.meta.url), 'utf8');
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
   const sitemapPaths = new Set([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => new URL(url).pathname));
