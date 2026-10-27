@@ -12,7 +12,6 @@ import {
   MapPin,
   Monitor,
   RefreshCw,
-  Video,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
@@ -22,6 +21,7 @@ import { useEventBySlug, useRelatedEvents } from '@/services/wordpress/event-hoo
 import type { CRFEvent } from '@/services/wordpress/types';
 import type { WPEventListing } from '@/services/wordpress/types';
 import {
+  acoesDoEvento,
   MODALIDADE_ICONS,
   MODALIDADE_LABELS,
   STATUS_COLORS,
@@ -152,8 +152,7 @@ export default function EventoDetailPage() {
   const StatusIcon = statusConfig.icon;
   const ModalidadeIcon = MODALIDADE_ICONS[evento.modalidade];
   const conteudo = eventoCompleto ? sanitizeWP(eventoCompleto.content?.rendered ?? '') : '';
-  const inscricaoAberta =
-    Boolean(evento.link) && evento.status !== 'cancelado' && evento.status !== 'encerrado';
+  const acoes = acoesDoEvento(evento);
 
   return (
     <div className="min-h-screen ">
@@ -281,39 +280,11 @@ export default function EventoDetailPage() {
                 {evento.publico && <InfoRow icon={Building2} rotulo="Público-alvo" valor={evento.publico} />}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-crfal-gray-200 ">
-                {inscricaoAberta ? (
-                  <a
-                    href={evento.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 px-5 py-3 bg-crfal-blue text-white text-sm font-semibold rounded-full hover:bg-crfal-blue-dark transition-colors"
-                  >
-                    Inscreva-se
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                ) : (
-                  <p className="text-sm text-crfal-gray-500  text-center">
-                    {evento.status === 'cancelado'
-                      ? 'Este evento foi cancelado.'
-                      : evento.status === 'encerrado'
-                        ? 'As inscrições deste evento já foram encerradas.'
-                        : 'Inscrições em breve.'}
-                  </p>
-                )}
-
-                {evento.status === 'em-andamento' && eventoCompleto?.event_details?.videoUrl && (
-                  <a
-                    href={eventoCompleto.event_details.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 px-5 py-3 border border-crfal-blue text-crfal-blue  text-sm font-semibold rounded-full hover:bg-crfal-blue hover:text-white transition-colors"
-                  >
-                    <Video className="w-4 h-4" />
-                    Assistir transmissão
-                  </a>
-                )}
-              </div>
+              {acoes.length > 0 && <div className="mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
+                {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
+                  {acao.label}<ExternalLink className="w-4 h-4" aria-hidden /><span className="sr-only"> (abre em uma nova aba)</span>
+                </a>)}
+              </div>}
             </div>
           </aside>
         </div>

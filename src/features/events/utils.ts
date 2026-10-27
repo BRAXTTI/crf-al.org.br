@@ -18,6 +18,7 @@ export interface Evento {
   status: StatusEvento;
   publico?: string;
   link?: string;
+  video?: string;
   banner?: string | null;
 }
 
@@ -128,7 +129,8 @@ export function mapEvent(evento: CRFEvent): Evento {
     modalidade,
     status: derivarStatus(evento, inicio, fim),
     publico: stripHTML(evento.publico) || undefined,
-    link: evento.registrationUrl || undefined,
+    link: urlSegura(evento.registrationUrl),
+    video: urlSegura(evento.videoUrl),
     banner: evento.banner,
   };
 }
@@ -184,3 +186,15 @@ export function rotuloContagem(data: string): string | null {
   return null;
 }
 
+
+function urlSegura(valor: string): string | undefined {
+  try { const url = new URL(valor); return ['http:', 'https:'].includes(url.protocol) ? url.href : undefined; } catch { return undefined; }
+}
+
+export function acoesDoEvento(evento: Evento): { label: string; href: string }[] {
+  if (evento.status === 'cancelado') return [];
+  if (evento.status === 'encerrado') return evento.video ? [{ label: 'Assistir gravação', href: evento.video }] : [];
+  const video = evento.video ? [{ label: 'Assistir ao vivo', href: evento.video }] : [];
+  const inscricao = evento.link ? [{ label: 'Inscreva-se', href: evento.link }] : [];
+  return evento.status === 'em-andamento' ? [...video, ...inscricao] : [...inscricao, ...video];
+}
