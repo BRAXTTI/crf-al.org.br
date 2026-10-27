@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Rawline é carregada pelos @font-face, conforme os pesos usados na página. -->
+    <!-- Rawline é carregada pelos @font-face, conforme os pesos usados na página.
+         Texto (400) e títulos (700) aparecem em todas as páginas: pré-carregados para
+         evitar troca visível de fonte; os demais pesos seguem sob demanda. -->
+    <link rel="preload" href="/fonts/rawline-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/rawline-700-normal.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
