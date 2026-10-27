@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, NEWS_INDEX_MAX_PAGES, NEWS_INDEX_RETRY_MS, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, legacyCover, NEWS_INDEX_MAX_PAGES, NEWS_INDEX_RETRY_MS, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
 const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
@@ -42,6 +42,14 @@ try {
   assert.equal(detail._embedded['wp:term'][0][0].name, 'Arquivo');
   assert.equal(detail._embedded['wp:featuredmedia'][0].alt_text, 'Capa');
   assert.match(detail._embedded['wp:featuredmedia'][0].media_details.sizes.medium.source_url, /midias/);
+  // Anexo ausente no WordPress novo (media/16032 → 404): capa do levantamento antigo, servida por midias.
+  assert.equal(legacyCover(55), undefined);
+  assert.equal(legacyCover(16032).source_url, 'https://midias.crf-al.org.br/app/uploads/2025/12/NOTA-DE-ESCLARECIMENTO-e1765903756488.png');
+  posts.push({ ...post(selected[0]), id: 999990, slug: 'capa-legada', categories: [42], featured_media: 16032 });
+  const legacy = (await newsPost('capa-legada'))._embedded['wp:featuredmedia'][0];
+  assert.equal(legacy.id, 16032);
+  assert.equal(legacy.media_details.sizes.large.source_url, 'https://midias.crf-al.org.br/app/uploads/2025/12/NOTA-DE-ESCLARECIMENTO-e1765903756488-955x560.png');
+  posts.pop();
   assert.equal(await newsPost('2534'), null); assert.equal(await newsPost('best-dating-sites'), null);
   assert.equal(await newsPost(String(find(107698).oldId)), null);
   assert.equal((await newsApi(new Request('https://example.test/api/news?slug=best-dating-sites'))).status, 410);

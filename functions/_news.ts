@@ -2,6 +2,7 @@ import type { KVNamespace } from '@cloudflare/workers-types';
 import { SITE_URL } from '../src/config/site';
 import { NEWS_MAP, BLOCKED_NEWS_SLUGS, BLOCKED_NEW_IDS } from './_news-map';
 import type { HistoricalNews } from './_news-map';
+import { LEGACY_COVERS } from './_news-covers';
 import type { WPPost, WPPostsPage, WPMedia } from '../src/services/wordpress/types';
 
 export const NEWS_CATEGORY_SLUG = 'noticias-do-portal';
@@ -348,6 +349,30 @@ function normalize<T extends { id: number; slug: string; title?: { rendered: str
     ),
   ) as T;
 }
+// O WordPress novo herdou o ID da capa, mas não o anexo (/wp/v2/media/{id} → 404). O arquivo continua
+// em midias.crf-al.org.br; os metadados vêm do levantamento do WordPress antigo, com o mesmo ID.
+const LEGACY_UPLOADS = 'https://midias.crf-al.org.br/app/uploads/';
+export function legacyCover(id: number | undefined): WPMedia | undefined {
+  const cover = id ? LEGACY_COVERS[id] : undefined;
+  if (!cover) return undefined;
+  const [path, width, height, alt, sizes] = cover;
+  const folder = LEGACY_UPLOADS + path.slice(0, path.lastIndexOf('/') + 1);
+  return {
+    id,
+    source_url: LEGACY_UPLOADS + path,
+    alt_text: alt,
+    media_details: {
+      width,
+      height,
+      sizes: Object.fromEntries(
+        Object.entries(sizes).map(([name, [file, w, h]]) => [
+          name,
+          { source_url: folder + file, width: w, height: h },
+        ]),
+      ),
+    },
+  };
+}
 type Category = { id: number; slug: string; name: string };
 async function categories(context?: NewsContext) {
   return cached('categories', context, async (scoped) => {
@@ -419,7 +444,7 @@ async function enrich(
   const images = new Map(media.map((item) => [item.id, item]));
   const names = new Map(authors);
   return posts.map((post) => {
-    const image = images.get(post.featured_media);
+    const image = images.get(post.featured_media) ?? legacyCover(post.featured_media);
     const author = withAuthor && post.author ? names.get(post.author) : null;
     return normalize({
       ...post,
