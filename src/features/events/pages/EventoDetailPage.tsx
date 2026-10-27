@@ -246,6 +246,7 @@ export default function EventoDetailPage() {
                   [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]:mt-6 [&_h2]:mb-3
                   [&_h3]:font-bold [&_h3]:text-neutral-800 [&_h3]:mt-6 [&_h3]:mb-3
                   [&_img]:rounded-xl [&_img]:my-4
+                  [&_iframe]:my-4 [&_iframe]:aspect-video [&_iframe]:h-auto [&_iframe]:w-full [&_iframe]:rounded-xl
                   [&_p]:mb-4
                   [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4
                   [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4"
