@@ -53,6 +53,26 @@ try {
   assert.equal(request.searchParams.get('slug'), 'evento-de-teste');
   globalThis.fetch = async () => Response.json([]);
   assert.equal(await client.fetchEventBySlug('missing'), null);
+  // Simula 20 s de leitura sem esperar em tempo real: a listagem do acervo
+  // precisa sobreviver ao cache frio, mantendo 15 s para as demais APIs.
+  const timers = new Map();
+  const savedTimers = { setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout };
+  try {
+    let timerId = 0;
+    globalThis.setTimeout = (callback, delay) => { timers.set(++timerId, { callback, delay }); return timerId; };
+    globalThis.clearTimeout = id => timers.delete(id);
+    globalThis.fetch = async (_url, { signal }) => ({ ok: true, json: async () => {
+      for (const { callback, delay } of timers.values()) if (delay <= 20_000) callback();
+      signal.throwIfAborted();
+      return { posts: [], total: 0, totalPages: 0 };
+    } });
+    assert.deepEqual(await client.fetchPosts(), { posts: [], total: 0, totalPages: 0 });
+    assert.equal(timers.size, 0);
+    await assert.rejects(requestJson('/other-api'), error => error.name === 'TimeoutError');
+  } finally {
+    globalThis.setTimeout = savedTimers.setTimeout;
+    globalThis.clearTimeout = savedTimers.clearTimeout;
+  }
   console.log('HTTP: erros, cancelamento, timeout durante o corpo e evento por slug validados.');
 } finally {
   globalThis.fetch = originalFetch;

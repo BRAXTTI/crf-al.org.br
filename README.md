@@ -26,7 +26,7 @@ npm run build
 - `src/features/`: páginas e componentes por domínio; HTML vindo do WP passa por DOMPurify.
 - `src/services/wordpress/`: clientes e TanStack Query; requisições de dados usam APIs da mesma origem.
 - `functions/_middleware.ts`: metadados e JSON-LD no HTML inicial, preload LCP, redirects e status. Não criar `_redirects`, `200.html` ou `404.html` na raiz.
-- `/api/news`: notícias novas da categoria `noticias-do-portal` e acervo reservado; cache fresco por 60 s, SWR até 10 min. Erros não são guardados.
+- `/api/news`: notícias novas da categoria `noticias-do-portal` e acervo reservado; índice persistido em `NEWS_INDEX`, atualizado a cada 10 min; respostas de detalhe/lista usam Cache API fresco por 60 s e SWR até 10 min. Erros não são guardados.
 - `/api/events`, `/api/gallery`: proxy de rotas permitidas, cache de respostas bem-sucedidas por 60 s, timeout, parâmetros validados e 503 com Retry-After em falhas de integração. Detalhes consultam slug/ID, sem baixar o catálogo para resolver metadados.
 - `/api/instagram` e `/api/cff-publicacoes`: agregadores existentes. Instagram conserva último resultado válido durante falhas curtas.
 - `wordpress/`: plugin de galeria e instruções de instalação no WP; instalação/ativação é tarefa administrativa externa.
@@ -42,7 +42,7 @@ Copie `.env.example` para `.env` para opções locais de frontend. Nenhum segred
 | --- | --- | --- |
 | `SITE_URL` | `src/config/site.ts` | Canônico único; alterar somente com decisão institucional e redirects planejados |
 | `WP_SITE_URL` | Pages Functions | Origem WP de eventos/galeria/metadados; padrão WP novo |
-| `NEWS_ARCHIVE_API_URL` | Pages Functions | Base REST completa opcional do arquivo migrado; ausente mantém o WP antigo |
+| `NEWS_ARCHIVE_API_URL` | Pages Functions | Não usada para notícias; a origem é o WordPress novo |
 | `INSTAGRAM_FEED_URL` | Pages Functions | Origem do HTML do feed Instagram |
 | `VITE_INSTAGRAM_FEED_URL` | build/dev | Feed usado pelo middleware Vite local |
 | `VITE_INSTAGRAM_PROFILE_URL` | build | Perfil do botão de fallback |
@@ -52,15 +52,15 @@ As APIs locais de conteúdo usam a origem padrão; validar configurações runti
 
 ### Arquivo de notícias: antes de desligar o WP antigo
 
-`functions/_news-archive.ts` contém **somente IDs, slugs e datas** das 2.808 URLs reservadas; não contém corpos nem imagens. `npm run news:archive` atualiza esse inventário a partir do WP antigo; `-- --from-stdin` aceita a exportação validada. Não executar a atualização cegamente durante migração.
+`functions/_news-map.ts` reserva 2.808 identidades históricas e relaciona IDs antigos aos novos, preservando slugs, bloqueios editoriais e 11 títulos recuperados. Não contém corpos nem imagens. `functions/_news-archive.ts` deriva desse mapa as entradas não bloqueadas. `npm run news:archive` apenas valida o mapa contra o inventário público do WP novo, sem modificar arquivos; falha se uma identidade divergir ou uma notícia não bloqueada ainda estiver ausente, inclusive as entradas resolvidas por slug. Não aceita exportação por `--from-stdin`.
 
-A variável opcional `NEWS_ARCHIVE_API_URL` permite apontar para o WP novo, usando a base REST completa que estiver habilitada nele (aceita `/wp-json/wp/v2` ou `/index.php?rest_route=/wp/v2`, usado pelo WP novo). O padrão atual permanece o legado. Quando configurada, a Function tenta a base nova primeiro e recorre ao legado em erro HTTP/rede/timeout. A configuração participa da chave de cache.
+As notícias usam exclusivamente o WordPress novo. O mapa versionado preserva IDs e URLs históricos; falhas de origem retornam erro controlado e os resultados recentes permanecem em cache.
 
-**Falta migrar e conferir conteúdo, mídia, IDs históricos e slugs.** A base alternativa exige os mesmos IDs e slugs do inventário. Se a importação alterar IDs, será necessário um mapa verificado antes de ativar a variável; IDs/slugs divergentes e listas incompletas disparam fallback, mas a validação editorial do corpo e das mídias continua indispensável. Confirmar também a exposição REST dos eventos expirados. Validar listagens, detalhes, sitemap e falha da origem nova no preview. Não desligar o legado enquanto houver dependência de conteúdo, mídia ou fallback. O snapshot não é backup do WP. Eventos relacionados no detalhe usam consulta limitada a 3 itens; nenhum catálogo completo é baixado nessa página.
+**Concluir e conferir a migração antes do corte.** Em 27/10/2026, as notícias históricas `107698`, `5967` e `8995` ainda estavam ausentes no WP novo: retornam 404 e não entram no sitemap. Importá-las com os slugs reservados permite a resolução sem alterar seus IDs históricos. Não há fallback para o WP antigo e `NEWS_ARCHIVE_API_URL` não altera esse comportamento. A validação editorial de corpos e mídias continua indispensável; o mapa não é backup do WP. Confirmar também a exposição REST dos eventos expirados e validar listagens, detalhes, sitemap e falha da origem nova no preview. Preservar o legado e as mídias enquanto houver dependências. Eventos relacionados no detalhe usam consulta limitada a 3 itens; nenhum catálogo completo é baixado nessa página.
 
 ## Deploy e operação
 
-No Cloudflare Pages: comando `npm run build`, saída `dist`, Node 22; Functions são compiladas a partir de `functions/`. Cadastrar as variáveis de runtime separadamente para preview e produção. Conferir no painel se a integração Git e o branch de produção são os pretendidos; o repo não configura DNS, secrets nem proteção de branch.
+No Cloudflare Pages: comando `npm run build`, saída `dist`, Node 22; Functions são compiladas a partir de `functions/`. Preservar as variáveis de build e runtime separadamente para preview e produção. O projeto é `crf-al-org-br`, integrado ao repositório `crf-al.org.br`, com branch de produção `main`; o repo não configura DNS, secrets nem proteção de branch.
 
 Antes de promover: CI verde; verificar num preview HTML inicial/JSON-LD, CSP e headers; conferir `/`, notícia publicada, slug ausente (404/noindex), origem indisponível (503/Retry-After), `/publicacao/:slug` (301), `/instituicao/estatuto` (404) e listas noindex. O Vite preview sozinho não comprova esses comportamentos. Reverter pelo deploy anterior no Pages; não fazer redirects em massa sem mapa validado. Depois de atualização de domínio, regenerar os derivados e revisar Search Console e Bulk Redirects.
 
@@ -76,3 +76,48 @@ Logs estruturados de falhas estão nas Functions. Acompanhar em Pages/Cloudflare
 - Produto: a busca inclui notícias (mínimo 3 caracteres), além de páginas e serviços; o feed RSS está em `/api/rss` e o calendário em `/api/events?format=ics`. Dados abertos adicionais dependem de definir conjuntos oficiais e licenças de publicação. Pré-renderização/SSR integral deve ser planejada com o ciclo de atualização do conteúdo.
 - Acessibilidade: página de orientação disponível; há auditoria Lighthouse/axe de uma página estática no CI; falta auditoria humana e axe nos fluxos completos e definição institucional de VLibras/eMAG. Não declarar conformidade sem verificação. Lighthouse em produção/preview representativo continua necessário; orçamento de bundle não mede Core Web Vitals.
 - Recomenda-se manter e revisar `.agents/`, `.cursor/`, `.claude/` e `skills-lock.json` como instruções e ferramentas de colaboração, sem segredos. São versionados e não foram removidos; não fazem parte do bundle público. Algumas instruções históricas podem descrever arquitetura antiga: prevalecem código e README atual.
+
+### Índice de notícias em KV e atualização agendada
+
+`newsIndex()` lê `news:index:v1` no binding `NEWS_INDEX`. O valor contém `storedAt` e `value`, sem TTL: um índice antigo continua disponível mesmo durante indisponibilidade do WordPress. Após 10 min, a leitura agenda refresh em `ctx.waitUntil`. Um namespace vazio faz a primeira construção em primeiro plano; enquanto outro refresh segura o lease, retorna 503/Retry-After até o índice existir. Sem binding, permanece o fallback de construção ao vivo + Cache API (60 s fresco, SWR até 600 s). Falha de KV configurado retorna erro, evitando despejar tráfego no host por indisponibilidade do armazenamento.
+
+A construção usa um pool de quatro requisições, com uma repetição para HTTP 5xx ou timeout de 15 s. Deduplica IDs, aceita totais variáveis e páginas removidas e acompanha páginas novas (limite de 100 páginas). Não é um snapshot transacional do WordPress: alterações durante paginação podem ficar para o próximo refresh. Falhas reais não substituem o último índice válido. Listagens e detalhes usam `_fields`, uma consulta de mídia por conjunto de IDs e categorias paginadas em cache; recompõem `_embedded` para manter capas, srcset, alt e categorias dos consumidores. O autor do detalhe é consultado separadamente e guardado em cache.
+
+O Worker em `workers/news-index-cron/` executa `*/10 * * * *` (UTC) e grava diretamente no mesmo KV, reutilizando a implementação e o mapa histórico das Functions. Escolhemos escrita direta para não expor endpoint de refresh nem distribuir `NEWS_REFRESH_TOKEN`, e para o cron não depender de uma requisição HTTP ao Pages. Publique ambos quando mudar o mapa ou a lógica do índice. O Worker não tem rota HTTP pública.
+
+Há single-flight por isolate e um lease/timestamp de 120 s em `news:index:refresh:v1`, mantido até expirar inclusive após falhas. Isso reduz rajadas e dá intervalo para propagação. **KV tem consistência eventual e não oferece lock atômico**: isolates/regiões ainda podem iniciar coletas simultâneas; quatro conexões é limite por coleta, não global. Exclusão global estrita exigiria Durable Object. O cron é a fonte regular de refresh; `waitUntil` de requisições tem janela limitada após a resposta, portanto a atualização agendada também cobre coletas lentas que ultrapassem essa janela. Monitorar falhas do cron e idade de `storedAt`.
+
+Decisão de configuração: **remover o `wrangler.toml` da raiz e manter o Pages configurado pela API/painel**. Adotar esse arquivo como fonte de configuração tornaria os campos correspondentes não editáveis no painel e exigiria reproduzir toda a configuração existente. As variáveis `VITE_*` são de build, portanto declarar somente variáveis de runtime e KV não preservaria a configuração do build. A opção mais segura é o operador acrescentar apenas o binding, preservando as configurações existentes. O arquivo `workers/news-index-cron/wrangler.toml` configura exclusivamente o Worker separado.
+
+Configuração operacional (a executar pelo operador; nenhuma ação Cloudflare foi executada nesta alteração):
+
+1. Usar o projeto Pages existente `crf-al-org-br` (`crf-al-org-br.pages.dev`, domínio `institucional.crf-al.org.br`), branch de produção `main`. Preservar `compatibility_date = 2026-09-21`, flags vazias, `fail_open = true` e `usage_model = standard`. Manter as quatro variáveis `plain_text`, idênticas em produção e preview:
+
+   | Variável | Valor |
+   | --- | --- |
+   | `INSTAGRAM_FEED_URL` | `https://wordpress.crf-al.org.br/index.php?rest_route=/wp/v2/pages&slug=instagram&_fields=content` |
+   | `VITE_SITE_URL` | `https://institucional.crf-al.org.br` |
+   | `VITE_WP_NEWS_SITE_URL` | `https://www.crf-al.org.br` |
+   | `VITE_WP_SITE_URL` | `https://wordpress.crf-al.org.br` |
+
+   Preservar inclusive as variáveis existentes que não são consumidas atualmente; `VITE_SITE_URL` não substitui o canônico versionado em `src/config/site.ts`.
+
+2. Os namespaces já foram criados; não recriá-los. O operador deve adicionar o binding `NEWS_INDEX` pela API do Pages, em `deployment_configs.production.kv_namespaces` e `deployment_configs.preview.kv_namespaces`, respectivamente, preservando os demais campos do projeto:
+
+   | Ambiente | Namespace | ID |
+   | --- | --- | --- |
+   | Produção | `crf-al-news-index` | `196cd57ec1974cafb40efbb388cb0924` |
+   | Preview | `crf-al-news-index-preview` | `1a1735967b6b42f68abc124256588c32` |
+
+   Cada entrada `NEWS_INDEX` deve ter `namespace_id` igual ao ID do respectivo ambiente. Alternativamente, configurar em Workers & Pages → `crf-al-org-br` → Settings → Bindings → KV namespace, separadamente por ambiente. Não há outros bindings no levantamento atual; preservar quaisquer bindings acrescentados posteriormente.
+
+3. Após configurar os bindings, publicar novos deployments pela integração Git existente: `main` usa produção e `feat/noticias-arquivo-wp-novo` usa preview. O push desta branch pode disparar o preview; se o binding for configurado depois, gerar outro deployment para aplicá-lo. Conferir os bindings e as variáveis em ambos os ambientes.
+4. Publicar o cron separadamente, pelo operador em ambiente autenticado, a partir da raiz do repositório:
+
+   ```sh
+   npx wrangler deploy --config workers/news-index-cron/wrangler.toml
+   ```
+
+   Esse comando é apenas documentação; não executar login/deploy neste ambiente. O Worker se chama `crf-al-news-index-cron`; `main = "index.ts"` resolve para `workers/news-index-cron/index.ts`, cujo handler `scheduled` executa a agenda `*/10 * * * *` (a cada 10 minutos, UTC). Seu único binding aponta para o KV de produção, sem `preview_id`. Não agendar esse Worker contra preview. O primeiro cron ou acesso preenche o namespace; conferir `storedAt` e logs após ativação. O preview faz refresh por acesso; para desenvolvimento sem KV, usar `npm run dev`.
+
+Referências oficiais consultadas: [bindings de Pages](https://developers.cloudflare.com/pages/functions/bindings/), [configuração Wrangler de Pages](https://developers.cloudflare.com/pages/functions/wrangler-configuration/), [consistência do KV](https://developers.cloudflare.com/kv/concepts/how-kv-works/), [comandos KV](https://developers.cloudflare.com/kv/reference/kv-commands/) e [Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/).

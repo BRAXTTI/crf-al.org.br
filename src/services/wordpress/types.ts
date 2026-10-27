@@ -61,6 +61,9 @@ export interface WPEmbedded {
 }
 
 export interface WPPost {
+  featured_media?: number;
+  categories?: number[];
+  author?: number;
   newsSource?: 'legacy' | 'current';
   id: number;
   date: string;
