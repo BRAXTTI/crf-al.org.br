@@ -1,9 +1,10 @@
+import { VIDEOS_URL } from '@/config/site';
 import { tutoriais } from '@/data/servicos';
 
 /**
  * Top 5 vídeos verticais (estilo reels) exibidos no topo da página de
- * Tutoriais, do mais recente para o mais antigo. Os arquivos ficam em
- * `public/images/tutoriais/`.
+ * Tutoriais, do mais recente para o mais antigo. Os vídeos ficam no R2
+ * (`VIDEOS_URL/tutoriais/`) e as capas em `public/images/tutoriais/`.
  */
 export interface ReelDestaque {
   id: string;
@@ -34,7 +35,7 @@ export const REELS_DESTAQUE: ReelDestaque[] = [
     id: 'sncr',
     title: 'Receita eletrônica de controlados',
     subtitle: 'O que muda com o SNCR',
-    src: '/images/tutoriais/sncr.mp4',
+    src: `${VIDEOS_URL}/tutoriais/sncr.mp4`,
     poster: '/images/tutoriais/sncr-poster.webp',
     duracao: '0:46',
   },
@@ -42,7 +43,7 @@ export const REELS_DESTAQUE: ReelDestaque[] = [
     id: 'crf-em-casa',
     title: 'Conheça o CRF AL em Casa',
     subtitle: 'O atendimento online do Conselho',
-    src: '/images/tutoriais/crf-em-casa.mp4',
+    src: `${VIDEOS_URL}/tutoriais/crf-em-casa.mp4`,
     poster: '/images/tutoriais/crf-em-casa-poster.webp',
     duracao: '0:32',
     href: '/servicos/manual-crf-em-casa',

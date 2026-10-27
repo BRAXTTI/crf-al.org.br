@@ -1,9 +1,14 @@
 /**
  * Manual de uso do CRF AL em Casa: cada seção tem um texto e uma demonstração
  * em vídeo curto (WebM em loop, sem som, convertido do GIF original). Os
- * arquivos ficam em `public/images/manual-crf-em-casa/`; enquanto `video` não
- * for informado, a página mostra “Demonstração em breve”.
+ * vídeos ficam no R2 (`VIDEOS_URL/manual-crf-em-casa/`) e as capas em
+ * `public/images/manual-crf-em-casa/`; enquanto `video` não for informado, a
+ * página mostra “Demonstração em breve”.
  */
+import { VIDEOS_URL } from '@/config/site';
+
+const VIDEOS = `${VIDEOS_URL}/manual-crf-em-casa`;
+
 export interface ManualSecao {
   /** Âncora da seção (`#<id>`). */
   id: string;
@@ -12,7 +17,7 @@ export interface ManualSecao {
   text: string[];
   /** Passos curtos, na ordem em que aparecem no sistema. */
   steps?: string[];
-  /** Vídeo WebM da demonstração (ex.: `/images/manual-crf-em-casa/acesso.webm`). */
+  /** Vídeo WebM da demonstração (ex.: `https://midias.crf-al.org.br/site/videos/manual-crf-em-casa/acesso.webm`). */
   video?: string;
   /** Primeiro quadro em JPG, exibido enquanto o vídeo carrega. */
   poster?: string;
@@ -32,7 +37,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
       'Escolha o tipo de acesso: Pessoa Física ou Pessoa Jurídica.',
       'Informe seu login e senha e clique em entrar.',
     ],
-    video: '/images/manual-crf-em-casa/acesso.webm',
+    video: `${VIDEOS}/acesso.webm`,
     poster: '/images/manual-crf-em-casa/acesso-poster.webp',
     videoAlt: 'Tela de login do CRF AL em Casa sendo preenchida e o acesso ao painel inicial.',
   },
@@ -49,7 +54,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
       'Selecione o tipo de solicitação, anexe o formulário e os documentos.',
       'Clique em “Salvar Protocolo”.',
     ],
-    video: '/images/manual-crf-em-casa/enviar-documentos.webm',
+    video: `${VIDEOS}/enviar-documentos.webm`,
     poster: '/images/manual-crf-em-casa/enviar-documentos-poster.webp',
     videoAlt: 'Download de um formulário, envio dos documentos e geração do protocolo no CRF AL em Casa.',
   },
@@ -64,7 +69,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
       'Localize a solicitação pelo número de protocolo.',
       'Confira a situação e, se houver pendência, envie o que foi pedido.',
     ],
-    video: '/images/manual-crf-em-casa/protocolos.webm',
+    video: `${VIDEOS}/protocolos.webm`,
     poster: '/images/manual-crf-em-casa/protocolos-poster.webp',
     videoAlt: 'Consulta da lista de protocolos e abertura de uma solicitação para ver a situação.',
   },
@@ -80,7 +85,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
       'Clique em “Consultar” para ver os débitos em aberto.',
       'Selecione a anuidade ou parcela e imprima o boleto.',
     ],
-    video: '/images/manual-crf-em-casa/boletos.webm',
+    video: `${VIDEOS}/boletos.webm`,
     poster: '/images/manual-crf-em-casa/boletos-poster.webp',
     videoAlt: 'Consulta de débitos e emissão da segunda via de um boleto.',
   },
@@ -97,7 +102,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
       'Informe a data de desligamento e, se necessário, anexe documentos.',
       'Clique em “Salvar Protocolo” e guarde o comprovante com o número do protocolo.',
     ],
-    video: '/images/manual-crf-em-casa/baixa-responsabilidade-tecnica.webm',
+    video: `${VIDEOS}/baixa-responsabilidade-tecnica.webm`,
     poster: '/images/manual-crf-em-casa/baixa-responsabilidade-tecnica-poster.webp',
     videoAlt: 'Solicitação de baixa de um vínculo de responsabilidade técnica no CRF AL em Casa.',
   },
@@ -113,7 +118,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
       'Leia as informações e clique em “Confirmar Leitura”.',
       'A certidão abre em PDF: imprima ou salve o arquivo.',
     ],
-    video: '/images/manual-crf-em-casa/certidao-regularidade.webm',
+    video: `${VIDEOS}/certidao-regularidade.webm`,
     poster: '/images/manual-crf-em-casa/certidao-regularidade-poster.webp',
     videoAlt: 'Emissão e impressão da certidão de regularidade técnica no CRF AL em Casa.',
   },

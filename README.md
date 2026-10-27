@@ -30,7 +30,7 @@ npm run build
 - `/api/events`, `/api/gallery`: proxy de rotas permitidas, cache de respostas bem-sucedidas por 60 s, timeout, parâmetros validados e 503 com Retry-After em falhas de integração. Detalhes consultam slug/ID, sem baixar o catálogo para resolver metadados.
 - `/api/instagram` e `/api/cff-publicacoes`: agregadores existentes. Instagram conserva último resultado válido durante falhas curtas.
 - `wordpress/`: plugin de galeria e instruções de instalação no WP; instalação/ativação é tarefa administrativa externa.
-- `public/_headers`: CSP, HSTS sem preload e cache. O `_headers` não vale para respostas geradas pelas Functions (APIs, 404/410/503, sitemap de notícias, redirects); o middleware completa nelas apenas os headers ausentes com `SECURITY_HEADERS` (`functions/_middleware.ts`). Ao mudar o bloco `/*`, atualizar os dois: `npm run test:seo` falha se divergirem. Assets com hash têm immutable; fontes (30 dias), vídeos (7 dias) e imagens de `/images` (1 dia, mais 7 dias de `stale-while-revalidate`, revalidadas por ETag/304) usam cache finito porque seus nomes atuais não são versionados. Ao substituir esses arquivos sem mudar o nome, invalidar o cache ou aguardar o TTL.
+- `public/_headers`: CSP, HSTS sem preload e cache. O `_headers` não vale para respostas geradas pelas Functions (APIs, 404/410/503, sitemap de notícias, redirects); o middleware completa nelas apenas os headers ausentes com `SECURITY_HEADERS` (`functions/_middleware.ts`). Ao mudar o bloco `/*`, atualizar os dois: `npm run test:seo` falha se divergirem. Assets com hash têm immutable; fontes (30 dias) e imagens de `/images` (1 dia, mais 7 dias de `stale-while-revalidate`, revalidadas por ETag/304) usam cache finito porque seus nomes atuais não são versionados. Vídeos não ficam em `public/` (ver [Vídeos no R2](#vídeos-no-r2)). Ao substituir esses arquivos sem mudar o nome, invalidar o cache ou aguardar o TTL.
 
 A SPA continua montando o conteúdo no navegador. Metadados/JSON-LD e status vêm do servidor; isto não equivale a SSR integral. O domínio do WP continua permitido para imagens e vídeos; `connect-src` foi reduzido a self e Cloudflare Insights, pois o navegador não consulta mais REST diretamente.
 
@@ -65,6 +65,21 @@ No Cloudflare Pages: comando `npm run build`, saída `dist`, Node 22; Functions 
 Antes de promover: CI verde; verificar num preview HTML inicial/JSON-LD, CSP e headers; conferir `/`, notícia publicada, slug ausente (404/noindex), origem indisponível (503/Retry-After), `/publicacao/:slug` (301), `/instituicao/estatuto` (404) e listas noindex. O Vite preview sozinho não comprova esses comportamentos. Reverter pelo deploy anterior no Pages; não fazer redirects em massa sem mapa validado. Depois de atualização de domínio, regenerar os derivados e revisar Search Console e Bulk Redirects.
 
 Logs estruturados de falhas estão nas Functions. Acompanhar em Pages/Cloudflare; o workflow `uptime.yml` verifica HTTP a cada 30 minutos quando habilitado no branch padrão do GitHub (a agenda não é SLA). `npm run test:uptime -- <preview>` permite uma verificação manual. As notificações de falha dependem das preferências da conta GitHub; alertas externos e Web Analytics dependem da conta e consentimento editorial. Os testes offline também conferem destinos internos literais; links externos e expressões dinâmicas exigem verificação no preview. Não há credenciais no repo. `security.txt` usa o contato real do setor de tecnologia em `config/contact.ts`; renovar o campo Expires anualmente e confirmar o fluxo interno de triagem.
+
+### Vídeos no R2
+
+Os vídeos do Manual do CRF AL em Casa (WebM) e dos Tutoriais (MP4) ficam no bucket R2 `crf-al-midias`, prefixo `site/videos/`, servidos em `https://midias.crf-al.org.br/site/videos/<pasta>/<arquivo>` (`manual-crf-em-casa/` e `tutoriais/`). A base é `VIDEOS_URL` em `src/config/site.ts`; os dados (`src/data/manual-crf-em-casa.ts`, `servicos.ts`, `tutoriais-destaque.ts`) montam as URLs a partir dela. As capas WebP continuam em `public/images/<pasta>/`. A CSP já permite `https://midias.crf-al.org.br` em `media-src` (em `public/_headers` e em `SECURITY_HEADERS`); `npm run test:videos` falha se algum vídeo voltar para `public/`, se uma URL sair da base do R2 ou se `media-src` perder o domínio.
+
+Os objetos são gravados com `Cache-Control: public, max-age=31536000, immutable`. Por isso, **nunca sobrescrever um vídeo com o mesmo nome**: publicar com nome novo (ex.: `boletos-v2.mp4`) e atualizar a referência no código. Para subir (requer `wrangler login` com acesso à conta):
+
+```sh
+npx wrangler r2 object put crf-al-midias/site/videos/tutoriais/boletos-v2.mp4 \
+  --file ./boletos-v2.mp4 --content-type video/mp4 \
+  --cache-control "public, max-age=31536000, immutable" --remote
+# WebM do manual: --content-type video/webm e caminho site/videos/manual-crf-em-casa/<nome>.webm
+```
+
+Sem `--remote`, o Wrangler grava apenas no armazenamento local de desenvolvimento.
 
 ## Conteúdo, segurança e pendências
 
