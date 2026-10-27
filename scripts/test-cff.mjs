@@ -51,4 +51,34 @@ try {
 } finally {
   globalThis.fetch = originalFetch;
 }
+// Handler: reserva antiga servida de imediato; a coleta (vários lotes) roda em segundo plano.
+const handlerSource = (await readFile(new URL('../functions/api/cff-publicacoes.js', import.meta.url), 'utf8')).replace("'./_cff'", JSON.stringify(parserUrl));
+const { onRequestGet } = await import(`data:text/javascript;base64,${Buffer.from(handlerSource).toString('base64')}`);
+const originalCaches = globalThis.caches; const originalError = console.error;
+let stored; const pending = []; let calls = 0;
+globalThis.caches = { default: { match: async () => stored?.clone(), put: async (_, response) => { stored = response; } } };
+console.error = () => {};
+const context = { request: new Request('https://example.org/api/cff-publicacoes'), waitUntil: promise => pending.push(promise) };
+try {
+  let release; const gate = new Promise(resolve => { release = resolve; });
+  globalThis.fetch = async (url) => { calls++; await gate; return new Response(String(url).endsWith('page=1') ? page1 : '<html></html>'); };
+  const backup = { collections: [{ title: 'Antiga', items: [{ link: pdf('old') }] }], fetchedAt: Date.now() - 7 * 3600_000 };
+  stored = new Response(JSON.stringify(backup));
+  let response = await onRequestGet(context);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).collections, backup.collections, 'Reserva servida sem esperar o CFF');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  await onRequestGet(context);
+  const started = calls;
+  release(); await Promise.all(pending.splice(0));
+  assert.ok(started > 0 && started <= 4, 'Uma única coleta em segundo plano');
+  assert.equal((await stored.clone().json()).collections[0].title, 'Notas técnicas – Tricologia');
+  response = await onRequestGet(context);
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=1800', 'Reserva atualizada volta a ser fresca');
+  stored = new Response(JSON.stringify({ ...backup, fetchedAt: Date.now() - 8 * 86400_000 }));
+  globalThis.fetch = async () => new Response('', { status: 503 });
+  assert.equal((await onRequestGet(context)).status, 503, 'Reserva vencida não é servida');
+} finally {
+  globalThis.fetch = originalFetch; globalThis.caches = originalCaches; console.error = originalError;
+}
 console.log('CFF: coleções, edições, links repetidos/inválidos, junção entre páginas e fim da listagem passaram.');
