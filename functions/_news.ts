@@ -77,14 +77,24 @@ async function categories(context?: NewsContext): Promise<{ category: number | n
 export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   return cached('index', context, async () => {
     const { category, spam } = await categories(context);
-    const rows: Entry[] = []; let pages = 1; let total = 0;
-    for (let page = 1; page <= pages; page++) {
+    let pages = 1; let total = 0;
+    const loadPage = async (page: number): Promise<Entry[]> => {
       const response = (await request('posts', { per_page: '100', page: String(page), _fields: 'id,slug,date,date_gmt,modified,title,categories' }))!;
-      pages = Number(response.headers.get('x-wp-totalpages')); total = Number(response.headers.get('x-wp-total'));
-      if (!Number.isInteger(pages) || pages < 0 || pages > 100 || !Number.isInteger(total)) throw new Error('Invalid news inventory');
-      rows.push(...await response.json() as Entry[]);
+      const pageCount = Number(response.headers.get('x-wp-totalpages'));
+      const postCount = Number(response.headers.get('x-wp-total'));
+      if (!Number.isInteger(pageCount) || pageCount < 0 || pageCount > 100 || !Number.isInteger(postCount) || postCount < 0) throw new Error('Invalid news inventory');
+      if (page === 1) { pages = pageCount; total = postCount; }
+      else if (pages !== pageCount || total !== postCount) throw new Error('News inventory changed during pagination');
+      return await response.json() as Entry[];
+    };
+    const rows = await loadPage(1);
+    // O acervo inteiro em série excede o timeout de 15 s do frontend sem cache.
+    // Lotes de cinco deixam uma conexão livre no runtime do Cloudflare.
+    for (let page = 2; page <= pages; page += 5) {
+      const batch = await Promise.all(Array.from({ length: Math.min(5, pages - page + 1) }, (_, offset) => loadPage(page + offset)));
+      rows.push(...batch.flat());
     }
-    if (rows.length !== total) throw new Error('News inventory changed during pagination');
+    if (rows.length !== total || new Set(rows.map(post => post.id)).size !== total) throw new Error('News inventory changed during pagination');
     return rows.filter(post => acceptable(post, category, spam)).map(normalize).filter(hasTitle).sort((a, b) => b.date_gmt.localeCompare(a.date_gmt) || b.id - a.id);
   });
 }

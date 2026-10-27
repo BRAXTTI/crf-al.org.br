@@ -17,7 +17,8 @@ export async function fetchPosts(
   options: { page?: number; perPage?: number; signal?: AbortSignal } = {}
 ): Promise<WPPostsPage> {
   const { page = 1, perPage = 10, signal } = options;
-  return requestJson<WPPostsPage>(`/api/news?page=${page}&per_page=${perPage}`, { signal });
+  // Sem cache, a API recompõe o índice completo do acervo antes de paginar.
+  return requestJson<WPPostsPage>(`/api/news?page=${page}&per_page=${perPage}`, { signal, timeoutMs: 60_000 });
 }
 
 export async function fetchPostById(id: number, signal?: AbortSignal): Promise<WPPost> {

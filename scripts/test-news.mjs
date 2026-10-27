@@ -47,6 +47,26 @@ try {
   posts.push({ ...post(find(107698)), id: 999998 });
   assert.equal((await newsPost('107698')).id, 999998);
   fail = true; assert.equal((await newsApi(new Request('https://example.test/api/news'))).status, 503);
+  const mockFetch = globalThis.fetch;
+  const inventory = Array.from({ length: 701 }, (_, i) => ({ ...post(selected[0]), id: 900000 + i, slug: `noticia-nova-${i}`, categories: [42] }));
+  let active = 0; let peak = 0;
+  const visited = [];
+  try {
+    globalThis.fetch = async input => {
+      const url = new URL(input);
+      if (url.searchParams.get('rest_route') === '/wp/v2/categories') return Response.json([{ id: 42, slug: 'noticias-do-portal' }]);
+      const page = Number(url.searchParams.get('page'));
+      visited.push(page); active++; peak = Math.max(peak, active);
+      await new Promise(resolve => setTimeout(resolve, 5));
+      active--;
+      return Response.json(inventory.slice((page - 1) * 100, page * 100), { headers: { 'x-wp-total': '701', 'x-wp-totalpages': '8' } });
+    };
+    const result = await newsIndex();
+    assert.equal(result.length, 701);
+    assert.deepEqual(result.map(row => row.id), inventory.map(row => row.id).reverse());
+    assert.deepEqual(visited, [1, 2, 3, 4, 5, 6, 7, 8]);
+    assert.equal(peak, 5, 'Coleta paralela limitada a cinco páginas por lote');
+  } finally { globalThis.fetch = mockFetch; }
   // A auditoria de corte precisa reprovar perdas de conteúdo, mas aceitar
   // importações posteriores por slug sem exigir outro mapa de IDs.
   const audit = inventory => spawnSync(process.execPath, ['--input-type=module'], { encoding: 'utf8', input: `
