@@ -60,7 +60,7 @@ As notícias usam exclusivamente o WordPress novo. O mapa versionado preserva ID
 
 ## Deploy e operação
 
-No Cloudflare Pages: comando `npm run build`, saída `dist`, Node 22; Functions são compiladas a partir de `functions/`. Cadastrar as variáveis de runtime separadamente para preview e produção. Conferir no painel se a integração Git e o branch de produção são os pretendidos; o repo não configura DNS, secrets nem proteção de branch.
+No Cloudflare Pages: comando `npm run build`, saída `dist`, Node 22; Functions são compiladas a partir de `functions/`. Preservar as variáveis de build e runtime separadamente para preview e produção. O projeto é `crf-al-org-br`, integrado ao repositório `crf-al.org.br`, com branch de produção `main`; o repo não configura DNS, secrets nem proteção de branch.
 
 Antes de promover: CI verde; verificar num preview HTML inicial/JSON-LD, CSP e headers; conferir `/`, notícia publicada, slug ausente (404/noindex), origem indisponível (503/Retry-After), `/publicacao/:slug` (301), `/instituicao/estatuto` (404) e listas noindex. O Vite preview sozinho não comprova esses comportamentos. Reverter pelo deploy anterior no Pages; não fazer redirects em massa sem mapa validado. Depois de atualização de domínio, regenerar os derivados e revisar Search Console e Bulk Redirects.
 
@@ -87,26 +87,37 @@ O Worker em `workers/news-index-cron/` executa `*/10 * * * *` (UTC) e grava dire
 
 Há single-flight por isolate e um lease/timestamp de 120 s em `news:index:refresh:v1`, mantido até expirar inclusive após falhas. Isso reduz rajadas e dá intervalo para propagação. **KV tem consistência eventual e não oferece lock atômico**: isolates/regiões ainda podem iniciar coletas simultâneas; quatro conexões é limite por coleta, não global. Exclusão global estrita exigiria Durable Object. O cron é a fonte regular de refresh; `waitUntil` de requisições tem janela limitada após a resposta, portanto a atualização agendada também cobre coletas lentas que ultrapassem essa janela. Monitorar falhas do cron e idade de `storedAt`.
 
-Configuração operacional (comandos documentados, não executados nesta alteração):
+Decisão de configuração: **remover o `wrangler.toml` da raiz e manter o Pages configurado pela API/painel**. Adotar esse arquivo como fonte de configuração tornaria os campos correspondentes não editáveis no painel e exigiria reproduzir toda a configuração existente. As variáveis `VITE_*` são de build, portanto declarar somente variáveis de runtime e KV não preservaria a configuração do build. A opção mais segura é o operador acrescentar apenas o binding, preservando as configurações existentes. O arquivo `workers/news-index-cron/wrangler.toml` configura exclusivamente o Worker separado.
 
-1. Confirmar o nome real do projeto Pages e preservar bindings/variáveis já existentes antes de adotar `wrangler.toml` como fonte de configuração. Substituir `name = "crf-al-prod"` se necessário.
-2. Criar namespaces distintos:
+Configuração operacional (a executar pelo operador; nenhuma ação Cloudflare foi executada nesta alteração):
+
+1. Usar o projeto Pages existente `crf-al-org-br` (`crf-al-org-br.pages.dev`, domínio `institucional.crf-al.org.br`), branch de produção `main`. Preservar `compatibility_date = 2026-09-21`, flags vazias, `fail_open = true` e `usage_model = standard`. Manter as quatro variáveis `plain_text`, idênticas em produção e preview:
+
+   | Variável | Valor |
+   | --- | --- |
+   | `INSTAGRAM_FEED_URL` | `https://wordpress.crf-al.org.br/index.php?rest_route=/wp/v2/pages&slug=instagram&_fields=content` |
+   | `VITE_SITE_URL` | `https://institucional.crf-al.org.br` |
+   | `VITE_WP_NEWS_SITE_URL` | `https://www.crf-al.org.br` |
+   | `VITE_WP_SITE_URL` | `https://wordpress.crf-al.org.br` |
+
+   Preservar inclusive as variáveis existentes que não são consumidas atualmente; `VITE_SITE_URL` não substitui o canônico versionado em `src/config/site.ts`.
+
+2. Os namespaces já foram criados; não recriá-los. O operador deve adicionar o binding `NEWS_INDEX` pela API do Pages, em `deployment_configs.production.kv_namespaces` e `deployment_configs.preview.kv_namespaces`, respectivamente, preservando os demais campos do projeto:
+
+   | Ambiente | Namespace | ID |
+   | --- | --- | --- |
+   | Produção | `crf-al-news-index` | `196cd57ec1974cafb40efbb388cb0924` |
+   | Preview | `crf-al-news-index-preview` | `1a1735967b6b42f68abc124256588c32` |
+
+   Cada entrada `NEWS_INDEX` deve ter `namespace_id` igual ao ID do respectivo ambiente. Alternativamente, configurar em Workers & Pages → `crf-al-org-br` → Settings → Bindings → KV namespace, separadamente por ambiente. Não há outros bindings no levantamento atual; preservar quaisquer bindings acrescentados posteriormente.
+
+3. Após configurar os bindings, publicar novos deployments pela integração Git existente: `main` usa produção e `feat/noticias-arquivo-wp-novo` usa preview. O push desta branch pode disparar o preview; se o binding for configurado depois, gerar outro deployment para aplicá-lo. Conferir os bindings e as variáveis em ambos os ambientes.
+4. Publicar o cron separadamente, pelo operador em ambiente autenticado, a partir da raiz do repositório:
 
    ```sh
-   npx wrangler kv namespace create NEWS_INDEX
-   npx wrangler kv namespace create NEWS_INDEX --preview
-   ```
-
-3. Copiar os IDs retornados: `REPLACE_WITH_PRODUCTION_NEWS_INDEX_ID` em ambos os arquivos Wrangler; `REPLACE_WITH_PREVIEW_NEWS_INDEX_ID` em `preview_id` e em `env.preview.kv_namespaces` do Pages. O `id` de preview deve apontar somente para preview; `preview_id` sozinho não configura deployments de preview. O vínculo ao Pages é declarado por `[[kv_namespaces]]`/`[[env.preview.kv_namespaces]]` e aplicado no próximo deploy. Não há comando separado `pages bind`. Alternativa pelo painel: Workers & Pages → projeto → Settings → Bindings → KV namespace → `NEWS_INDEX`, selecionando produção e preview separadamente.
-4. Quando autorizado a publicar, aplicar o binding no projeto existente e publicar o cron:
-
-   ```sh
-   npm run build
-   npx wrangler pages deploy dist --project-name crf-al-prod --branch <BRANCH_DE_PRODUCAO>
-   npx wrangler pages deploy dist --project-name crf-al-prod --branch feat/noticias-arquivo-wp-novo
    npx wrangler deploy --config workers/news-index-cron/wrangler.toml
    ```
 
-   Substituir o projeto e `<BRANCH_DE_PRODUCAO>` pelos valores existentes. A segunda publicação usa o namespace de preview; não agendar o cron de produção contra preview. A integração Git existente também aplica o arquivo no próximo deploy. Nenhum desses comandos deve ser executado com placeholders. O primeiro cron ou acesso preenche o namespace; conferir `storedAt` e logs após ativação. O preview faz refresh por acesso; para desenvolvimento sem KV, usar `npm run dev`.
+   Esse comando é apenas documentação; não executar login/deploy neste ambiente. O Worker se chama `crf-al-news-index-cron`; `main = "index.ts"` resolve para `workers/news-index-cron/index.ts`, cujo handler `scheduled` executa a agenda `*/10 * * * *` (a cada 10 minutos, UTC). Seu único binding aponta para o KV de produção, sem `preview_id`. Não agendar esse Worker contra preview. O primeiro cron ou acesso preenche o namespace; conferir `storedAt` e logs após ativação. O preview faz refresh por acesso; para desenvolvimento sem KV, usar `npm run dev`.
 
 Referências oficiais consultadas: [bindings de Pages](https://developers.cloudflare.com/pages/functions/bindings/), [configuração Wrangler de Pages](https://developers.cloudflare.com/pages/functions/wrangler-configuration/), [consistência do KV](https://developers.cloudflare.com/kv/concepts/how-kv-works/), [comandos KV](https://developers.cloudflare.com/kv/reference/kv-commands/) e [Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/).
