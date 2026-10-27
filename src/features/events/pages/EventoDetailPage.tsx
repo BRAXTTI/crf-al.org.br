@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ElementType } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   AlertCircle,
@@ -46,8 +46,8 @@ function paraCRFEvent(evento: WPEventListing, bannerFallback?: string | null): C
     excerpt: resumoTexto.length > 160 ? `${resumoTexto.slice(0, 157)}...` : resumoTexto,
     status: evento.status,
     banner: getPostImage(evento) ?? bannerFallback ?? null,
-    startDate: detalhes?.startDate ?? '',
-    endDate: detalhes?.endDate ?? '',
+    startDate: detalhes?.startDate?.includes(' ') ? detalhes.startDate : [detalhes?.startDate, detalhes?.startTime].filter(Boolean).join(' '),
+    endDate: detalhes?.endDate?.includes(' ') ? detalhes.endDate : [detalhes?.endDate, detalhes?.endTime].filter(Boolean).join(' '),
     location: detalhes?.location ?? '',
     online: detalhes?.online ?? false,
     cancelled: detalhes?.cancelled ?? false,
@@ -60,7 +60,7 @@ function paraCRFEvent(evento: WPEventListing, bannerFallback?: string | null): C
   };
 }
 
-function InfoRow({ icon: Icon, rotulo, valor, dateTime }: { icon: typeof Calendar; rotulo: string; valor: string; dateTime?: string }) {
+function InfoRow({ icon: Icon, rotulo, valor, dateTime }: { icon: ElementType; rotulo: string; valor: string; dateTime?: string }) {
   return (
     <div className="flex items-start gap-3">
       <div className="p-2 rounded-lg bg-crfal-blue-lighter  shrink-0">
@@ -120,12 +120,7 @@ export default function EventoDetailPage() {
 
   if (!evento && carregandoEvento) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-crfal-gray-500 ">Carregando evento...</p>
-        </div>
-      </div>
+      <div className="container-crfal py-10" role="status"><span className="sr-only">Carregando evento...</span><div className="grid gap-8 lg:grid-cols-12 animate-pulse"><div className="aspect-video rounded-2xl bg-crfal-gray-200 lg:col-span-8" /><div className="h-80 rounded-2xl bg-crfal-gray-200 lg:col-span-4" /></div></div>
     );
   }
 
@@ -194,11 +189,6 @@ export default function EventoDetailPage() {
             <StatusIcon className="w-3 h-3" />
             {STATUS_LABELS[evento.status]}
           </span>
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50  text-red-600 ">
-              <Ban className="w-3 h-3" />
-              Não será realizado
-            </span>
-          )}
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/10 text-white border border-white/20">
             <ModalidadeIcon className="w-3 h-3" />
             {MODALIDADE_LABELS[evento.modalidade]}
@@ -236,7 +226,7 @@ export default function EventoDetailPage() {
         )}
 
           </div>
-          <aside className="lg:col-start-9 lg:col-span-4 lg:row-span-2 lg:row-start-1 lg:self-start lg:sticky lg:top-24">
+          <aside className="lg:col-start-9 lg:col-span-4 lg:row-span-2 lg:row-start-1 lg:self-start lg:sticky lg:top-(--header-offset)">
             <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card">
               <h2 className="font-display text-xl font-semibold text-neutral-800 md:text-2xl mb-6">
                 Informações do evento
@@ -247,6 +237,7 @@ export default function EventoDetailPage() {
                 {horario && <InfoRow icon={Calendar} rotulo="Horário" valor={horario} dateTime={dataISO} />}
                 <InfoRow icon={ModalidadeIcon} rotulo="Modalidade" valor={MODALIDADE_LABELS[evento.modalidade]} />
                 {evento.local && <InfoRow icon={evento.modalidade === 'online' ? Monitor : MapPin} rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'} valor={evento.local} />}
+                {evento.modalidade === 'hibrido' && evento.video && <InfoRow icon={Monitor} rotulo="Transmissão" valor={evento.video} />}
                 {evento.publico && <InfoRow icon={Building2} rotulo="Público" valor={evento.publico} />}
                 <InfoRow icon={Calendar} rotulo="Situação" valor={`${STATUS_LABELS[evento.status]}${evento.status === 'em-andamento' ? ' · Ao vivo agora' : evento.status === 'em-breve' && rotuloContagem(evento.data) ? ` · ${rotuloContagem(evento.data)}` : ''}`} />
               </dl>

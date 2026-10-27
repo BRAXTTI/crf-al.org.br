@@ -55,6 +55,10 @@ try {
   assert.match(calendar.headers.get('Content-Type'), /text\/calendar/);
   const ics = await calendar.text();
   assert.match(ics, /DTSTART:20261026T120000Z/);
+  const generated = ics.match(/DTSTAMP:(\d{8}T\d{6}Z)/)?.[1];
+  assert.ok(generated, 'DTSTAMP contém o instante de geração');
+  const now = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  assert.equal(generated.slice(0, 13), now.slice(0, 13), 'DTSTAMP usa a data e hora atuais');
   assert.match(ics, /STATUS:CANCELLED/);
   assert.match(ics, /BEGIN:VCALENDAR/);
   globalThis.fetch = async () => new Response('', { status: 404 });
