@@ -21,8 +21,8 @@ function jsonResponse(body, status = 200, stale = false) {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      // Não guardar indisponibilidade ou feed antigo no navegador/CDN.
-      'cache-control': status !== 200 || stale ? 'no-store' : `public, max-age=${FRESH_TTL_SECONDS}`,
+      // Erros não são guardados; a reserva evita executar a Function a cada visita.
+      'cache-control': status !== 200 ? 'no-store' : stale ? 'public, max-age=60' : `public, max-age=${FRESH_TTL_SECONDS}`,
       'x-content-type-options': 'nosniff',
     },
   });

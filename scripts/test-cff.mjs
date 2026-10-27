@@ -73,7 +73,7 @@ try {
   let response = await onRequestGet(context);
   assert.equal(response.status, 200);
   assert.deepEqual((await response.json()).collections, backup.collections, 'Reserva servida sem esperar o CFF');
-  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=60');
   await onRequestGet(context);
   const started = calls;
   release(); await Promise.all(pending.splice(0));

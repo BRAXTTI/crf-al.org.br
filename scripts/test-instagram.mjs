@@ -51,7 +51,7 @@ try {
   response = await onRequestGet(context);
   assert.equal(response.status, 200);
   assert.equal((await response.json()).stale, true);
-  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=60');
   await Promise.all(pending.splice(0));
   assert.deepEqual((await stored.clone().json()).items, backup.items, 'Falha na atualização preserva a reserva');
 

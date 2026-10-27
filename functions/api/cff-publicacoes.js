@@ -21,7 +21,7 @@ function jsonResponse(body, status = 200, stale = false) {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      'cache-control': status !== 200 || stale ? 'no-store' : 'public, max-age=1800',
+      'cache-control': status !== 200 ? 'no-store' : stale ? 'public, max-age=60' : 'public, max-age=1800',
       'x-content-type-options': 'nosniff',
     },
   });
