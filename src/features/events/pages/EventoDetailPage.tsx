@@ -14,7 +14,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
+import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { getPostImage, getPostImageSet, stripHTML } from '@/services/wordpress/client';
 import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { useEventBySlug, useRelatedEvents } from '@/services/wordpress/event-hooks';
@@ -29,6 +29,7 @@ import {
   formatarData,
   formatarDataExtenso,
   formatarHorario,
+  rotuloContagem,
   mapEvent,
   type Evento,
 } from '../utils';
@@ -176,14 +177,14 @@ export default function EventoDetailPage() {
         title={evento.titulo}
         eyebrow="Evento"
         section="imprensa"
+        actions={acoes.map((acao, i) => <PageHeroAction key={acao.href} href={acao.href} variant={i === 0 ? "primary" : "secondary"}>{acao.label}</PageHeroAction>)}
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
             <StatusIcon className="w-3 h-3" />
             {STATUS_LABELS[evento.status]}
           </span>
-          {evento.status === 'cancelado' && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50  text-red-600 ">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50  text-red-600 ">
               <Ban className="w-3 h-3" />
               Não será realizado
             </span>
@@ -192,6 +193,7 @@ export default function EventoDetailPage() {
             <ModalidadeIcon className="w-3 h-3" />
             {MODALIDADE_LABELS[evento.modalidade]}
           </span>
+          {evento.status === 'em-breve' && rotuloContagem(evento.data) && <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white">{rotuloContagem(evento.data)}</span>}
         </div>
 
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
@@ -212,15 +214,39 @@ export default function EventoDetailPage() {
         </div>
       </PageHero>
 
-      <div className="container-crfal py-10 md:py-16">
-        {capa && (
-          <figure className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 shadow-card mb-10">
+      <div className="container-crfal pt-6 lg:pt-10 pb-12 lg:pb-16">
+        <div className="grid gap-6 lg:gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-8 empty:hidden">
+          {capa && (
+          <figure className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 shadow-card">
             <img src={capa.src} srcSet={capa.srcSet} sizes="(min-width: 1024px) 800px, calc(100vw - 32px)" width={capa.width} height={capa.height} alt={capa.alt || `Arte de divulgação do evento «${evento.titulo}»`} decoding="async" fetchPriority="high" className="mx-auto block h-auto w-auto max-w-full max-h-[min(75vh,720px)]" />
           </figure>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-          <div className="lg:col-span-2 min-w-0">
+          </div>
+          <aside className="lg:col-start-9 lg:col-span-4 lg:row-span-2 lg:row-start-1 lg:self-start lg:sticky lg:top-24">
+            <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card">
+              <h2 className="font-display text-xl font-semibold text-neutral-800 md:text-2xl mb-6">
+                Informações do evento
+              </h2>
+
+              <dl className="space-y-4">
+                {evento.data && <InfoRow icon={Calendar} rotulo="Data" valor={formatarDataExtenso(evento.data, evento.dataFim)} dateTime={evento.data.slice(0, 10)} />}
+                {horario && <InfoRow icon={Calendar} rotulo="Horário" valor={horario} dateTime={dataISO} />}
+                <InfoRow icon={ModalidadeIcon} rotulo="Modalidade" valor={MODALIDADE_LABELS[evento.modalidade]} />
+                {evento.local && <InfoRow icon={evento.modalidade === 'online' ? Monitor : MapPin} rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'} valor={evento.local} />}
+                {evento.publico && <InfoRow icon={Building2} rotulo="Público" valor={evento.publico} />}
+                <InfoRow icon={Calendar} rotulo="Situação" valor={STATUS_LABELS[evento.status]} />
+              </dl>
+
+              {acoes.length > 0 && <div className="hidden lg:block mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
+                {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
+                  {acao.label}<ExternalLink className="w-4 h-4" aria-hidden /><span className="sr-only"> (abre em uma nova aba)</span>
+                </a>)}
+              </div>}
+            </div>
+          </aside>
+          <div className="lg:col-span-8 min-w-0 rounded-2xl border border-crfal-gray-200 bg-white p-6 md:p-8 shadow-card">
             <h2 className="font-display text-xl font-semibold text-neutral-800  md:text-2xl mb-6">Sobre o evento</h2>
 
             {erroEvento ? (
@@ -244,7 +270,7 @@ export default function EventoDetailPage() {
               </div>
             ) : conteudo ? (
               <div
-                className="text-crfal-gray-600  leading-relaxed
+                className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed
                   [&_a]:text-crfal-blue [&_a]:underline
                   [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]:mt-6 [&_h2]:mb-3
                   [&_h3]:font-bold [&_h3]:text-neutral-800 [&_h3]:mt-6 [&_h3]:mb-3
@@ -256,7 +282,7 @@ export default function EventoDetailPage() {
                 dangerouslySetInnerHTML={{ __html: conteudo }}
               />
             ) : evento.descricao ? (
-              <p className="text-crfal-gray-600  leading-relaxed">{evento.descricao}</p>
+              <p className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed">{evento.descricao}</p>
             ) : (
               <p className="text-crfal-gray-500 ">
                 A descrição completa deste evento ainda não foi disponibilizada.
@@ -264,28 +290,6 @@ export default function EventoDetailPage() {
             )}
           </div>
 
-          <aside className="lg:col-span-1">
-            <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card lg:sticky lg:top-24">
-              <h2 className="font-display text-xl font-semibold text-neutral-800 md:text-2xl mb-6">
-                Informações do evento
-              </h2>
-
-              <dl className="space-y-4">
-                {evento.data && <InfoRow icon={Calendar} rotulo="Data" valor={formatarDataExtenso(evento.data, evento.dataFim)} dateTime={evento.data.slice(0, 10)} />}
-                {horario && <InfoRow icon={Calendar} rotulo="Horário" valor={horario} dateTime={dataISO} />}
-                <InfoRow icon={ModalidadeIcon} rotulo="Modalidade" valor={MODALIDADE_LABELS[evento.modalidade]} />
-                {evento.local && <InfoRow icon={evento.modalidade === 'online' ? Monitor : MapPin} rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'} valor={evento.local} />}
-                {evento.publico && <InfoRow icon={Building2} rotulo="Público" valor={evento.publico} />}
-                <InfoRow icon={Calendar} rotulo="Situação" valor={STATUS_LABELS[evento.status]} />
-              </dl>
-
-              {acoes.length > 0 && <div className="mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
-                {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
-                  {acao.label}<ExternalLink className="w-4 h-4" aria-hidden /><span className="sr-only"> (abre em uma nova aba)</span>
-                </a>)}
-              </div>}
-            </div>
-          </aside>
         </div>
 
         {outrosEventos.length > 0 && (
