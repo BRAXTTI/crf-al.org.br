@@ -1,4 +1,5 @@
 import type { ElementType } from 'react';
+import { formatDate, weekday } from '@/lib/maceio';
 import { Building2, CheckCircle2, Clock, MapPin, Monitor, XCircle } from 'lucide-react';
 import { stripHTML } from '@/services/wordpress/client';
 import type { CRFEvent } from '@/services/wordpress/types';
@@ -13,6 +14,8 @@ export interface Evento {
   descricao: string;
   data: string;
   dataFim?: string;
+  horaInicio?: string;
+  horaFim?: string;
   local: string;
   modalidade: ModalidadeEvento;
   status: StatusEvento;
@@ -125,6 +128,8 @@ export function mapEvent(evento: CRFEvent): Evento {
     descricao: stripHTML(evento.excerpt),
     data: evento.startDate,
     dataFim: multiDia ? evento.endDate : undefined,
+    horaInicio: evento.startDate.slice(11, 16) || undefined,
+    horaFim: evento.endDate.slice(11, 16) || undefined,
     local: stripHTML(evento.location) || (modalidade === 'online' ? 'Evento Online' : ''),
     modalidade,
     status: derivarStatus(evento, inicio, fim),
@@ -197,4 +202,17 @@ export function acoesDoEvento(evento: Evento): { label: string; href: string }[]
   const video = evento.video ? [{ label: 'Assistir ao vivo', href: evento.video }] : [];
   const inscricao = evento.link ? [{ label: 'Inscreva-se', href: evento.link }] : [];
   return evento.status === 'em-andamento' ? [...video, ...inscricao] : [...inscricao, ...video];
+}
+
+export function formatarDataExtenso(data: string, fim?: string): string {
+  if (!data) return '';
+  const fmt = (d: string) => formatDate(d.slice(0, 10), { day: 'numeric', month: 'long', year: 'numeric' });
+  return fim ? `${fmt(data)} a ${fmt(fim)}` : `${weekday(data.slice(0, 10))}, ${fmt(data)}`;
+}
+export function formatarHorario(inicio?: string, fim?: string, data?: string, dataFim?: string): string {
+  if (!inicio) return '';
+  const hora = (v: string) => `${Number(v.slice(0, 2))}h${v.slice(3, 5) === '00' ? '' : v.slice(3, 5)}`;
+  const dia = (v: string) => `${Number(v.slice(8, 10))}/${Number(v.slice(5, 7))}`;
+  const texto = data && dataFim && fim ? `Início ${dia(data)} às ${hora(inicio)} · término ${dia(dataFim)} às ${hora(fim)}` : fim ? `${hora(inicio)} às ${hora(fim)}` : `A partir das ${hora(inicio)}`;
+  return `${texto} (horário de Brasília)`;
 }

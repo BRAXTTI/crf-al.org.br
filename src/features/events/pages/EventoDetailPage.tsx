@@ -27,7 +27,8 @@ import {
   STATUS_COLORS,
   STATUS_LABELS,
   formatarData,
-  formatarDataHora,
+  formatarDataExtenso,
+  formatarHorario,
   mapEvent,
   type Evento,
 } from '../utils';
@@ -57,17 +58,17 @@ function paraCRFEvent(evento: WPEventListing, bannerFallback?: string | null): C
   };
 }
 
-function InfoRow({ icon: Icon, rotulo, valor }: { icon: typeof Calendar; rotulo: string; valor: string }) {
+function InfoRow({ icon: Icon, rotulo, valor, dateTime }: { icon: typeof Calendar; rotulo: string; valor: string; dateTime?: string }) {
   return (
     <div className="flex items-start gap-3">
       <div className="p-2 rounded-lg bg-crfal-blue-lighter  shrink-0">
-        <Icon className="w-4 h-4 text-crfal-blue " />
+        <Icon className="w-4 h-4 text-crfal-blue " aria-hidden />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-400 ">
+        <dt className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-600 ">
           {rotulo}
-        </p>
-        <p className="text-sm text-neutral-700  wrap-break-word">{valor}</p>
+        </dt>
+        <dd className="text-sm text-neutral-800 wrap-break-word">{dateTime ? <time dateTime={dateTime}>{valor}</time> : valor}</dd>
       </div>
     </div>
   );
@@ -153,6 +154,8 @@ export default function EventoDetailPage() {
   const ModalidadeIcon = MODALIDADE_ICONS[evento.modalidade];
   const conteudo = eventoCompleto ? sanitizeWP(eventoCompleto.content?.rendered ?? '') : '';
   const acoes = acoesDoEvento(evento);
+  const horario = formatarHorario(evento.horaInicio, evento.horaFim, evento.data, evento.dataFim);
+  const dataISO = evento.horaInicio ? `${evento.data.slice(0, 10)}T${evento.horaInicio}-03:00` : evento.data.slice(0, 10);
 
   return (
     <div className="min-h-screen ">
@@ -194,7 +197,7 @@ export default function EventoDetailPage() {
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
           <span className="inline-flex items-center gap-1.5">
             <Calendar className="w-4 h-4" />
-            {formatarData(evento.data, evento.dataFim)}
+            {formatarDataExtenso(evento.data, evento.dataFim)}{horario && ` · ${horario}`}
           </span>
           {evento.local && (
             <span className="inline-flex items-center gap-1.5">
@@ -263,22 +266,18 @@ export default function EventoDetailPage() {
 
           <aside className="lg:col-span-1">
             <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card lg:sticky lg:top-24">
-              <h2 className="text-lg font-bold text-neutral-800  mb-6">
+              <h2 className="font-display text-xl font-semibold text-neutral-800 md:text-2xl mb-6">
                 Informações do evento
               </h2>
 
-              <div className="space-y-5">
-                {evento.data && <InfoRow icon={Calendar} rotulo="Início" valor={formatarDataHora(evento.data)} />}
-                {evento.dataFim && <InfoRow icon={Calendar} rotulo="Término" valor={formatarDataHora(evento.dataFim)} />}
-                {evento.local && (
-                  <InfoRow
-                    icon={evento.modalidade === 'online' ? Monitor : MapPin}
-                    rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'}
-                    valor={evento.local}
-                  />
-                )}
-                {evento.publico && <InfoRow icon={Building2} rotulo="Público-alvo" valor={evento.publico} />}
-              </div>
+              <dl className="space-y-4">
+                {evento.data && <InfoRow icon={Calendar} rotulo="Data" valor={formatarDataExtenso(evento.data, evento.dataFim)} dateTime={evento.data.slice(0, 10)} />}
+                {horario && <InfoRow icon={Calendar} rotulo="Horário" valor={horario} dateTime={dataISO} />}
+                <InfoRow icon={ModalidadeIcon} rotulo="Modalidade" valor={MODALIDADE_LABELS[evento.modalidade]} />
+                {evento.local && <InfoRow icon={evento.modalidade === 'online' ? Monitor : MapPin} rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'} valor={evento.local} />}
+                {evento.publico && <InfoRow icon={Building2} rotulo="Público" valor={evento.publico} />}
+                <InfoRow icon={Calendar} rotulo="Situação" valor={STATUS_LABELS[evento.status]} />
+              </dl>
 
               {acoes.length > 0 && <div className="mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
                 {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
