@@ -7,9 +7,12 @@ const read = async file => JSON.parse(await readFile(resolve(dir, file), 'utf8')
 const [pairs, oldPosts, newPosts, conflicts] = await Promise.all(['mapa-posts-candidatos.json', 'antigo/posts-all.json', 'novo/posts-all.json', 'conflitos-id.json'].map(read));
 const oldById = new Map(oldPosts.map(post => [post.id, post]));
 const newById = new Map(newPosts.map(post => [post.id, post]));
-// Lista editorial auditada em SUSPEITOS.md: dating-online, spam e conteúdo padrão/teste.
-const blockedOld = new Set([2534, 2143, 2074, 169, 163, 83, 81, 79, 1]);
-const blockedNew = new Set([2534, 2143, 2074, 169, 163, 83, 81, 79, 16337]);
+// Critérios da auditoria: categoria dating-online ou expressões de spam/teste
+// em slug, título ou conteúdo. Nomes isolados de medicamentos não são suficientes.
+const spam = /dating sites?|online dating|lorem ipsum|welcome to wordpress|online casino|casino online|buy viagra|payday loans/i;
+const suspects = (posts, category) => new Set(posts.filter(post => post.categories?.includes(category) || spam.test([post.slug, post.title?.rendered, post.content?.rendered].join(' '))).map(post => post.id));
+const blockedOld = suspects(oldPosts, 22);
+const blockedNew = suspects(newPosts, 3);
 // IDs identificados na seção "11 posts sem título no novo" do levantamento.
 const titleIds = new Set([8657, 8453, 8215, 7571, 7466, 7334, 7108, 6991, 6774, 6610, 6227]);
 const rows = pairs.map(pair => {
