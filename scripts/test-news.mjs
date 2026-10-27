@@ -132,7 +132,9 @@ try {
   const refreshA = refreshNewsIndex(context);
   const refreshB = refreshNewsIndex(context);
   assert.equal(refreshA, refreshB, 'Refresh concorrente compartilha promise');
+  const writesBefore = writes.filter(row => row.key === NEWS_INDEX_KEY).length;
   await refreshA;
+  assert.equal(writes.filter(row => row.key === NEWS_INDEX_KEY).length, writesBefore, 'Índice igual não regrava payload');
   assert.equal(requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/posts').length, 1);
   // Detalhe: mídia e autor em paralelo; reserva no KV com SWR e escrita só quando muda.
   {

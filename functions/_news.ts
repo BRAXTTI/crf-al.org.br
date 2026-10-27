@@ -212,11 +212,12 @@ async function buildNewsIndex(context?: NewsContext): Promise<Entry[]> {
 }
 export const NEWS_INDEX_KEY = 'news:index:v1';
 export const NEWS_INDEX_LOCK = 'news:index:refresh:v1';
-const REFRESH_MS = 10 * 60_000;
+const REFRESH_MS = 25 * 60_000;
+const NEWS_INDEX_CHECK = 'news:index:checked:v1';
 const LEASE_MS = 120_000;
 // Após falha, o lease vira um intervalo curto: sem 503 por 2 min com o KV vazio e sem martelar a origem.
 export const NEWS_INDEX_RETRY_MS = 15_000;
-type StoredIndex = { storedAt: number; value: Entry[] };
+type StoredIndex = { storedAt: number; checkedAt?: number; hash?: string; value: Entry[] };
 const refreshing = new WeakMap<KVNamespace, Promise<Entry[] | null>>();
 // O índice tem ~1 MB: lido do KV com cache de borda de 60 s e decodificado no máximo uma vez
 // por minuto em cada isolate. Um índice novo aparece em até ~2 min (memória + borda do KV).
@@ -228,7 +229,11 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   const hit = memo.get(kv);
   if (hit && Date.now() - hit.readAt < NEWS_INDEX_MEMO_MS) return hit.entry;
   const entry = await kv.get<StoredIndex>(NEWS_INDEX_KEY, { type: 'json', cacheTtl: 60 });
-  if (entry) memo.set(kv, { readAt: Date.now(), entry });
+  if (entry) {
+    const checked = await kv.get<{ hash: string; checkedAt: number }>(NEWS_INDEX_CHECK, { type: 'json', cacheTtl: 60 });
+    if (checked?.hash === entry.hash) entry.checkedAt = checked?.checkedAt;
+    memo.set(kv, { readAt: Date.now(), entry });
+  }
   return entry;
 }
 export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> {
@@ -249,8 +254,13 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
       await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now() - LEASE_MS + NEWS_INDEX_RETRY_MS), { expirationTtl: 60 }).catch(() => undefined);
       throw error;
     }
-    const entry = { storedAt: Date.now(), value };
-    await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
+    const bytes = new TextEncoder().encode(JSON.stringify(value));
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+    const previous = await readNewsIndex(kv);
+    const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
+    if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
+    await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
     memo.set(kv, { readAt: Date.now(), entry });
     // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
     return value;
@@ -263,7 +273,7 @@ export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   if (!kv) return cached('index', context, () => buildNewsIndex(background(context)));
   const entry = await readNewsIndex(kv);
   if (entry) {
-    if (Date.now() - entry.storedAt > REFRESH_MS) context!.waitUntil(refreshNewsIndex(context!).catch(error => {
+    if (Date.now() - (entry.checkedAt ?? entry.storedAt) > REFRESH_MS) context!.waitUntil(refreshNewsIndex(context!).catch(error => {
       console.error(JSON.stringify({ event: 'news_index_refresh_failed', message: String(error) }));
     }));
     return entry.value;
