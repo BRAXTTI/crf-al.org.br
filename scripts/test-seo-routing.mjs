@@ -108,6 +108,22 @@ try {
     const asset = new Response('resource', { headers: { 'Content-Type': type } });
     await assertPassThrough(await request(path, { response: asset.clone() }), asset, `Preserve real resource: ${path}`);
   }
+  // Cache-Control de /images/* fornecido por next() sobrevive inclusive ao 304.
+  for (const status of [200, 304]) {
+    const image = new Response(status === 304 ? null : 'image', {
+      status,
+      headers: {
+        'Content-Type': 'image/webp',
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+        ETag: '"image-v1"',
+      },
+    });
+    await assertPassThrough(
+      await request('/images/cache-test.webp', { response: image.clone() }),
+      image,
+      `Cache de imagem preservado no status ${status}`,
+    );
+  }
   // Assets estáticos preservam validadores (304); rotas HTML os descartam para injetar metadados.
   const validators = { 'If-None-Match': '"abc"', 'If-Modified-Since': 'Tue, 27 Oct 2026 00:00:00 GMT' };
   for (const path of ['/images/logo.png', '/documentos/manual.pdf', '/fonts/inter-400.woff2', '/assets/main.js']) {
