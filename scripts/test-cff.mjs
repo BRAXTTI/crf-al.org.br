@@ -48,6 +48,12 @@ try {
 
   globalThis.fetch = async () => new Response('<html></html>');
   await assert.rejects(getCffPublications(), /nenhuma publicação/);
+  globalThis.fetch = async (_url, { signal }) => new Promise((_resolve, reject) => {
+    signal.addEventListener('abort', () => reject(new DOMException('timeout', 'AbortError')), { once: true });
+  });
+  const start = Date.now();
+  await assert.rejects(getCffPublications(30), /timeout/);
+  assert.ok(Date.now() - start < 1000, 'Prazo total encerra coleta lenta');
 } finally {
   globalThis.fetch = originalFetch;
 }
