@@ -23,7 +23,7 @@ export async function fetchPosts(
 
 export async function fetchPostById(id: number, signal?: AbortSignal): Promise<WPPost> {
   const post = await fetchPostBySlug(String(id), signal);
-  if (!post) throw new Error('Notícia não encontrada.');
+  if (!post) throw new HttpError(404);
   return post;
 }
 

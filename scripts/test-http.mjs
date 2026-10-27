@@ -22,6 +22,8 @@ try {
   }
   globalThis.fetch = async () => new Response(null, { status: 404 });
   assert.equal(await client.fetchPostBySlug('missing'), null);
+  await assert.rejects(client.fetchPostById(999999), error =>
+    error instanceof HttpError && error.status === 404 && retry(0, error) === false);
   globalThis.fetch = async () => new Response(null, { status: 503 });
   await assert.rejects(client.fetchPostBySlug('existing'), error => error.status === 503);
 
