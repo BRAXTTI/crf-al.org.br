@@ -25,6 +25,11 @@ try {
   assert.equal((await request('/api/events', 'POST')).status, 405);
   assert.equal((await request('/api/gallery?slug=album')).status, 200);
   assert.equal(urls.at(-1).searchParams.get('rest_route'), '/crfal/v1/photo-albums/album');
+  assert.equal((await request('/api/gallery/?page=2')).status, 200);
+  assert.equal(urls.at(-1).searchParams.get('rest_route'), '/crfal/v1/photo-albums', 'Barra final do middleware Vite preserva a rota de galeria');
+  assert.equal(urls.at(-1).searchParams.get('page'), '2');
+  assert.equal((await request('/api/gallery/?slug=outro-album')).status, 200);
+  assert.equal(urls.at(-1).searchParams.get('rest_route'), '/crfal/v1/photo-albums/outro-album');
   globalThis.fetch = async () => Response.json([{ id: 1, slug: 'evento', title: 'Título, teste', startDate: '2026-10-26 09:00:00', endDate: '', location: 'Maceió', cancelled: true }]);
   const calendar = await request('/api/events?format=ics');
   assert.match(calendar.headers.get('Content-Type'), /text\/calendar/);

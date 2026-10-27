@@ -64,6 +64,12 @@ async function expectMissing(path, plainText = false) {
 }
 
 try {
+  const headers = await readFile(new URL('../public/_headers', import.meta.url), 'utf8');
+  const csp = headers.match(/Content-Security-Policy: (.+)/)[1];
+  for (const directive of ['img-src', 'media-src']) {
+    const sources = csp.split(';').map(value => value.trim().split(/\s+/)).find(value => value[0] === directive);
+    assert.ok(sources.includes('https://midias.crf-al.org.br'), `${directive}: permitir mídias após o redirect dos uploads legados`);
+  }
   const routes = await readFile(new URL('../src/router/app-router.tsx', import.meta.url), 'utf8');
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
   const sitemapPaths = new Set([...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(([, url]) => new URL(url).pathname));

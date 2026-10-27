@@ -12,7 +12,7 @@ export async function contentApi(request: Request, context: ContentContext): Pro
   const related = input.searchParams.get('related');
   const page = Number(input.searchParams.get('page') ?? 1);
   if ((slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) || (id !== null && !/^[1-9]\d*$/.test(id)) || (related !== null && !/^[1-9]\d*$/.test(related)) || !Number.isSafeInteger(page) || page < 1) return Response.json({ error: 'Parâmetros inválidos.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
-  const gallery = input.pathname === '/api/gallery';
+  const gallery = input.pathname.replace(/\/$/, '') === '/api/gallery';
   const origin = new URL('/index.php', context.env?.WP_SITE_URL || 'https://wordpress.crf-al.org.br');
   origin.searchParams.set('rest_route', gallery ? `/crfal/v1/photo-albums${slug ? `/${slug}` : ''}` : slug || id || related ? `/wp/v2/event_listing${id ? `/${id}` : ''}` : '/crfal/v1/events');
   if (related && !gallery) { origin.searchParams.set('per_page', '3'); origin.searchParams.set('exclude', related); origin.searchParams.set('_embed', '1'); }
