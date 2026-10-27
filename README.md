@@ -122,3 +122,24 @@ Configuração operacional (a executar pelo operador; nenhuma ação Cloudflare 
    Esse comando é apenas documentação; não executar login/deploy neste ambiente. O Worker se chama `crf-al-news-index-cron`; `main = "index.ts"` resolve para `workers/news-index-cron/index.ts`, cujo handler `scheduled` executa a agenda `*/10 * * * *` (a cada 10 minutos, UTC). Seu único binding aponta para o KV de produção, sem `preview_id`. Não agendar esse Worker contra preview. O primeiro cron ou acesso preenche o namespace; conferir `storedAt` e logs após ativação. O preview faz refresh por acesso; para desenvolvimento sem KV, usar `npm run dev`.
 
 Referências oficiais consultadas: [bindings de Pages](https://developers.cloudflare.com/pages/functions/bindings/), [configuração Wrangler de Pages](https://developers.cloudflare.com/pages/functions/wrangler-configuration/), [consistência do KV](https://developers.cloudflare.com/kv/concepts/how-kv-works/), [comandos KV](https://developers.cloudflare.com/kv/reference/kv-commands/) e [Cron Triggers](https://developers.cloudflare.com/workers/configuration/cron-triggers/).
+
+### Relatórios locais de CSP
+
+A política existente continua aplicada. Uma cópia em
+`Content-Security-Policy-Report-Only` envia violações por `report-uri` para
+`POST /api/csp-report`, na mesma origem, sem serviço de terceiros. A cópia de
+observação não adiciona bloqueios; omite `upgrade-insecure-requests`, que não é
+aplicável em report-only. Os headers estão em `public/_headers` e no middleware.
+
+O endpoint aceita apenas `application/csp-report`, limita o corpo a 16 KiB e
+responde 204 após registrar o evento `csp_report` nos logs da Function.
+Registra somente a diretiva e as origens do documento e do recurso bloqueado:
+descarta caminhos, query strings, amostras de script e o corpo bruto. Não grava
+em KV nem envia dados a outro serviço. Os relatórios são dados não confiáveis;
+servem para diagnóstico, nunca para liberar automaticamente novas origens.
+A entrega depende do suporte do navegador e não é garantida.
+
+Após uma publicação autorizada, procurar `csp_report` nos logs das Functions e
+avaliar as diretivas antes de alterar a política aplicada. Para desativar a coleta,
+remover o header report-only dos dois arquivos. Os testes offline cobrem o
+endpoint e a sincronização dos headers; nenhuma publicação é necessária para rodá-los.
