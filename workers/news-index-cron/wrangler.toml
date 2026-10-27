@@ -1,0 +1,13 @@
+name = "crf-al-news-index-cron"
+main = "index.ts"
+compatibility_date = "2026-10-27"
+workers_dev = false
+preview_urls = false
+
+[triggers]
+crons = ["*/10 * * * *"]
+
+[[kv_namespaces]]
+binding = "NEWS_INDEX"
+id = "REPLACE_WITH_PRODUCTION_NEWS_INDEX_ID"
+preview_id = "REPLACE_WITH_PREVIEW_NEWS_INDEX_ID"

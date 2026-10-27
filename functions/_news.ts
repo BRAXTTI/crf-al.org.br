@@ -1,7 +1,8 @@
+import type { KVNamespace } from '@cloudflare/workers-types';
 import { SITE_URL } from '../src/config/site';
 import { NEWS_MAP, BLOCKED_NEWS_SLUGS, BLOCKED_NEW_IDS } from './_news-map';
 import type { HistoricalNews } from './_news-map';
-import type { WPPost, WPPostsPage } from '../src/services/wordpress/types';
+import type { WPPost, WPPostsPage, WPMedia } from '../src/services/wordpress/types';
 
 export const NEWS_CATEGORY_SLUG = 'noticias-do-portal';
 type Entry = { id: number; slug: string; date: string; date_gmt: string; modified?: string; title?: { rendered: string }; categories?: number[]; newsSource: 'current' };
@@ -11,23 +12,40 @@ const bySlug = new Map(NEWS_MAP.map(row => [row.slug, row]));
 const byNewSlug = new Map(NEWS_MAP.filter(row => row.newSlug !== row.slug).map(row => [row.newSlug, row]));
 const blockedSlugs = new Set(BLOCKED_NEWS_SLUGS);
 const blockedIds = new Set(BLOCKED_NEW_IDS);
-const fields = 'id,date,date_gmt,modified,slug,link,title,excerpt,content,categories,_links,_embedded';
+const fields = 'id,date,date_gmt,modified,slug,link,title,excerpt,content,categories,featured_media,author,_links';
 export const ORIGIN_CACHE = { cf: { cacheTtlByStatus: { '200-299': 60, '404': 60, '500-599': 0 }, cacheEverything: true } } as RequestInit;
-interface NewsContext { env?: { NEWS_ARCHIVE_API_URL?: string }; waitUntil: (promise: Promise<unknown>) => void }
+export interface NewsEnv { NEWS_ARCHIVE_API_URL?: string; NEWS_INDEX?: KVNamespace }
+interface NewsContext { env?: NewsEnv; waitUntil: (promise: Promise<unknown>) => void }
 interface PublicCache { match: (request: Request) => Promise<Response | undefined>; put: (request: Request, response: Response) => Promise<void>; delete?: (request: Request) => Promise<unknown> }
 
-async function request(path: string, params: Record<string, string> = {}, missing = false): Promise<Response | null> {
+async function request(path: string, params: Record<string, string> = {}, missing = false, missingPage = false): Promise<Response | null> {
   const url = new URL('https://wordpress.crf-al.org.br/index.php');
   url.searchParams.set('rest_route', `/wp/v2/${path}`);
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
-  const response = await fetch(url, { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
-  if (missing && response.status === 404) return null;
-  if (!response.ok) throw new Error(`News current HTTP ${response.status}`);
-  return response;
+  for (let attempt = 0; ; attempt++) {
+    let response: Response;
+    try {
+      const upstream = await fetch(url, { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
+      // Inclui a leitura do corpo na tentativa: timeout pode ocorrer após os headers.
+      response = new Response(await upstream.arrayBuffer(), { status: upstream.status, headers: upstream.headers });
+    }
+    catch (error) {
+      if (attempt === 0 && error instanceof Error && ['TimeoutError', 'AbortError'].includes(error.name)) continue;
+      throw error;
+    }
+    if (attempt === 0 && response.status >= 500) { await response.body?.cancel(); continue; }
+    if (missing && response.status === 404) return null;
+    if (missingPage && response.status === 400) {
+      const body = await response.json() as { code?: string };
+      if (body.code === 'rest_post_invalid_page_number') return null;
+    }
+    if (!response.ok) throw new Error(`News current HTTP ${response.status}`);
+    return response;
+  }
 }
 async function cached<T>(key: string, context: NewsContext | undefined, load: () => Promise<T>): Promise<T> {
   const cache = (globalThis as typeof globalThis & { caches?: { default?: PublicCache } }).caches?.default;
-  const request = new Request(`${SITE_URL}/__news/v4/${key}`);
+  const request = new Request(`${SITE_URL}/__news/v5/${key}`);
   const store = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': 'public, max-age=600' } }));
   const hit = cache && context ? await cache.match(request) : undefined;
   if (hit) {
@@ -67,36 +85,92 @@ function normalize<T extends { id: number; slug: string; title?: { rendered: str
   // Reescreve todos os campos de mídia, inclusive srcset e tamanhos aninhados.
   return JSON.parse(JSON.stringify(result).replace(/https?:\/\/(?:www\.)?crf-al\.org\.br(?=\/(?:app|wp-content)\/uploads\/)/gi, 'https://midias.crf-al.org.br')) as T;
 }
-async function categories(context?: NewsContext): Promise<{ category: number | null; spam: number | null }> {
+type Category = { id: number; slug: string; name: string };
+async function categories(context?: NewsContext) {
   return cached('categories', context, async () => {
-    const response = await request('categories', { per_page: '100', _fields: 'id,slug' });
-    const rows = await response!.json() as Array<{ id: number; slug: string }>;
-    return { category: rows.find(row => row.slug === NEWS_CATEGORY_SLUG)?.id ?? null, spam: rows.find(row => row.slug === 'dating-online')?.id ?? null };
+    const rows: Category[] = [];
+    for (let page = 1, pages = 1; page <= pages; page++) {
+      const response = (await request('categories', { per_page: '100', page: String(page), _fields: 'id,slug,name' }))!;
+      rows.push(...await response.json() as Category[]);
+      pages = Math.min(100, Number(response.headers.get('x-wp-totalpages')) || 1);
+    }
+    return { rows, category: rows.find(row => row.slug === NEWS_CATEGORY_SLUG)?.id ?? null, spam: rows.find(row => row.slug === 'dating-online')?.id ?? null };
   });
 }
+async function enrich(posts: WPPost[], taxonomy: Awaited<ReturnType<typeof categories>>, context?: NewsContext, withAuthor = false): Promise<WPPost[]> {
+  const ids = [...new Set(posts.map(post => post.featured_media).filter((id): id is number => Boolean(id)))];
+  const media = await (ids.length ? request('media', { include: ids.join(','), per_page: String(ids.length), _fields: 'id,source_url,media_details,alt_text' }).then(response => response!.json() as Promise<WPMedia[]>) : Promise.resolve([]));
+  const images = new Map(media.map(item => [item.id, item]));
+  return Promise.all(posts.map(async post => {
+    const image = images.get(post.featured_media);
+    const author = withAuthor && post.author ? await cached(`author/${post.author}`, context, async () => {
+      const response = await request(`users/${post.author}`, { _fields: 'name' }, true);
+      return response ? await response.json() as { name: string } : null;
+    }) : null;
+    return normalize({ ...post, _embedded: {
+      ...(image ? { 'wp:featuredmedia': [image] } : {}),
+      'wp:term': [(post.categories ?? []).flatMap(id => taxonomy.rows.filter(row => row.id === id))],
+      ...(author ? { author: [author] } : {}),
+    } });
+  }));
+}
+async function buildNewsIndex(context?: NewsContext): Promise<Entry[]> {
+  const { category, spam } = await categories(context);
+  let pages = 1;
+  const loadPage = async (page: number): Promise<Entry[]> => {
+    const response = await request('posts', { per_page: '100', page: String(page), _fields: 'id,slug,date,date_gmt,modified,title,categories' }, false, page > 1);
+    if (!response) return [];
+    const pageCount = Number(response.headers.get('x-wp-totalpages'));
+    if (!Number.isInteger(pageCount) || pageCount < 0 || pageCount > 100) throw new Error('Invalid news inventory');
+    pages = Math.max(pages, pageCount);
+    return await response.json() as Entry[];
+  };
+  const rows = await loadPage(1);
+  let next = 2;
+  // Cada conexão começa a próxima página assim que termina; nunca mais de quatro.
+  const results = await Promise.allSettled(Array.from({ length: 4 }, async () => {
+    while (next <= pages) rows.push(...await loadPage(next++));
+  }));
+  const failed = results.find(result => result.status === 'rejected');
+  if (failed?.status === 'rejected') throw failed.reason;
+  return [...new Map(rows.map(post => [post.id, post])).values()].filter(post => acceptable(post, category, spam)).map(normalize).filter(hasTitle).sort((a, b) => b.date_gmt.localeCompare(a.date_gmt) || b.id - a.id);
+}
+export const NEWS_INDEX_KEY = 'news:index:v1';
+export const NEWS_INDEX_LOCK = 'news:index:refresh:v1';
+const REFRESH_MS = 10 * 60_000;
+type StoredIndex = { storedAt: number; value: Entry[] };
+const refreshing = new WeakMap<KVNamespace, Promise<Entry[] | null>>();
+export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> {
+  const kv = context.env?.NEWS_INDEX;
+  if (!kv) return Promise.reject(new Error('NEWS_INDEX binding required'));
+  const pending = refreshing.get(kv);
+  if (pending) return pending;
+  const task = (async () => {
+    const lock = await kv.get<number>(NEWS_INDEX_LOCK, 'json');
+    if (lock && Date.now() - lock < 120_000) return null;
+    // KV não oferece compare-and-swap: lease distribuído best-effort + single-flight local.
+    await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: 120 });
+    const value = await buildNewsIndex(context);
+    await kv.put(NEWS_INDEX_KEY, JSON.stringify({ storedAt: Date.now(), value }));
+    // Mantém o lease até expirar, evitando novas tentativas durante propagação/falhas.
+    return value;
+  })().finally(() => refreshing.delete(kv));
+  refreshing.set(kv, task);
+  return task;
+}
 export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
-  return cached('index', context, async () => {
-    const { category, spam } = await categories(context);
-    let pages = 1; let total = 0;
-    const loadPage = async (page: number): Promise<Entry[]> => {
-      const response = (await request('posts', { per_page: '100', page: String(page), _fields: 'id,slug,date,date_gmt,modified,title,categories' }))!;
-      const pageCount = Number(response.headers.get('x-wp-totalpages'));
-      const postCount = Number(response.headers.get('x-wp-total'));
-      if (!Number.isInteger(pageCount) || pageCount < 0 || pageCount > 100 || !Number.isInteger(postCount) || postCount < 0) throw new Error('Invalid news inventory');
-      if (page === 1) { pages = pageCount; total = postCount; }
-      else if (pages !== pageCount || total !== postCount) throw new Error('News inventory changed during pagination');
-      return await response.json() as Entry[];
-    };
-    const rows = await loadPage(1);
-    // O acervo inteiro em série excede o timeout de 15 s do frontend sem cache.
-    // Lotes de cinco deixam uma conexão livre no runtime do Cloudflare.
-    for (let page = 2; page <= pages; page += 5) {
-      const batch = await Promise.all(Array.from({ length: Math.min(5, pages - page + 1) }, (_, offset) => loadPage(page + offset)));
-      rows.push(...batch.flat());
-    }
-    if (rows.length !== total || new Set(rows.map(post => post.id)).size !== total) throw new Error('News inventory changed during pagination');
-    return rows.filter(post => acceptable(post, category, spam)).map(normalize).filter(hasTitle).sort((a, b) => b.date_gmt.localeCompare(a.date_gmt) || b.id - a.id);
-  });
+  const kv = context?.env?.NEWS_INDEX;
+  if (!kv) return cached('index', context, () => buildNewsIndex(context));
+  const entry = await kv.get<StoredIndex>(NEWS_INDEX_KEY, 'json');
+  if (entry) {
+    if (Date.now() - entry.storedAt > REFRESH_MS) context!.waitUntil(refreshNewsIndex(context!).catch(error => {
+      console.error(JSON.stringify({ event: 'news_index_refresh_failed', message: String(error) }));
+    }));
+    return entry.value;
+  }
+  const value = await refreshNewsIndex(context!);
+  if (value) return value;
+  throw new Error('News index warming up');
 }
 export const newsSitemapIndex = newsIndex;
 export async function newsPost(slug: string, context?: NewsContext, metadataOnly = false): Promise<WPPost | null> {
@@ -104,7 +178,7 @@ export async function newsPost(slug: string, context?: NewsContext, metadataOnly
   return cached(`${metadataOnly ? 'metadata' : 'post'}/${encodeURIComponent(slug)}`, context, async () => {
     const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
     const postFields = metadataOnly ? fields.replace('content,', '') : fields;
-    const params = { _fields: postFields, _embed: metadataOnly ? 'wp:featuredmedia' : 'wp:featuredmedia,wp:term,author' };
+    const params = { _fields: postFields };
     let post: WPPost | undefined;
     if (row?.newId != null) {
       const response = await request(`posts/${row.newId}`, params, true);
@@ -118,9 +192,9 @@ export async function newsPost(slug: string, context?: NewsContext, metadataOnly
       post = response ? await response.json() as WPPost : undefined;
     }
     if (!post) return null;
-    const { category, spam } = await categories(context);
-    if (!acceptable(post, category, spam)) return null;
-    const result = normalize(post);
+    const taxonomy = await categories(context);
+    if (!acceptable(post, taxonomy.category, taxonomy.spam)) return null;
+    const [result] = await enrich([post], taxonomy, context, !metadataOnly);
     return hasTitle(result) ? result : null;
   });
 }
@@ -130,12 +204,12 @@ export async function newsPage(page = 1, perPage = 12, context?: NewsContext): P
   if (!entries.length) return { posts: [], total: index.length, totalPages: Math.ceil(index.length / perPage) };
   const ids = entries.map(entry => entry.id);
   const posts = await cached<WPPost[]>(`list/${ids.join(',')}`, context, async () => {
-    const response = await request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', ''), _embed: 'wp:featuredmedia,wp:term' });
-    const rows = await response!.json() as WPPost[]; const { category, spam } = await categories(context);
-    const filtered = rows.filter(post => acceptable(post, category, spam)).map(normalize);
+    const response = await request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', '') });
+    const rows = await response!.json() as WPPost[]; const taxonomy = await categories(context);
+    const filtered = rows.filter(post => acceptable(post, taxonomy.category, taxonomy.spam)).map(normalize);
     const lookup = new Map(filtered.map(post => [post.id, post]));
     if (entries.some(entry => lookup.get(entry.id)?.slug !== entry.slug)) throw new Error('News inventory changed during listing');
-    return entries.map(entry => lookup.get(entry.id)!);
+    return enrich(entries.map(entry => lookup.get(entry.id)!), taxonomy, context);
   });
   return { posts, total: index.length, totalPages: Math.ceil(index.length / perPage) };
 }
