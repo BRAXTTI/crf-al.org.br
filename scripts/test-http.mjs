@@ -45,13 +45,12 @@ try {
 
   let request;
   globalThis.fetch = async url => {
-    request = new URL(url);
+    request = new URL(url, 'https://portal.example');
     return Response.json([{ id: 123, slug: 'evento-de-teste', event_details: { online: true } }]);
   };
   assert.equal((await client.fetchEventBySlug('evento-de-teste')).id, 123);
-  assert.equal(request.searchParams.get('rest_route'), '/wp/v2/event_listing');
+  assert.equal(request.pathname, '/api/events');
   assert.equal(request.searchParams.get('slug'), 'evento-de-teste');
-  assert.equal(request.searchParams.get('_embed'), '1');
   globalThis.fetch = async () => Response.json([]);
   assert.equal(await client.fetchEventBySlug('missing'), null);
   console.log('HTTP: erros, cancelamento, timeout durante o corpo e evento por slug validados.');

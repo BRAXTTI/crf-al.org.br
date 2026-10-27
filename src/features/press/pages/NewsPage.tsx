@@ -1,7 +1,7 @@
-import { useState, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
-import { Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, ChevronRight, Newspaper, ChevronLeft } from 'lucide-react';
 import {
   getPostCategory,
@@ -132,7 +132,9 @@ function Pagination({
 }
 
 export default function NewsPage() {
-  const [page, setPage] = useState(1);
+  const [params, setParams] = useSearchParams();
+  const requestedPage = Number(params.get('pagina'));
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const { data, isLoading, isFetching, isError, refetch } = usePosts(page, PER_PAGE);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -141,7 +143,7 @@ export default function NewsPage() {
   const totalPosts = data?.total ?? 0;
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+    setParams(newPage > 1 ? { pagina: String(newPage) } : {});
     gridRef.current?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
   };
 

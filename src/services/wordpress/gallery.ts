@@ -1,7 +1,6 @@
 import { requestJson } from '../http';
 import type { PhotoAlbum, PhotoAlbumPage } from './types';
 
-const WP_SITE_URL = (import.meta.env.VITE_WP_SITE_URL ?? 'https://wordpress.crf-al.org.br').replace(/\/$/, '');
 
 export class GalleryApiError extends Error {
   readonly status: number;
@@ -12,8 +11,8 @@ export class GalleryApiError extends Error {
 }
 
 async function galleryRequest<T>(route: string, params: Record<string, string>, signal?: AbortSignal): Promise<T> {
-  const query = new URLSearchParams({ rest_route: `/crfal/v1/photo-albums${route}`, ...params });
-  return requestJson<T>(`${WP_SITE_URL}/index.php?${query}`, {
+  const query = new URLSearchParams({ ...(route ? { slug: decodeURIComponent(route.slice(1)) } : {}), ...params });
+  return requestJson<T>(`/api/gallery?${query}`, {
     signal,
     errorForStatus: status => new GalleryApiError(status),
   });

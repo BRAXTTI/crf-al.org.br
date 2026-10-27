@@ -18,7 +18,7 @@ import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { getPostImage, stripHTML } from '@/services/wordpress/client';
 import { sanitizeWP } from '@/services/wordpress/sanitize';
-import { useEventById, useEventBySlug, useEvents } from '@/services/wordpress/event-hooks';
+import { useEventBySlug, useRelatedEvents } from '@/services/wordpress/event-hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
 import type { WPEventListing } from '@/services/wordpress/types';
 import {
@@ -75,46 +75,34 @@ function InfoRow({ icon: Icon, rotulo, valor }: { icon: typeof Calendar; rotulo:
 
 export default function EventoDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const {
-    data: lista,
-    isLoading: carregandoLista,
-    isError: erroLista,
-    refetch: recarregarLista,
-  } = useEvents();
-
-  const resumo = useMemo(() => (lista ?? []).find((evento) => evento.slug === slug), [lista, slug]);
   const porSlug = useEventBySlug(slug ?? '');
-  // O WordPress pode omitir eventos expirados da coleção nativa.
-  // Preserve o acesso por ID quando a listagem customizada ainda os oferece.
-  const usarId = Boolean(resumo) && (porSlug.data === null || porSlug.isError);
-  const porId = useEventById(usarId ? resumo!.id : Number.NaN);
-  const eventoCompleto = porSlug.data ?? porId.data;
-  const carregandoEvento = porSlug.isLoading || porId.isLoading;
-  const erroEvento = usarId ? porId.isError : porSlug.isError;
-  const recarregarEvento = () => usarId ? porId.refetch() : porSlug.refetch();
+  const eventoCompleto = porSlug.data;
+  const carregandoEvento = porSlug.isLoading;
+  const erroEvento = porSlug.isError;
+  const recarregarEvento = porSlug.refetch;
+  const relacionados = useRelatedEvents(eventoCompleto?.id);
 
   const evento: Evento | null = useMemo(() => {
-    if (eventoCompleto) return mapEvent(paraCRFEvent(eventoCompleto, resumo?.banner));
-    if (resumo) return mapEvent(resumo);
+    if (eventoCompleto) return mapEvent(paraCRFEvent(eventoCompleto));
     return null;
-  }, [eventoCompleto, resumo]);
+  }, [eventoCompleto]);
 
   const outrosEventos = useMemo(() => {
-    if (!lista || !evento) return [];
-    return lista
-      .map(mapEvent)
+    if (!relacionados.data || !evento) return [];
+    return relacionados.data
+      .map(post => mapEvent(paraCRFEvent(post)))
       .filter((e) => e.id !== evento.id && (e.status === 'em-breve' || e.status === 'em-andamento'))
       .sort((a, b) => a.data.localeCompare(b.data))
       .slice(0, 3);
-  }, [lista, evento]);
+  }, [relacionados.data, evento]);
 
-  if (!evento && (erroLista || erroEvento) && !carregandoEvento) {
+  if (!evento && erroEvento && !carregandoEvento) {
     return (
       <div className="min-h-screen  flex items-center justify-center px-4">
         <div className="max-w-xl w-full bg-white  rounded-xl border border-red-200  p-8 text-center">
           <p className="text-red-600  mb-4">Não foi possível carregar o evento agora.</p>
           <button
-            onClick={() => { void recarregarLista(); void recarregarEvento(); }}
+            onClick={() => { void recarregarEvento(); }}
             className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full border border-crfal-blue text-crfal-blue hover:bg-crfal-blue hover:text-white transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
@@ -125,7 +113,7 @@ export default function EventoDetailPage() {
     );
   }
 
-  if (!evento && (carregandoLista || carregandoEvento)) {
+  if (!evento && carregandoEvento) {
     return (
       <div className="min-h-screen  flex items-center justify-center">
         <div className="text-center">

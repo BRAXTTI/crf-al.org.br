@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { loadNews } from './load-news.mjs';
 
-const { newsIndex, newsPage, newsPost, newsApi } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex } = await import(await loadNews());
 const savedFetch = globalThis.fetch;
 const savedError = console.error;
 console.error = () => {};
@@ -67,5 +67,30 @@ try {
   assert.equal((await newsIndex()).length, 2808);
   page = await newsPage(9999, 12);
   assert.equal(page.posts.length, 0);
+  const inventoryFetch = globalThis.fetch;
+  globalThis.fetch = async url => new URL(url).hostname === 'www.crf-al.org.br' ? Response.json([{ id: 107698, slug: historicalSlug, title: { rendered: 'Título publicado' } }], { headers: { 'x-wp-total': '1', 'x-wp-totalpages': '1' } }) : inventoryFetch(url);
+  const sitemap = await newsSitemapIndex();
+  assert.deepEqual(sitemap.map(post => post.slug), [historicalSlug], 'Sitemap excludes reserved posts absent from published inventory');
+  globalThis.fetch = inventoryFetch;
+  const mockFetch = globalThis.fetch;
+  const primaryContext = { env: { NEWS_ARCHIVE_API_URL: 'https://archive.example/wp-json/wp/v2' }, waitUntil: () => {} };
+  let primaryCalls = 0;
+  globalThis.fetch = async url => {
+    if (new URL(url).hostname === 'archive.example') { primaryCalls++; return Response.json(post(107698, historicalSlug)); }
+    throw new Error('Legacy must not be called when primary succeeds');
+  };
+  assert.equal((await newsPost(historicalSlug, primaryContext)).id, 107698);
+  assert.equal(primaryCalls, 1);
+  globalThis.fetch = async url => {
+    const parsed = new URL(url);
+    assert.equal(parsed.searchParams.get('rest_route'), '/wp/v2/posts/107698');
+    assert.ok(parsed.searchParams.has('_fields'));
+    return Response.json(post(107698, historicalSlug));
+  };
+  assert.equal((await newsPost(historicalSlug, { ...primaryContext, env: { NEWS_ARCHIVE_API_URL: 'https://archive.example/index.php?rest_route=/wp/v2' } })).id, 107698);
+
+  globalThis.fetch = async url => new URL(url).hostname === 'archive.example' ? new Response('', { status: 503 }) : mockFetch(url);
+  assert.equal((await newsPost(historicalSlug, primaryContext)).slug, historicalSlug, 'Primary failure falls back to legacy');
+  globalThis.fetch = mockFetch;
   console.log('News: editorial category, chronological pagination, duplicate slugs/IDs, original media, source isolation, missing category and failures passed.');
 } finally { globalThis.fetch = savedFetch; console.error = savedError; }

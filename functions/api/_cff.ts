@@ -1,3 +1,4 @@
+import { SITE_URL } from '../../src/config/site';
 /**
  * Leitura das "Publicações do CFF" (Conselho Federal de Farmácia).
  * O site do CFF não oferece RSS nem API: /publicacoes é HTML renderizado no
@@ -21,7 +22,7 @@ export interface CffCollection {
 }
 
 export const CFF_BASE_URL = 'https://site.cff.org.br';
-const USER_AGENT = 'crfal-site/1.0 (+https://institucional.crf-al.org.br)';
+const USER_AGENT = `crfal-site/1.0 (+${SITE_URL})`;
 /** Limite de páginas do CFF lidas por atualização (protege a origem). */
 const MAX_SOURCE_PAGES = 20;
 const PARALLEL_PAGES = 4;

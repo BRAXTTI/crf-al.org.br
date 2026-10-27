@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { ATENDIMENTO, LOCAIS, HORARIO_ATENDIMENTO, telefoneHref } from '@/config/contact';
 import {
   MapPin,
@@ -14,14 +15,16 @@ const quickLinks = [
   { label: 'Legislação', href: '/legislacao' },
   { label: 'Eventos', href: '/eventos' },
   { label: 'Galeria de Fotos', href: '/imprensa/galeria-de-fotos' },
+  { label: 'Acesso à Informação', href: '/acesso-a-informacao' },
   { label: 'Transparência', href: 'https://crf-al.implanta.net.br/portaltransparencia/' },
 ];
 
+// Destinos internos existentes; não anunciar consultas sem URL oficial validada.
 const serviceLinks = [
-  { label: 'Inscrição', href: '/servicos/tutoriais' },
-  { label: '2ª Via de Certidões', href: '/servicos/tutoriais' },
-  { label: 'Consultar Inscrição', href: '/servicos/tutoriais' },
-  { label: 'Validar Documentos', href: '/servicos/tutoriais' },
+  { label: 'Requerimentos', href: '/servicos/requerimentos' },
+  { label: 'Tutoriais', href: '/servicos/tutoriais' },
+  { label: 'Manual do CRF AL em Casa', href: '/servicos/manual-crf-em-casa' },
+  { label: 'Ouvidoria', href: '/servicos/ouvidoria' },
 ];
 
 const SOCIAL_ICONS: Record<string, React.ElementType> = {
@@ -56,7 +59,7 @@ export default function Footer() {
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
+                  <MapPin aria-hidden="true" className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Sede</p>
                     <p>{LOCAIS[0].endereco}</p>
@@ -64,7 +67,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
+                  <MapPin aria-hidden="true" className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Seccional</p>
                     <p>{LOCAIS[1].endereco}</p>
@@ -72,7 +75,7 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
+                  <Clock aria-hidden="true" className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Horário de Funcionamento</p>
                     <p>{HORARIO_ATENDIMENTO} (sem pausa para o almoço)</p>
@@ -80,18 +83,18 @@ export default function Footer() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
+                  <Phone aria-hidden="true" className="w-5 h-5 text-crfal-gold shrink-0 mt-0.5" />
                   <div className="text-sm text-white/80">
                     <p className="font-medium text-white">Canais de Atendimento</p>
                     <a
                       href={telefoneHref(ATENDIMENTO.telefone)}
-                      className="block hover:text-white transition-colors"
+                      className="flex min-h-11 items-center hover:text-white transition-colors"
                     >
                       {ATENDIMENTO.telefone}
                     </a>
                     <a
                       href={`mailto:${ATENDIMENTO.email}`}
-                      className="block hover:text-white transition-colors"
+                      className="flex min-h-11 items-center hover:text-white transition-colors"
                     >
                       {ATENDIMENTO.email}
                     </a>
@@ -101,54 +104,54 @@ export default function Footer() {
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
+              <h2 className="font-bold text-lg mb-5 flex items-center gap-2">
                 <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Links Rápidos
-              </h3>
+              </h2>
               <ul className="space-y-3">
                 {quickLinks.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
+                    <Link
+                      to={link.href}
                       className="group flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300"
                     >
-                      <ChevronRight className="w-4 h-4 text-crfal-blue-light opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4 text-crfal-blue-light opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                       <span className="group-hover:translate-x-1 transition-transform duration-300">
                         {link.label}
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
+              <h2 className="font-bold text-lg mb-5 flex items-center gap-2">
                 <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Serviços
-              </h3>
+              </h2>
               <ul className="space-y-3">
                 {serviceLinks.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
+                    <Link
+                      to={link.href}
                       className="group flex items-center gap-2 text-white/80 hover:text-white transition-all duration-300"
                     >
-                      <ChevronRight className="w-4 h-4 text-crfal-blue-light opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4 text-crfal-blue-light opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                       <span className="group-hover:translate-x-1 transition-transform duration-300">
                         {link.label}
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
+              <h2 className="font-bold text-lg mb-5 flex items-center gap-2">
                 <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Redes Sociais
-              </h3>
+              </h2>
 
               <div className="flex gap-3 mb-6">
                 {socialLinks.map((social) => {
@@ -162,7 +165,7 @@ export default function Footer() {
                       aria-label={social.label}
                       className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:scale-110"
                     >
-                      <Icon className="w-5 h-5" />
+                      <Icon aria-hidden="true" className="w-5 h-5" />
                     </a>
                   );
                 })}
@@ -178,14 +181,15 @@ export default function Footer() {
                 © {new Date().getFullYear()} CRFAL - Conselho Regional de Farmácia
                 do Estado de Alagoas. Todos os direitos reservados.
               </p>
-              <div className="flex items-center gap-4 text-sm text-white/60">
-                <a href="/politica-de-privacidade" className="hover:text-white transition-colors">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-white/60">
+                <Link to="/acessibilidade" className="hover:text-white transition-colors">Acessibilidade</Link>
+                <Link to="/politica-de-privacidade" className="hover:text-white transition-colors">
                   Política de Privacidade
-                </a>
+                </Link>
                 <span className="text-white/30">|</span>
-                <a href="/termos-de-uso" className="hover:text-white transition-colors">
+                <Link to="/termos-de-uso" className="hover:text-white transition-colors">
                   Termos de Uso
-                </a>
+                </Link>
               </div>
             </div>
           </div>

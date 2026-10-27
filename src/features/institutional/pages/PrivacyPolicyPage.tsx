@@ -1,3 +1,4 @@
+import { SITE_URL } from '@/config/site';
 import { useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -441,7 +442,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-crfal-gray-200 bg-white px-5 py-4 text-[13px] text-crfal-gray-600">
               <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#8A6A12]" aria-hidden />Última atualização: {ATUALIZACAO}</span>
-              <span className="inline-flex items-center gap-2"><MonitorSmartphone className="h-4 w-4 text-[#8A6A12]" aria-hidden />Vale para institucional.crf-al.org.br</span>
+              <span className="inline-flex items-center gap-2"><MonitorSmartphone className="h-4 w-4 text-[#8A6A12]" aria-hidden />Vale para {new URL(SITE_URL).hostname}</span>
               <span className="inline-flex items-center gap-2"><FileSearch className="h-4 w-4 text-[#8A6A12]" aria-hidden /><Link to="/termos-de-uso" className={linkClass}>Termos de Uso</Link></span>
             </div>
           </div>

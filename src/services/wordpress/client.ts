@@ -13,12 +13,6 @@ export const WP_UPLOADS_URL = `${WP_SITE_URL}/wp-content/uploads`;
 
 export const LEGACY_WP_UPLOADS_URL = 'https://www.crf-al.org.br/app/uploads';
 
-/** URL no estilo `index.php?rest_route=` (usada pelo WP de eventos). */
-function restUrl(route: string, params: Record<string, string> = {}): string {
-  const search = new URLSearchParams(params).toString();
-  return `${WP_SITE_URL}/index.php?rest_route=${route}${search ? `&${search}` : ''}`;
-}
-
 export async function fetchPosts(
   options: { page?: number; perPage?: number; signal?: AbortSignal } = {}
 ): Promise<WPPostsPage> {
@@ -51,18 +45,18 @@ export function decodeHTMLEntities(value: string): string {
 
 /** Lista todos os eventos (publicados e encerrados) vindos do WP Event Manager. */
 export async function fetchEvents(signal?: AbortSignal): Promise<CRFEvent[]> {
-  return requestJson<CRFEvent[]>(restUrl('/crfal/v1/events'), { signal });
+  return requestJson<CRFEvent[]>('/api/events', { signal });
 }
 
 /** Busca um evento individual (com conteúdo completo e meta) pelo id. */
 export async function fetchEventById(id: number, signal?: AbortSignal): Promise<WPEventListing> {
-  return requestJson<WPEventListing>(restUrl(`/wp/v2/event_listing/${id}`, { _embed: '1' }), { signal });
+  return requestJson<WPEventListing>(`/api/events?id=${id}`, { signal });
 }
 
 /** Permite abrir eventos publicados sem esperar pela listagem de relacionados. */
 export async function fetchEventBySlug(slug: string, signal?: AbortSignal): Promise<WPEventListing | null> {
   const events = await requestJson<WPEventListing[]>(
-    restUrl('/wp/v2/event_listing', { slug, _embed: '1', per_page: '1' }),
+    `/api/events?slug=${encodeURIComponent(slug)}`,
     { signal },
   );
   return events[0] ?? null;

@@ -1,4 +1,7 @@
+import { contentApi } from "./functions/_content"
 import path from "path"
+import { ATENDIMENTO, LOCAIS } from "./src/config/contact"
+import { SOCIAL_LINKS, SITE_URL } from "./src/config/site"
 import react from "@vitejs/plugin-react"
 import { defineConfig, loadEnv, type Plugin } from "vite"
 import { getInstagramItems } from "./functions/api/_parse"
@@ -13,6 +16,12 @@ function portalDevApi(feedUrl?: string): Plugin {
   return {
     name: "portal-dev-api",
     configureServer(server) {
+      for (const route of ['/api/events', '/api/gallery']) server.middlewares.use(route, async (req, res) => {
+        const response = await contentApi(new Request(`http://localhost${route}${req.url ?? ''}`, { method: req.method }), { waitUntil: promise => { void promise } })
+        res.statusCode = response.status
+        response.headers.forEach((value, key) => res.setHeader(key, value))
+        res.end(await response.text())
+      })
       server.middlewares.use("/api/news", async (req, res) => {
         const response = await newsApi(new Request(`http://localhost/api/news${req.url ?? ''}`, { method: req.method }))
         res.statusCode = response.status
@@ -48,7 +57,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
   return {
   base: '/',
-  plugins: [react(), portalDevApi(env.VITE_INSTAGRAM_FEED_URL)],
+  plugins: [{ name: "canonical-html", transformIndexHtml: html => html.replaceAll("%SITE_URL%", SITE_URL).replace('%ORGANIZATION_JSON%', JSON.stringify({ '@context': 'https://schema.org', '@graph': [{ '@type': 'GovernmentOrganization', name: 'Conselho Regional de Farmácia do Estado de Alagoas', url: SITE_URL, logo: `${SITE_URL}/images/logo-crf-azul.png`, telephone: ATENDIMENTO.telefone, email: ATENDIMENTO.email, address: { '@type': 'PostalAddress', streetAddress: LOCAIS[0].endereco, addressLocality: LOCAIS[0].cidade, postalCode: LOCAIS[0].endereco.match(/CEP ([0-9-]+)/)?.[1], addressRegion: 'AL', addressCountry: 'BR' }, parentOrganization: { '@type': 'GovernmentOrganization', name: 'Conselho Federal de Farmácia', url: 'https://www.cff.org.br' }, sameAs: SOCIAL_LINKS.map(social => social.href) }, { '@type': 'WebSite', name: 'CRF-AL', url: SITE_URL }] }).replaceAll('<', '\\u003c')) }, react(), portalDevApi(env.VITE_INSTAGRAM_FEED_URL)],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

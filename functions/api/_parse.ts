@@ -1,3 +1,4 @@
+import { SITE_URL } from '../../src/config/site';
 /**
  * Lógica compartilhada de leitura do feed do Instagram (Smash Balloon).
  * Usada pela Pages Function (/api/instagram) e pelo middleware de dev do Vite.
@@ -84,7 +85,7 @@ export async function getInstagramItems(feedUrl: string = DEFAULT_FEED_URL): Pro
   try {
     const res = await fetch(feedUrl, {
       signal: controller.signal,
-      headers: { 'user-agent': 'crfal-site/1.0 (+https://institucional.crf-al.org.br)' },
+      headers: { 'user-agent': `crfal-site/1.0 (+${SITE_URL})` },
     });
     if (!res.ok) throw new Error(`Instagram feed origin returned HTTP ${res.status}`);
     // A API REST evita depender das regras de links permanentes da hospedagem.
