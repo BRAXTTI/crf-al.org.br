@@ -15,4 +15,11 @@ for (let page = 1; page <= pages; page++) {
 if (current.size !== total) throw new Error('Inventário incompleto');
 const mismatches = rows.filter(row => row.newId !== null && current.get(row.newId) !== row.newSlug);
 if (mismatches.length) throw new Error(`Identidades divergentes: ${JSON.stringify(mismatches)}`);
-console.log(`${rows.length} identidades verificadas; ${rows.filter(row => row.newId === null).length} dependem de importação por slug.`);
+// Entradas sem ID também são URLs públicas reservadas. Validar apenas os pares
+// conhecidos aprovaria o corte mesmo com notícias históricas ainda ausentes.
+const currentBySlug = new Map([...current].map(([id, slug]) => [slug, id]));
+const reservedIds = new Set(rows.filter(row => row.newId !== null).map(row => row.newId));
+const missing = rows.filter(row => !row.blocked && row.newId === null &&
+  (!currentBySlug.has(row.newSlug) || reservedIds.has(currentBySlug.get(row.newSlug))));
+if (missing.length) throw new Error(`Migração incompleta: notícias históricas ausentes: ${JSON.stringify(missing.map(({ oldId, slug }) => ({ oldId, slug })))}`);
+console.log(`${rows.length} identidades verificadas; ${rows.filter(row => !row.blocked && row.newId === null).length} resolvidas por slug.`);

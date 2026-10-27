@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
@@ -46,6 +47,27 @@ try {
   posts.push({ ...post(find(107698)), id: 999998 });
   assert.equal((await newsPost('107698')).id, 999998);
   fail = true; assert.equal((await newsApi(new Request('https://example.test/api/news'))).status, 503);
+  // A auditoria de corte precisa reprovar perdas de conteúdo, mas aceitar
+  // importações posteriores por slug sem exigir outro mapa de IDs.
+  const audit = inventory => spawnSync(process.execPath, ['--input-type=module'], { encoding: 'utf8', input: `
+    const inventory = ${JSON.stringify(inventory)};
+    globalThis.fetch = async () => Response.json(inventory, { headers: {
+      'x-wp-total': String(inventory.length), 'x-wp-totalpages': '1'
+    } });
+    await import(${JSON.stringify(new URL('./generate-news-archive.mjs', import.meta.url).href)});
+  ` });
+  const mapped = NEWS_MAP.filter(row => row.newId !== null).map(row => ({ id: row.newId, slug: row.newSlug }));
+  const incomplete = audit(mapped);
+  assert.equal(incomplete.status, 1);
+  assert.match(incomplete.stderr, /Migração incompleta/);
+  for (const row of NEWS_MAP.filter(row => !row.blocked && row.newId === null)) assert.ok(incomplete.stderr.includes(String(row.oldId)));
+  const complete = [...mapped, ...NEWS_MAP.filter(row => row.newId === null).map((row, i) => ({ id: 900000 + i, slug: row.newSlug }))];
+  const success = audit(complete);
+  assert.equal(success.status, 0, success.stderr);
+  assert.match(success.stdout, /3 resolvidas por slug/);
+  const mismatch = audit(complete.map((row, i) => i === 0 ? { ...row, slug: 'identidade-errada' } : row));
+  assert.equal(mismatch.status, 1);
+  assert.match(mismatch.stderr, /Identidades divergentes/);
   for (const dir of ['functions', 'src']) for (const file of await readdir(dir, { recursive: true })) {
     if (!/\.(?:ts|tsx|js|mjs)$/.test(file)) continue;
     const text = await readFile(`${dir}/${file}`, 'utf8');

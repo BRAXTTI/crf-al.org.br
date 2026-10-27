@@ -69,6 +69,7 @@ try {
   for (const directive of ['img-src', 'media-src']) {
     const sources = csp.split(';').map(value => value.trim().split(/\s+/)).find(value => value[0] === directive);
     assert.ok(sources.includes('https://midias.crf-al.org.br'), `${directive}: permitir mídias após o redirect dos uploads legados`);
+    assert.equal(sources.filter(source => source === 'https://midias.crf-al.org.br').length, 1, `${directive}: domínio de mídias sem duplicação`);
   }
   const routes = await readFile(new URL('../src/router/app-router.tsx', import.meta.url), 'utf8');
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
