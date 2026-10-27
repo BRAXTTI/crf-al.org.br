@@ -1,5 +1,5 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsSitemapIndex, ORIGIN_CACHE } from './_news';
+import { newsPost, newsSitemapIndex, isBlockedNews, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
@@ -242,6 +242,22 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     }
   }
 
+  const historicalId = pathname === '/' ? url.searchParams.get('p') : pathname.startsWith(NEWS_PREFIX) && /^\d+$/.test(pathname.slice(NEWS_PREFIX.length)) ? pathname.slice(NEWS_PREFIX.length) : null;
+  const legacySlug = pathname.startsWith('/publicacao/') ? pathname.slice('/publicacao/'.length) : pathname.startsWith(NEWS_PREFIX) ? pathname.slice(NEWS_PREFIX.length) : '';
+  let decodedSlug = legacySlug;
+  try { decodedSlug = decodeURIComponent(legacySlug); } catch { /* inválido: será tratado como 404 */ }
+  if ((historicalId && isBlockedNews(historicalId)) || (decodedSlug && isBlockedNews(decodedSlug))) {
+    return new Response('Conteúdo removido.', { status: 410, headers: { 'Cache-Control': 'public, max-age=300', 'X-Robots-Tag': 'noindex' } });
+  }
+  if (historicalId && /^\d+$/.test(historicalId)) {
+    try {
+      const post = await newsPost(historicalId, context, true);
+      if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);
+      return new Response('Notícia não encontrada.', { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
+    } catch {
+      return new Response('Notícia temporariamente indisponível.', { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' } });
+    }
+  }
   if (pathname === '/instituicao/missao-visao') return Response.redirect(`${SITE_URL}/instituicao/sobre-conselho`, 301);
   if (pathname === '/imprensa/noticias-cff') return Response.redirect(`${SITE_URL}/imprensa/publicacoes-cff`, 301);
   if (pathname.startsWith('/publicacao/') && pathname.slice('/publicacao/'.length) && !pathname.slice('/publicacao/'.length).includes('/')) {

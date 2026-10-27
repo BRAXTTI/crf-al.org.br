@@ -61,7 +61,7 @@ function normalize<T extends { id: number; slug: string; title?: { rendered: str
   const row = historical(post);
   const result = { ...post, slug: row?.slug ?? post.slug, ...(row?.title ? { title: { rendered: row.title } } : {}), newsSource: 'current' };
   // Reescreve todos os campos de mídia, inclusive srcset e tamanhos aninhados.
-  return JSON.parse(JSON.stringify(result).replace(/https?:\/\/(?:www\.)?crf-al\.org\.br\/(?:app|wp-content)\/uploads\//gi, 'https://midias.crf-al.org.br/')) as T;
+  return JSON.parse(JSON.stringify(result).replace(/https?:\/\/(?:www\.)?crf-al\.org\.br(?=\/(?:app|wp-content)\/uploads\/)/gi, 'https://midias.crf-al.org.br')) as T;
 }
 async function categories(context?: NewsContext): Promise<{ category: number | null; spam: number | null }> {
   return cached('categories', context, async () => {
