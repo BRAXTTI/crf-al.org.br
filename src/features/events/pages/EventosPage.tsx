@@ -260,8 +260,8 @@ export default function EventosPage() {
 
             {/* Barra de filtros */}
             <div className="sticky top-(--header-offset) z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <div className="relative lg:min-w-56 lg:max-w-xs lg:flex-1">
+              <div className="flex flex-col gap-3">
+                <div className="relative w-full">
                   <label htmlFor="busca-evento" className="sr-only">Buscar evento</label>
                   <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-crfal-gray-400" />
                   <input
@@ -286,14 +286,14 @@ export default function EventosPage() {
                 <div
                   role="group"
                   aria-label="Filtrar por status"
-                  className="flex gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
+                  className="flex flex-wrap gap-1.5 p-0.5"
                 >
                   {filtros.map((filtro) => (
                     <button
                       key={filtro.value}
                       onClick={() => setFiltroStatus(filtro.value)}
                       aria-pressed={filtroStatus === filtro.value}
-                      className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                      className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                         filtroStatus === filtro.value
                           ? 'bg-crfal-blue text-white shadow-md'
                           : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-crfal-gray-200 hover:text-crfal-blue   '
@@ -316,7 +316,7 @@ export default function EventosPage() {
                 <div
                   role="group"
                   aria-label="Filtrar por modalidade"
-                  className="flex gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden lg:ml-auto"
+                  className="flex flex-wrap gap-1.5 p-0.5"
                 >
                   {modalidades.map((modalidade) => {
                     const ativo = filtroModalidade === modalidade.value;
@@ -327,7 +327,7 @@ export default function EventosPage() {
                         key={modalidade.value}
                         onClick={() => setFiltroModalidade(modalidade.value)}
                         aria-pressed={ativo}
-                        className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                        className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-2 text-xs font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                           ativo
                             ? 'border-crfal-blue bg-crfal-blue text-white'
                             : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue   '
