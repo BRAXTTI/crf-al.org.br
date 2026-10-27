@@ -52,11 +52,11 @@ As APIs locais de conteúdo usam a origem padrão; validar configurações runti
 
 ### Arquivo de notícias: antes de desligar o WP antigo
 
-`functions/_news-archive.ts` contém **somente IDs, slugs e datas** das 2.808 URLs reservadas; não contém corpos nem imagens. `npm run news:archive` atualiza esse inventário a partir do WP antigo; `-- --from-stdin` aceita a exportação validada. Não executar a atualização cegamente durante migração.
+`functions/_news-map.ts` reserva 2.808 identidades históricas e relaciona IDs antigos aos novos, preservando slugs, bloqueios editoriais e 11 títulos recuperados. Não contém corpos nem imagens. `functions/_news-archive.ts` deriva desse mapa as entradas não bloqueadas. `npm run news:archive` apenas valida o mapa contra o inventário público do WP novo, sem modificar arquivos; falha se uma identidade divergir ou uma notícia não bloqueada ainda estiver ausente, inclusive as entradas resolvidas por slug. Não aceita exportação por `--from-stdin`.
 
 As notícias usam exclusivamente o WordPress novo. O mapa versionado preserva IDs e URLs históricos; falhas de origem retornam erro controlado e os resultados recentes permanecem em cache.
 
-**Falta migrar e conferir conteúdo, mídia, IDs históricos e slugs.** A base alternativa exige os mesmos IDs e slugs do inventário. Se a importação alterar IDs, será necessário um mapa verificado antes de ativar a variável; IDs/slugs divergentes e listas incompletas disparam fallback, mas a validação editorial do corpo e das mídias continua indispensável. Confirmar também a exposição REST dos eventos expirados. Validar listagens, detalhes, sitemap e falha da origem nova no preview. Não desligar o legado enquanto houver dependência de conteúdo, mídia ou fallback. O snapshot não é backup do WP. Eventos relacionados no detalhe usam consulta limitada a 3 itens; nenhum catálogo completo é baixado nessa página.
+**Concluir e conferir a migração antes do corte.** Em 27/10/2026, as notícias históricas `107698`, `5967` e `8995` ainda estavam ausentes no WP novo: retornam 404 e não entram no sitemap. Importá-las com os slugs reservados permite a resolução sem alterar seus IDs históricos. Não há fallback para o WP antigo e `NEWS_ARCHIVE_API_URL` não altera esse comportamento. A validação editorial de corpos e mídias continua indispensável; o mapa não é backup do WP. Confirmar também a exposição REST dos eventos expirados e validar listagens, detalhes, sitemap e falha da origem nova no preview. Preservar o legado e as mídias enquanto houver dependências. Eventos relacionados no detalhe usam consulta limitada a 3 itens; nenhum catálogo completo é baixado nessa página.
 
 ## Deploy e operação
 
