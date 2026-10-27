@@ -7,7 +7,6 @@
   Cross-Origin-Opener-Policy: same-origin
   X-Permitted-Cross-Domain-Policies: none
   Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://crf-al.org.br https://www.crf-al.org.br https://*.cdninstagram.com https://*.fbcdn.net https://admin.cff.org.br; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com; media-src 'self' https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://www.crf-al.org.br; upgrade-insecure-requests
-  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://crf-al.org.br https://www.crf-al.org.br https://*.cdninstagram.com https://*.fbcdn.net https://admin.cff.org.br; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com; media-src 'self' https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://www.crf-al.org.br; report-uri /api/csp-report
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
