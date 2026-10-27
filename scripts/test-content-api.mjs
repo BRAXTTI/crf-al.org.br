@@ -52,7 +52,20 @@ try {
   assert.match(ics, /BEGIN:VCALENDAR/);
   globalThis.fetch = async () => new Response('', { status: 404 });
   assert.equal((await request('/api/gallery?slug=missing')).status, 404);
+  await Promise.all(pending.splice(0));
+  globalThis.fetch = async () => { throw new Error('offline'); };
+  assert.equal((await request('/api/gallery?slug=missing')).status, 404, '404 fica em cache');
+  const eventKey = [...stored.keys()].find(key => key.includes('slug=evento'));
+  const old = Date.now() - 120_000;
+  stored.get(eventKey).headers.set('X-Stored-At', String(old));
+  stored.get(eventKey).headers.set('X-Checked-At', String(old));
+  assert.equal((await request('/api/events?slug=evento')).status, 200, 'SWR responde durante falha');
+  await Promise.all(pending.splice(0));
+  assert.equal(Number(stored.get(eventKey).headers.get('X-Stored-At')), old, 'Falha preserva idade');
+  stored.get(eventKey).headers.set('X-Stored-At', String(Date.now() - 86400_001));
   console.error = () => {};
+  assert.equal((await request('/api/events?slug=evento')).status, 503, 'Reserva expira em 24 h');
+
   const failed = await request('/api/events');
   assert.equal(failed.status, 503, 'Missing collection is an integration failure');
   assert.equal(failed.headers.get('Retry-After'), '60');
