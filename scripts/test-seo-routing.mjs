@@ -107,20 +107,47 @@ try {
   await expectMissing('/imprensa/noticias/999999999');
   await expectMissing('/imprensa/galeria-de-fotos/album-inexistente');
 
-  const post = { id: 8155, slug: 'noticia', date: '2026-10-10T09:00:00', title: { rendered: 'Título &amp; notícia' }, excerpt: { rendered: '<p>Resumo</p>' } };
-  origin = () => Response.json(post);
-  let response = await request('/imprensa/noticias/8155');
+  const post = { id: 16028, slug: 'esclarecimentos-acerca-do-registro-de-responsabilidade-tecnica-do-farmaceutico-atraves-do-contrato-de-trabalho', date: '2026-10-10T09:00:00', title: { rendered: 'Título &amp; notícia' }, excerpt: { rendered: '<p>Resumo</p>' }, categories: [1] };
+  origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
+  let response = await request('/imprensa/noticias/16028');
   assert.equal(response.status, 301);
-  assert.equal(response.headers.get('Location'), 'https://institucional.crf-al.org.br/imprensa/noticias/noticia');
-  let originUrl;
-  origin = url => { originUrl = new URL(url); return Response.json(originUrl.searchParams.get('rest_route') === '/wp/v2/categories' ? [{id: 10, slug: 'noticias-do-portal'}] : [post]); };
-  response = await request('/imprensa/noticias/noticia');
+  assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${post.slug}`);
+  response = await request('/?p=16028');
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${post.slug}`);
+  assert.equal((await request('/imprensa/noticias/best-dating-sites')).status, 410);
+  assert.equal((await request('/?p=2534')).status, 410);
+  origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
+  response = await request(`/imprensa/noticias/${post.slug}`);
   assert.equal(response.status, 200);
-  assert.equal(originUrl.searchParams.get('categories'), '10', 'Current metadata must use editorial category');
   await Promise.all(background);
   const before = fetches;
-  assert.equal((await request('/imprensa/noticias/noticia?utm_source=test')).status, 200);
+  assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test`)).status, 200);
   assert.equal(fetches, before, 'Metadata cache ignores tracking query strings');
+
+  // Sitemap e RSS passam pela implementação real do índice e dos lotes.
+  stored = new Map();
+  const spam = { ...post, id: 2534, slug: 'best-dating-sites', categories: [3] };
+  origin = url => {
+    const u = new URL(url); const route = u.searchParams.get('rest_route');
+    if (route === '/wp/v2/categories') return Response.json([{ id: 3, slug: 'dating-online' }]);
+    return Response.json([post, spam], { headers: { 'x-wp-total': '2', 'x-wp-totalpages': '1' } });
+  };
+  const sitemapResponse = await request('/sitemap-news.xml');
+  const sitemapText = await sitemapResponse.text();
+  assert.equal(sitemapResponse.status, 200);
+  assert.ok(sitemapText.includes(post.slug));
+  assert.ok(!sitemapText.includes(spam.slug));
+  assert.ok(!sitemapText.includes(['www.crf-al.org.br', 'wp-json'].join('/')));
+  const rssSource = (await readFile(new URL('../functions/api/rss.ts', import.meta.url), 'utf8'))
+    .replace("'../_news'", JSON.stringify(await loadNews()))
+    .replace("'../../src/config/site'", JSON.stringify(siteUrl));
+  const rss = await import(moduleUrl(rssSource));
+  const feed = await rss.onRequest({ request: new Request('https://example.org/api/rss'), waitUntil: promise => background.push(promise) });
+  const feedText = await feed.text();
+  assert.equal(feed.status, 200); assert.ok(feedText.includes(post.slug));
+  assert.ok(!feedText.includes(spam.slug));
+  assert.ok(!feedText.includes(['www.crf-al.org.br', 'wp-json'].join('/')));
 
   for (const status of [404, 403, 500, 503]) {
     stored = new Map();
