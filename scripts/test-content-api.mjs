@@ -8,7 +8,14 @@ const stored = new Map();
 const context = { env: { WP_SITE_URL: 'https://wordpress.example' }, waitUntil: promise => pending.push(promise) };
 const request = (path, method = 'GET') => contentApi(new Request(`https://portal.example${path}`, { method }), context);
 try {
-  globalThis.caches = { default: { match: async key => stored.get(key.url)?.clone(), put: async (key, value) => stored.set(key.url, value) } };
+  // Como no Workers, respostas de cache.match (e seus clones) têm headers imutáveis.
+  const immutable = response => {
+    const copy = response.clone();
+    for (const method of ['set', 'append', 'delete']) copy.headers[method] = () => { throw new TypeError("Can't modify immutable headers."); };
+    copy.clone = () => immutable(response);
+    return copy;
+  };
+  globalThis.caches = { default: { match: async key => stored.has(key.url) ? immutable(stored.get(key.url)) : undefined, put: async (key, value) => stored.set(key.url, value) } };
   globalThis.fetch = async url => { urls.push(new URL(url)); return Response.json([{ slug: 'evento' }]); };
   assert.equal((await request('/api/events?slug=evento')).status, 200);
   assert.equal(urls[0].searchParams.get('rest_route'), '/wp/v2/event_listing');
@@ -62,6 +69,14 @@ try {
   assert.equal((await request('/api/events?slug=evento')).status, 200, 'SWR responde durante falha');
   await Promise.all(pending.splice(0));
   assert.equal(Number(stored.get(eventKey).headers.get('X-Stored-At')), old, 'Falha preserva idade');
+  assert.ok(Number(stored.get(eventKey).headers.get('X-Checked-At')) > old, 'Tentativa registrada mesmo com headers imutáveis');
+  globalThis.fetch = async () => Response.json([{ slug: 'evento', title: 'novo' }]);
+  stored.get(eventKey).headers.set('X-Checked-At', String(old));
+  assert.equal((await request('/api/events?slug=evento')).status, 200);
+  await Promise.all(pending.splice(0));
+  assert.ok(Number(stored.get(eventKey).headers.get('X-Stored-At')) > old, 'Revalidação grava a resposta nova');
+  assert.equal((await (await request('/api/events?slug=evento')).json())[0].title, 'novo');
+  globalThis.fetch = async () => { throw new Error('offline'); };
   stored.get(eventKey).headers.set('X-Stored-At', String(Date.now() - 86400_001));
   console.error = () => {};
   assert.equal((await request('/api/events?slug=evento')).status, 503, 'Reserva expira em 24 h');

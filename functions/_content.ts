@@ -109,7 +109,8 @@ export async function contentApi(request: Request, context: ContentContext): Pro
   const key = new Request(origin.href + (calendar ? '&format=ics' : ''));
   const store = async (response: Response, storedAt = Date.now(), checkedAt = storedAt) => {
     if (!cache) return;
-    const saved = response.clone();
+    // Respostas de cache.match têm headers imutáveis (inclusive no clone): copiar antes de alterar.
+    const saved = new Response(response.clone().body, response);
     saved.headers.set('X-Stored-At', String(storedAt));
     saved.headers.set('X-Checked-At', String(checkedAt));
     saved.headers.set(
