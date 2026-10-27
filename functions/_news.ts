@@ -206,6 +206,19 @@ export const NEWS_INDEX_LOCK = 'news:index:refresh:v1';
 const REFRESH_MS = 10 * 60_000;
 type StoredIndex = { storedAt: number; value: Entry[] };
 const refreshing = new WeakMap<KVNamespace, Promise<Entry[] | null>>();
+// O índice tem ~1 MB: lido do KV com cache de borda de 60 s e decodificado no máximo uma vez
+// por minuto em cada isolate. Um índice novo aparece em até ~2 min (memória + borda do KV).
+export const NEWS_INDEX_MEMO_MS = 60_000;
+const memo = new WeakMap<KVNamespace, { readAt: number; entry: StoredIndex }>();
+/** Somente para testes: descarta a cópia em memória do índice. */
+export function clearNewsIndexMemo(kv: KVNamespace) { memo.delete(kv); }
+async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
+  const hit = memo.get(kv);
+  if (hit && Date.now() - hit.readAt < NEWS_INDEX_MEMO_MS) return hit.entry;
+  const entry = await kv.get<StoredIndex>(NEWS_INDEX_KEY, { type: 'json', cacheTtl: 60 });
+  if (entry) memo.set(kv, { readAt: Date.now(), entry });
+  return entry;
+}
 export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> {
   const kv = context.env?.NEWS_INDEX;
   if (!kv) return Promise.reject(new Error('NEWS_INDEX binding required'));
@@ -217,7 +230,9 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
     // KV não oferece compare-and-swap: lease distribuído best-effort + single-flight local.
     await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: 120 });
     const value = await buildNewsIndex(background(context));
-    await kv.put(NEWS_INDEX_KEY, JSON.stringify({ storedAt: Date.now(), value }));
+    const entry = { storedAt: Date.now(), value };
+    await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
+    memo.set(kv, { readAt: Date.now(), entry });
     // Mantém o lease até expirar, evitando novas tentativas durante propagação/falhas.
     return value;
   })().finally(() => refreshing.delete(kv));
@@ -227,7 +242,7 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
 export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   const kv = context?.env?.NEWS_INDEX;
   if (!kv) return cached('index', context, () => buildNewsIndex(background(context)));
-  const entry = await kv.get<StoredIndex>(NEWS_INDEX_KEY, 'json');
+  const entry = await readNewsIndex(kv);
   if (entry) {
     if (Date.now() - entry.storedAt > REFRESH_MS) context!.waitUntil(refreshNewsIndex(context!).catch(error => {
       console.error(JSON.stringify({ event: 'news_index_refresh_failed', message: String(error) }));
@@ -276,7 +291,7 @@ export const WARM_POSTS = 30;
 export async function warmNewsPosts(context: NewsContext, index?: Entry[] | null, limit = WARM_POSTS): Promise<number> {
   const kv = context.env?.NEWS_INDEX;
   if (!kv) throw new Error('NEWS_INDEX binding required');
-  const entries = (index ?? (await kv.get<StoredIndex>(NEWS_INDEX_KEY, 'json'))?.value ?? []).slice(0, limit);
+  const entries = (index ?? (await readNewsIndex(kv))?.value ?? []).slice(0, limit);
   if (!entries.length) return 0;
   const ids = entries.map(entry => entry.id);
   const [response, taxonomy] = await Promise.all([request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields }), categories(context)]);

@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
 const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
@@ -80,8 +80,9 @@ try {
   fail = false;
   const values = new Map();
   const writes = [];
+  const reads = [];
   const kv = {
-    async get(key) { return values.has(key) ? JSON.parse(values.get(key)) : null; },
+    async get(key, options) { reads.push({ key, options }); return values.has(key) ? JSON.parse(values.get(key)) : null; },
     async put(key, value, options) { writes.push({ key, options }); values.set(key, value); },
   };
   const pending = [];
@@ -94,14 +95,26 @@ try {
   requests = [];
   assert.deepEqual(await newsIndex(context), cold);
   assert.equal(requests.length, 0, 'KV fresco não consulta WP');
+  // Cópia em memória por isolate; leitura do KV com cache de borda.
+  clearNewsIndexMemo(kv); reads.length = 0;
+  await newsIndex(context); await newsIndex(context); await newsIndex(context);
+  const indexReads = reads.filter(row => row.key === NEWS_INDEX_KEY);
+  assert.equal(indexReads.length, 1, 'Índice decodificado uma vez por isolate');
+  assert.deepEqual(indexReads[0].options, { type: 'json', cacheTtl: 60 });
   const stale = { storedAt: 1, value: cold };
   values.set(NEWS_INDEX_KEY, JSON.stringify(stale));
   assert.deepEqual(await newsIndex(context), cold);
+  assert.equal(pending.length, 0, 'Dentro da janela da memória o KV não é relido');
+  clearNewsIndexMemo(kv);
+  assert.deepEqual(await newsIndex(context), cold);
+  assert.equal(pending.length, 1, 'Índice antigo agenda refresh');
   await Promise.all(pending.splice(0));
   assert.equal(requests.length, 0, 'Lease ativo impede refresh');
   values.delete(NEWS_INDEX_LOCK);
   fail = true;
+  clearNewsIndexMemo(kv);
   assert.deepEqual(await newsIndex(context), cold, 'KV antigo disponível durante falha');
+  assert.equal(pending.length, 1);
   await Promise.all(pending.splice(0));
   assert.deepEqual(JSON.parse(values.get(NEWS_INDEX_KEY)), stale, 'Falha preserva índice');
   fail = false;
