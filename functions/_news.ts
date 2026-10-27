@@ -14,7 +14,7 @@ const blockedSlugs = new Set(BLOCKED_NEWS_SLUGS);
 const blockedIds = new Set(BLOCKED_NEW_IDS);
 const fields = 'id,date,date_gmt,modified,slug,link,title,excerpt,content,categories,featured_media,author,_links';
 export const ORIGIN_CACHE = { cf: { cacheTtlByStatus: { '200-299': 60, '404': 60, '500-599': 0 }, cacheEverything: true } } as RequestInit;
-export interface NewsEnv { NEWS_ARCHIVE_API_URL?: string; NEWS_INDEX?: KVNamespace }
+export interface NewsEnv { WP_SITE_URL?: string; NEWS_ARCHIVE_API_URL?: string; NEWS_INDEX?: KVNamespace }
 /** Prazo total das chamadas ao WordPress de uma requisição; sem ele, 15 s por chamada e uma repetição. */
 export interface NewsBudget { deadline: number; retry: boolean }
 interface NewsContext { env?: NewsEnv; waitUntil: (promise: Promise<unknown>) => void; budget?: NewsBudget }
@@ -31,8 +31,37 @@ function background(context?: NewsContext): NewsContext | undefined {
 }
 interface PublicCache { match: (request: Request) => Promise<Response | undefined>; put: (request: Request, response: Response) => Promise<void>; delete?: (request: Request) => Promise<unknown> }
 
-async function request(path: string, params: Record<string, string> = {}, missing = false, missingPage = false, budget?: NewsBudget): Promise<Response | null> {
-  const url = new URL('https://wordpress.crf-al.org.br/index.php');
+const scopedNamespaces = new WeakMap<KVNamespace, Map<string, KVNamespace>>();
+function originScope(context?: NewsContext): string {
+  const origin = new URL(context?.env?.WP_SITE_URL || 'https://wordpress.crf-al.org.br').origin;
+  return origin === 'https://wordpress.crf-al.org.br' ? '' : encodeURIComponent(origin);
+}
+function newsKV(context?: NewsContext): KVNamespace | undefined {
+  const kv = context?.env?.NEWS_INDEX;
+  const scope = originScope(context);
+  if (!kv || !scope) return kv;
+  let namespaces = scopedNamespaces.get(kv);
+  if (!namespaces) { namespaces = new Map(); scopedNamespaces.set(kv, namespaces); }
+  let scoped = namespaces.get(scope);
+  if (!scoped) {
+    scoped = new Proxy(kv, {
+      get(target, property) {
+        const member = Reflect.get(target, property);
+        if (typeof member !== 'function') return member;
+        return (...args: unknown[]) => {
+          if (['get', 'getWithMetadata', 'put', 'delete'].includes(String(property))) args[0] = `${scope}:${args[0]}`;
+          return Reflect.apply(member, target, args);
+        };
+      },
+    });
+    namespaces.set(scope, scoped);
+  }
+  return scoped;
+}
+
+async function request(path: string, params: Record<string, string> = {}, missing = false, missingPage = false, context?: NewsContext): Promise<Response | null> {
+  const budget = context?.budget;
+  const url = new URL('/index.php', context?.env?.WP_SITE_URL || 'https://wordpress.crf-al.org.br');
   url.searchParams.set('rest_route', `/wp/v2/${path}`);
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
   for (let attempt = 0; ; attempt++) {
@@ -85,8 +114,9 @@ async function storeDurable<T>(kv: KVNamespace, key: string, value: T, previous?
 const NOT_FOUND_S = 300;
 async function cachedLoad<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, { durable = false, freshMs = FRESH_MS } = {}): Promise<T> {
   const cache = context ? localCache() : undefined;
-  const kv = durable ? context?.env?.NEWS_INDEX : undefined;
-  const request = new Request(`${SITE_URL}/__news/v5/${key}`);
+  const kv = durable ? newsKV(context) : undefined;
+  const scopeKey = `${originScope(context)}/${key}`;
+  const request = new Request(`${SITE_URL}/__news/v5/${scopeKey}`);
   const putLocal = (value: T, storedAt = Date.now(), checkedAt?: number) => cache!.put(request, Response.json({ storedAt, checkedAt, value }, { headers: { 'Cache-Control': `public, max-age=${value === null ? NOT_FOUND_S : kv ? DURABLE_TTL_S : 600}` } }));
   const persist = async (value: T, previous?: Stored<T> | null) => {
     if (value === null) {
@@ -103,13 +133,13 @@ async function cachedLoad<T>(key: string, context: NewsContext | undefined, load
   if (!entry && kv) { entry = await kv.get<Stored<T>>(durableKey(key), 'json') ?? undefined; fromDurable = Boolean(entry); }
   if (entry && Date.now() - entry.storedAt <= MAX_STALE_MS) {
     const stale = entry;
-    if (stale.value !== null && (fromDurable || Date.now() - (stale.checkedAt ?? stale.storedAt) > freshMs) && !revalidating.has(key)) {
+    if (stale.value !== null && (fromDurable || Date.now() - (stale.checkedAt ?? stale.storedAt) > freshMs) && !revalidating.has(scopeKey)) {
       const task = (async () => {
         if (cache) await putLocal(stale.value, stale.storedAt, Date.now());
         // Reserva lida do KV evita uma segunda leitura; vinda do cache local, confere o KV.
         await persist(await load(background(context)), kv && !fromDurable ? undefined : stale);
-      })().catch(() => undefined).finally(() => revalidating.delete(key));
-      revalidating.set(key, task);
+      })().catch(() => undefined).finally(() => revalidating.delete(scopeKey));
+      revalidating.set(scopeKey, task);
       context!.waitUntil(task);
     }
     return stale.value;
@@ -121,10 +151,11 @@ async function cachedLoad<T>(key: string, context: NewsContext | undefined, load
 // Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
 const loading = new Map<string, Promise<unknown>>();
 function cached<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, options = {}): Promise<T> {
-  const pending = loading.get(key);
+  const scopeKey = `${originScope(context)}/${key}`;
+  const pending = loading.get(scopeKey);
   if (pending) return pending as Promise<T>;
-  const task = cachedLoad(key, context, load, options).finally(() => loading.delete(key));
-  loading.set(key, task);
+  const task = cachedLoad(key, context, load, options).finally(() => loading.delete(scopeKey));
+  loading.set(scopeKey, task);
   return task;
 }
 function hasTitle(post: { title?: { rendered: string } }) { return Boolean(post.title?.rendered.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()); }
@@ -160,7 +191,7 @@ async function categories(context?: NewsContext) {
   return cached('categories', context, async scoped => {
     const rows: Category[] = [];
     for (let page = 1, pages = 1; page <= pages; page++) {
-      const response = (await request('categories', { per_page: '100', page: String(page), _fields: 'id,slug,name' }, false, false, scoped?.budget))!;
+      const response = (await request('categories', { per_page: '100', page: String(page), _fields: 'id,slug,name' }, false, false, scoped))!;
       rows.push(...await response.json() as Category[]);
       pages = Math.min(100, Number(response.headers.get('x-wp-totalpages')) || 1);
     }
@@ -172,9 +203,9 @@ async function enrich(posts: WPPost[], taxonomy: Awaited<ReturnType<typeof categ
   const authorIds = withAuthor ? [...new Set(posts.map(post => post.author).filter((id): id is number => Boolean(id)))] : [];
   // Mídia e autores não dependem um do outro: uma única ida e volta à origem.
   const [media, authors] = await Promise.all([
-    ids.length ? request('media', { include: ids.join(','), per_page: String(ids.length), _fields: 'id,source_url,media_details,alt_text' }, false, false, context?.budget).then(response => response!.json() as Promise<WPMedia[]>) : Promise.resolve([]),
+    ids.length ? request('media', { include: ids.join(','), per_page: String(ids.length), _fields: 'id,source_url,media_details,alt_text' }, false, false, context).then(response => response!.json() as Promise<WPMedia[]>) : Promise.resolve([]),
     Promise.all(authorIds.map(async id => [id, await cached(`author/${id}`, context, async scoped => {
-      const response = await request(`users/${id}`, { _fields: 'name' }, true, false, scoped?.budget);
+      const response = await request(`users/${id}`, { _fields: 'name' }, true, false, scoped);
       return response ? await response.json() as { name: string } : null;
     })] as const)),
   ]);
@@ -198,7 +229,7 @@ async function buildNewsIndex(context?: NewsContext): Promise<Entry[]> {
   let pages = 1;
   let truncated = false;
   const loadPage = async (page: number): Promise<Entry[]> => {
-    const response = await request('posts', { per_page: '100', page: String(page), orderby: 'date', order: 'desc', _fields: 'id,slug,date,date_gmt,modified,title,categories' }, false, page > 1);
+    const response = await request('posts', { per_page: '100', page: String(page), orderby: 'date', order: 'desc', _fields: 'id,slug,date,date_gmt,modified,title,categories' }, false, page > 1, context);
     if (!response) return [];
     const pageCount = Number(response.headers.get('x-wp-totalpages'));
     if (!Number.isInteger(pageCount) || pageCount < 0) throw new Error('Invalid news inventory');
@@ -246,7 +277,7 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   return entry;
 }
 export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> {
-  const kv = context.env?.NEWS_INDEX;
+  const kv = newsKV(context);
   if (!kv) return Promise.reject(new Error('NEWS_INDEX binding required'));
   const pending = refreshing.get(kv);
   if (pending) return pending;
@@ -278,7 +309,7 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
   return task;
 }
 export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
-  const kv = context?.env?.NEWS_INDEX;
+  const kv = newsKV(context);
   if (!kv) return cached('index', context, () => buildNewsIndex(background(context)));
   const entry = await readNewsIndex(kv);
   if (entry) {
@@ -297,21 +328,20 @@ const postKey = (slug: string) => `post/${encodeURIComponent(slug)}`;
 export async function newsPost(slug: string, context?: NewsContext): Promise<WPPost | null> {
   if (isBlockedNews(slug)) return null;
   return cached(postKey(slug), context, async scoped => {
-    const budget = scoped?.budget;
     const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
     const params = { _fields: fields };
     const loadPost = async (): Promise<WPPost | undefined> => {
       if (row?.newId != null) {
-        const response = await request(`posts/${row.newId}`, params, true, false, budget);
+        const response = await request(`posts/${row.newId}`, params, true, false, scoped);
         const post = response ? await response.json() as WPPost : undefined;
         if (post && (post.id !== row.newId || post.slug !== row.newSlug)) throw new Error('News identity mismatch');
         return post;
       }
       if (row || !/^\d+$/.test(slug)) {
-        const response = await request('posts', { ...params, slug: row?.newSlug ?? slug, per_page: '1' }, false, false, budget);
+        const response = await request('posts', { ...params, slug: row?.newSlug ?? slug, per_page: '1' }, false, false, scoped);
         return (await response!.json() as WPPost[])[0];
       }
-      const response = await request(`posts/${slug}`, params, true, false, budget);
+      const response = await request(`posts/${slug}`, params, true, false, scoped);
       return response ? await response.json() as WPPost : undefined;
     };
     // Categorias normalmente vêm do cache; ainda assim não esperam pelo post.
@@ -327,12 +357,12 @@ export const WARM_POSTS = 30;
  * cobre todos os posts; o KV só é regravado quando o conteúdo mudou.
  */
 export async function warmNewsPosts(context: NewsContext, index?: Entry[] | null, limit = WARM_POSTS): Promise<number> {
-  const kv = context.env?.NEWS_INDEX;
+  const kv = newsKV(context);
   if (!kv) throw new Error('NEWS_INDEX binding required');
   const entries = (index ?? (await readNewsIndex(kv))?.value ?? []).slice(0, limit);
   if (!entries.length) return 0;
   const ids = entries.map(entry => entry.id);
-  const [response, taxonomy] = await Promise.all([request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields }), categories(context)]);
+  const [response, taxonomy] = await Promise.all([request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields }, false, false, context), categories(context)]);
   const rows = (await response!.json() as WPPost[]).filter(post => acceptable(post, taxonomy.category, taxonomy.spam));
   const posts = (await enrich(rows, taxonomy, context, true)).filter(hasTitle);
   await Promise.all(posts.map(post => storeDurable(kv, postKey(post.slug), post)));
@@ -344,7 +374,7 @@ export async function newsPage(page = 1, perPage = 12, context?: NewsContext): P
   if (!entries.length) return { posts: [], total: index.length, totalPages: Math.ceil(index.length / perPage) };
   const ids = entries.map(entry => entry.id);
   const posts = await cached<WPPost[]>(`list/${ids.join(',')}`, context, async scoped => {
-    const [response, taxonomy] = await Promise.all([request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', '') }, false, false, scoped?.budget), categories(scoped)]);
+    const [response, taxonomy] = await Promise.all([request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', '') }, false, false, scoped), categories(scoped)]);
     const rows = await response!.json() as WPPost[];
     const filtered = rows.filter(post => acceptable(post, taxonomy.category, taxonomy.spam)).map(normalize);
     const lookup = new Map(filtered.map(post => [post.id, post]));
@@ -371,7 +401,7 @@ export async function searchNews(term: string, context?: NewsContext): Promise<W
   if (normalized === null) throw new RangeError('Invalid news search');
   // Resultados de busca mudam pouco: 5 min frescos, depois stale-while-revalidate.
   return cached(`search/${encodeURIComponent(normalized)}`, context, async scoped => {
-    const [response, { category, spam }] = await Promise.all([request('posts', { search: normalized, per_page: '100', _fields: 'id,slug,date,date_gmt,title,excerpt,categories' }, false, false, scoped?.budget), categories(scoped)]);
+    const [response, { category, spam }] = await Promise.all([request('posts', { search: normalized, per_page: '100', _fields: 'id,slug,date,date_gmt,title,excerpt,categories' }, false, false, scoped), categories(scoped)]);
     const posts = await response!.json() as WPPost[];
     return posts.filter(post => acceptable(post, category, spam)).map(normalize).filter(hasTitle).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
   }, { freshMs: 5 * 60_000 });

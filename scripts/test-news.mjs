@@ -256,6 +256,23 @@ try {
       }
     } finally { globalThis.fetch = previousFetch; }
   }
+  {
+    const previousFetch = globalThis.fetch;
+    const hosts = [];
+    globalThis.fetch = async input => {
+      const url = new URL(input);
+      hosts.push(url.origin);
+      url.hostname = 'wordpress.crf-al.org.br';
+      return previousFetch(url);
+    };
+    try {
+      const staging = { env: { WP_SITE_URL: 'https://staging.example' }, waitUntil() {} };
+      await newsPost(find(16028).slug, staging);
+      await newsIndex(staging);
+      assert.ok(hosts.length > 2);
+      assert.ok(hosts.every(host => host === 'https://staging.example'), 'Todas as chamadas respeitam WP_SITE_URL');
+    } finally { globalThis.fetch = previousFetch; }
+  }
   // Teto de páginas: inventário maior que o limite gera índice com as mais recentes, sem falhar.
   {
     const mockFetch = globalThis.fetch; const seen = new Set(); let order;
