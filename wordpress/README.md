@@ -31,13 +31,15 @@ O portal não apresenta a data de publicação como se fosse a data do evento.
 
 O complemento utiliza `FooGallery::get_by_id()->attachments()`, respeitando a
 seleção e a ordenação do plugin, inclusive para fotos reutilizadas de outras
-galerias. Desde a versão 1.1.0, a **listagem** não monta todas as fotos para obter
-capa e contagem quando a galeria usa a fonte padrão (biblioteca de mídia) sem
-ordenação personalizada: uma consulta valida os anexos de `attachment_ids` (na
-ordem do FooGallery) e só a capa tem URLs calculadas. Outras fontes, ordenações e o
-**detalhe** continuam usando `attachments()`. Após atualizar, conferir na listagem
-que capa e contagem do álbum de Arapiraca seguem iguais ao detalhe. A implementação contempla imagens da biblioteca de mídia; fontes
+galerias. Listagem e detalhe usam o mesmo caminho (`attachments()` e as mesmas
+regras de foto válida), então capa e contagem da listagem coincidem com o detalhe.
+A versão 1.1.0 tinha um atalho na listagem que podia divergir; a 1.1.1 o removeu.
+Após atualizar, conferir que capa e contagem do álbum de Arapiraca seguem iguais ao
+detalhe. A implementação contempla imagens da biblioteca de mídia; fontes
 externas de versões PRO e vídeos não fazem parte desta integração.
+
+O `crfal-photo-gallery.zip` deve conter exatamente a pasta `crfal-photo-gallery/`:
+`npm run test:gallery` falha se o zip e o PHP divergirem.
 
 ## API e cache
 
