@@ -180,15 +180,23 @@ async function enrich(posts: WPPost[], taxonomy: Awaited<ReturnType<typeof categ
     } });
   });
 }
+// Teto de segurança contra cabeçalhos absurdos (~20 mil posts; hoje ~30 páginas). Acima dele,
+// o índice guarda as páginas mais recentes e registra o corte em vez de falhar para sempre.
+export const NEWS_INDEX_MAX_PAGES = 200;
 async function buildNewsIndex(context?: NewsContext): Promise<Entry[]> {
   const { category, spam } = await categories(context);
   let pages = 1;
+  let truncated = false;
   const loadPage = async (page: number): Promise<Entry[]> => {
-    const response = await request('posts', { per_page: '100', page: String(page), _fields: 'id,slug,date,date_gmt,modified,title,categories' }, false, page > 1);
+    const response = await request('posts', { per_page: '100', page: String(page), orderby: 'date', order: 'desc', _fields: 'id,slug,date,date_gmt,modified,title,categories' }, false, page > 1);
     if (!response) return [];
     const pageCount = Number(response.headers.get('x-wp-totalpages'));
-    if (!Number.isInteger(pageCount) || pageCount < 0 || pageCount > 100) throw new Error('Invalid news inventory');
-    pages = Math.max(pages, pageCount);
+    if (!Number.isInteger(pageCount) || pageCount < 0) throw new Error('Invalid news inventory');
+    if (pageCount > NEWS_INDEX_MAX_PAGES && !truncated) {
+      truncated = true;
+      console.error(JSON.stringify({ event: 'news_index_truncated', pages: pageCount, limit: NEWS_INDEX_MAX_PAGES }));
+    }
+    pages = Math.max(pages, Math.min(pageCount, NEWS_INDEX_MAX_PAGES));
     return await response.json() as Entry[];
   };
   const rows = await loadPage(1);
@@ -204,6 +212,9 @@ async function buildNewsIndex(context?: NewsContext): Promise<Entry[]> {
 export const NEWS_INDEX_KEY = 'news:index:v1';
 export const NEWS_INDEX_LOCK = 'news:index:refresh:v1';
 const REFRESH_MS = 10 * 60_000;
+const LEASE_MS = 120_000;
+// Após falha, o lease vira um intervalo curto: sem 503 por 2 min com o KV vazio e sem martelar a origem.
+export const NEWS_INDEX_RETRY_MS = 15_000;
 type StoredIndex = { storedAt: number; value: Entry[] };
 const refreshing = new WeakMap<KVNamespace, Promise<Entry[] | null>>();
 // O índice tem ~1 MB: lido do KV com cache de borda de 60 s e decodificado no máximo uma vez
@@ -226,14 +237,21 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
   if (pending) return pending;
   const task = (async () => {
     const lock = await kv.get<number>(NEWS_INDEX_LOCK, 'json');
-    if (lock && Date.now() - lock < 120_000) return null;
+    if (lock && Date.now() - lock < LEASE_MS) return null;
     // KV não oferece compare-and-swap: lease distribuído best-effort + single-flight local.
-    await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: 120 });
-    const value = await buildNewsIndex(background(context));
+    await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: LEASE_MS / 1000 });
+    let value: Entry[];
+    try {
+      value = await buildNewsIndex(background(context));
+    } catch (error) {
+      // Libera o lease: o timestamp recuado expira em NEWS_INDEX_RETRY_MS (o TTL mínimo do KV é 60 s).
+      await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now() - LEASE_MS + NEWS_INDEX_RETRY_MS), { expirationTtl: 60 }).catch(() => undefined);
+      throw error;
+    }
     const entry = { storedAt: Date.now(), value };
     await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
     memo.set(kv, { readAt: Date.now(), entry });
-    // Mantém o lease até expirar, evitando novas tentativas durante propagação/falhas.
+    // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
     return value;
   })().finally(() => refreshing.delete(kv));
   refreshing.set(kv, task);

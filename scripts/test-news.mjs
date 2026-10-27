@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, NEWS_INDEX_MAX_PAGES, NEWS_INDEX_RETRY_MS, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
 const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
@@ -117,6 +117,15 @@ try {
   assert.equal(pending.length, 1);
   await Promise.all(pending.splice(0));
   assert.deepEqual(JSON.parse(values.get(NEWS_INDEX_KEY)), stale, 'Falha preserva índice');
+  // Falha libera o lease após um intervalo curto (KV vazio não fica 2 min em 503).
+  const released = JSON.parse(values.get(NEWS_INDEX_LOCK));
+  const remaining = released + 120_000 - Date.now();
+  assert.ok(remaining > 0 && remaining <= NEWS_INDEX_RETRY_MS, `Lease restante após falha: ${remaining} ms`);
+  assert.equal(writes.at(-1).key, NEWS_INDEX_LOCK); assert.equal(writes.at(-1).options.expirationTtl, 60);
+  values.set(NEWS_INDEX_LOCK, JSON.stringify(released - NEWS_INDEX_RETRY_MS));
+  fail = false;
+  assert.ok((await refreshNewsIndex(context)).length, 'Novo refresh permitido depois do intervalo');
+  fail = true;
   fail = false;
   values.delete(NEWS_INDEX_LOCK);
   requests = [];
@@ -219,6 +228,26 @@ try {
     await Promise.all(pending.splice(0));
     assert.ok(requests.length);
   } finally { globalThis.caches = previousCaches; }
+  // Teto de páginas: inventário maior que o limite gera índice com as mais recentes, sem falhar.
+  {
+    const mockFetch = globalThis.fetch; const seen = new Set(); let order;
+    const logged = []; const previousError = console.error; console.error = message => logged.push(message);
+    try {
+      globalThis.fetch = async input => {
+        const url = new URL(input);
+        if (url.searchParams.get('rest_route') === '/wp/v2/categories') return Response.json([{ id: 42, slug: 'noticias-do-portal' }]);
+        const page = Number(url.searchParams.get('page')); seen.add(page); order = `${url.searchParams.get('orderby')} ${url.searchParams.get('order')}`;
+        return Response.json([{ ...inventory[0], id: 800000 + page, slug: `pagina-${page}`, date_gmt: `2020-01-01T00:00:${String(page % 60).padStart(2, '0')}` }], { headers: { 'x-wp-totalpages': String(NEWS_INDEX_MAX_PAGES + 50) } });
+      };
+      const result = await newsIndex();
+      assert.equal(result.length, NEWS_INDEX_MAX_PAGES);
+      assert.equal(Math.max(...seen), NEWS_INDEX_MAX_PAGES, 'Não passa do teto');
+      assert.equal(order, 'date desc', 'Páginas mais recentes primeiro');
+      assert.ok(logged.some(message => message.includes('news_index_truncated')));
+      globalThis.fetch = async () => Response.json([], { headers: { 'x-wp-totalpages': 'abc' } });
+      await assert.rejects(newsIndex(), /Invalid news inventory/);
+    } finally { globalThis.fetch = mockFetch; console.error = previousError; }
+  }
   // Mudança de total, duplicação, página removida e nova página durante a coleta.
   const workingFetch = globalThis.fetch;
   const attempts = new Map();
