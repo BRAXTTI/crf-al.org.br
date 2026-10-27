@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
-import { getPostImage, stripHTML } from '@/services/wordpress/client';
+import { getPostImage, getPostImageSet, stripHTML } from '@/services/wordpress/client';
 import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { useEventBySlug, useRelatedEvents } from '@/services/wordpress/event-hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
@@ -147,6 +147,7 @@ export default function EventoDetailPage() {
     );
   }
 
+  const capa = eventoCompleto ? getPostImageSet(eventoCompleto) : undefined;
   const statusConfig = STATUS_COLORS[evento.status];
   const StatusIcon = statusConfig.icon;
   const ModalidadeIcon = MODALIDADE_ICONS[evento.modalidade];
@@ -210,10 +211,10 @@ export default function EventoDetailPage() {
       </PageHero>
 
       <div className="container-crfal py-10 md:py-16">
-        {evento.banner && (
-          <div className="rounded-xl overflow-hidden mb-10 border border-crfal-gray-200  shadow-card">
-            <img src={evento.banner} alt={evento.titulo} className="w-full h-auto object-cover max-h-[420px]" />
-          </div>
+        {capa && (
+          <figure className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 shadow-card mb-10">
+            <img src={capa.src} srcSet={capa.srcSet} sizes="(min-width: 1024px) 800px, calc(100vw - 32px)" width={capa.width} height={capa.height} alt={capa.alt || `Arte de divulgação do evento «${evento.titulo}»`} decoding="async" fetchPriority="high" className="mx-auto block h-auto w-auto max-w-full max-h-[min(75vh,720px)]" />
+          </figure>
         )}
 
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
