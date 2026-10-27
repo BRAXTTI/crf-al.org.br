@@ -205,9 +205,29 @@ try {
       const checked = await local.get(entry).clone().json();
       assert.equal(checked.storedAt, old, 'Falha não renova a idade');
       assert.ok(checked.checkedAt > old);
+      // Cópia local com mais de 24 h: a reserva do KV (mais recente) é consultada antes da origem.
       local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 86400_001 }));
+      assert.deepEqual(await newsPost(slug, context), saved.value, 'Cópia local antiga recorre ao KV');
+      assert.equal(pending.length, 1, 'Reserva do KV com menos de 24 h: servida já, revalidação em segundo plano');
+      await Promise.all(pending.splice(0));
+      // Reserva do KV com mais de 24 h (storedAt só é regravado quando o conteúdo muda) e origem fora.
+      const durable = JSON.parse(values.get(postKey));
+      values.set(postKey, JSON.stringify({ ...durable, storedAt: Date.now() - 86400_001 }));
+      local.delete(entry); requests = [];
+      assert.deepEqual(await newsPost(slug, context), durable.value, 'Origem fora: reserva antiga do KV em vez de 503');
+      assert.ok(requests.length, 'Reserva com mais de 24 h ainda tenta a origem primeiro');
+      local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 86400_001 }));
+      assert.deepEqual(await newsPost(slug, context), durable.value, 'Cópias local e do KV antigas: serve a do KV');
+      assert.equal((await newsApi(new Request(`https://example.test/api/news?slug=${encodeURIComponent(slug)}`), context)).status, 200, 'API também serve a reserva antiga');
+      // Sem reserva no KV, a cópia local antiga não é servida: pode ter sido removida em outro data center.
+      values.delete(postKey);
       await assert.rejects(newsPost(slug, context), /503/);
+      assert.equal((await newsApi(new Request(`https://example.test/api/news?slug=${encodeURIComponent(slug)}`), context)).status, 503);
       fail = false;
+      values.set(postKey, JSON.stringify({ ...durable, storedAt: Date.now() - 86400_001 }));
+      local.delete(entry);
+      await newsPost(slug, context);
+      assert.ok(Date.now() - JSON.parse(values.get(postKey)).storedAt < 60_000, 'Origem de volta renova a reserva antiga');
 
     } finally { globalThis.caches = previousCaches; }
     // Cron: uma consulta `include` aquece os mais recentes.
