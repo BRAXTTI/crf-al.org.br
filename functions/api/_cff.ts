@@ -1,4 +1,5 @@
 import { SITE_URL } from '../../src/config/site';
+import { CFF_REQUEST_BUDGET_MS } from '../../src/config/cff';
 /**
  * Leitura das "Publicações do CFF" (Conselho Federal de Farmácia).
  * O site do CFF não oferece RSS nem API: /publicacoes é HTML renderizado no
@@ -26,6 +27,8 @@ const USER_AGENT = `crfal-site/1.0 (+${SITE_URL})`;
 /** Limite de páginas do CFF lidas por atualização (protege a origem). */
 const MAX_SOURCE_PAGES = 20;
 const PARALLEL_PAGES = 4;
+/** Teto da coleta; usado pela atualização em segundo plano, quando ninguém está esperando. */
+export const CFF_BACKGROUND_BUDGET_MS = 20_000;
 
 function decodeEntities(value: string): string {
   return value
@@ -89,10 +92,11 @@ async function fetchText(url: string, timeoutMs: number): Promise<string> {
 
 /**
  * Percorre /publicacoes?page=N (em lotes paralelos) até a primeira página vazia
- * e devolve as coleções na ordem do CFF, juntando títulos repetidos.
+ * e devolve as coleções na ordem do CFF, juntando títulos repetidos. O prazo padrão
+ * é o de uma requisição com o navegador esperando (abaixo do timeout dele).
  */
-export async function getCffPublications(budgetMs = 20_000): Promise<CffCollection[]> {
-  const deadline = Date.now() + Math.min(budgetMs, 20_000);
+export async function getCffPublications(budgetMs = CFF_REQUEST_BUDGET_MS): Promise<CffCollection[]> {
+  const deadline = Date.now() + Math.min(budgetMs, CFF_BACKGROUND_BUDGET_MS);
   const collections: CffCollection[] = [];
   for (let start = 1; start <= MAX_SOURCE_PAGES; start += PARALLEL_PAGES) {
     const remaining = deadline - Date.now();
