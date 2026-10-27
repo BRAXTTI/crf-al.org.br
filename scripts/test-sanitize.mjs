@@ -75,12 +75,14 @@ for (const node of document.querySelectorAll('*')) {
   }
 }
 const links = new JSDOM(sanitizeWP(`
-  <a href="https://www.crf-al.org.br/pagina?x=1#secao" target="_blank" rel="opener">Legado</a>
+  <a href="https://www.crf-al.org.br/publicacao/noticia?x=1#secao" target="_blank" rel="opener">Legado</a>
   <a href="https://institucional.crf-al.org.br/pagina#secao">Atual</a>
   <a href="https://external.example/#secao" target="_blank">Externo</a>
   <a href="#user-content-secao" target="janela">Local</a>
+  <a href="https://www.crf-al.org.br/app/uploads/2024/08/edital.pdf#page=2">Upload legado</a>
+  <a href="https://crf-al.org.br/servicos/">Página legada</a>
 `)).window.document.querySelectorAll('a');
-assert.equal(links[0].getAttribute('href'), '/pagina?x=1#user-content-secao');
+assert.equal(links[0].getAttribute('href'), '/publicacao/noticia?x=1#user-content-secao');
 assert.equal(links[0].getAttribute('target'), '_blank');
 assert.equal(links[0].getAttribute('rel'), 'noopener noreferrer');
 assert.equal(links[1].getAttribute('href'), 'https://institucional.crf-al.org.br/pagina#user-content-secao');
@@ -88,6 +90,9 @@ assert.equal(links[2].getAttribute('href'), 'https://external.example/#secao');
 assert.equal(links[2].getAttribute('rel'), 'noopener noreferrer');
 assert.equal(links[3].getAttribute('href'), '#user-content-secao');
 assert.equal(links[3].getAttribute('target'), '_self');
+assert.equal(links[4].getAttribute('href'), 'https://www.crf-al.org.br/app/uploads/2024/08/edital.pdf#page=2', 'Upload legado não vira caminho do portal');
+assert.equal(links[4].getAttribute('rel'), 'noopener noreferrer');
+assert.equal(links[5].getAttribute('href'), 'https://crf-al.org.br/servicos/', 'Página legada sem rota no portal');
 dom.window.close();
 delete globalThis.window;
 console.log('DOMPurify real: XSS, srcdoc, SVG, iframe e DOM clobbering validados em jsdom.');

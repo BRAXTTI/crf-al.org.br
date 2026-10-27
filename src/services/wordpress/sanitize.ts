@@ -48,7 +48,9 @@ export function secureLink(node: HookElement, origins: string[]): void {
   let url: URL;
   try { url = new URL(href, SITE_URL); } catch { return; }
   if (!['http:', 'https:'].includes(url.protocol)) return;
-  const legacy = ['crf-al.org.br', 'www.crf-al.org.br'].includes(url.hostname);
+  // Do site antigo, só /publicacao/<slug> tem destino no portal (301 para a notícia). Uploads e
+  // demais páginas continuam no domínio legado, que segue no ar.
+  const legacy = ['crf-al.org.br', 'www.crf-al.org.br'].includes(url.hostname) && /^\/publicacao\/[^/]+\/?$/.test(url.pathname);
   const internal = legacy || origins.includes(url.origin);
   if (internal && url.hash.length > 1 && !url.hash.startsWith(`#${NAMED_PROPS_PREFIX}`)) {
     url.hash = `#${NAMED_PROPS_PREFIX}${url.hash.slice(1)}`;
