@@ -18,7 +18,7 @@ const source = (await readFile(new URL('../functions/_middleware.ts', import.met
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
   .replace("'./_news'", JSON.stringify(await loadNews()));
-const { onRequest, buildMeta, buildPreload, newsPreload, homePreload } = await import(moduleUrl(source));
+const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders } = await import(moduleUrl(source));
 const { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } = await import(bannersUrl);
 const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
 const { PAGE_METADATA } = await import(metadataUrl);
@@ -53,6 +53,14 @@ async function request(path, options = {}) {
     next: async upstream => { forwarded = upstream; return options.response || shell(); },
     waitUntil: promise => background.push(promise),
   });
+}
+
+/** O middleware só acrescenta headers de segurança: status, corpo e headers originais seguem iguais. */
+async function assertPassThrough(actual, expected, message) {
+  assert.equal(actual.status, expected.status, message);
+  for (const [name, value] of expected.headers) assert.equal(actual.headers.get(name), value, `${message}: ${name}`);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) assert.equal(actual.headers.get(name), expected.headers.get(name) ?? value, `${message}: ${name}`);
+  assert.equal(await actual.text(), await expected.clone().text(), message);
 }
 
 async function expectMissing(path, plainText = false) {
@@ -95,13 +103,13 @@ try {
 
   for (const [path, type] of [['/assets/main.js', 'application/javascript'], ['/images/logo.png', 'image/png'], ['/api/instagram', 'application/json'], ['/robots.txt', 'text/plain'], ['/sitemap.xml', 'application/xml']]) {
     const asset = new Response('resource', { headers: { 'Content-Type': type } });
-    assert.equal(await request(path, { response: asset }), asset, `Preserve real resource: ${path}`);
+    await assertPassThrough(await request(path, { response: asset.clone() }), asset, `Preserve real resource: ${path}`);
   }
   // Assets estáticos preservam validadores (304); rotas HTML os descartam para injetar metadados.
   const validators = { 'If-None-Match': '"abc"', 'If-Modified-Since': 'Tue, 27 Oct 2026 00:00:00 GMT' };
   for (const path of ['/images/logo.png', '/documentos/manual.pdf', '/fonts/inter-400.woff2', '/assets/main.js']) {
     const notModified = new Response(null, { status: 304 });
-    assert.equal(await request(path, { headers: validators, response: notModified }), notModified, `304 preservado: ${path}`);
+    await assertPassThrough(await request(path, { headers: validators, response: notModified.clone() }), notModified, `304 preservado: ${path}`);
     assert.equal(forwarded.headers.get('If-None-Match'), '"abc"', path);
     assert.ok(forwarded.headers.get('If-Modified-Since'), path);
   }
@@ -111,9 +119,22 @@ try {
     assert.equal(forwarded.headers.get('If-Modified-Since'), null, path);
   }
   const existing404 = new Response('Not found', { status: 404 });
-  assert.equal(await request('/images/missing.png', { response: existing404 }), existing404);
+  await assertPassThrough(await request('/images/missing.png', { response: existing404.clone() }), existing404, 'Asset 404 real');
   const postResponse = Response.json({ ok: true });
-  assert.equal(await request('/api/instagram', { method: 'POST', response: postResponse }), postResponse);
+  await assertPassThrough(await request('/api/instagram', { method: 'POST', response: postResponse.clone() }), postResponse, 'POST repassado');
+  // Headers de segurança: mesmos valores do _headers, em respostas geradas por Functions, sem sobrescrever.
+  const headerBlock = headers.split(/\n(?=\S)/).find(block => block.startsWith('/*\n')).split('\n').slice(1).filter(Boolean);
+  assert.deepEqual(Object.fromEntries(headerBlock.map(line => line.trim().split(/: (.*)/s).slice(0, 2))), SECURITY_HEADERS, 'Middleware e _headers sincronizados');
+  for (const path of ['/pagina-inexistente', '/api/missing', '/instituicao/missao-visao', '/imprensa/noticias/best-dating-sites', '/sitemap-news.xml']) {
+    const generated = await request(path);
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) assert.equal(generated.headers.get(name), value, `${path}: ${name}`);
+  }
+  const custom = withSecurityHeaders(new Response('{}', { headers: { 'Content-Security-Policy': "default-src 'none'", 'X-Frame-Options': 'DENY' } }));
+  assert.equal(custom.headers.get('Content-Security-Policy'), "default-src 'none'", 'Não sobrescreve CSP da resposta');
+  assert.equal(custom.headers.get('X-Frame-Options'), 'DENY');
+  assert.equal(custom.headers.get('X-Content-Type-Options'), 'nosniff');
+  const complete = new Response('', { headers: SECURITY_HEADERS });
+  assert.equal(withSecurityHeaders(complete), complete, 'Resposta completa não é copiada');
 
   for (const [path, target] of [['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia'], ['/imprensa/noticias-cff', '/imprensa/publicacoes-cff']]) {
     const response = await request(path);

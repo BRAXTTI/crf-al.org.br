@@ -248,7 +248,36 @@ async function cachedMetadata(context: PagesContext, pathname: string, resolve: 
   return data;
 }
 
+/**
+ * Mesmo conjunto do bloco `/*` de public/_headers (teste garante a sincronia). O `_headers`
+ * não se aplica a respostas geradas por Functions (APIs, 404/410/503, sitemap, redirects).
+ */
+export const SECURITY_HEADERS: Record<string, string> = {
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'X-Permitted-Cross-Domain-Policies': 'none',
+  'Content-Security-Policy': "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://crf-al.org.br https://www.crf-al.org.br https://*.cdninstagram.com https://*.fbcdn.net https://admin.cff.org.br; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com; media-src 'self' https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://www.crf-al.org.br; upgrade-insecure-requests",
+};
+
+/** Completa apenas os headers ausentes; nunca substitui um valor definido pela resposta. */
+export function withSecurityHeaders(response: Response): Response {
+  const missing = Object.keys(SECURITY_HEADERS).filter(name => !response.headers.has(name));
+  if (!missing.length || response.status === 101) return response;
+  // Headers de Response.redirect() e de respostas de fetch são imutáveis: copiar antes.
+  const secured = new Response(response.body, response);
+  for (const name of missing) secured.headers.set(name, SECURITY_HEADERS[name]);
+  return secured;
+}
+
 export async function onRequest(context: PagesContext): Promise<Response> {
+  return withSecurityHeaders(await handle(context));
+}
+
+async function handle(context: PagesContext): Promise<Response> {
   const url = new URL(context.request.url);
   const pathname = url.pathname.replace(/\/$/, '') || '/';
   if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
