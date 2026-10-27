@@ -13,7 +13,7 @@ export const SANITIZE_CONFIG = {
   FORBID_TAGS: ['style', 'link', 'meta', 'base', 'form', 'input', 'button', 'textarea', 'select', 'option', 'optgroup', 'datalist', 'fieldset', 'output', 'dialog', 'template'],
   FORBID_ATTR: ['autofocus', 'formaction'],
   ADD_TAGS: ['iframe'],
-  ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'loading', 'referrerpolicy'],
+  ADD_ATTR: ['target', 'allow', 'allowfullscreen', 'frameborder', 'loading', 'referrerpolicy'],
   // Prefixa id/name (DOM clobbering); âncoras internas são reescritas abaixo.
   SANITIZE_NAMED_PROPS: true,
 };
@@ -36,6 +36,9 @@ export function filterIframe(node: HookElement): boolean {
 
 /** Links externos sem acesso ao opener/referrer; âncoras internas seguem os ids prefixados. */
 export function secureLink(node: HookElement, origins: string[]): void {
+  const target = node.getAttribute('target')?.toLowerCase();
+  if (target) node.setAttribute('target', target === '_blank' ? '_blank' : '_self');
+  if (target === '_blank') node.setAttribute('rel', 'noopener noreferrer');
   const href = node.getAttribute('href');
   if (!href) return;
   if (href.startsWith('#')) {
@@ -44,7 +47,15 @@ export function secureLink(node: HookElement, origins: string[]): void {
   }
   let url: URL;
   try { url = new URL(href, SITE_URL); } catch { return; }
-  if (['http:', 'https:'].includes(url.protocol) && !origins.includes(url.origin)) node.setAttribute('rel', 'noopener noreferrer');
+  if (!['http:', 'https:'].includes(url.protocol)) return;
+  const legacy = ['crf-al.org.br', 'www.crf-al.org.br'].includes(url.hostname);
+  const internal = legacy || origins.includes(url.origin);
+  if (internal && url.hash.length > 1 && !url.hash.startsWith(`#${NAMED_PROPS_PREFIX}`)) {
+    url.hash = `#${NAMED_PROPS_PREFIX}${url.hash.slice(1)}`;
+    node.setAttribute('href', href.split('#')[0] + url.hash);
+  }
+  if (legacy) node.setAttribute('href', url.pathname + url.search + url.hash);
+  if (!internal) node.setAttribute('rel', 'noopener noreferrer');
 }
 
 let configured = false;
