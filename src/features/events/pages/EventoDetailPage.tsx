@@ -14,6 +14,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { SITE_URL } from '@/config/site';
+import { eventsCalendar } from '@/lib/calendar';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { getPostImage, getPostImageSet, stripHTML } from '@/services/wordpress/client';
 import { sanitizeWP } from '@/services/wordpress/sanitize';
@@ -156,6 +158,13 @@ export default function EventoDetailPage() {
   const conteudo = eventoCompleto ? sanitizeWP(eventoCompleto.content?.rendered ?? '') : '';
   const acoes = acoesDoEvento(evento);
   const horario = formatarHorario(evento.horaInicio, evento.horaFim, evento.data, evento.dataFim);
+  const baixarAgenda = () => {
+    if (!eventoCompleto) return;
+    const url = URL.createObjectURL(new Blob([eventsCalendar([paraCRFEvent(eventoCompleto)], SITE_URL)], { type: 'text/calendar;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url; link.download = `${evento.slug}.ics`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
   const dataISO = evento.horaInicio ? `${evento.data.slice(0, 10)}T${evento.horaInicio}-03:00` : evento.data.slice(0, 10);
 
   return (
@@ -177,7 +186,7 @@ export default function EventoDetailPage() {
         title={evento.titulo}
         eyebrow="Evento"
         section="imprensa"
-        actions={acoes.map((acao, i) => <PageHeroAction key={acao.href} href={acao.href} variant={i === 0 ? "primary" : "secondary"}>{acao.label}</PageHeroAction>)}
+        actions={<>{acoes.map((acao, i) => <PageHeroAction key={acao.href} href={acao.href} variant={i === 0 ? "primary" : "secondary"}>{acao.label}</PageHeroAction>)}{evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 rounded-full border border-white/30 px-5 py-2.5 text-sm font-bold text-white focus-visible:ring-2 focus-visible:ring-white">Adicionar à agenda</button>}</>}
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
@@ -239,10 +248,11 @@ export default function EventoDetailPage() {
                 <InfoRow icon={Calendar} rotulo="Situação" valor={STATUS_LABELS[evento.status]} />
               </dl>
 
-              {acoes.length > 0 && <div className="hidden lg:block mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
+              {(acoes.length > 0 || (evento.status === 'em-breve' && evento.data)) && <div className="hidden lg:block mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
                 {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
                   {acao.label}<ExternalLink className="w-4 h-4" aria-hidden /><span className="sr-only"> (abre em uma nova aba)</span>
                 </a>)}
+                {evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 w-full rounded-full border border-crfal-blue px-5 py-3 text-sm font-semibold text-crfal-blue focus-visible:ring-2 focus-visible:ring-crfal-gold">Adicionar à agenda</button>}
               </div>}
             </div>
           </aside>
