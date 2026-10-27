@@ -276,6 +276,60 @@ try {
       }
     } finally { globalThis.fetch = previousFetch; }
   }
+  // Notícia já na reserva (fallback stale) e depois despublicada: deixa de ser servida.
+  {
+    const previousFetch = globalThis.fetch; const previousCaches = globalThis.caches;
+    const local = new Map(); const store = new Map(); const tasks = [];
+    globalThis.caches = { default: {
+      async match(req) { return local.get(req.url)?.clone(); },
+      async put(req, response) { local.set(req.url, response); },
+      async delete(req) { return local.delete(req.url); },
+    } };
+    const kvStore = { async get(key) { return store.has(key) ? JSON.parse(store.get(key)) : null; }, async put(key, value) { store.set(key, value); }, async delete(key) { store.delete(key); } };
+    const ctx = { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task) };
+    const slug = find(16028).slug; const durable = `news:cache:v1:post/${encodeURIComponent(slug)}`;
+    const localKey = () => [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(slug)}`));
+    const apiStatus = async () => (await newsApi(new Request(`https://example.test/api/news?slug=${encodeURIComponent(slug)}`), ctx)).status;
+    const setLocal = async patch => local.set(localKey(), Response.json({ ...(await local.get(localKey()).clone().json()), ...patch }));
+    // Variações da reserva: cópia local antiga, só no KV e no KV com mais de 24 h.
+    const reserves = {
+      local: async () => setLocal({ storedAt: Date.now() - 120_000, checkedAt: undefined }),
+      kv: async () => local.delete(localKey()),
+      'kv antigo': async () => {
+        local.delete(localKey());
+        store.set(durable, JSON.stringify({ ...JSON.parse(store.get(durable)), storedAt: Date.now() - 86400_001 }));
+      },
+    };
+    try {
+      for (const status of [401, 403, 404, 410]) for (const [name, prepare] of Object.entries(reserves)) {
+        const label = `${status} (${name})`;
+        globalThis.fetch = previousFetch;
+        local.clear(); store.clear();
+        assert.equal((await newsPost(slug, ctx)).slug, slug, label); await Promise.all(tasks.splice(0));
+        assert.ok(store.has(durable), `${label}: reserva gravada`);
+        await prepare();
+        globalThis.fetch = async (input, init) => new URL(input).searchParams.get('rest_route').startsWith('/wp/v2/posts/')
+          ? new Response(null, { status }) : previousFetch(input, init);
+        const first = await newsPost(slug, ctx);
+        // Dentro de 24 h, o primeiro acesso ainda recebe a reserva (stale-while-revalidate).
+        if (name === 'kv antigo') assert.equal(first, null, `${label}: reserva antiga não é servida`);
+        else assert.equal(first.slug, slug, `${label}: stale-while-revalidate`);
+        await Promise.all(tasks.splice(0));
+        assert.equal(store.has(durable), false, `${label}: reserva do KV apagada`);
+        assert.equal(await newsPost(slug, ctx), null, `${label}: não é mais servida`);
+        assert.equal(await apiStatus(), 404, label);
+        assert.equal(tasks.length, 0, `${label}: "não encontrado" não revalida`);
+        // Passado o cache de "não encontrado", segue fora (KV vazio, origem ainda nega).
+        await setLocal({ storedAt: Date.now() - 301_000 });
+        assert.equal(await newsPost(slug, ctx), null, `${label}: após 5 min`);
+        // Mesmo com a origem fora, a reserva removida não volta.
+        globalThis.fetch = async () => new Response('', { status: 503 });
+        await setLocal({ storedAt: Date.now() - 301_000 });
+        await assert.rejects(newsPost(slug, ctx), /503/, `${label}: sem reserva para ressuscitar`);
+        await Promise.all(tasks.splice(0));
+      }
+    } finally { globalThis.fetch = previousFetch; globalThis.caches = previousCaches; }
+  }
   {
     const previousFetch = globalThis.fetch;
     const hosts = [];
