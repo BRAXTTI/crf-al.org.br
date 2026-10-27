@@ -373,6 +373,55 @@ try {
       assert.ok(requests.some(url => url.searchParams.get('rest_route') === '/wp/v2/media'), 'Revalidação completa apesar do prazo da requisição');
     } finally { globalThis.fetch = workingFetch; }
   }
+  // Carga compartilhada: cada chamador respeita o próprio prazo e a própria política de repetição.
+  {
+    const workingFetch = globalThis.fetch;
+    const base = { waitUntil() {} };
+    const slug = find(16028).slug;
+    const html = ms => withNewsBudget(base, ms, false);
+    const apiCtx = () => withNewsBudget(base, API_BUDGET_MS, true);
+    // Atraso que respeita o AbortSignal, como o fetch real.
+    const slow = ms => async (input, init) => {
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(resolve, ms);
+        init?.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(init.signal.reason); });
+      });
+      return workingFetch(input, init);
+    };
+    try {
+      // API primeiro (8 s): o HTML que chega depois desiste no próprio prazo, sem esperar a API.
+      globalThis.fetch = slow(150);
+      const apiFirst = newsPost(slug, apiCtx());
+      const started = Date.now();
+      await assert.rejects(newsPost(slug, html(40)), error => error.name === 'TimeoutError');
+      assert.ok(Date.now() - started < 120, `HTML esperou ${Date.now() - started} ms pela carga da API`);
+      assert.equal((await apiFirst).slug, slug, 'A carga da API segue até o fim');
+      // HTML primeiro (prazo curto): a API que chega depois não herda o prazo dele.
+      const htmlFirst = newsPost(slug, html(40));
+      const apiLater = newsPost(slug, apiCtx());
+      await assert.rejects(htmlFirst, error => error.name === 'TimeoutError');
+      assert.equal((await apiLater).slug, slug, 'API não herda o prazo do HTML');
+      // HTML primeiro (sem repetição): a API que chega depois ainda tem a sua repetição.
+      const failedOnce = new Set();
+      globalThis.fetch = async (input, init) => {
+        const route = new URL(input).searchParams.get('rest_route');
+        await new Promise(resolve => setTimeout(resolve, 20));
+        if (!failedOnce.has(route)) { failedOnce.add(route); return new Response('', { status: 503 }); }
+        return workingFetch(input, init);
+      };
+      const htmlNoRetry = newsPost(slug, html(PAGE_BUDGET_MS));
+      const apiRetry = newsPost(slug, apiCtx());
+      await assert.rejects(htmlNoRetry, /503/);
+      assert.equal((await apiRetry).slug, slug, 'API não herda a ausência de repetição do HTML');
+      // Política equivalente ou mais ampla: quem chega depois só compartilha, sem nova carga.
+      let calls = 0;
+      globalThis.fetch = async () => { calls++; await new Promise(resolve => setTimeout(resolve, 20)); return new Response('', { status: 503 }); };
+      const owner = newsPost(slug, apiCtx());
+      const joiner = newsPost(slug, html(PAGE_BUDGET_MS));
+      await assert.rejects(owner, /503/); await assert.rejects(joiner, /503/);
+      assert.equal(calls, 4, 'HTML compartilha a falha da API (post e categorias, com repetição)');
+    } finally { globalThis.fetch = workingFetch; }
+  }
   // "Não encontrado" fica 5 min no cache local (sem escrita no KV); busca normalizada e limitada.
   {
     const local = new Map(); const previousCaches = globalThis.caches; const tasks = [];

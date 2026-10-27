@@ -281,8 +281,28 @@ async function cachedLoad<T>(
     await persist(value, kv ? (durableEntry ?? null) : undefined).catch(() => undefined);
   return value;
 }
+// Sem prazo (recargas em segundo plano): 15 s por chamada e uma repetição.
+const UNBOUNDED: NewsBudget = { deadline: Infinity, retry: true };
+/** A carga de `owner` dá ao chamador tudo o que a política dele permitiria. */
+const covers = (owner: NewsBudget, caller: NewsBudget) =>
+  owner.deadline >= caller.deadline && (owner.retry || !caller.retry);
+function untilDeadline<T>(task: Promise<T>, deadline: number): Promise<T> {
+  if (deadline === Infinity) return task;
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new DOMException('News budget exhausted', 'TimeoutError')),
+      Math.max(0, deadline - Date.now()),
+    );
+    task.then(resolve, reject).finally(() => clearTimeout(timer));
+  });
+}
 // Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
-const loading = new Map<string, Promise<unknown>>();
+const loading = new Map<string, { task: Promise<unknown>; budget: NewsBudget }>();
+/**
+ * A carga compartilhada segue o prazo e a política de repetição de quem a iniciou. Quem chega
+ * depois a aguarda só até o próprio prazo; se ela falhar por uma política mais restrita que a
+ * sua (prazo menor ou sem repetição) e ainda houver tempo, tenta de novo com a própria.
+ */
 function cached<T>(
   key: string,
   context: NewsContext | undefined,
@@ -290,11 +310,19 @@ function cached<T>(
   options: CacheOptions = {},
 ): Promise<T> {
   const scopeKey = `${originScope(context)}/${key}`;
-  const pending = loading.get(scopeKey);
-  if (pending) return pending as Promise<T>;
-  const task = cachedLoad(key, context, load, options).finally(() => loading.delete(scopeKey));
-  loading.set(scopeKey, task);
-  return task;
+  const budget = context?.budget ?? UNBOUNDED;
+  const shared = loading.get(scopeKey);
+  if (shared)
+    return untilDeadline(shared.task as Promise<T>, budget.deadline).catch((error: unknown) => {
+      if (covers(shared.budget, budget) || Date.now() >= budget.deadline) throw error;
+      return cached(key, context, load, options);
+    });
+  const entry = { budget, task: undefined as unknown as Promise<T> };
+  entry.task = cachedLoad(key, context, load, options).finally(() => {
+    if (loading.get(scopeKey) === entry) loading.delete(scopeKey);
+  });
+  loading.set(scopeKey, entry);
+  return entry.task;
 }
 function hasTitle(post: { title?: { rendered: string } }) {
   return Boolean(
