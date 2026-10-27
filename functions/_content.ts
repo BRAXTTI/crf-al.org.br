@@ -4,7 +4,7 @@ import type { CRFEvent } from '../src/services/wordpress/types';
 /** Proxy público de rotas permitidas. Nunca aceita uma URL de origem do cliente. */
 export interface ContentEnv { WP_SITE_URL?: string }
 export interface ContentContext { env?: ContentEnv; waitUntil: (promise: Promise<unknown>) => void }
-/** Páginas acima do teto compartilham a mesma consulta (e o mesmo cache) da última. */
+/** Páginas acima do teto são inválidas; nunca repetem a última página. */
 export const MAX_GALLERY_PAGE = 100;
 // Só o que detalhe e relacionados usam: sem autor, termos ou meta crua; `_links`/`_embedded` mantêm a capa.
 const EVENT_FIELDS = 'id,date,modified,slug,link,status,title,excerpt,content,featured_media,event_details,_links,_embedded';
@@ -26,8 +26,8 @@ export async function contentApi(request: Request, context: ContentContext): Pro
   const id = input.searchParams.get('id');
   const related = input.searchParams.get('related');
   const requestedPage = Number(input.searchParams.get('page') ?? 1);
-  const page = Math.min(requestedPage, MAX_GALLERY_PAGE);
-  if ((slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) || (id !== null && !/^[1-9]\d*$/.test(id)) || (related !== null && !/^[1-9]\d*$/.test(related)) || !Number.isSafeInteger(requestedPage) || requestedPage < 1) return Response.json({ error: 'Parâmetros inválidos.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+  const page = requestedPage;
+  if ((slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) || (id !== null && !/^[1-9]\d*$/.test(id)) || (related !== null && !/^[1-9]\d*$/.test(related)) || !Number.isSafeInteger(requestedPage) || requestedPage < 1 || requestedPage > MAX_GALLERY_PAGE) return Response.json({ error: 'Parâmetros inválidos.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
   const gallery = input.pathname.replace(/\/$/, '') === '/api/gallery';
   const origin = new URL('/index.php', context.env?.WP_SITE_URL || 'https://wordpress.crf-al.org.br');
   origin.searchParams.set('rest_route', gallery ? `/crfal/v1/photo-albums${slug ? `/${slug}` : ''}` : slug || id || related ? `/wp/v2/event_listing${id ? `/${id}` : ''}` : '/crfal/v1/events');

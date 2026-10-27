@@ -27,11 +27,11 @@ try {
   assert.equal((await request('/api/events?id=5')).status, 200);
   assert.equal(urls.at(-1).searchParams.get('rest_route'), '/wp/v2/event_listing/5');
   assert.equal(urls.at(-1).searchParams.get('_embed'), 'wp:featuredmedia');
-  assert.equal((await request('/api/gallery?page=9007199254740991')).status, 200);
-  assert.equal(urls.at(-1).searchParams.get('page'), '100', 'Página limitada ao teto');
-  const beforeClamp = urls.length; await Promise.all(pending);
-  assert.equal((await request('/api/gallery?page=500')).status, 200);
-  assert.equal(urls.length, beforeClamp, 'Páginas acima do teto reutilizam o cache');
+  const beforeLimit = urls.length;
+  for (const page of [101, 150, 500, 9007199254740991]) {
+    assert.equal((await request(`/api/gallery?page=${page}`)).status, 400);
+  }
+  assert.equal(urls.length, beforeLimit, 'Página acima do teto não consulta a origem');
   assert.equal((await request('/api/gallery?page=1.5')).status, 400);
   assert.equal((await request('/api/events?slug=%2F')).status, 400);
   assert.equal((await request('/api/gallery?page=0')).status, 400);
