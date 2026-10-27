@@ -127,6 +127,11 @@ try {
   origin = () => new Response('', { status: 404 });
   await expectMissing('/imprensa/noticias/999999999');
   await expectMissing('/imprensa/galeria-de-fotos/album-inexistente');
+  await Promise.all(background);
+  const missingFetches = fetches;
+  await expectMissing('/imprensa/galeria-de-fotos/album-inexistente');
+  await expectMissing('/eventos/evento-inexistente');
+  assert.equal(fetches, missingFetches, 'Não encontrado fica em cache por 5 min');
 
   const post = { id: 16028, slug: 'esclarecimentos-acerca-do-registro-de-responsabilidade-tecnica-do-farmaceutico-atraves-do-contrato-de-trabalho', date: '2026-10-10T09:00:00', title: { rendered: 'Título &amp; notícia' }, excerpt: { rendered: '<p>Resumo</p>' }, categories: [1] };
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);

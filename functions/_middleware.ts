@@ -217,31 +217,34 @@ function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Resp
 }
 
 const METADATA_FRESH_MS = 10 * 60_000;
+const NOT_FOUND_S = 300;
 const refreshingMetadata = new Set<string>();
 
 async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
   // Cache metadata only: never retain HTML pointing to an outdated deployment bundle.
   const cache = (caches as CacheStorage & { default: Cache }).default;
   const key = new Request(`${SITE_URL}/__page-metadata/v6/${encodeURIComponent(context.env?.WP_SITE_URL || '')}/${encodeURIComponent(context.env?.NEWS_ARCHIVE_API_URL || '')}${pathname}`);
-  const store = (data: OgData) => cache.put(key, new Response(JSON.stringify({ storedAt: Date.now(), data }), {
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=86400' },
+  // "Não encontrado" fica 5 min: slugs inexistentes não chegam sempre ao WordPress.
+  const store = (data: OgData | null) => cache.put(key, new Response(JSON.stringify({ storedAt: Date.now(), data }), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${data ? 86400 : NOT_FOUND_S}` },
   }));
   const cached = await cache.match(key);
-  if (cached) {
+  const entry = cached ? await cached.json() as { storedAt: number; data: OgData | null } : undefined;
+  if (entry?.data === null && Date.now() - entry.storedAt < NOT_FOUND_S * 1000) return null;
+  if (entry?.data) {
     // Stale-while-revalidate: a página nunca espera pela origem quando já há metadados.
-    const entry = await cached.json() as { storedAt: number; data: OgData };
+    const current = entry.data;
     if (Date.now() - entry.storedAt > METADATA_FRESH_MS && !refreshingMetadata.has(key.url)) {
       refreshingMetadata.add(key.url);
       context.waitUntil((async () => {
-        await store(entry.data);
-        const data = await resolve();
-        await (data ? store(data) : cache.delete(key));
+        await store(current);
+        await store(await resolve());
       })().catch(() => undefined).finally(() => refreshingMetadata.delete(key.url)));
     }
-    return entry.data;
+    return current;
   }
   const data = await resolve();
-  if (data) context.waitUntil(store(data).catch(() => undefined));
+  context.waitUntil(store(data).catch(() => undefined));
   return data;
 }
 

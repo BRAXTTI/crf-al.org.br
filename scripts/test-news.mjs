@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
 const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
@@ -265,6 +265,43 @@ try {
       await Promise.all(tasks.splice(0));
       assert.ok(requests.some(url => url.searchParams.get('rest_route') === '/wp/v2/media'), 'Revalidação completa apesar do prazo da requisição');
     } finally { globalThis.fetch = workingFetch; }
+  }
+  // "Não encontrado" fica 5 min no cache local (sem escrita no KV); busca normalizada e limitada.
+  {
+    const local = new Map(); const previousCaches = globalThis.caches; const tasks = [];
+    globalThis.caches = { default: {
+      async match(req) { return local.get(req.url)?.clone(); },
+      async put(req, response) { local.set(req.url, response); },
+      async delete(req) { return local.delete(req.url); },
+    } };
+    const kvWrites = []; const kvStore = { async get() { return null; }, async put(key) { kvWrites.push(key); }, async delete(key) { kvWrites.push(key); } };
+    const ctx = { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task) };
+    try {
+      requests = [];
+      assert.equal(await newsPost('slug-inexistente', ctx), null);
+      await Promise.all(tasks.splice(0));
+      const before = requests.length; assert.ok(before);
+      assert.equal(await newsPost('slug-inexistente', ctx), null);
+      assert.equal(requests.length, before, 'Não encontrado servido do cache');
+      assert.equal(tasks.length, 0, 'Não encontrado não dispara revalidação');
+      assert.equal(kvWrites.length, 0, 'Não encontrado não escreve no KV');
+      const missingKey = [...local.keys()].find(key => key.endsWith('/post/slug-inexistente'));
+      local.set(missingKey, Response.json({ storedAt: Date.now() - 301_000, value: null }));
+      assert.equal(await newsPost('slug-inexistente', ctx), null);
+      assert.ok(requests.length > before, 'Após 5 min consulta a origem de novo');
+      await Promise.all(tasks.splice(0));
+      // Busca: variações compartilham a chave; termos extras são descartados.
+      assert.equal(normalizeSearch('  Farmácia   CRF '), 'farmácia crf');
+      assert.equal(normalizeSearch('a b c d e f g h i j'), 'a b c d e f g h');
+      assert.equal(normalizeSearch('ab'), null); assert.equal(normalizeSearch('x'.repeat(121)), null); assert.equal(normalizeSearch('abc\u0000'), null);
+      requests = [];
+      await searchNews('Farmácia CRF', ctx); await Promise.all(tasks.splice(0));
+      const searches = requests.filter(url => url.searchParams.has('search')).length;
+      await searchNews('  farmácia   crf', ctx);
+      assert.equal(requests.filter(url => url.searchParams.has('search')).length, searches, 'Busca normalizada reaproveita o cache');
+      assert.equal(requests.find(url => url.searchParams.has('search')).searchParams.get('search'), 'farmácia crf');
+      for (const term of ['ab', '   a ', 'x'.repeat(121), 'abc\u0007']) assert.equal((await newsApi(new Request(`https://example.test/api/news?search=${encodeURIComponent(term)}`), ctx)).status, 400, JSON.stringify(term));
+    } finally { globalThis.caches = previousCaches; }
   }
   const cronUrl = await moduleUrl('../workers/news-index-cron/index.ts', { "'../../functions/_news'": JSON.stringify(await loadNews()) });
   const cron = (await import(cronUrl)).default;

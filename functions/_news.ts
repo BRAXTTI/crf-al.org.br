@@ -78,27 +78,31 @@ async function storeDurable<T>(kv: KVNamespace, key: string, value: T, previous?
  * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, o KV
  * NEWS_INDEX guarda uma reserva compartilhada entre data centers, servida de imediato quando
  * o cache local está vazio. Recargas em segundo plano são single-flight por isolate e marcam
- * a entrada local como fresca antes de consultar a origem.
+ * a entrada local como fresca antes de consultar a origem. Resultados `null` (não encontrado)
+ * ficam 5 min só no cache local, para que slugs inexistentes não cheguem sempre à origem.
  */
-async function cached<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, durable = false): Promise<T> {
+const NOT_FOUND_S = 300;
+async function cached<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, { durable = false, freshMs = FRESH_MS } = {}): Promise<T> {
   const cache = context ? localCache() : undefined;
   const kv = durable ? context?.env?.NEWS_INDEX : undefined;
   const request = new Request(`${SITE_URL}/__news/v5/${key}`);
-  const putLocal = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': `public, max-age=${kv ? DURABLE_TTL_S : 600}` } }));
+  const putLocal = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': `public, max-age=${value === null ? NOT_FOUND_S : kv ? DURABLE_TTL_S : 600}` } }));
   const persist = async (value: T, previous?: Stored<T> | null) => {
     if (value === null) {
-      // Só apaga o que existia: exclusões no KV também contam como escritas.
-      if (previous !== null) await Promise.all([cache?.delete?.(request), kv?.delete(durableKey(key))]);
+      // Exclusões no KV também contam como escritas: só apaga o que existia.
+      await Promise.all([cache && putLocal(value), previous !== null && kv?.delete(durableKey(key))]);
       return;
     }
     await Promise.all([cache && putLocal(value), kv && storeDurable(kv, key, value, previous)]);
   };
   let entry = cache ? await cache.match(request).then(hit => hit?.json() as Promise<Stored<T>> | undefined) : undefined;
+  // "Não encontrado" não tem stale-while-revalidate: após 5 min consulta a origem de novo.
+  if (entry?.value === null && Date.now() - entry.storedAt > NOT_FOUND_S * 1000) entry = undefined;
   let fromDurable = false;
   if (!entry && kv) { entry = await kv.get<Stored<T>>(durableKey(key), 'json') ?? undefined; fromDurable = Boolean(entry); }
   if (entry) {
     const stale = entry;
-    if ((fromDurable || Date.now() - stale.storedAt > FRESH_MS) && !revalidating.has(key)) {
+    if (stale.value !== null && (fromDurable || Date.now() - stale.storedAt > freshMs) && !revalidating.has(key)) {
       const task = (async () => {
         if (cache) await putLocal(stale.value);
         // Reserva lida do KV evita uma segunda leitura; vinda do cache local, confere o KV.
@@ -110,7 +114,7 @@ async function cached<T>(key: string, context: NewsContext | undefined, load: (c
     return stale.value;
   }
   const value = await load(context);
-  if ((cache || kv) && value !== null) context!.waitUntil(persist(value, kv ? null : undefined).catch(() => undefined));
+  if (cache || (kv && value !== null)) context!.waitUntil(persist(value, kv ? null : undefined).catch(() => undefined));
   return value;
 }
 function hasTitle(post: { title?: { rendered: string } }) { return Boolean(post.title?.rendered.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()); }
@@ -262,7 +266,7 @@ export async function newsPost(slug: string, context?: NewsContext): Promise<WPP
     if (!post || !acceptable(post, taxonomy.category, taxonomy.spam)) return null;
     const [result] = await enrich([post], taxonomy, scoped, true);
     return hasTitle(result) ? result : null;
-  }, true);
+  }, { durable: true });
 }
 export const WARM_POSTS = 30;
 /**
@@ -296,12 +300,28 @@ export async function newsPage(page = 1, perPage = 12, context?: NewsContext): P
   });
   return { posts, total: index.length, totalPages: Math.ceil(index.length / perPage) };
 }
+const SEARCH_MAX_LENGTH = 120;
+const SEARCH_MAX_WORDS = 8;
+/**
+ * Normaliza o termo (espaços, caixa, Unicode) para que variações compartilhem o cache e
+ * limita o número de palavras: cada uma vira uma cláusula LIKE no WordPress.
+ */
+export function normalizeSearch(term: string): string | null {
+  // eslint-disable-next-line no-control-regex
+  if (term.length > SEARCH_MAX_LENGTH || /[\u0000-\u001f\u007f]/.test(term)) return null;
+  const words = term.normalize('NFC').toLocaleLowerCase('pt-BR').split(/\s+/).filter(Boolean).slice(0, SEARCH_MAX_WORDS);
+  const normalized = words.join(' ');
+  return normalized.length >= 3 ? normalized : null;
+}
 export async function searchNews(term: string, context?: NewsContext): Promise<WPPost[]> {
-  return cached(`search/${encodeURIComponent(term)}`, context, async scoped => {
-    const [response, { category, spam }] = await Promise.all([request('posts', { search: term, per_page: '100', _fields: 'id,slug,date,date_gmt,title,excerpt,categories' }, false, false, scoped?.budget), categories(scoped)]);
+  const normalized = normalizeSearch(term);
+  if (normalized === null) throw new RangeError('Invalid news search');
+  // Resultados de busca mudam pouco: 5 min frescos, depois stale-while-revalidate.
+  return cached(`search/${encodeURIComponent(normalized)}`, context, async scoped => {
+    const [response, { category, spam }] = await Promise.all([request('posts', { search: normalized, per_page: '100', _fields: 'id,slug,date,date_gmt,title,excerpt,categories' }, false, false, scoped?.budget), categories(scoped)]);
     const posts = await response!.json() as WPPost[];
     return posts.filter(post => acceptable(post, category, spam)).map(normalize).filter(hasTitle).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
-  });
+  }, { freshMs: 5 * 60_000 });
 }
 export async function newsApi(request: Request, base?: NewsContext): Promise<Response> {
   if (!['GET', 'HEAD'].includes(request.method)) return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
@@ -310,8 +330,8 @@ export async function newsApi(request: Request, base?: NewsContext): Promise<Res
   try {
     const search = url.searchParams.get('search');
     if (search !== null) {
-      if (search.trim().length < 3 || search.length > 120) return Response.json({ error: 'Busca deve ter entre 3 e 120 caracteres.' }, { status: 400 });
-      return Response.json(await searchNews(search.trim(), context), { headers: { 'Cache-Control': 'public, max-age=60' } });
+      if (normalizeSearch(search) === null) return Response.json({ error: 'Busca deve ter entre 3 e 120 caracteres.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+      return Response.json(await searchNews(search, context), { headers: { 'Cache-Control': 'public, max-age=300' } });
     }
     const slug = url.searchParams.get('slug');
     if (slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) return Response.json({ error: 'Slug inválido.' }, { status: 400 });
