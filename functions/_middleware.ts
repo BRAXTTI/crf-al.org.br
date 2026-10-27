@@ -283,9 +283,17 @@ async function handle(context: PagesContext): Promise<Response> {
   if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
   if (pathname === '/sitemap-news.xml') {
     try {
+      const cache = (caches as CacheStorage & { default: Cache }).default;
+      const key = new Request(`${SITE_URL}/__sitemap-news/v1/${encodeURIComponent(context.env?.WP_SITE_URL || '')}`);
+      const hit = await cache.match(key);
+      if (hit) return new Response(context.request.method === 'HEAD' ? null : hit.body, hit);
       const entries = await newsSitemapIndex(context);
       const xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + entries.map(post => `<url><loc>${escapeAttr(`${SITE_URL}${NEWS_PREFIX}${post.slug}`)}</loc><lastmod>${escapeAttr((post.modified || post.date).slice(0, 10))}</lastmod></url>`).join('') + '</urlset>';
-      return new Response(context.request.method === 'HEAD' ? null : xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=60' } });
+      const response = new Response(xml, {
+        headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=600' },
+      });
+      context.waitUntil(cache.put(key, response.clone()).catch(() => undefined));
+      return new Response(context.request.method === 'HEAD' ? null : response.body, response);
     } catch {
       return new Response('Sitemap temporariamente indisponível.', { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' } });
     }

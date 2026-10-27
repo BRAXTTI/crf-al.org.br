@@ -206,6 +206,15 @@ try {
   const sitemapResponse = await request('/sitemap-news.xml');
   const sitemapText = await sitemapResponse.text();
   assert.equal(sitemapResponse.status, 200);
+  assert.equal(sitemapResponse.headers.get('Cache-Control'), 'public, max-age=600');
+  await Promise.all(background);
+  const beforeSitemap = fetches;
+  const cachedXmlKey = [...stored.keys()].find(key => key.includes('/__sitemap-news/'));
+  assert.ok(cachedXmlKey, 'XML completo guardado na Cache API');
+  assert.equal(await (await request('/sitemap-news.xml')).text(), sitemapText);
+  assert.equal(await (await request('/sitemap-news.xml', { method: 'HEAD' })).text(), '');
+  assert.equal(fetches, beforeSitemap, 'Sitemap em cache dispensa índice e origem');
+
   assert.ok(sitemapText.includes(post.slug));
   assert.ok(!sitemapText.includes(spam.slug));
   assert.ok(!sitemapText.includes(['www.crf-al.org.br', 'wp-json'].join('/')));
