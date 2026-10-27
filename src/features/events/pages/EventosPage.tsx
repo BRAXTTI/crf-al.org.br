@@ -261,7 +261,7 @@ export default function EventosPage() {
             {/* Barra de filtros */}
             <div className="sticky top-(--header-offset) z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <div className="relative lg:max-w-xs lg:flex-1">
+                <div className="relative lg:min-w-56 lg:max-w-xs lg:flex-1">
                   <label htmlFor="busca-evento" className="sr-only">Buscar evento</label>
                   <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-crfal-gray-400" />
                   <input
