@@ -1,5 +1,5 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsSitemapIndex, isBlockedNews, ORIGIN_CACHE } from './_news';
+import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, ORIGIN_CACHE } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
@@ -250,6 +250,8 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     return new Response('Conteúdo removido.', { status: 410, headers: { 'Cache-Control': 'public, max-age=300', 'X-Robots-Tag': 'noindex' } });
   }
   if (historicalId && /^\d+$/.test(historicalId)) {
+    const knownSlug = knownHistoricalSlug(historicalId);
+    if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}`, 301);
     try {
       const post = await newsPost(historicalId, context, true);
       if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);

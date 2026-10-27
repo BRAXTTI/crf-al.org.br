@@ -117,6 +117,10 @@ try {
   assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${post.slug}`);
   assert.equal((await request('/imprensa/noticias/best-dating-sites')).status, 410);
   assert.equal((await request('/?p=2534')).status, 410);
+  origin = () => new Response('', { status: 503 });
+  assert.equal((await request('/?p=16193')).status, 301, 'O mapa garante o redirect durante falha da origem');
+  assert.equal((await request('/imprensa/noticias/16150')).status, 301);
+  assert.equal((await request('/?p=107698')).status, 503, 'Ausente precisa ser verificado na origem');
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
   response = await request(`/imprensa/noticias/${post.slug}`);
   assert.equal(response.status, 200);

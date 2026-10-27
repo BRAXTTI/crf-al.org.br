@@ -44,6 +44,10 @@ export function isBlockedNews(slug: string): boolean {
   const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
   return Boolean(row?.blocked || blockedSlugs.has(slug));
 }
+export function knownHistoricalSlug(id: string): string | null {
+  const row = byOldId.get(Number(id));
+  return row && !row.blocked && row.newId !== null ? row.slug : null;
+}
 function historical(post: { id: number; slug: string }): HistoricalNews | undefined {
   const row = byNewId.get(post.id) || bySlug.get(post.slug);
   // Um ID pode ter sido reutilizado; nunca atribua outro conteúdo à URL histórica.
