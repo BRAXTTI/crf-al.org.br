@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { moduleUrl } from './load-typescript.mjs';
 
 const httpUrl = await moduleUrl('../src/services/http.ts');
-const { requestJson, HttpError } = await import(httpUrl);
+const { requestJson, HttpError, retryTransient } = await import(httpUrl);
 const client = await import(await moduleUrl('../src/services/wordpress/client.ts', {
   "'../http'": JSON.stringify(httpUrl),
   "'./image-set'": JSON.stringify(await moduleUrl('../src/services/wordpress/image-set.ts')),
@@ -10,6 +10,10 @@ const client = await import(await moduleUrl('../src/services/wordpress/client.ts
 }));
 const originalFetch = globalThis.fetch;
 try {
+  const retry = retryTransient(2);
+  for (const status of [400, 404, 410, 503]) assert.equal(retry(0, new HttpError(status)), false, `Sem repetição para ${status}`);
+  assert.equal(retry(0, { status: 503 }), false, 'Erros com status (ex.: galeria) seguem a mesma política');
+  assert.equal(retry(0, new HttpError(500)), true); assert.equal(retry(1, new TypeError('rede')), true); assert.equal(retry(2, new TypeError('rede')), false);
   globalThis.fetch = async () => Response.json({ ok: true });
   assert.deepEqual(await requestJson('/test'), { ok: true });
   for (const status of [404, 503]) {

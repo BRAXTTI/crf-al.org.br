@@ -1,5 +1,5 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, ORIGIN_CACHE } from './_news';
+import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
@@ -63,7 +63,7 @@ function escapeAttr(value: string): string {
 
 async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | null> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
+  const timer = setTimeout(() => controller.abort(), PAGE_BUDGET_MS);
   try {
     const res = await fetch(url, { ...ORIGIN_CACHE, signal: controller.signal, headers: { 'user-agent': 'crfal-og/2.0' } });
     if (res.status === 404 && allowNotFound) return null;
@@ -79,7 +79,7 @@ async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | nul
 // ---------------------------------------------------------------------------
 
 async function resolveNews(slug: string, context: PagesContext): Promise<OgData | null> {
-  const post = await newsPost(slug, context);
+  const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
   if (!post) return null;
   const media = post._embedded?.['wp:featuredmedia']?.[0];
   const cover = mediaImageSet(media);
@@ -216,16 +216,32 @@ function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Resp
   return response;
 }
 
+const METADATA_FRESH_MS = 10 * 60_000;
+const refreshingMetadata = new Set<string>();
+
 async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
   // Cache metadata only: never retain HTML pointing to an outdated deployment bundle.
   const cache = (caches as CacheStorage & { default: Cache }).default;
-  const key = new Request(`${SITE_URL}/__page-metadata/v5/${encodeURIComponent(context.env?.WP_SITE_URL || '')}/${encodeURIComponent(context.env?.NEWS_ARCHIVE_API_URL || '')}${pathname}`);
+  const key = new Request(`${SITE_URL}/__page-metadata/v6/${encodeURIComponent(context.env?.WP_SITE_URL || '')}/${encodeURIComponent(context.env?.NEWS_ARCHIVE_API_URL || '')}${pathname}`);
+  const store = (data: OgData) => cache.put(key, new Response(JSON.stringify({ storedAt: Date.now(), data }), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=86400' },
+  }));
   const cached = await cache.match(key);
-  if (cached) return cached.json();
+  if (cached) {
+    // Stale-while-revalidate: a página nunca espera pela origem quando já há metadados.
+    const entry = await cached.json() as { storedAt: number; data: OgData };
+    if (Date.now() - entry.storedAt > METADATA_FRESH_MS && !refreshingMetadata.has(key.url)) {
+      refreshingMetadata.add(key.url);
+      context.waitUntil((async () => {
+        await store(entry.data);
+        const data = await resolve();
+        await (data ? store(data) : cache.delete(key));
+      })().catch(() => undefined).finally(() => refreshingMetadata.delete(key.url)));
+    }
+    return entry.data;
+  }
   const data = await resolve();
-  if (data) context.waitUntil(cache.put(key, new Response(JSON.stringify(data), {
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=600' },
-  })).catch(() => undefined));
+  if (data) context.waitUntil(store(data).catch(() => undefined));
   return data;
 }
 
@@ -254,7 +270,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     const knownSlug = knownHistoricalSlug(historicalId);
     if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}`, 301);
     try {
-      const post = await newsPost(historicalId, context);
+      const post = await newsPost(historicalId, withNewsBudget(context, PAGE_BUDGET_MS, false));
       if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);
       return new Response('Notícia não encontrada.', { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
     } catch {
@@ -297,7 +313,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   if (!slug || slug.includes('/')) return notFound(asset, pathname);
   try {
     if (prefix === NEWS_PREFIX && /^\d+$/.test(slug)) {
-      const post = await newsPost(slug, context);
+      const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
       return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301) : notFound(asset, pathname);
     }
     // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.

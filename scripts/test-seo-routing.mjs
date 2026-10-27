@@ -150,6 +150,17 @@ try {
   assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test`)).status, 200);
   assert.equal(fetches, before, 'Metadata cache ignores tracking query strings');
 
+  // Metadados de evento: stale-while-revalidate, servidos mesmo com a origem fora.
+  origin = () => Response.json([{ slug: 'evento-swr', title: { rendered: 'Evento' }, excerpt: { rendered: 'Resumo' } }]);
+  assert.equal((await request('/eventos/evento-swr')).status, 200);
+  await Promise.all(background);
+  const eventKey = [...stored.keys()].find(key => key.includes('/__page-metadata/') && key.endsWith('/eventos/evento-swr'));
+  const eventEntry = await stored.get(eventKey).clone().json();
+  stored.set(eventKey, Response.json({ ...eventEntry, storedAt: 0 }));
+  origin = () => new Response('', { status: 503 });
+  assert.equal((await request('/eventos/evento-swr')).status, 200, 'Metadados antigos servidos durante falha');
+  await Promise.all(background);
+  assert.ok(stored.has(eventKey), 'Falha na revalidação preserva a reserva');
   // Sitemap e RSS passam pela implementação real do índice e dos lotes.
   stored = new Map();
   const spam = { ...post, id: 2534, slug: 'best-dating-sites', categories: [3] };

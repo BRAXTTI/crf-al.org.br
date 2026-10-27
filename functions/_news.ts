@@ -15,25 +15,41 @@ const blockedIds = new Set(BLOCKED_NEW_IDS);
 const fields = 'id,date,date_gmt,modified,slug,link,title,excerpt,content,categories,featured_media,author,_links';
 export const ORIGIN_CACHE = { cf: { cacheTtlByStatus: { '200-299': 60, '404': 60, '500-599': 0 }, cacheEverything: true } } as RequestInit;
 export interface NewsEnv { NEWS_ARCHIVE_API_URL?: string; NEWS_INDEX?: KVNamespace }
-interface NewsContext { env?: NewsEnv; waitUntil: (promise: Promise<unknown>) => void }
+/** Prazo total das chamadas ao WordPress de uma requisição; sem ele, 15 s por chamada e uma repetição. */
+export interface NewsBudget { deadline: number; retry: boolean }
+interface NewsContext { env?: NewsEnv; waitUntil: (promise: Promise<unknown>) => void; budget?: NewsBudget }
+/** HTML: ~4,5 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
+export const PAGE_BUDGET_MS = 4500;
+export const API_BUDGET_MS = 8000;
+const CALL_TIMEOUT_MS = 15_000;
+export function withNewsBudget(context: NewsContext, ms: number, retry: boolean): NewsContext {
+  return { env: context.env, waitUntil: promise => context.waitUntil(promise), budget: { deadline: Date.now() + ms, retry } };
+}
+/** Recargas em segundo plano e o índice compartilhado não herdam o prazo da requisição. */
+function background(context?: NewsContext): NewsContext | undefined {
+  return context && { env: context.env, waitUntil: promise => context.waitUntil(promise) };
+}
 interface PublicCache { match: (request: Request) => Promise<Response | undefined>; put: (request: Request, response: Response) => Promise<void>; delete?: (request: Request) => Promise<unknown> }
 
-async function request(path: string, params: Record<string, string> = {}, missing = false, missingPage = false): Promise<Response | null> {
+async function request(path: string, params: Record<string, string> = {}, missing = false, missingPage = false, budget?: NewsBudget): Promise<Response | null> {
   const url = new URL('https://wordpress.crf-al.org.br/index.php');
   url.searchParams.set('rest_route', `/wp/v2/${path}`);
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
   for (let attempt = 0; ; attempt++) {
+    const remaining = budget ? budget.deadline - Date.now() : CALL_TIMEOUT_MS;
+    if (remaining <= 0) throw new DOMException('News budget exhausted', 'TimeoutError');
+    const retry = attempt === 0 && (!budget || budget.retry);
     let response: Response;
     try {
-      const upstream = await fetch(url, { ...ORIGIN_CACHE, signal: AbortSignal.timeout(15000) });
+      const upstream = await fetch(url, { ...ORIGIN_CACHE, signal: AbortSignal.timeout(Math.min(remaining, CALL_TIMEOUT_MS)) });
       // Inclui a leitura do corpo na tentativa: timeout pode ocorrer após os headers.
       response = new Response(await upstream.arrayBuffer(), { status: upstream.status, headers: upstream.headers });
     }
     catch (error) {
-      if (attempt === 0 && error instanceof Error && ['TimeoutError', 'AbortError'].includes(error.name)) continue;
+      if (retry && error instanceof Error && ['TimeoutError', 'AbortError'].includes(error.name)) continue;
       throw error;
     }
-    if (attempt === 0 && response.status >= 500) { await response.body?.cancel(); continue; }
+    if (retry && response.status >= 500) { await response.body?.cancel(); continue; }
     if (missing && response.status === 404) return null;
     if (missingPage && response.status === 400) {
       const body = await response.json() as { code?: string };
@@ -64,7 +80,7 @@ async function storeDurable<T>(kv: KVNamespace, key: string, value: T, previous?
  * o cache local está vazio. Recargas em segundo plano são single-flight por isolate e marcam
  * a entrada local como fresca antes de consultar a origem.
  */
-async function cached<T>(key: string, context: NewsContext | undefined, load: () => Promise<T>, durable = false): Promise<T> {
+async function cached<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, durable = false): Promise<T> {
   const cache = context ? localCache() : undefined;
   const kv = durable ? context?.env?.NEWS_INDEX : undefined;
   const request = new Request(`${SITE_URL}/__news/v5/${key}`);
@@ -86,14 +102,14 @@ async function cached<T>(key: string, context: NewsContext | undefined, load: ()
       const task = (async () => {
         if (cache) await putLocal(stale.value);
         // Reserva lida do KV evita uma segunda leitura; vinda do cache local, confere o KV.
-        await persist(await load(), kv && !fromDurable ? undefined : stale);
+        await persist(await load(background(context)), kv && !fromDurable ? undefined : stale);
       })().catch(() => undefined).finally(() => revalidating.delete(key));
       revalidating.set(key, task);
       context!.waitUntil(task);
     }
     return stale.value;
   }
-  const value = await load();
+  const value = await load(context);
   if ((cache || kv) && value !== null) context!.waitUntil(persist(value, kv ? null : undefined).catch(() => undefined));
   return value;
 }
@@ -127,10 +143,10 @@ function normalize<T extends { id: number; slug: string; title?: { rendered: str
 }
 type Category = { id: number; slug: string; name: string };
 async function categories(context?: NewsContext) {
-  return cached('categories', context, async () => {
+  return cached('categories', context, async scoped => {
     const rows: Category[] = [];
     for (let page = 1, pages = 1; page <= pages; page++) {
-      const response = (await request('categories', { per_page: '100', page: String(page), _fields: 'id,slug,name' }))!;
+      const response = (await request('categories', { per_page: '100', page: String(page), _fields: 'id,slug,name' }, false, false, scoped?.budget))!;
       rows.push(...await response.json() as Category[]);
       pages = Math.min(100, Number(response.headers.get('x-wp-totalpages')) || 1);
     }
@@ -142,9 +158,9 @@ async function enrich(posts: WPPost[], taxonomy: Awaited<ReturnType<typeof categ
   const authorIds = withAuthor ? [...new Set(posts.map(post => post.author).filter((id): id is number => Boolean(id)))] : [];
   // Mídia e autores não dependem um do outro: uma única ida e volta à origem.
   const [media, authors] = await Promise.all([
-    ids.length ? request('media', { include: ids.join(','), per_page: String(ids.length), _fields: 'id,source_url,media_details,alt_text' }).then(response => response!.json() as Promise<WPMedia[]>) : Promise.resolve([]),
-    Promise.all(authorIds.map(async id => [id, await cached(`author/${id}`, context, async () => {
-      const response = await request(`users/${id}`, { _fields: 'name' }, true);
+    ids.length ? request('media', { include: ids.join(','), per_page: String(ids.length), _fields: 'id,source_url,media_details,alt_text' }, false, false, context?.budget).then(response => response!.json() as Promise<WPMedia[]>) : Promise.resolve([]),
+    Promise.all(authorIds.map(async id => [id, await cached(`author/${id}`, context, async scoped => {
+      const response = await request(`users/${id}`, { _fields: 'name' }, true, false, scoped?.budget);
       return response ? await response.json() as { name: string } : null;
     })] as const)),
   ]);
@@ -196,7 +212,7 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
     if (lock && Date.now() - lock < 120_000) return null;
     // KV não oferece compare-and-swap: lease distribuído best-effort + single-flight local.
     await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: 120 });
-    const value = await buildNewsIndex(context);
+    const value = await buildNewsIndex(background(context));
     await kv.put(NEWS_INDEX_KEY, JSON.stringify({ storedAt: Date.now(), value }));
     // Mantém o lease até expirar, evitando novas tentativas durante propagação/falhas.
     return value;
@@ -206,7 +222,7 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
 }
 export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   const kv = context?.env?.NEWS_INDEX;
-  if (!kv) return cached('index', context, () => buildNewsIndex(context));
+  if (!kv) return cached('index', context, () => buildNewsIndex(background(context)));
   const entry = await kv.get<StoredIndex>(NEWS_INDEX_KEY, 'json');
   if (entry) {
     if (Date.now() - entry.storedAt > REFRESH_MS) context!.waitUntil(refreshNewsIndex(context!).catch(error => {
@@ -223,27 +239,28 @@ const postKey = (slug: string) => `post/${encodeURIComponent(slug)}`;
 /** Detalhe completo da notícia. Middleware (metadados) e /api/news compartilham a mesma chave. */
 export async function newsPost(slug: string, context?: NewsContext): Promise<WPPost | null> {
   if (isBlockedNews(slug)) return null;
-  return cached(postKey(slug), context, async () => {
+  return cached(postKey(slug), context, async scoped => {
+    const budget = scoped?.budget;
     const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
     const params = { _fields: fields };
     const loadPost = async (): Promise<WPPost | undefined> => {
       if (row?.newId != null) {
-        const response = await request(`posts/${row.newId}`, params, true);
+        const response = await request(`posts/${row.newId}`, params, true, false, budget);
         const post = response ? await response.json() as WPPost : undefined;
         if (post && (post.id !== row.newId || post.slug !== row.newSlug)) throw new Error('News identity mismatch');
         return post;
       }
       if (row || !/^\d+$/.test(slug)) {
-        const response = await request('posts', { ...params, slug: row?.newSlug ?? slug, per_page: '1' });
+        const response = await request('posts', { ...params, slug: row?.newSlug ?? slug, per_page: '1' }, false, false, budget);
         return (await response!.json() as WPPost[])[0];
       }
-      const response = await request(`posts/${slug}`, params, true);
+      const response = await request(`posts/${slug}`, params, true, false, budget);
       return response ? await response.json() as WPPost : undefined;
     };
     // Categorias normalmente vêm do cache; ainda assim não esperam pelo post.
-    const [post, taxonomy] = await Promise.all([loadPost(), categories(context)]);
+    const [post, taxonomy] = await Promise.all([loadPost(), categories(scoped)]);
     if (!post || !acceptable(post, taxonomy.category, taxonomy.spam)) return null;
-    const [result] = await enrich([post], taxonomy, context, true);
+    const [result] = await enrich([post], taxonomy, scoped, true);
     return hasTitle(result) ? result : null;
   }, true);
 }
@@ -269,26 +286,27 @@ export async function newsPage(page = 1, perPage = 12, context?: NewsContext): P
   const index = await newsIndex(context); const entries = index.slice((page - 1) * perPage, page * perPage);
   if (!entries.length) return { posts: [], total: index.length, totalPages: Math.ceil(index.length / perPage) };
   const ids = entries.map(entry => entry.id);
-  const posts = await cached<WPPost[]>(`list/${ids.join(',')}`, context, async () => {
-    const response = await request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', '') });
-    const rows = await response!.json() as WPPost[]; const taxonomy = await categories(context);
+  const posts = await cached<WPPost[]>(`list/${ids.join(',')}`, context, async scoped => {
+    const [response, taxonomy] = await Promise.all([request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', '') }, false, false, scoped?.budget), categories(scoped)]);
+    const rows = await response!.json() as WPPost[];
     const filtered = rows.filter(post => acceptable(post, taxonomy.category, taxonomy.spam)).map(normalize);
     const lookup = new Map(filtered.map(post => [post.id, post]));
     if (entries.some(entry => lookup.get(entry.id)?.slug !== entry.slug)) throw new Error('News inventory changed during listing');
-    return enrich(entries.map(entry => lookup.get(entry.id)!), taxonomy, context);
+    return enrich(entries.map(entry => lookup.get(entry.id)!), taxonomy, scoped);
   });
   return { posts, total: index.length, totalPages: Math.ceil(index.length / perPage) };
 }
 export async function searchNews(term: string, context?: NewsContext): Promise<WPPost[]> {
-  return cached(`search/${encodeURIComponent(term)}`, context, async () => {
-    const response = await request('posts', { search: term, per_page: '100', _fields: 'id,slug,date,date_gmt,title,excerpt,categories' });
-    const posts = await response!.json() as WPPost[]; const { category, spam } = await categories(context);
+  return cached(`search/${encodeURIComponent(term)}`, context, async scoped => {
+    const [response, { category, spam }] = await Promise.all([request('posts', { search: term, per_page: '100', _fields: 'id,slug,date,date_gmt,title,excerpt,categories' }, false, false, scoped?.budget), categories(scoped)]);
+    const posts = await response!.json() as WPPost[];
     return posts.filter(post => acceptable(post, category, spam)).map(normalize).filter(hasTitle).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
   });
 }
-export async function newsApi(request: Request, context?: NewsContext): Promise<Response> {
+export async function newsApi(request: Request, base?: NewsContext): Promise<Response> {
   if (!['GET', 'HEAD'].includes(request.method)) return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
   const url = new URL(request.url);
+  const context = base && withNewsBudget(base, API_BUDGET_MS, true);
   try {
     const search = url.searchParams.get('search');
     if (search !== null) {

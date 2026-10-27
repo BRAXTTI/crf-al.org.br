@@ -29,6 +29,18 @@ function withTimeout(signal: AbortSignal | undefined, timeoutMs: number) {
   };
 }
 
+/**
+ * Política de repetição do React Query: erros 4xx são definitivos e 503 indica origem
+ * indisponível (com Retry-After); repetir só aumentaria a carga sobre ela.
+ */
+export function retryTransient(maxRetries: number) {
+  return (failureCount: number, error: unknown) => {
+    const status = (error as { status?: unknown } | null)?.status;
+    if (typeof status === 'number' && (status < 500 || status === 503)) return false;
+    return failureCount < maxRetries;
+  };
+}
+
 /** O prazo cobre também a leitura do JSON, preservando o cancelamento do chamador. */
 export async function requestJson<T>(
   url: string,

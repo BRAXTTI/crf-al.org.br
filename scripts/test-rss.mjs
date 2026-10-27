@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { moduleUrl } from './load-typescript.mjs';
-const fakeNews = `data:text/javascript;base64,${Buffer.from(`export async function newsPage() { return { posts: [{ slug: 'noticia', title: { rendered: '<b>Título</b>' }, excerpt: { rendered: '<p>Resumo & informação</p>' } }] }; }`).toString('base64')}`;
+const fakeNews = `data:text/javascript;base64,${Buffer.from(`export const API_BUDGET_MS = 8000; export const withNewsBudget = context => context; export async function newsPage() { return { posts: [{ slug: 'noticia', title: { rendered: '<b>Título</b>' }, excerpt: { rendered: '<p>Resumo & informação</p>' } }] }; }`).toString('base64')}`;
 const { onRequest } = await import(await moduleUrl('../functions/api/rss.ts', {
   "'../_news'": JSON.stringify(fakeNews),
   "'../../src/config/site'": JSON.stringify(await moduleUrl('../src/config/site.ts')),

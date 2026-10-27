@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
 const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
@@ -237,6 +237,35 @@ try {
     };
     await assert.rejects(newsIndex(), /body timeout/); assert.equal(calls, 2);
   } finally { globalThis.fetch = workingFetch; }
+  // Orçamentos: SSR sem repetição, prazo total compartilhado; recarga em segundo plano sem prazo.
+  {
+    assert.ok(PAGE_BUDGET_MS >= 4000 && PAGE_BUDGET_MS <= 5000); assert.equal(API_BUDGET_MS, 8000);
+    const workingFetch = globalThis.fetch; let calls = 0;
+    const page = withNewsBudget({ waitUntil() {} }, PAGE_BUDGET_MS, false);
+    try {
+      globalThis.fetch = async () => { calls++; return new Response('', { status: 503 }); };
+      await assert.rejects(newsPost('noticia-sem-repeticao', page), /503/);
+      assert.equal(calls, 2, 'Post e categorias em paralelo, sem repetição');
+      calls = 0;
+      await assert.rejects(newsPost('noticia-api', withNewsBudget({ waitUntil() {} }, API_BUDGET_MS, true)), /503/);
+      assert.equal(calls, 4, 'API repete uma vez dentro do prazo');
+      calls = 0;
+      const expired = { waitUntil() {}, budget: { deadline: Date.now() - 1, retry: true } };
+      await assert.rejects(newsPost('noticia-prazo', expired), error => error.name === 'TimeoutError');
+      assert.equal(calls, 0, 'Prazo esgotado não consulta a origem');
+      // Com reserva disponível, o prazo esgotado não importa e a recarga roda sem ele.
+      globalThis.fetch = workingFetch;
+      const tasks = [];
+      const store = new Map(); const kvStore = { async get(key) { return store.has(key) ? JSON.parse(store.get(key)) : null; }, async put(key, value) { store.set(key, value); }, async delete(key) { store.delete(key); } };
+      const slug = find(16028).slug;
+      await newsPost(slug, { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task) }); await Promise.all(tasks.splice(0));
+      requests = [];
+      const served = await newsPost(slug, { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task), budget: { deadline: Date.now() - 1, retry: false } });
+      assert.equal(served.slug, slug);
+      await Promise.all(tasks.splice(0));
+      assert.ok(requests.some(url => url.searchParams.get('rest_route') === '/wp/v2/media'), 'Revalidação completa apesar do prazo da requisição');
+    } finally { globalThis.fetch = workingFetch; }
+  }
   const cronUrl = await moduleUrl('../workers/news-index-cron/index.ts', { "'../../functions/_news'": JSON.stringify(await loadNews()) });
   const cron = (await import(cronUrl)).default;
   values.delete(NEWS_INDEX_LOCK);

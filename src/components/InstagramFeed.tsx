@@ -5,6 +5,7 @@ import { INSTAGRAM_PROFILE_URL } from '@/config/site';
 import { CFF_COVER_ASPECT } from '@/features/press/cff';
 
 import { fetchInstagram, type InstagramItem, type MediaType } from '@/services/instagram';
+import { retryTransient } from '@/services/http';
 
 interface InstagramFeedProps { title?: string; description?: string }
 
@@ -105,7 +106,7 @@ export default function InstagramFeed({
   title = 'O CRF-AL mais perto de você',
   description = 'Acompanhe os eventos, as ações do Conselho e o dia a dia da profissão farmacêutica.',
 }: InstagramFeedProps) {
-  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed', POSTS], queryFn: ({ signal }) => fetchInstagram(signal, POSTS), staleTime: 10 * 60 * 1000, retry: 1 });
+  const { data, isLoading, isError } = useQuery({ queryKey: ['instagram-feed', POSTS], queryFn: ({ signal }) => fetchInstagram(signal, POSTS), staleTime: 10 * 60 * 1000, retry: retryTransient(1) });
   const items = data ?? [];
 
   return (

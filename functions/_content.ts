@@ -25,7 +25,7 @@ export async function contentApi(request: Request, context: ContentContext): Pro
   const hit = await cache?.match(key);
   if (hit) return new Response(request.method === 'HEAD' ? null : hit.body, hit);
   try {
-    const upstream = await fetch(origin, { signal: AbortSignal.timeout(15000), cf: { cacheEverything: true, cacheTtlByStatus: { '200-299': 60, '500-599': 0 } } } as RequestInit);
+    const upstream = await fetch(origin, { signal: AbortSignal.timeout(8000), cf: { cacheEverything: true, cacheTtlByStatus: { '200-299': 60, '500-599': 0 } } } as RequestInit);
     if (upstream.status === 404 && (gallery && slug || id)) return Response.json({ error: 'Conteúdo não encontrado.' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
     if (!upstream.ok) throw new Error(`Content HTTP ${upstream.status}`);
     const data = await upstream.json();
