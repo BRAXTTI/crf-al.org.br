@@ -1,5 +1,6 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
 import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, ORIGIN_CACHE } from './_news';
+import type { NewsEnv } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
@@ -27,7 +28,7 @@ interface OgData {
   preloadSrcset?: string;
 }
 
-type PagesContext = EventContext<{ NEWS_ARCHIVE_API_URL?: string; WP_SITE_URL?: string }, string, Record<string, unknown>>;
+type PagesContext = EventContext<NewsEnv & { WP_SITE_URL?: string }, string, Record<string, unknown>>;
 
 function decodeEntities(value: string): string {
   return value
@@ -78,7 +79,7 @@ async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | nul
 // ---------------------------------------------------------------------------
 
 async function resolveNews(slug: string, context: PagesContext): Promise<OgData | null> {
-  const post = await newsPost(slug, context, true);
+  const post = await newsPost(slug, context);
   if (!post) return null;
   const media = post._embedded?.['wp:featuredmedia']?.[0];
   const cover = mediaImageSet(media);
@@ -253,7 +254,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     const knownSlug = knownHistoricalSlug(historicalId);
     if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}`, 301);
     try {
-      const post = await newsPost(historicalId, context, true);
+      const post = await newsPost(historicalId, context);
       if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);
       return new Response('Notícia não encontrada.', { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
     } catch {
@@ -296,10 +297,11 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   if (!slug || slug.includes('/')) return notFound(asset, pathname);
   try {
     if (prefix === NEWS_PREFIX && /^\d+$/.test(slug)) {
-      const post = await newsPost(slug, context, true);
+      const post = await newsPost(slug, context);
       return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301) : notFound(asset, pathname);
     }
-    const og = await cachedMetadata(context, pathname, () => prefix === NEWS_PREFIX ? resolveNews(slug, context) : prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
+    // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.
+    const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
     if (og?.title) return injectOg(asset, og);
     return notFound(asset, pathname);
   } catch (error) {

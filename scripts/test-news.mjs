@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
 const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
@@ -112,6 +112,83 @@ try {
   assert.equal(refreshA, refreshB, 'Refresh concorrente compartilha promise');
   await refreshA;
   assert.equal(requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/posts').length, 1);
+  // Detalhe: mídia e autor em paralelo; reserva no KV com SWR e escrita só quando muda.
+  {
+    const slug = find(16028).slug; const postKey = `news:cache:v1:post/${encodeURIComponent(slug)}`;
+    const mockFetch = globalThis.fetch; let active = 0; let peak = 0;
+    globalThis.fetch = async input => {
+      const route = new URL(input).searchParams.get('rest_route');
+      if (route !== '/wp/v2/media' && route !== '/wp/v2/users/7') return mockFetch(input);
+      active++; peak = Math.max(peak, active); await new Promise(resolve => setTimeout(resolve, 10)); active--;
+      return mockFetch(input);
+    };
+    try { await newsPost(slug); } finally { globalThis.fetch = mockFetch; }
+    assert.equal(peak, 2, 'Mídia e autor consultados em paralelo');
+    writes.length = 0; requests = [];
+    const first = await newsPost(slug, context);
+    await Promise.all(pending.splice(0));
+    assert.equal(first.content.rendered.length > 0, true, 'Detalhe completo (com conteúdo) também serve os metadados');
+    assert.equal(writes.filter(row => row.key === postKey).length, 1);
+    assert.equal(writes.find(row => row.key === postKey).options.expirationTtl, 7 * 24 * 3600);
+    fail = true;
+    assert.deepEqual(await newsPost(slug, context), first, 'Reserva do KV servida mesmo com a origem fora');
+    await Promise.all(pending.splice(0));
+    fail = false; requests = [];
+    assert.deepEqual(await newsPost(slug, context), first);
+    await Promise.all(pending.splice(0));
+    assert.ok(requests.length, 'Revalidação em segundo plano');
+    assert.equal(writes.filter(row => row.key === postKey).length, 1, 'Conteúdo igual não regrava o KV');
+    const original = posts.find(p => p.id === find(16028).newId); const title = original.title;
+    original.title = { rendered: 'Título editado' };
+    try {
+      assert.deepEqual(await newsPost(slug, context), first, 'Edição: primeiro acesso ainda recebe a reserva');
+      await Promise.all(pending.splice(0));
+      assert.equal((await newsPost(slug, context)).title.rendered, 'Título editado', 'Edição aparece após a revalidação');
+      await Promise.all(pending.splice(0));
+      assert.equal(writes.filter(row => row.key === postKey).length, 2);
+    } finally { original.title = title; }
+    // Middleware e API usam a mesma chave local: a API reaproveita o post buscado no SSR.
+    const local = new Map();
+    const previousCaches = globalThis.caches;
+    globalThis.caches = { default: {
+      async match(req) { return local.get(req.url)?.clone(); },
+      async put(req, response) { local.set(req.url, response); },
+      async delete(req) { return local.delete(req.url); },
+    } };
+    try {
+      values.delete(postKey);
+      await newsPost(slug, context); await Promise.all(pending.splice(0)); requests = [];
+      const api = await newsApi(new Request(`https://example.test/api/news?slug=${encodeURIComponent(slug)}`), context);
+      assert.equal(api.status, 200); assert.equal(requests.length, 0, 'Cache fresco compartilhado');
+      values.delete(postKey); writes.length = 0;
+      await newsPost(slug, context); await Promise.all(pending.splice(0));
+      assert.equal(requests.length, 0, 'Cache local fresco não consulta KV nem origem');
+      const entry = [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(slug)}`));
+      const body = await local.get(entry).clone().json();
+      local.set(entry, Response.json({ ...body, storedAt: Date.now() - 61_000 }));
+      await Promise.all([newsPost(slug, context), newsPost(slug, context)]);
+      assert.equal(pending.length, 1, 'Revalidação single-flight');
+      await Promise.all(pending.splice(0));
+      assert.ok(values.has(postKey), 'Revalidação recompõe a reserva do KV');
+    } finally { globalThis.caches = previousCaches; }
+    // Cron: uma consulta `include` aquece os mais recentes.
+    values.clear(); writes.length = 0; requests = [];
+    const recent = await refreshNewsIndex(context);
+    requests = [];
+    const warmed = await warmNewsPosts(context);
+    assert.equal(warmed, recent.length);
+    assert.equal(requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/posts').length, 1);
+    assert.ok(requests.find(url => url.searchParams.get('rest_route') === '/wp/v2/posts').searchParams.get('_fields').includes('content'));
+    for (const row of recent) assert.ok(values.has(`news:cache:v1:post/${encodeURIComponent(row.slug)}`), row.slug);
+    writes.length = 0;
+    assert.equal(await warmNewsPosts(context), recent.length);
+    assert.equal(writes.length, 0, 'Pré-aquecimento sem mudanças não escreve no KV');
+    fail = true;
+    assert.equal((await newsPost(selected[1].slug, context)).id, selected[1].newId, 'Post pré-aquecido servido do KV');
+    await Promise.all(pending.splice(0));
+    fail = false;
+    await assert.rejects(warmNewsPosts({ env: {}, waitUntil() {} }), /binding required/);
+  }
   // Sem binding continua usando Cache API, inclusive SWR.
   const cacheValues = new Map();
   const previousCaches = globalThis.caches;

@@ -67,7 +67,7 @@ export default function NewsDetailPage() {
   const error = isLegacyId ? idError : slugError;
   const refetch = isLegacyId ? refetchId : refetchSlug;
 
-  const { data: relatedPosts } = useRelatedPosts(post?.slug ?? '', 3);
+  const { data: relatedPosts } = useRelatedPosts(post?.slug ?? (isLegacyId ? '' : slug ?? ''), 3);
 
   const related: RelatedItem[] =
     relatedPosts?.map((item) => ({

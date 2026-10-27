@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { fetchPostById, fetchPostBySlug, fetchPosts, fetchRelatedPosts } from './client';
+import { fetchPostById, fetchPostBySlug, fetchPosts } from './client';
 
 export function usePosts(page = 1, perPage = 10) {
   return useQuery({
@@ -25,11 +25,14 @@ export function usePostBySlug(slug: string) {
   });
 }
 
+/**
+ * A página 1 não depende do slug: começa junto com o detalhe da notícia e é
+ * compartilhada entre matérias; o filtro do post atual acontece na tela.
+ */
 export function useRelatedPosts(excludeSlug: string, perPage = 3) {
   return useQuery({
-    queryKey: ['wp', 'posts', 'related', excludeSlug, perPage],
-    queryFn: ({ signal }) => fetchRelatedPosts(excludeSlug, perPage, signal),
-    enabled: Boolean(excludeSlug),
+    queryKey: ['wp', 'posts', 1, perPage + 1],
+    queryFn: ({ signal }) => fetchPosts({ perPage: perPage + 1, signal }),
+    select: (page) => page.posts.filter((post) => !excludeSlug || post.slug !== excludeSlug).slice(0, perPage),
   });
 }
-

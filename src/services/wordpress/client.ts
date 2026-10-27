@@ -63,15 +63,6 @@ export async function fetchEventBySlug(slug: string, signal?: AbortSignal): Prom
   return events[0] ?? null;
 }
 
-export async function fetchRelatedPosts(
-  excludeSlug: string,
-  perPage = 3,
-  signal?: AbortSignal
-): Promise<WPPost[]> {
-  const posts = await fetchPosts({ perPage: perPage + 1, signal }).then((page) => page.posts);
-  return posts.filter((post) => post.slug !== excludeSlug).slice(0, perPage);
-}
-
 /** Qualquer payload do WordPress que possa conter recursos embutidos (`_embed`). */
 type WPWithEmbed = { _embedded?: WPEmbedded };
 

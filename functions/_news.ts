@@ -43,18 +43,58 @@ async function request(path: string, params: Record<string, string> = {}, missin
     return response;
   }
 }
-async function cached<T>(key: string, context: NewsContext | undefined, load: () => Promise<T>): Promise<T> {
-  const cache = (globalThis as typeof globalThis & { caches?: { default?: PublicCache } }).caches?.default;
+type Stored<T> = { storedAt: number; value: T };
+const FRESH_MS = 60_000;
+// Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
+const DURABLE_TTL_S = 7 * 24 * 3600;
+// KV cobra cada escrita: só regrava quando o conteúdo muda ou a reserva envelhece.
+const DURABLE_REWRITE_MS = 24 * 3600_000;
+const revalidating = new Map<string, Promise<void>>();
+const durableKey = (key: string) => `news:cache:v1:${key}`;
+function localCache() { return (globalThis as typeof globalThis & { caches?: { default?: PublicCache } }).caches?.default; }
+async function storeDurable<T>(kv: KVNamespace, key: string, value: T, previous?: Stored<T> | null): Promise<void> {
+  const now = Date.now();
+  const stored = previous === undefined ? await kv.get<Stored<T>>(durableKey(key), 'json') : previous;
+  if (stored && now - stored.storedAt < DURABLE_REWRITE_MS && JSON.stringify(stored.value) === JSON.stringify(value)) return;
+  await kv.put(durableKey(key), JSON.stringify({ storedAt: now, value }), { expirationTtl: DURABLE_TTL_S });
+}
+/**
+ * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, o KV
+ * NEWS_INDEX guarda uma reserva compartilhada entre data centers, servida de imediato quando
+ * o cache local está vazio. Recargas em segundo plano são single-flight por isolate e marcam
+ * a entrada local como fresca antes de consultar a origem.
+ */
+async function cached<T>(key: string, context: NewsContext | undefined, load: () => Promise<T>, durable = false): Promise<T> {
+  const cache = context ? localCache() : undefined;
+  const kv = durable ? context?.env?.NEWS_INDEX : undefined;
   const request = new Request(`${SITE_URL}/__news/v5/${key}`);
-  const store = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': 'public, max-age=600' } }));
-  const hit = cache && context ? await cache.match(request) : undefined;
-  if (hit) {
-    const entry = await hit.json() as { storedAt: number; value: T };
-    if (Date.now() - entry.storedAt > 60_000) context!.waitUntil(load().then(async value => { await (value !== null ? store(value) : cache!.delete?.(request)); }).catch(() => undefined));
-    return entry.value;
+  const putLocal = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': `public, max-age=${kv ? DURABLE_TTL_S : 600}` } }));
+  const persist = async (value: T, previous?: Stored<T> | null) => {
+    if (value === null) {
+      // Só apaga o que existia: exclusões no KV também contam como escritas.
+      if (previous !== null) await Promise.all([cache?.delete?.(request), kv?.delete(durableKey(key))]);
+      return;
+    }
+    await Promise.all([cache && putLocal(value), kv && storeDurable(kv, key, value, previous)]);
+  };
+  let entry = cache ? await cache.match(request).then(hit => hit?.json() as Promise<Stored<T>> | undefined) : undefined;
+  let fromDurable = false;
+  if (!entry && kv) { entry = await kv.get<Stored<T>>(durableKey(key), 'json') ?? undefined; fromDurable = Boolean(entry); }
+  if (entry) {
+    const stale = entry;
+    if ((fromDurable || Date.now() - stale.storedAt > FRESH_MS) && !revalidating.has(key)) {
+      const task = (async () => {
+        if (cache) await putLocal(stale.value);
+        // Reserva lida do KV evita uma segunda leitura; vinda do cache local, confere o KV.
+        await persist(await load(), kv && !fromDurable ? undefined : stale);
+      })().catch(() => undefined).finally(() => revalidating.delete(key));
+      revalidating.set(key, task);
+      context!.waitUntil(task);
+    }
+    return stale.value;
   }
   const value = await load();
-  if (cache && context && value !== null) context.waitUntil(store(value).catch(() => undefined));
+  if ((cache || kv) && value !== null) context!.waitUntil(persist(value, kv ? null : undefined).catch(() => undefined));
   return value;
 }
 function hasTitle(post: { title?: { rendered: string } }) { return Boolean(post.title?.rendered.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()); }
@@ -99,20 +139,26 @@ async function categories(context?: NewsContext) {
 }
 async function enrich(posts: WPPost[], taxonomy: Awaited<ReturnType<typeof categories>>, context?: NewsContext, withAuthor = false): Promise<WPPost[]> {
   const ids = [...new Set(posts.map(post => post.featured_media).filter((id): id is number => Boolean(id)))];
-  const media = await (ids.length ? request('media', { include: ids.join(','), per_page: String(ids.length), _fields: 'id,source_url,media_details,alt_text' }).then(response => response!.json() as Promise<WPMedia[]>) : Promise.resolve([]));
-  const images = new Map(media.map(item => [item.id, item]));
-  return Promise.all(posts.map(async post => {
-    const image = images.get(post.featured_media);
-    const author = withAuthor && post.author ? await cached(`author/${post.author}`, context, async () => {
-      const response = await request(`users/${post.author}`, { _fields: 'name' }, true);
+  const authorIds = withAuthor ? [...new Set(posts.map(post => post.author).filter((id): id is number => Boolean(id)))] : [];
+  // Mídia e autores não dependem um do outro: uma única ida e volta à origem.
+  const [media, authors] = await Promise.all([
+    ids.length ? request('media', { include: ids.join(','), per_page: String(ids.length), _fields: 'id,source_url,media_details,alt_text' }).then(response => response!.json() as Promise<WPMedia[]>) : Promise.resolve([]),
+    Promise.all(authorIds.map(async id => [id, await cached(`author/${id}`, context, async () => {
+      const response = await request(`users/${id}`, { _fields: 'name' }, true);
       return response ? await response.json() as { name: string } : null;
-    }) : null;
+    })] as const)),
+  ]);
+  const images = new Map(media.map(item => [item.id, item]));
+  const names = new Map(authors);
+  return posts.map(post => {
+    const image = images.get(post.featured_media);
+    const author = withAuthor && post.author ? names.get(post.author) : null;
     return normalize({ ...post, _embedded: {
       ...(image ? { 'wp:featuredmedia': [image] } : {}),
       'wp:term': [(post.categories ?? []).flatMap(id => taxonomy.rows.filter(row => row.id === id))],
       ...(author ? { author: [author] } : {}),
     } });
-  }));
+  });
 }
 async function buildNewsIndex(context?: NewsContext): Promise<Entry[]> {
   const { category, spam } = await categories(context);
@@ -173,30 +219,50 @@ export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   throw new Error('News index warming up');
 }
 export const newsSitemapIndex = newsIndex;
-export async function newsPost(slug: string, context?: NewsContext, metadataOnly = false): Promise<WPPost | null> {
+const postKey = (slug: string) => `post/${encodeURIComponent(slug)}`;
+/** Detalhe completo da notícia. Middleware (metadados) e /api/news compartilham a mesma chave. */
+export async function newsPost(slug: string, context?: NewsContext): Promise<WPPost | null> {
   if (isBlockedNews(slug)) return null;
-  return cached(`${metadataOnly ? 'metadata' : 'post'}/${encodeURIComponent(slug)}`, context, async () => {
+  return cached(postKey(slug), context, async () => {
     const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
-    const postFields = metadataOnly ? fields.replace('content,', '') : fields;
-    const params = { _fields: postFields };
-    let post: WPPost | undefined;
-    if (row?.newId != null) {
-      const response = await request(`posts/${row.newId}`, params, true);
-      post = response ? await response.json() as WPPost : undefined;
-      if (post && (post.id !== row.newId || post.slug !== row.newSlug)) throw new Error('News identity mismatch');
-    } else if (row || !/^\d+$/.test(slug)) {
-      const response = await request('posts', { ...params, slug: row?.newSlug ?? slug, per_page: '1' });
-      post = (await response!.json() as WPPost[])[0];
-    } else {
+    const params = { _fields: fields };
+    const loadPost = async (): Promise<WPPost | undefined> => {
+      if (row?.newId != null) {
+        const response = await request(`posts/${row.newId}`, params, true);
+        const post = response ? await response.json() as WPPost : undefined;
+        if (post && (post.id !== row.newId || post.slug !== row.newSlug)) throw new Error('News identity mismatch');
+        return post;
+      }
+      if (row || !/^\d+$/.test(slug)) {
+        const response = await request('posts', { ...params, slug: row?.newSlug ?? slug, per_page: '1' });
+        return (await response!.json() as WPPost[])[0];
+      }
       const response = await request(`posts/${slug}`, params, true);
-      post = response ? await response.json() as WPPost : undefined;
-    }
-    if (!post) return null;
-    const taxonomy = await categories(context);
-    if (!acceptable(post, taxonomy.category, taxonomy.spam)) return null;
-    const [result] = await enrich([post], taxonomy, context, !metadataOnly);
+      return response ? await response.json() as WPPost : undefined;
+    };
+    // Categorias normalmente vêm do cache; ainda assim não esperam pelo post.
+    const [post, taxonomy] = await Promise.all([loadPost(), categories(context)]);
+    if (!post || !acceptable(post, taxonomy.category, taxonomy.spam)) return null;
+    const [result] = await enrich([post], taxonomy, context, true);
     return hasTitle(result) ? result : null;
-  });
+  }, true);
+}
+export const WARM_POSTS = 30;
+/**
+ * Pré-aquece no KV o detalhe das notícias mais recentes (cron). Uma consulta `include`
+ * cobre todos os posts; o KV só é regravado quando o conteúdo mudou.
+ */
+export async function warmNewsPosts(context: NewsContext, index?: Entry[] | null, limit = WARM_POSTS): Promise<number> {
+  const kv = context.env?.NEWS_INDEX;
+  if (!kv) throw new Error('NEWS_INDEX binding required');
+  const entries = (index ?? (await kv.get<StoredIndex>(NEWS_INDEX_KEY, 'json'))?.value ?? []).slice(0, limit);
+  if (!entries.length) return 0;
+  const ids = entries.map(entry => entry.id);
+  const [response, taxonomy] = await Promise.all([request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields }), categories(context)]);
+  const rows = (await response!.json() as WPPost[]).filter(post => acceptable(post, taxonomy.category, taxonomy.spam));
+  const posts = (await enrich(rows, taxonomy, context, true)).filter(hasTitle);
+  await Promise.all(posts.map(post => storeDurable(kv, postKey(post.slug), post)));
+  return posts.length;
 }
 export async function newsPage(page = 1, perPage = 12, context?: NewsContext): Promise<WPPostsPage> {
   if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(perPage) || perPage < 1 || perPage > 100) throw new RangeError('Invalid news pagination');
