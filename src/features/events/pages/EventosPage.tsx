@@ -354,7 +354,7 @@ export default function EventosPage() {
               )}
             </div>
 
-            {totalResultados === 0 ? (
+            {totalResultados === 0 && !destaque ? (
               <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white py-14 text-center  ">
                 <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300 " />
                 <h2 className="font-display text-lg font-semibold text-neutral-800 ">
