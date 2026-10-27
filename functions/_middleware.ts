@@ -267,9 +267,11 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   }
   const staticData = Object.hasOwn(PAGE_METADATA, pathname) ? PAGE_METADATA[pathname] : undefined;
   const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));
-  // Conditional validators belong to the static shell; drop them so a 304 never skips the metadata lookup.
+  // Os validadores pertencem ao shell estático: nas rotas HTML um 304 pularia a injeção de metadados.
+  // Assets reais (imagens, PDFs, fontes, bundles) mantêm os validadores e podem responder 304.
+  const htmlRoute = Boolean(staticData || prefix) || !/\.[a-z0-9]+$/i.test(pathname);
   let upstream = context.request;
-  if (upstream.headers.has('If-None-Match') || upstream.headers.has('If-Modified-Since')) {
+  if (htmlRoute && (upstream.headers.has('If-None-Match') || upstream.headers.has('If-Modified-Since'))) {
     const headers = new Headers(upstream.headers);
     headers.delete('If-None-Match');
     headers.delete('If-Modified-Since');

@@ -45,11 +45,12 @@ function shell() {
   });
 }
 
+let forwarded;
 async function request(path, options = {}) {
   background = [];
   return onRequest({
-    request: new Request(`https://institucional.crf-al.org.br${path}`, { method: options.method || 'GET' }),
-    next: async () => options.response || shell(),
+    request: new Request(`https://institucional.crf-al.org.br${path}`, { method: options.method || 'GET', headers: options.headers }),
+    next: async upstream => { forwarded = upstream; return options.response || shell(); },
     waitUntil: promise => background.push(promise),
   });
 }
@@ -95,6 +96,19 @@ try {
   for (const [path, type] of [['/assets/main.js', 'application/javascript'], ['/images/logo.png', 'image/png'], ['/api/instagram', 'application/json'], ['/robots.txt', 'text/plain'], ['/sitemap.xml', 'application/xml']]) {
     const asset = new Response('resource', { headers: { 'Content-Type': type } });
     assert.equal(await request(path, { response: asset }), asset, `Preserve real resource: ${path}`);
+  }
+  // Assets estáticos preservam validadores (304); rotas HTML os descartam para injetar metadados.
+  const validators = { 'If-None-Match': '"abc"', 'If-Modified-Since': 'Tue, 27 Oct 2026 00:00:00 GMT' };
+  for (const path of ['/images/logo.png', '/documentos/manual.pdf', '/fonts/inter-400.woff2', '/assets/main.js']) {
+    const notModified = new Response(null, { status: 304 });
+    assert.equal(await request(path, { headers: validators, response: notModified }), notModified, `304 preservado: ${path}`);
+    assert.equal(forwarded.headers.get('If-None-Match'), '"abc"', path);
+    assert.ok(forwarded.headers.get('If-Modified-Since'), path);
+  }
+  for (const path of ['/', '/instituicao/sobre-conselho', '/pagina-inexistente', '/imprensa/noticias/noticia.v2']) {
+    await request(path, { headers: validators });
+    assert.equal(forwarded.headers.get('If-None-Match'), null, path);
+    assert.equal(forwarded.headers.get('If-Modified-Since'), null, path);
   }
   const existing404 = new Response('Not found', { status: 404 });
   assert.equal(await request('/images/missing.png', { response: existing404 }), existing404);
