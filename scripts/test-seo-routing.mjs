@@ -185,11 +185,16 @@ try {
   await Promise.all(background);
   const eventKey = [...stored.keys()].find(key => key.includes('/__page-metadata/') && key.endsWith('/eventos/evento-swr'));
   const eventEntry = await stored.get(eventKey).clone().json();
-  stored.set(eventKey, Response.json({ ...eventEntry, storedAt: 0 }));
+  stored.set(eventKey, Response.json({ ...eventEntry, storedAt: Date.now() - 660_000 }));
   origin = () => new Response('', { status: 503 });
   assert.equal((await request('/eventos/evento-swr')).status, 200, 'Metadados antigos servidos durante falha');
   await Promise.all(background);
   assert.ok(stored.has(eventKey), 'Falha na revalidação preserva a reserva');
+  const checkedEvent = await stored.get(eventKey).clone().json();
+  assert.ok(checkedEvent.checkedAt > checkedEvent.storedAt);
+  stored.set(eventKey, Response.json({ ...eventEntry, storedAt: Date.now() - 86400_001 }));
+  assert.equal((await request('/eventos/evento-swr')).status, 503, 'Reserva expirada não é servida');
+
   // Sitemap e RSS passam pela implementação real do índice e dos lotes.
   stored = new Map();
   const spam = { ...post, id: 2534, slug: 'best-dating-sites', categories: [3] };

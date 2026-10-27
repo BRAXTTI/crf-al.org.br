@@ -225,19 +225,19 @@ async function cachedMetadata(context: PagesContext, pathname: string, resolve: 
   const cache = (caches as CacheStorage & { default: Cache }).default;
   const key = new Request(`${SITE_URL}/__page-metadata/v6/${encodeURIComponent(context.env?.WP_SITE_URL || '')}/${encodeURIComponent(context.env?.NEWS_ARCHIVE_API_URL || '')}${pathname}`);
   // "Não encontrado" fica 5 min: slugs inexistentes não chegam sempre ao WordPress.
-  const store = (data: OgData | null) => cache.put(key, new Response(JSON.stringify({ storedAt: Date.now(), data }), {
+  const store = (data: OgData | null, storedAt = Date.now(), checkedAt?: number) => cache.put(key, new Response(JSON.stringify({ storedAt, checkedAt, data }), {
     headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${data ? 86400 : NOT_FOUND_S}` },
   }));
   const cached = await cache.match(key);
-  const entry = cached ? await cached.json() as { storedAt: number; data: OgData | null } : undefined;
+  const entry = cached ? await cached.json() as { storedAt: number; checkedAt?: number; data: OgData | null } : undefined;
   if (entry?.data === null && Date.now() - entry.storedAt < NOT_FOUND_S * 1000) return null;
-  if (entry?.data) {
+  if (entry?.data && Date.now() - entry.storedAt <= 24 * 3600_000) {
     // Stale-while-revalidate: a página nunca espera pela origem quando já há metadados.
     const current = entry.data;
-    if (Date.now() - entry.storedAt > METADATA_FRESH_MS && !refreshingMetadata.has(key.url)) {
+    if (Date.now() - (entry.checkedAt ?? entry.storedAt) > METADATA_FRESH_MS && !refreshingMetadata.has(key.url)) {
       refreshingMetadata.add(key.url);
       context.waitUntil((async () => {
-        await store(current);
+        await store(current, entry.storedAt, Date.now());
         await store(await resolve());
       })().catch(() => undefined).finally(() => refreshingMetadata.delete(key.url)));
     }

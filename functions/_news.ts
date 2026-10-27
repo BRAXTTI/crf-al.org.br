@@ -50,7 +50,7 @@ async function request(path: string, params: Record<string, string> = {}, missin
       throw error;
     }
     if (retry && response.status >= 500) { await response.body?.cancel(); continue; }
-    if (missing && response.status === 404) return null;
+    if (missing && [401, 403, 404, 410].includes(response.status)) return null;
     if (missingPage && response.status === 400) {
       const body = await response.json() as { code?: string };
       if (body.code === 'rest_post_invalid_page_number') return null;
@@ -59,7 +59,8 @@ async function request(path: string, params: Record<string, string> = {}, missin
     return response;
   }
 }
-type Stored<T> = { storedAt: number; value: T };
+type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
+const MAX_STALE_MS = 24 * 3600_000;
 const FRESH_MS = 60_000;
 // Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
 const DURABLE_TTL_S = 7 * 24 * 3600;
@@ -86,7 +87,7 @@ async function cached<T>(key: string, context: NewsContext | undefined, load: (c
   const cache = context ? localCache() : undefined;
   const kv = durable ? context?.env?.NEWS_INDEX : undefined;
   const request = new Request(`${SITE_URL}/__news/v5/${key}`);
-  const putLocal = (value: T) => cache!.put(request, Response.json({ storedAt: Date.now(), value }, { headers: { 'Cache-Control': `public, max-age=${value === null ? NOT_FOUND_S : kv ? DURABLE_TTL_S : 600}` } }));
+  const putLocal = (value: T, storedAt = Date.now(), checkedAt?: number) => cache!.put(request, Response.json({ storedAt, checkedAt, value }, { headers: { 'Cache-Control': `public, max-age=${value === null ? NOT_FOUND_S : kv ? DURABLE_TTL_S : 600}` } }));
   const persist = async (value: T, previous?: Stored<T> | null) => {
     if (value === null) {
       // Exclusões no KV também contam como escritas: só apaga o que existia.
@@ -100,11 +101,11 @@ async function cached<T>(key: string, context: NewsContext | undefined, load: (c
   if (entry?.value === null && Date.now() - entry.storedAt > NOT_FOUND_S * 1000) entry = undefined;
   let fromDurable = false;
   if (!entry && kv) { entry = await kv.get<Stored<T>>(durableKey(key), 'json') ?? undefined; fromDurable = Boolean(entry); }
-  if (entry) {
+  if (entry && Date.now() - entry.storedAt <= MAX_STALE_MS) {
     const stale = entry;
-    if (stale.value !== null && (fromDurable || Date.now() - stale.storedAt > freshMs) && !revalidating.has(key)) {
+    if (stale.value !== null && (fromDurable || Date.now() - (stale.checkedAt ?? stale.storedAt) > freshMs) && !revalidating.has(key)) {
       const task = (async () => {
-        if (cache) await putLocal(stale.value);
+        if (cache) await putLocal(stale.value, stale.storedAt, Date.now());
         // Reserva lida do KV evita uma segunda leitura; vinda do cache local, confere o KV.
         await persist(await load(background(context)), kv && !fromDurable ? undefined : stale);
       })().catch(() => undefined).finally(() => revalidating.delete(key));
@@ -114,7 +115,7 @@ async function cached<T>(key: string, context: NewsContext | undefined, load: (c
     return stale.value;
   }
   const value = await load(context);
-  if (cache || (kv && value !== null)) context!.waitUntil(persist(value, kv ? null : undefined).catch(() => undefined));
+  if (cache || (kv && value !== null)) context!.waitUntil(persist(value, kv ? entry ?? null : undefined).catch(() => undefined));
   return value;
 }
 function hasTitle(post: { title?: { rendered: string } }) { return Boolean(post.title?.rendered.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()); }

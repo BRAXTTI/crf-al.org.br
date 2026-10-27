@@ -192,6 +192,18 @@ try {
       assert.equal(pending.length, 1, 'Revalidação single-flight');
       await Promise.all(pending.splice(0));
       assert.ok(values.has(postKey), 'Revalidação recompõe a reserva do KV');
+      const saved = await local.get(entry).clone().json();
+      const old = Date.now() - 120_000;
+      local.set(entry, Response.json({ ...saved, storedAt: old }));
+      fail = true;
+      await newsPost(slug, context); await Promise.all(pending.splice(0));
+      const checked = await local.get(entry).clone().json();
+      assert.equal(checked.storedAt, old, 'Falha não renova a idade');
+      assert.ok(checked.checkedAt > old);
+      local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 86400_001 }));
+      await assert.rejects(newsPost(slug, context), /503/);
+      fail = false;
+
     } finally { globalThis.caches = previousCaches; }
     // Cron: uma consulta `include` aquece os mais recentes.
     values.clear(); writes.length = 0; requests = [];
@@ -228,6 +240,17 @@ try {
     await Promise.all(pending.splice(0));
     assert.ok(requests.length);
   } finally { globalThis.caches = previousCaches; }
+  // Posts privados, removidos e na lixeira não podem sobreviver no fallback.
+  {
+    const previousFetch = globalThis.fetch;
+    try {
+      for (const status of [401, 403, 404, 410]) {
+        globalThis.fetch = async input => new URL(input).searchParams.get('rest_route').startsWith('/wp/v2/posts/')
+          ? new Response(null, { status }) : previousFetch(input);
+        assert.equal(await newsPost(find(16028).slug), null, String(status));
+      }
+    } finally { globalThis.fetch = previousFetch; }
+  }
   // Teto de páginas: inventário maior que o limite gera índice com as mais recentes, sem falhar.
   {
     const mockFetch = globalThis.fetch; const seen = new Set(); let order;
