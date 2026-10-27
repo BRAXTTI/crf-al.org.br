@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CRF-AL — API da Galeria de Fotos
  * Description: Integra as galerias publicadas do FooGallery ao portal institucional.
- * Version: 1.1.0
+ * Version: 1.1.1
  * Requires PHP: 7.4
  */
 
@@ -60,86 +60,32 @@ final class CRFAL_Photo_Gallery_API {
         );
     }
 
-    /**
-     * Capa e contagem da listagem sem montar todas as fotos. Só para a fonte padrão
-     * (biblioteca de mídia) sem ordenação personalizada, em que `attachment_ids` já está
-     * na ordem do FooGallery. Retorna null para usar o caminho completo de `attachments()`.
-     */
-    private static function summary( $post, $gallery ) {
-        $datasource = isset( $gallery->datasource_name ) && '' !== (string) $gallery->datasource_name ? (string) $gallery->datasource_name : 'media_library';
-        $sorting = isset( $gallery->sorting ) ? (string) $gallery->sorting : '';
-        if ( 'media_library' !== $datasource || '' !== $sorting || ! isset( $gallery->attachment_ids ) || ! is_array( $gallery->attachment_ids ) ) {
-            return null;
-        }
-        $ids = array_values( array_unique( array_filter( array_map( 'absint', $gallery->attachment_ids ) ) ) );
-        if ( ! $ids ) {
-            return array( 'count' => 0, 'cover' => null );
-        }
-        // Uma consulta para todos os anexos (posts e meta em cache), sem calcular URLs de imagem.
-        $query = new WP_Query( array(
-            'post_type' => 'attachment',
-            'post_status' => array( 'inherit', 'publish' ),
-            'post__in' => $ids,
-            'orderby' => 'post__in',
-            'posts_per_page' => count( $ids ),
-            'has_password' => false,
-            'ignore_sticky_posts' => true,
-            'no_found_rows' => true,
-            'update_post_meta_cache' => true,
-            'update_post_term_cache' => false,
-        ) );
-        $valid = array();
-        foreach ( $query->posts as $attachment ) {
-            if ( wp_attachment_is_image( $attachment->ID ) ) {
-                $valid[] = (int) $attachment->ID;
-            }
-        }
-        // Mesma regra do caminho completo: imagem destacada, se estiver entre as fotos; senão a primeira.
-        $featured_id = (int) get_post_thumbnail_id( $post->ID );
-        $candidates = in_array( $featured_id, $valid, true ) ? array_merge( array( $featured_id ), array_diff( $valid, array( $featured_id ) ) ) : $valid;
-        $cover = null;
-        foreach ( $candidates as $id ) {
-            $cover = self::photo( (object) array(
-                'ID' => $id,
-                'alt' => get_post_meta( $id, '_wp_attachment_image_alt', true ),
-                'caption' => get_post_field( 'post_excerpt', $id ),
-            ) );
-            if ( $cover ) {
-                break;
-            }
-        }
-        return array( 'count' => count( $valid ), 'cover' => $cover );
-    }
-
     private static function album( $post, $with_photos = false ) {
         $gallery = FooGallery::get_by_id( $post->ID );
         if ( ! $gallery ) {
             return self::unavailable();
         }
         $photos = array();
-        $summary = $with_photos ? null : self::summary( $post, $gallery );
-        if ( ! $summary ) {
-            // A API PHP aplica a seleção, a ordenação e os filtros do FooGallery.
-            // Não usar media?parent=: uma foto reutilizada pode pertencer a outro post.
-            foreach ( $gallery->attachments() as $attachment ) {
-                $photo = self::photo( $attachment );
-                if ( $photo ) {
-                    $photos[] = $photo;
-                }
+        // A API PHP aplica a seleção, a ordenação e os filtros do FooGallery.
+        // Não usar media?parent=: uma foto reutilizada pode pertencer a outro post.
+        foreach ( $gallery->attachments() as $attachment ) {
+            $photo = self::photo( $attachment );
+            if ( $photo ) {
+                $photos[] = $photo;
             }
-            $cover = null;
-            $featured_id = get_post_thumbnail_id( $post->ID );
-            foreach ( $photos as $photo ) {
-                if ( $photo['id'] === (int) $featured_id ) {
-                    $cover = $photo;
-                    break;
-                }
-            }
-            $summary = array(
-                'count' => count( $photos ),
-                'cover' => $cover ?: ( isset( $photos[0] ) ? $photos[0] : null ),
-            );
         }
+        $cover = null;
+        $featured_id = get_post_thumbnail_id( $post->ID );
+        foreach ( $photos as $photo ) {
+            if ( $photo['id'] === (int) $featured_id ) {
+                $cover = $photo;
+                break;
+            }
+        }
+        $summary = array(
+            'count' => count( $photos ),
+            'cover' => $cover ?: ( isset( $photos[0] ) ? $photos[0] : null ),
+        );
         $album = array(
             'id' => (int) $post->ID,
             'slug' => $post->post_name,
