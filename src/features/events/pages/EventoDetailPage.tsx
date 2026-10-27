@@ -7,7 +7,6 @@ import {
   Ban,
   Building2,
   Calendar,
-  ChevronRight,
   ExternalLink,
   MapPin,
   Monitor,
@@ -22,13 +21,13 @@ import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { useEventBySlug, useRelatedEvents } from '@/services/wordpress/event-hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
 import type { WPEventListing } from '@/services/wordpress/types';
+import { EventoCard } from '../components/EventCards';
 import {
   acoesDoEvento,
   MODALIDADE_ICONS,
   MODALIDADE_LABELS,
   STATUS_COLORS,
   STATUS_LABELS,
-  formatarData,
   formatarDataExtenso,
   formatarHorario,
   rotuloContagem,
@@ -316,24 +315,8 @@ export default function EventoDetailPage() {
               </Link>
             </div>
 
-            <div className="space-y-3">
-              {outrosEventos.map((outro) => (
-                <Link
-                  key={outro.id}
-                  to={`/eventos/${outro.slug}`}
-                  className="flex items-center justify-between gap-4 bg-white  rounded-xl border border-crfal-gray-200  px-5 py-4 hover:border-crfal-blue/30 hover:shadow-card transition-all group"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-neutral-800  truncate group-hover:text-crfal-blue  transition-colors">
-                      {outro.titulo}
-                    </p>
-                    <p className="text-xs text-crfal-gray-500  mt-0.5">
-                      {formatarData(outro.data, outro.dataFim)} · {STATUS_LABELS[outro.status]}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-crfal-gray-300  group-hover:text-crfal-blue transition-colors shrink-0" />
-                </Link>
-              ))}
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {outrosEventos.map((outro, index) => <EventoCard key={outro.id} evento={outro} index={index} />)}
             </div>
           </div>
         )}
