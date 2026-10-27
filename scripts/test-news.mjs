@@ -149,7 +149,10 @@ try {
     try { await newsPost(slug); } finally { globalThis.fetch = mockFetch; }
     assert.equal(peak, 2, 'Mídia e autor consultados em paralelo');
     writes.length = 0; requests = [];
-    const first = await newsPost(slug, context);
+    const burst = await Promise.all(Array.from({ length: 12 }, () => newsPost(slug, context)));
+    const first = burst[0];
+    assert.ok(burst.every(post => post === first), 'Rajada fria compartilha o mesmo resultado');
+    assert.equal(requests.filter(url => url.searchParams.get('rest_route').startsWith('/wp/v2/posts/')).length, 1);
     await Promise.all(pending.splice(0));
     assert.equal(first.content.rendered.length > 0, true, 'Detalhe completo (com conteúdo) também serve os metadados');
     assert.equal(writes.filter(row => row.key === postKey).length, 1);

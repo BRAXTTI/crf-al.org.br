@@ -83,7 +83,7 @@ async function storeDurable<T>(kv: KVNamespace, key: string, value: T, previous?
  * ficam 5 min só no cache local, para que slugs inexistentes não cheguem sempre à origem.
  */
 const NOT_FOUND_S = 300;
-async function cached<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, { durable = false, freshMs = FRESH_MS } = {}): Promise<T> {
+async function cachedLoad<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, { durable = false, freshMs = FRESH_MS } = {}): Promise<T> {
   const cache = context ? localCache() : undefined;
   const kv = durable ? context?.env?.NEWS_INDEX : undefined;
   const request = new Request(`${SITE_URL}/__news/v5/${key}`);
@@ -115,8 +115,17 @@ async function cached<T>(key: string, context: NewsContext | undefined, load: (c
     return stale.value;
   }
   const value = await load(context);
-  if (cache || (kv && value !== null)) context!.waitUntil(persist(value, kv ? entry ?? null : undefined).catch(() => undefined));
+  if (cache || (kv && value !== null)) await persist(value, kv ? entry ?? null : undefined).catch(() => undefined);
   return value;
+}
+// Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
+const loading = new Map<string, Promise<unknown>>();
+function cached<T>(key: string, context: NewsContext | undefined, load: (context?: NewsContext) => Promise<T>, options = {}): Promise<T> {
+  const pending = loading.get(key);
+  if (pending) return pending as Promise<T>;
+  const task = cachedLoad(key, context, load, options).finally(() => loading.delete(key));
+  loading.set(key, task);
+  return task;
 }
 function hasTitle(post: { title?: { rendered: string } }) { return Boolean(post.title?.rendered.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()); }
 export function isBlockedNews(slug: string): boolean {
