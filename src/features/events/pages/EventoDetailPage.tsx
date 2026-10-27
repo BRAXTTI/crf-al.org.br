@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   AlertCircle,
@@ -78,6 +78,8 @@ function InfoRow({ icon: Icon, rotulo, valor, dateTime }: { icon: typeof Calenda
 }
 
 export default function EventoDetailPage() {
+  const [agora, setAgora] = useState(() => Date.now());
+  useEffect(() => { const timer = window.setInterval(() => setAgora(Date.now()), 60_000); return () => window.clearInterval(timer); }, []);
   const { slug } = useParams<{ slug: string }>();
   const porSlug = useEventBySlug(slug ?? '');
   const eventoCompleto = porSlug.data;
@@ -87,9 +89,9 @@ export default function EventoDetailPage() {
   const relacionados = useRelatedEvents(eventoCompleto?.id);
 
   const evento: Evento | null = useMemo(() => {
-    if (eventoCompleto) return mapEvent(paraCRFEvent(eventoCompleto));
+    if (eventoCompleto) { void agora; return mapEvent(paraCRFEvent(eventoCompleto)); }
     return null;
-  }, [eventoCompleto]);
+  }, [eventoCompleto, agora]);
 
   const outrosEventos = useMemo(() => {
     if (!relacionados.data || !evento) return [];
@@ -226,6 +228,8 @@ export default function EventoDetailPage() {
       <div className="container-crfal pt-6 lg:pt-10 pb-12 lg:pb-16">
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-12">
           <div className="lg:col-span-8 empty:hidden">
+          {evento.status === 'cancelado' && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"><Ban className="mr-2 inline h-5 w-5" aria-hidden />Este evento foi cancelado e não será realizado.</div>}
+          {evento.status === 'encerrado' && <div className="mb-6 rounded-xl bg-crfal-gray-100 p-4 text-crfal-gray-700">Este evento já foi realizado em {formatarDataExtenso(evento.data, evento.dataFim)}.{evento.video && <> <a className="underline" href={evento.video} target="_blank" rel="noopener noreferrer">Assistir gravação<span className="sr-only"> (abre em uma nova aba)</span></a></>}</div>}
           {capa && (
           <figure className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 shadow-card">
             <img src={capa.src} srcSet={capa.srcSet} sizes="(min-width: 1024px) 800px, calc(100vw - 32px)" width={capa.width} height={capa.height} alt={capa.alt || `Arte de divulgação do evento «${evento.titulo}»`} decoding="async" fetchPriority="high" className="mx-auto block h-auto w-auto max-w-full max-h-[min(75vh,720px)]" />
@@ -245,7 +249,7 @@ export default function EventoDetailPage() {
                 <InfoRow icon={ModalidadeIcon} rotulo="Modalidade" valor={MODALIDADE_LABELS[evento.modalidade]} />
                 {evento.local && <InfoRow icon={evento.modalidade === 'online' ? Monitor : MapPin} rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'} valor={evento.local} />}
                 {evento.publico && <InfoRow icon={Building2} rotulo="Público" valor={evento.publico} />}
-                <InfoRow icon={Calendar} rotulo="Situação" valor={STATUS_LABELS[evento.status]} />
+                <InfoRow icon={Calendar} rotulo="Situação" valor={`${STATUS_LABELS[evento.status]}${evento.status === 'em-andamento' ? ' · Ao vivo agora' : evento.status === 'em-breve' && rotuloContagem(evento.data) ? ` · ${rotuloContagem(evento.data)}` : ''}`} />
               </dl>
 
               {(acoes.length > 0 || (evento.status === 'em-breve' && evento.data)) && <div className="hidden lg:block mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">

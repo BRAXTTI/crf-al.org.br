@@ -1,5 +1,5 @@
 import type { ElementType } from 'react';
-import { formatDate, weekday } from '@/lib/maceio';
+import { formatDate, weekday, todayInMaceio, daysUntil } from '@/lib/maceio';
 import { Building2, CheckCircle2, Clock, MapPin, Monitor, XCircle } from 'lucide-react';
 import { stripHTML } from '@/services/wordpress/client';
 import type { CRFEvent } from '@/services/wordpress/types';
@@ -114,7 +114,7 @@ function derivarStatus(
 /** Mapeia um evento da API para o modelo de exibição da listagem/detalhe. */
 export function mapEvent(evento: CRFEvent): Evento {
   const inicio = parseWPDateTime(evento.startDate);
-  const fim = parseWPDateTime(evento.endDate);
+  const fim = parseWPDateTime(evento.endDate) ?? (evento.startDate ? parseWPDateTime(`${evento.startDate.slice(0, 10)} 23:59:59`) : null);
   const modalidade = derivarModalidade(evento.modalidade, evento.online);
   const multiDia =
     Boolean(evento.startDate) &&
@@ -130,7 +130,7 @@ export function mapEvent(evento: CRFEvent): Evento {
     dataFim: multiDia ? evento.endDate : undefined,
     horaInicio: evento.startDate.slice(11, 16) || undefined,
     horaFim: evento.endDate.slice(11, 16) || undefined,
-    local: stripHTML(evento.location) || (modalidade === 'online' ? 'Evento Online' : ''),
+    local: stripHTML(evento.location),
     modalidade,
     status: derivarStatus(evento, inicio, fim),
     publico: stripHTML(evento.publico) || undefined,
@@ -172,20 +172,8 @@ export function formatarDataHora(valor: string): string {
 export function rotuloContagem(data: string): string | null {
   const ts = parseWPDateTime(data);
   if (ts === null) return null;
-  const inicio = new Date(ts);
-  const hoje = new Date();
-  if (
-    inicio.getFullYear() === hoje.getFullYear() &&
-    inicio.getMonth() === hoje.getMonth() &&
-    inicio.getDate() === hoje.getDate()
-  ) {
-    return 'É hoje!';
-  }
-  const diffDias = Math.round(
-    (new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate()).getTime() -
-      new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).getTime()) /
-      86_400_000
-  );
+  const diffDias = daysUntil(data.slice(0, 10), todayInMaceio());
+  if (diffDias === 0) return 'É hoje!';
   if (diffDias === 1) return 'Amanhã';
   if (diffDias > 1) return `Em ${diffDias} dias`;
   return null;
