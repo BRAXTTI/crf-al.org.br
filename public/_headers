@@ -15,16 +15,16 @@
   Cache-Control: public, max-age=2592000
 
 /images/*.jpg
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /images/*.png
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /images/*.svg
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /images/*.webp
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 /images/*.mp4
   Cache-Control: public, max-age=604800

@@ -67,7 +67,7 @@ export default function NewsDetailPage() {
   const error = isLegacyId ? idError : slugError;
   const refetch = isLegacyId ? refetchId : refetchSlug;
 
-  const { data: relatedPosts } = useRelatedPosts(post?.slug ?? '', 3);
+  const { data: relatedPosts } = useRelatedPosts(post?.slug ?? (isLegacyId ? '' : slug ?? ''), 3);
 
   const related: RelatedItem[] =
     relatedPosts?.map((item) => ({
@@ -277,7 +277,8 @@ export default function NewsDetailPage() {
                       [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-4
                       [&_li]:mb-2
                       [&_a]:text-crfal-blue [&_a]:underline
-                      [&_img]:rounded-xl [&_img]:my-4 [&_img]:w-full"
+                      [&_img]:rounded-xl [&_img]:my-4 [&_img]:w-full
+                      [&_iframe]:my-4 [&_iframe]:aspect-video [&_iframe]:h-auto [&_iframe]:w-full [&_iframe]:rounded-xl"
                     dangerouslySetInnerHTML={{ __html: sanitizeWP(post.content?.rendered ?? '') }}
                   />
                 </div>

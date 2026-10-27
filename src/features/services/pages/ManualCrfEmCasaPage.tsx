@@ -66,7 +66,8 @@ function VideoDemonstracao({ secao }: { secao: ManualSecao }) {
       muted
       loop
       playsInline
-      preload={reduzido ? 'metadata' : 'auto'}
+      // Só metadados: o download completo (até ~5 MB por vídeo) começa ao tocar.
+      preload="metadata"
       controls={reduzido}
       className="block aspect-4/3 h-auto w-full rounded-xl bg-crfal-blue-lighter/40 object-cover shadow-xs"
     />

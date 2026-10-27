@@ -23,7 +23,7 @@ export async function fetchPosts(
 
 export async function fetchPostById(id: number, signal?: AbortSignal): Promise<WPPost> {
   const post = await fetchPostBySlug(String(id), signal);
-  if (!post) throw new Error('Notícia não encontrada.');
+  if (!post) throw new HttpError(404);
   return post;
 }
 
@@ -61,15 +61,6 @@ export async function fetchEventBySlug(slug: string, signal?: AbortSignal): Prom
     { signal },
   );
   return events[0] ?? null;
-}
-
-export async function fetchRelatedPosts(
-  excludeSlug: string,
-  perPage = 3,
-  signal?: AbortSignal
-): Promise<WPPost[]> {
-  const posts = await fetchPosts({ perPage: perPage + 1, signal }).then((page) => page.posts);
-  return posts.filter((post) => post.slug !== excludeSlug).slice(0, perPage);
 }
 
 /** Qualquer payload do WordPress que possa conter recursos embutidos (`_embed`). */

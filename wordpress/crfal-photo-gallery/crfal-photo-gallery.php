@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CRF-AL — API da Galeria de Fotos
  * Description: Integra as galerias publicadas do FooGallery ao portal institucional.
- * Version: 1.0.0
+ * Version: 1.1.1
  * Requires PHP: 7.4
  */
 
@@ -82,6 +82,10 @@ final class CRFAL_Photo_Gallery_API {
                 break;
             }
         }
+        $summary = array(
+            'count' => count( $photos ),
+            'cover' => $cover ?: ( isset( $photos[0] ) ? $photos[0] : null ),
+        );
         $album = array(
             'id' => (int) $post->ID,
             'slug' => $post->post_name,
@@ -89,8 +93,8 @@ final class CRFAL_Photo_Gallery_API {
             'description' => self::text( $post->post_excerpt ),
             'date' => get_post_time( 'c', true, $post ),
             'modified' => get_post_modified_time( 'c', true, $post ),
-            'count' => count( $photos ),
-            'cover' => $cover ?: ( isset( $photos[0] ) ? $photos[0] : null ),
+            'count' => $summary['count'],
+            'cover' => $summary['cover'],
         );
         if ( $with_photos ) {
             $album['photos'] = $photos;

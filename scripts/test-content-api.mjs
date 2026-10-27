@@ -8,18 +8,38 @@ const stored = new Map();
 const context = { env: { WP_SITE_URL: 'https://wordpress.example' }, waitUntil: promise => pending.push(promise) };
 const request = (path, method = 'GET') => contentApi(new Request(`https://portal.example${path}`, { method }), context);
 try {
-  globalThis.caches = { default: { match: async key => stored.get(key.url)?.clone(), put: async (key, value) => stored.set(key.url, value) } };
+  // Como no Workers, respostas de cache.match (e seus clones) têm headers imutáveis.
+  const immutable = response => {
+    const copy = response.clone();
+    for (const method of ['set', 'append', 'delete']) copy.headers[method] = () => { throw new TypeError("Can't modify immutable headers."); };
+    copy.clone = () => immutable(response);
+    return copy;
+  };
+  globalThis.caches = { default: { match: async key => stored.has(key.url) ? immutable(stored.get(key.url)) : undefined, put: async (key, value) => stored.set(key.url, value) } };
   globalThis.fetch = async url => { urls.push(new URL(url)); return Response.json([{ slug: 'evento' }]); };
   assert.equal((await request('/api/events?slug=evento')).status, 200);
   assert.equal(urls[0].searchParams.get('rest_route'), '/wp/v2/event_listing');
   assert.equal(urls[0].searchParams.get('slug'), 'evento');
   assert.equal(urls[0].searchParams.get('per_page'), '1');
+  assert.equal(urls[0].searchParams.get('_embed'), 'wp:featuredmedia', 'Sem autor/termos embutidos');
+  for (const field of ['title', 'content', 'event_details', 'status', '_embedded']) assert.ok(urls[0].searchParams.get('_fields').split(',').includes(field), field);
+  assert.ok(!urls[0].searchParams.get('_fields').split(',').includes('author'));
   await Promise.all(pending);
   assert.equal(await (await request('/api/events?slug=evento', 'HEAD')).text(), '');
   assert.equal(urls.length, 1, 'HEAD reuses edge cache');
   assert.equal((await request('/api/events?related=123')).status, 200);
   assert.equal(urls.at(-1).searchParams.get('per_page'), '3');
   assert.equal(urls.at(-1).searchParams.get('exclude'), '123');
+  assert.equal(urls.at(-1).searchParams.get('_embed'), 'wp:featuredmedia');
+  assert.equal((await request('/api/events?id=5')).status, 200);
+  assert.equal(urls.at(-1).searchParams.get('rest_route'), '/wp/v2/event_listing/5');
+  assert.equal(urls.at(-1).searchParams.get('_embed'), 'wp:featuredmedia');
+  const beforeLimit = urls.length;
+  for (const page of [101, 150, 500, 9007199254740991]) {
+    assert.equal((await request(`/api/gallery?page=${page}`)).status, 400);
+  }
+  assert.equal(urls.length, beforeLimit, 'Página acima do teto não consulta a origem');
+  assert.equal((await request('/api/gallery?page=1.5')).status, 400);
   assert.equal((await request('/api/events?slug=%2F')).status, 400);
   assert.equal((await request('/api/gallery?page=0')).status, 400);
   assert.equal((await request('/api/events', 'POST')).status, 405);
@@ -39,7 +59,28 @@ try {
   assert.match(ics, /BEGIN:VCALENDAR/);
   globalThis.fetch = async () => new Response('', { status: 404 });
   assert.equal((await request('/api/gallery?slug=missing')).status, 404);
+  await Promise.all(pending.splice(0));
+  globalThis.fetch = async () => { throw new Error('offline'); };
+  assert.equal((await request('/api/gallery?slug=missing')).status, 404, '404 fica em cache');
+  const eventKey = [...stored.keys()].find(key => key.includes('slug=evento'));
+  const old = Date.now() - 120_000;
+  stored.get(eventKey).headers.set('X-Stored-At', String(old));
+  stored.get(eventKey).headers.set('X-Checked-At', String(old));
+  assert.equal((await request('/api/events?slug=evento')).status, 200, 'SWR responde durante falha');
+  await Promise.all(pending.splice(0));
+  assert.equal(Number(stored.get(eventKey).headers.get('X-Stored-At')), old, 'Falha preserva idade');
+  assert.ok(Number(stored.get(eventKey).headers.get('X-Checked-At')) > old, 'Tentativa registrada mesmo com headers imutáveis');
+  globalThis.fetch = async () => Response.json([{ slug: 'evento', title: 'novo' }]);
+  stored.get(eventKey).headers.set('X-Checked-At', String(old));
+  assert.equal((await request('/api/events?slug=evento')).status, 200);
+  await Promise.all(pending.splice(0));
+  assert.ok(Number(stored.get(eventKey).headers.get('X-Stored-At')) > old, 'Revalidação grava a resposta nova');
+  assert.equal((await (await request('/api/events?slug=evento')).json())[0].title, 'novo');
+  globalThis.fetch = async () => { throw new Error('offline'); };
+  stored.get(eventKey).headers.set('X-Stored-At', String(Date.now() - 86400_001));
   console.error = () => {};
+  assert.equal((await request('/api/events?slug=evento')).status, 503, 'Reserva expira em 24 h');
+
   const failed = await request('/api/events');
   assert.equal(failed.status, 503, 'Missing collection is an integration failure');
   assert.equal(failed.headers.get('Retry-After'), '60');

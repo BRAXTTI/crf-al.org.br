@@ -18,7 +18,7 @@ const source = (await readFile(new URL('../functions/_middleware.ts', import.met
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
   .replace("'./_news'", JSON.stringify(await loadNews()));
-const { onRequest, buildMeta, buildPreload, newsPreload, homePreload } = await import(moduleUrl(source));
+const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders } = await import(moduleUrl(source));
 const { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } = await import(bannersUrl);
 const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
 const { PAGE_METADATA } = await import(metadataUrl);
@@ -45,13 +45,22 @@ function shell() {
   });
 }
 
+let forwarded;
 async function request(path, options = {}) {
   background = [];
   return onRequest({
-    request: new Request(`https://institucional.crf-al.org.br${path}`, { method: options.method || 'GET' }),
-    next: async () => options.response || shell(),
+    request: new Request(`https://institucional.crf-al.org.br${path}`, { method: options.method || 'GET', headers: options.headers }),
+    next: async upstream => { forwarded = upstream; return options.response || shell(); },
     waitUntil: promise => background.push(promise),
   });
+}
+
+/** O middleware só acrescenta headers de segurança: status, corpo e headers originais seguem iguais. */
+async function assertPassThrough(actual, expected, message) {
+  assert.equal(actual.status, expected.status, message);
+  for (const [name, value] of expected.headers) assert.equal(actual.headers.get(name), value, `${message}: ${name}`);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) assert.equal(actual.headers.get(name), expected.headers.get(name) ?? value, `${message}: ${name}`);
+  assert.equal(await actual.text(), await expected.clone().text(), message);
 }
 
 async function expectMissing(path, plainText = false) {
@@ -70,6 +79,9 @@ try {
     const sources = csp.split(';').map(value => value.trim().split(/\s+/)).find(value => value[0] === directive);
     assert.ok(sources.includes('https://midias.crf-al.org.br'), `${directive}: permitir mídias após o redirect dos uploads legados`);
     assert.equal(sources.filter(source => source === 'https://midias.crf-al.org.br').length, 1, `${directive}: domínio de mídias sem duplicação`);
+  }
+  for (const ext of ['jpg', 'png', 'svg', 'webp']) {
+    assert.match(headers, new RegExp(`/images/\\*\\.${ext}\\n  Cache-Control: public, max-age=86400, stale-while-revalidate=604800\\n`), `Cache de /images/*.${ext}`);
   }
   const routes = await readFile(new URL('../src/router/app-router.tsx', import.meta.url), 'utf8');
   const sitemap = await readFile(new URL('../public/sitemap-pages.xml', import.meta.url), 'utf8');
@@ -94,12 +106,54 @@ try {
 
   for (const [path, type] of [['/assets/main.js', 'application/javascript'], ['/images/logo.png', 'image/png'], ['/api/instagram', 'application/json'], ['/robots.txt', 'text/plain'], ['/sitemap.xml', 'application/xml']]) {
     const asset = new Response('resource', { headers: { 'Content-Type': type } });
-    assert.equal(await request(path, { response: asset }), asset, `Preserve real resource: ${path}`);
+    await assertPassThrough(await request(path, { response: asset.clone() }), asset, `Preserve real resource: ${path}`);
+  }
+  // Cache-Control de /images/* fornecido por next() sobrevive inclusive ao 304.
+  for (const status of [200, 304]) {
+    const image = new Response(status === 304 ? null : 'image', {
+      status,
+      headers: {
+        'Content-Type': 'image/webp',
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+        ETag: '"image-v1"',
+      },
+    });
+    await assertPassThrough(
+      await request('/images/cache-test.webp', { response: image.clone() }),
+      image,
+      `Cache de imagem preservado no status ${status}`,
+    );
+  }
+  // Assets estáticos preservam validadores (304); rotas HTML os descartam para injetar metadados.
+  const validators = { 'If-None-Match': '"abc"', 'If-Modified-Since': 'Tue, 27 Oct 2026 00:00:00 GMT' };
+  for (const path of ['/images/logo.png', '/documentos/manual.pdf', '/fonts/inter-400.woff2', '/assets/main.js']) {
+    const notModified = new Response(null, { status: 304 });
+    await assertPassThrough(await request(path, { headers: validators, response: notModified.clone() }), notModified, `304 preservado: ${path}`);
+    assert.equal(forwarded.headers.get('If-None-Match'), '"abc"', path);
+    assert.ok(forwarded.headers.get('If-Modified-Since'), path);
+  }
+  for (const path of ['/', '/instituicao/sobre-conselho', '/pagina-inexistente', '/imprensa/noticias/noticia.v2']) {
+    await request(path, { headers: validators });
+    assert.equal(forwarded.headers.get('If-None-Match'), null, path);
+    assert.equal(forwarded.headers.get('If-Modified-Since'), null, path);
   }
   const existing404 = new Response('Not found', { status: 404 });
-  assert.equal(await request('/images/missing.png', { response: existing404 }), existing404);
+  await assertPassThrough(await request('/images/missing.png', { response: existing404.clone() }), existing404, 'Asset 404 real');
   const postResponse = Response.json({ ok: true });
-  assert.equal(await request('/api/instagram', { method: 'POST', response: postResponse }), postResponse);
+  await assertPassThrough(await request('/api/instagram', { method: 'POST', response: postResponse.clone() }), postResponse, 'POST repassado');
+  // Headers de segurança: mesmos valores do _headers, em respostas geradas por Functions, sem sobrescrever.
+  const headerBlock = headers.split(/\n(?=\S)/).find(block => block.startsWith('/*\n')).split('\n').slice(1).filter(Boolean);
+  assert.deepEqual(Object.fromEntries(headerBlock.map(line => line.trim().split(/: (.*)/s).slice(0, 2))), SECURITY_HEADERS, 'Middleware e _headers sincronizados');
+  for (const path of ['/pagina-inexistente', '/api/missing', '/instituicao/missao-visao', '/imprensa/noticias/best-dating-sites', '/sitemap-news.xml']) {
+    const generated = await request(path);
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) assert.equal(generated.headers.get(name), value, `${path}: ${name}`);
+  }
+  const custom = withSecurityHeaders(new Response('{}', { headers: { 'Content-Security-Policy': "default-src 'none'", 'X-Frame-Options': 'DENY' } }));
+  assert.equal(custom.headers.get('Content-Security-Policy'), "default-src 'none'", 'Não sobrescreve CSP da resposta');
+  assert.equal(custom.headers.get('X-Frame-Options'), 'DENY');
+  assert.equal(custom.headers.get('X-Content-Type-Options'), 'nosniff');
+  const complete = new Response('', { headers: SECURITY_HEADERS });
+  assert.equal(withSecurityHeaders(complete), complete, 'Resposta completa não é copiada');
 
   for (const [path, target] of [['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia'], ['/imprensa/noticias-cff', '/imprensa/publicacoes-cff']]) {
     const response = await request(path);
@@ -113,6 +167,11 @@ try {
   origin = () => new Response('', { status: 404 });
   await expectMissing('/imprensa/noticias/999999999');
   await expectMissing('/imprensa/galeria-de-fotos/album-inexistente');
+  await Promise.all(background);
+  const missingFetches = fetches;
+  await expectMissing('/imprensa/galeria-de-fotos/album-inexistente');
+  await expectMissing('/eventos/evento-inexistente');
+  assert.equal(fetches, missingFetches, 'Não encontrado fica em cache por 5 min');
 
   const post = { id: 16028, slug: 'esclarecimentos-acerca-do-registro-de-responsabilidade-tecnica-do-farmaceutico-atraves-do-contrato-de-trabalho', date: '2026-10-10T09:00:00', title: { rendered: 'Título &amp; notícia' }, excerpt: { rendered: '<p>Resumo</p>' }, categories: [1] };
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
@@ -136,6 +195,22 @@ try {
   assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test`)).status, 200);
   assert.equal(fetches, before, 'Metadata cache ignores tracking query strings');
 
+  // Metadados de evento: stale-while-revalidate, servidos mesmo com a origem fora.
+  origin = () => Response.json([{ slug: 'evento-swr', title: { rendered: 'Evento' }, excerpt: { rendered: 'Resumo' } }]);
+  assert.equal((await request('/eventos/evento-swr')).status, 200);
+  await Promise.all(background);
+  const eventKey = [...stored.keys()].find(key => key.includes('/__page-metadata/') && key.endsWith('/eventos/evento-swr'));
+  const eventEntry = await stored.get(eventKey).clone().json();
+  stored.set(eventKey, Response.json({ ...eventEntry, storedAt: Date.now() - 660_000 }));
+  origin = () => new Response('', { status: 503 });
+  assert.equal((await request('/eventos/evento-swr')).status, 200, 'Metadados antigos servidos durante falha');
+  await Promise.all(background);
+  assert.ok(stored.has(eventKey), 'Falha na revalidação preserva a reserva');
+  const checkedEvent = await stored.get(eventKey).clone().json();
+  assert.ok(checkedEvent.checkedAt > checkedEvent.storedAt);
+  stored.set(eventKey, Response.json({ ...eventEntry, storedAt: Date.now() - 86400_001 }));
+  assert.equal((await request('/eventos/evento-swr')).status, 503, 'Reserva expirada não é servida');
+
   // Sitemap e RSS passam pela implementação real do índice e dos lotes.
   stored = new Map();
   const spam = { ...post, id: 2534, slug: 'best-dating-sites', categories: [3] };
@@ -147,6 +222,15 @@ try {
   const sitemapResponse = await request('/sitemap-news.xml');
   const sitemapText = await sitemapResponse.text();
   assert.equal(sitemapResponse.status, 200);
+  assert.equal(sitemapResponse.headers.get('Cache-Control'), 'public, max-age=600');
+  await Promise.all(background);
+  const beforeSitemap = fetches;
+  const cachedXmlKey = [...stored.keys()].find(key => key.includes('/__sitemap-news/'));
+  assert.ok(cachedXmlKey, 'XML completo guardado na Cache API');
+  assert.equal(await (await request('/sitemap-news.xml')).text(), sitemapText);
+  assert.equal(await (await request('/sitemap-news.xml', { method: 'HEAD' })).text(), '');
+  assert.equal(fetches, beforeSitemap, 'Sitemap em cache dispensa índice e origem');
+
   assert.ok(sitemapText.includes(post.slug));
   assert.ok(!sitemapText.includes(spam.slug));
   assert.ok(!sitemapText.includes(['www.crf-al.org.br', 'wp-json'].join('/')));

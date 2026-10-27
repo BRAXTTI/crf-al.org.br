@@ -51,7 +51,27 @@ try {
   response = await onRequestGet(context);
   assert.equal(response.status, 200);
   assert.equal((await response.json()).stale, true);
-  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=60');
+  await Promise.all(pending.splice(0));
+  assert.deepEqual((await stored.clone().json()).items, backup.items, 'Falha na atualização preserva a reserva');
+
+  // Reserva antiga com origem saudável: responde já, atualiza em segundo plano, uma vez.
+  originStatus = 200; requests = 0;
+  stored = new Response(JSON.stringify(backup));
+  let release; const gate = new Promise(resolve => { release = resolve; });
+  globalThis.fetch = async () => { requests++; await gate; return new Response(originHtml); };
+  response = await onRequestGet(context);
+  assert.equal(response.status, 200, 'Não espera a origem');
+  assert.equal((await response.json()).fetchedAt, backup.fetchedAt);
+  await onRequestGet(context);
+  release(); await Promise.all(pending.splice(0));
+  assert.equal(requests, 1, 'Atualização em segundo plano single-flight');
+  assert.ok((await stored.clone().json()).fetchedAt > backup.fetchedAt, 'Reserva atualizada');
+  globalThis.fetch = async () => { requests++; return new Response(originHtml, { status: originStatus }); };
+  originStatus = 503;
+  stored = new Response(JSON.stringify({ ...backup, checkedAt: Date.now() }));
+  requests = 0; await onRequestGet(context); await Promise.all(pending.splice(0));
+  assert.equal(requests, 0, 'Tentativa recente não é repetida por outro isolate');
 
   stored = undefined;
   response = await onRequestGet(context);

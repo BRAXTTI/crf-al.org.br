@@ -48,3 +48,28 @@ try {
 } finally {
   globalThis.fetch = originalFetch;
 }
+
+// O zip é o que o admin instala: precisa conter exatamente o PHP versionado.
+{
+  const { readFile } = await import('node:fs/promises');
+  const { inflateRawSync } = await import('node:zlib');
+  const zip = await readFile(new URL('../wordpress/crfal-photo-gallery.zip', import.meta.url));
+  const end = zip.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  assert.ok(end >= 0, 'Zip sem diretório central');
+  const files = new Map();
+  for (let offset = zip.readUInt32LE(end + 16), i = 0; i < zip.readUInt16LE(end + 10); i++) {
+    const method = zip.readUInt16LE(offset + 10);
+    const size = zip.readUInt32LE(offset + 20);
+    const nameLength = zip.readUInt16LE(offset + 28);
+    const name = zip.toString('utf8', offset + 46, offset + 46 + nameLength);
+    const local = zip.readUInt32LE(offset + 42);
+    const start = local + 30 + zip.readUInt16LE(local + 26) + zip.readUInt16LE(local + 28);
+    const raw = zip.subarray(start, start + size);
+    if (!name.endsWith('/')) files.set(name, method === 8 ? inflateRawSync(raw) : raw);
+    offset += 46 + nameLength + zip.readUInt16LE(offset + 30) + zip.readUInt16LE(offset + 32);
+  }
+  const php = 'crfal-photo-gallery/crfal-photo-gallery.php';
+  assert.deepEqual([...files.keys()], [php]);
+  assert.ok(files.get(php).equals(await readFile(new URL(`../wordpress/${php}`, import.meta.url))), 'crfal-photo-gallery.zip desatualizado em relação ao PHP');
+  console.log('Galeria: zip do plugin igual ao PHP versionado.');
+}

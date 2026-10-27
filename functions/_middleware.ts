@@ -1,5 +1,6 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, ORIGIN_CACHE } from './_news';
+import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
+import type { NewsEnv } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
@@ -27,7 +28,7 @@ interface OgData {
   preloadSrcset?: string;
 }
 
-type PagesContext = EventContext<{ NEWS_ARCHIVE_API_URL?: string; WP_SITE_URL?: string }, string, Record<string, unknown>>;
+type PagesContext = EventContext<NewsEnv & { WP_SITE_URL?: string }, string, Record<string, unknown>>;
 
 function decodeEntities(value: string): string {
   return value
@@ -62,7 +63,7 @@ function escapeAttr(value: string): string {
 
 async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | null> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
+  const timer = setTimeout(() => controller.abort(), PAGE_BUDGET_MS);
   try {
     const res = await fetch(url, { ...ORIGIN_CACHE, signal: controller.signal, headers: { 'user-agent': 'crfal-og/2.0' } });
     if (res.status === 404 && allowNotFound) return null;
@@ -78,7 +79,7 @@ async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | nul
 // ---------------------------------------------------------------------------
 
 async function resolveNews(slug: string, context: PagesContext): Promise<OgData | null> {
-  const post = await newsPost(slug, context, true);
+  const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
   if (!post) return null;
   const media = post._embedded?.['wp:featuredmedia']?.[0];
   const cover = mediaImageSet(media);
@@ -215,28 +216,84 @@ function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Resp
   return response;
 }
 
+const METADATA_FRESH_MS = 10 * 60_000;
+const NOT_FOUND_S = 300;
+const refreshingMetadata = new Set<string>();
+
 async function cachedMetadata(context: PagesContext, pathname: string, resolve: () => Promise<OgData | null>): Promise<OgData | null> {
   // Cache metadata only: never retain HTML pointing to an outdated deployment bundle.
   const cache = (caches as CacheStorage & { default: Cache }).default;
-  const key = new Request(`${SITE_URL}/__page-metadata/v5/${encodeURIComponent(context.env?.WP_SITE_URL || '')}/${encodeURIComponent(context.env?.NEWS_ARCHIVE_API_URL || '')}${pathname}`);
+  const key = new Request(`${SITE_URL}/__page-metadata/v6/${encodeURIComponent(context.env?.WP_SITE_URL || '')}/${encodeURIComponent(context.env?.NEWS_ARCHIVE_API_URL || '')}${pathname}`);
+  // "Não encontrado" fica 5 min: slugs inexistentes não chegam sempre ao WordPress.
+  const store = (data: OgData | null, storedAt = Date.now(), checkedAt?: number) => cache.put(key, new Response(JSON.stringify({ storedAt, checkedAt, data }), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${data ? 86400 : NOT_FOUND_S}` },
+  }));
   const cached = await cache.match(key);
-  if (cached) return cached.json();
+  const entry = cached ? await cached.json() as { storedAt: number; checkedAt?: number; data: OgData | null } : undefined;
+  if (entry?.data === null && Date.now() - entry.storedAt < NOT_FOUND_S * 1000) return null;
+  if (entry?.data && Date.now() - entry.storedAt <= 24 * 3600_000) {
+    // Stale-while-revalidate: a página nunca espera pela origem quando já há metadados.
+    const current = entry.data;
+    if (Date.now() - (entry.checkedAt ?? entry.storedAt) > METADATA_FRESH_MS && !refreshingMetadata.has(key.url)) {
+      refreshingMetadata.add(key.url);
+      context.waitUntil((async () => {
+        await store(current, entry.storedAt, Date.now());
+        await store(await resolve());
+      })().catch(() => undefined).finally(() => refreshingMetadata.delete(key.url)));
+    }
+    return current;
+  }
   const data = await resolve();
-  if (data) context.waitUntil(cache.put(key, new Response(JSON.stringify(data), {
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=600' },
-  })).catch(() => undefined));
+  context.waitUntil(store(data).catch(() => undefined));
   return data;
 }
 
+/**
+ * Mesmo conjunto do bloco `/*` de public/_headers (teste garante a sincronia). O `_headers`
+ * não se aplica a respostas geradas por Functions (APIs, 404/410/503, sitemap, redirects).
+ */
+export const SECURITY_HEADERS: Record<string, string> = {
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'X-Permitted-Cross-Domain-Policies': 'none',
+  'Content-Security-Policy': "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://crf-al.org.br https://www.crf-al.org.br https://*.cdninstagram.com https://*.fbcdn.net https://admin.cff.org.br; font-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; frame-src https://www.youtube-nocookie.com; media-src 'self' https://midias.crf-al.org.br https://wordpress.crf-al.org.br https://www.crf-al.org.br; upgrade-insecure-requests",
+};
+
+/** Completa apenas os headers ausentes; nunca substitui um valor definido pela resposta. */
+export function withSecurityHeaders(response: Response): Response {
+  const missing = Object.keys(SECURITY_HEADERS).filter(name => !response.headers.has(name));
+  if (!missing.length || response.status === 101) return response;
+  // Headers de Response.redirect() e de respostas de fetch são imutáveis: copiar antes.
+  const secured = new Response(response.body, response);
+  for (const name of missing) secured.headers.set(name, SECURITY_HEADERS[name]);
+  return secured;
+}
+
 export async function onRequest(context: PagesContext): Promise<Response> {
+  return withSecurityHeaders(await handle(context));
+}
+
+async function handle(context: PagesContext): Promise<Response> {
   const url = new URL(context.request.url);
   const pathname = url.pathname.replace(/\/$/, '') || '/';
   if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
   if (pathname === '/sitemap-news.xml') {
     try {
+      const cache = (caches as CacheStorage & { default: Cache }).default;
+      const key = new Request(`${SITE_URL}/__sitemap-news/v1/${encodeURIComponent(context.env?.WP_SITE_URL || '')}`);
+      const hit = await cache.match(key);
+      if (hit) return new Response(context.request.method === 'HEAD' ? null : hit.body, hit);
       const entries = await newsSitemapIndex(context);
       const xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + entries.map(post => `<url><loc>${escapeAttr(`${SITE_URL}${NEWS_PREFIX}${post.slug}`)}</loc><lastmod>${escapeAttr((post.modified || post.date).slice(0, 10))}</lastmod></url>`).join('') + '</urlset>';
-      return new Response(context.request.method === 'HEAD' ? null : xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=60' } });
+      const response = new Response(xml, {
+        headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=600' },
+      });
+      context.waitUntil(cache.put(key, response.clone()).catch(() => undefined));
+      return new Response(context.request.method === 'HEAD' ? null : response.body, response);
     } catch {
       return new Response('Sitemap temporariamente indisponível.', { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' } });
     }
@@ -253,7 +310,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     const knownSlug = knownHistoricalSlug(historicalId);
     if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}`, 301);
     try {
-      const post = await newsPost(historicalId, context, true);
+      const post = await newsPost(historicalId, withNewsBudget(context, PAGE_BUDGET_MS, false));
       if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);
       return new Response('Notícia não encontrada.', { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
     } catch {
@@ -267,9 +324,11 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   }
   const staticData = Object.hasOwn(PAGE_METADATA, pathname) ? PAGE_METADATA[pathname] : undefined;
   const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));
-  // Conditional validators belong to the static shell; drop them so a 304 never skips the metadata lookup.
+  // Os validadores pertencem ao shell estático: nas rotas HTML um 304 pularia a injeção de metadados.
+  // Assets reais (imagens, PDFs, fontes, bundles) mantêm os validadores e podem responder 304.
+  const htmlRoute = Boolean(staticData || prefix) || !/\.[a-z0-9]+$/i.test(pathname);
   let upstream = context.request;
-  if (upstream.headers.has('If-None-Match') || upstream.headers.has('If-Modified-Since')) {
+  if (htmlRoute && (upstream.headers.has('If-None-Match') || upstream.headers.has('If-Modified-Since'))) {
     const headers = new Headers(upstream.headers);
     headers.delete('If-None-Match');
     headers.delete('If-Modified-Since');
@@ -294,10 +353,11 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   if (!slug || slug.includes('/')) return notFound(asset, pathname);
   try {
     if (prefix === NEWS_PREFIX && /^\d+$/.test(slug)) {
-      const post = await newsPost(slug, context, true);
+      const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
       return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301) : notFound(asset, pathname);
     }
-    const og = await cachedMetadata(context, pathname, () => prefix === NEWS_PREFIX ? resolveNews(slug, context) : prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
+    // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.
+    const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
     if (og?.title) return injectOg(asset, og);
     return notFound(asset, pathname);
   } catch (error) {

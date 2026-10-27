@@ -91,11 +91,14 @@ async function fetchText(url: string, timeoutMs: number): Promise<string> {
  * Percorre /publicacoes?page=N (em lotes paralelos) até a primeira página vazia
  * e devolve as coleções na ordem do CFF, juntando títulos repetidos.
  */
-export async function getCffPublications(): Promise<CffCollection[]> {
+export async function getCffPublications(budgetMs = 20_000): Promise<CffCollection[]> {
+  const deadline = Date.now() + Math.min(budgetMs, 20_000);
   const collections: CffCollection[] = [];
   for (let start = 1; start <= MAX_SOURCE_PAGES; start += PARALLEL_PAGES) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) throw new DOMException('CFF: prazo total esgotado', 'TimeoutError');
     const pages = Array.from({ length: Math.min(PARALLEL_PAGES, MAX_SOURCE_PAGES - start + 1) }, (_, i) => start + i);
-    const parsed = await Promise.all(pages.map(async (page) => parseCffPublications(await fetchText(`${CFF_BASE_URL}/publicacoes?page=${page}`, 10000))));
+    const parsed = await Promise.all(pages.map(async (page) => parseCffPublications(await fetchText(`${CFF_BASE_URL}/publicacoes?page=${page}`, Math.min(10_000, remaining)))));
     let ended = false;
     for (const found of parsed) {
       if (found.length === 0) {

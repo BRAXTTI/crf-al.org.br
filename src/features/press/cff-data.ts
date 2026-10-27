@@ -1,4 +1,4 @@
-import { requestJson } from '@/services/http';
+import { requestJson, retryTransient } from '@/services/http';
 import { useQuery } from '@tanstack/react-query';
 
 export interface CffPublication { link: string; cover?: string; edition?: number }
@@ -24,7 +24,7 @@ export function useCffPublications() {
     queryKey: ['cff-publications'],
     queryFn: ({ signal }) => fetchCffPublications(signal),
     staleTime: 60 * 60 * 1000,
-    retry: 1,
+    retry: retryTransient(1),
   });
 }
 
