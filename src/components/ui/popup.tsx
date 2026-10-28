@@ -78,21 +78,28 @@ export default function Popup({ popup }: PopupProps) {
     let delayDone = false;
     let interacted = false;
     const tryOpen = () => {
-      if (delayDone && interacted) setOpen(true);
+      if (delayDone && interacted && !document.querySelector('[data-notification-bell] [aria-expanded="true"]')) {
+        observer.disconnect();
+        setOpen(true);
+      }
     };
-    const onInteract = () => {
+    const onInteract = (event: Event) => {
+      if (event.target instanceof Element && event.target.closest('[data-notification-bell]')) return;
       interacted = true;
       removeListeners();
       tryOpen();
     };
     const removeListeners = () => INTERACTION_EVENTS.forEach((type) => window.removeEventListener(type, onInteract));
     INTERACTION_EVENTS.forEach((type) => window.addEventListener(type, onInteract, { passive: true }));
+    const observer = new MutationObserver(tryOpen);
+    observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['aria-expanded'] });
     const timer = window.setTimeout(() => {
       delayDone = true;
       tryOpen();
     }, active.delayMs ?? DEFAULT_DELAY_MS);
     return () => {
       window.clearTimeout(timer);
+      observer.disconnect();
       removeListeners();
     };
   }, [active]);
