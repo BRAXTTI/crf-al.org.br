@@ -289,11 +289,11 @@ export function withSecurityHeaders(response: Response): Response {
   return secured;
 }
 
-export async function onRequest(context: PagesContext): Promise<Response> {
+async function handleRequest(context: PagesContext & { timings: Record<string, number> }): Promise<Response> {
   return withSecurityHeaders(await handle(context));
 }
 
-async function handle(context: PagesContext): Promise<Response> {
+async function handle(context: PagesContext & { timings: Record<string, number> }): Promise<Response> {
   const url = new URL(context.request.url);
   const pathname = url.pathname.replace(/\/$/, '') || '/';
   // Endpoints do WordPress antigo não pertencem ao institucional, em qualquer método.
@@ -385,7 +385,9 @@ async function handle(context: PagesContext): Promise<Response> {
     headers.delete('If-Modified-Since');
     upstream = new Request(upstream, { headers });
   }
+  const assetStart = performance.now();
   const asset = await context.next(upstream);
+  context.timings.asset += performance.now() - assetStart;
   if (!asset.ok || !asset.headers.get('content-type')?.includes('text/html')) return asset;
   // Pages falls back to index.html for missing files and routes in a SPA.
   // Keep real assets/API responses, but never report that HTML fallback as success.
@@ -411,7 +413,10 @@ async function handle(context: PagesContext): Promise<Response> {
     const render = async () => {
       const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
       if (!og?.title) return notFound(asset, pathname);
-      const response = injectOg(asset, og);
+      const rewriteStart = performance.now();
+      const rewritten = injectOg(asset, og);
+      const response = new Response(await rewritten.arrayBuffer(), rewritten);
+      context.timings.rewriter += performance.now() - rewriteStart;
       if (prefix === NEWS_PREFIX) response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000');
       return response;
     };
@@ -448,4 +453,12 @@ function notFound(asset: Response, pathname: string): Response {
   return injectOg(new Response(asset.body, { status: 404, headers }), {
     title: 'Página não encontrada', description: 'O conteúdo solicitado não foi encontrado.', canonical: `${SITE_URL}${pathname}`, noindex: true,
   });
+}
+
+export async function onRequest(context: PagesContext): Promise<Response> {
+  const timings = { cache: 0, kv: 0, asset: 0, rewriter: 0, origin: 0 };
+  const response = await handleRequest(Object.assign(context, { timings }));
+  const result = new Response(response.body, response);
+  result.headers.set('Server-Timing', Object.entries(timings).map(([name, value]) => `${name};dur=${value.toFixed(1)}`).join(', '));
+  return result;
 }

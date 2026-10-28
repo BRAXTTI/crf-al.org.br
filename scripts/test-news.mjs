@@ -226,7 +226,7 @@ try {
     await Promise.all(pending.splice(0));
     assert.equal(first.content.rendered.length > 0, true, 'Detalhe completo (com conteúdo) também serve os metadados');
     assert.equal(writes.filter(row => row.key === postKey).length, 1);
-    assert.equal(writes.find(row => row.key === postKey).options.expirationTtl, 30 * 24 * 3600);
+    assert.equal(writes.find(row => row.key === postKey).options, undefined);
     fail = true;
     assert.deepEqual(await newsPost(slug, context), first, 'Reserva do KV servida mesmo com a origem fora');
     await Promise.all(pending.splice(0));
@@ -492,7 +492,7 @@ try {
       for (const term of ['ab', '   a ', 'x'.repeat(121), 'abc\u0007']) assert.equal((await newsApi(new Request(`https://example.test/api/news?search=${encodeURIComponent(term)}`), ctx)).status, 400, JSON.stringify(term));
     } finally { globalThis.caches = previousCaches; }
   }
-  const cronUrl = await moduleUrl('../workers/news-index-cron/index.ts', { "'../../functions/_news'": JSON.stringify(await loadNews()) });
+  const cronUrl = await moduleUrl('../workers/news-index-cron/index.ts', { "'../../functions/_news'": JSON.stringify(await loadNews()), "'./snapshot.json'": JSON.stringify('data:text/javascript,export default undefined') });
   const cron = (await import(cronUrl)).default;
   values.delete(NEWS_INDEX_LOCK);
   await cron.scheduled({}, context.env, context);

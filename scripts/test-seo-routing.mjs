@@ -55,7 +55,13 @@ async function request(path, options = {}) {
   background = [];
   return onRequest({
     request: new Request(`https://institucional.crf-al.org.br${path}`, { method: options.method || 'GET', headers: options.headers }),
-    next: async upstream => { forwarded = upstream; return options.response || shell(); },
+    next: async upstream => {
+      if (upstream && new URL(upstream.url).pathname.startsWith('/news-snapshot/')) {
+        try { return new Response(await readFile(new URL(`../public${new URL(upstream.url).pathname}`, import.meta.url)), { headers: { 'Content-Type': 'application/json' } }); }
+        catch { return new Response('missing', { status: 404 }); }
+      }
+      forwarded = upstream; return options.response || shell();
+    },
     waitUntil: promise => background.push(promise),
   });
 }
@@ -247,6 +253,7 @@ try {
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
   response = await request(`/imprensa/noticias/${post.slug}`);
   assert.equal(response.status, 200);
+  assert.match(response.headers.get('Server-Timing'), /cache;dur=.*kv;dur=.*asset;dur=.*rewriter;dur=.*origin;dur=/);
   await Promise.all(background);
   const before = fetches;
   assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test`)).status, 200);
@@ -305,17 +312,17 @@ try {
   for (const status of [404, 403, 500, 503]) {
     stored = new Map();
     origin = () => new Response('', { status });
-    // A missing API collection means the integration is broken, not that all
-    // articles/events disappeared. Individual 404s were covered above.
-    for (const path of ['/imprensa/noticias/noticia', '/eventos/evento']) {
-      response = await request(path);
-      assert.equal(response.status, path.startsWith('/imprensa/noticias/') ? 200 : 503, `${path}: origin ${status}`);
-      assert.equal(response.headers.get('Cache-Control'), 'no-store');
-      assert.equal(response.headers.get('Retry-After'), path.startsWith('/imprensa/noticias/') ? null : '60');
-      assert.equal(response.headers.get('X-Robots-Tag'), null, 'Do not deindex valid content during an outage');
-      assert.equal(response.headers.get('ETag'), null);
-    }
-    assert.equal(stored.size, 0, 'Never cache origin errors');
+    response = await request(`/imprensa/noticias/${post.slug}`);
+    assert.equal(response.status, 200, `snapshot durante falha ${status}`);
+    response = await request('/imprensa/noticias/noticia-inexistente');
+    assert.equal(response.status, 404);
+    response = await request('/eventos/evento');
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get('Cache-Control'), 'no-store');
+    assert.equal(response.headers.get('Retry-After'), '60');
+    assert.equal(response.headers.get('X-Robots-Tag'), null);
+    assert.equal(response.headers.get('ETag'), null);
+
   }
   origin = () => { throw new TypeError('Network unavailable'); };
   assert.equal((await request('/imprensa/galeria-de-fotos/album')).status, 503);

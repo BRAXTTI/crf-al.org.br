@@ -16,7 +16,7 @@
     "test:metadata": "node scripts/test-page-metadata.mjs",
     "sitemap:refresh": "node scripts/generate-sitemaps.mjs public",
     "test:seo": "node scripts/test-seo-routing.mjs",
-    "test:news": "node scripts/test-news.mjs && node scripts/test-news-response-cache.mjs",
+    "test:news": "node scripts/test-news.mjs && node scripts/test-news-response-cache.mjs && node scripts/test-news-snapshot.mjs",
     "test:cff": "node scripts/test-cff.mjs",
     "news:archive": "node scripts/generate-news-archive.mjs",
     "lint": "eslint .",

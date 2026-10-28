@@ -44,6 +44,9 @@ interface NewsContext {
   env?: NewsEnv;
   waitUntil: (promise: Promise<unknown>) => void;
   budget?: NewsBudget;
+  next?: (request: Request) => Promise<Response>;
+  request?: Request;
+  timings?: Record<string, number>;
 }
 /** HTML: ~1,8 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
 export const PAGE_BUDGET_MS = 1800;
@@ -52,6 +55,9 @@ const CALL_TIMEOUT_MS = 8_000;
 export function withNewsBudget(context: NewsContext, ms: number, retry: boolean): NewsContext {
   return {
     env: context.env,
+    next: context.next,
+    request: context.request,
+    timings: context.timings,
     waitUntil: (promise) => context.waitUntil(promise),
     budget: { deadline: Date.now() + ms, retry },
   };
@@ -114,11 +120,13 @@ async function request(
     if (remaining <= 0) throw new DOMException('News budget exhausted', 'TimeoutError');
     const retry = attempt === 0 && (!budget || budget.retry);
     let response: Response;
+    const originStart = performance.now();
     try {
       const upstream = await fetch(url, {
         ...ORIGIN_CACHE,
         signal: AbortSignal.timeout(Math.min(remaining, CALL_TIMEOUT_MS)),
       });
+      if (context?.timings) context.timings.origin = (context.timings.origin || 0) + performance.now() - originStart;
       // Inclui a leitura do corpo na tentativa: timeout pode ocorrer após os headers.
       response = new Response(await upstream.arrayBuffer(), {
         status: upstream.status,
@@ -167,9 +175,7 @@ async function storeDurable<T>(
     JSON.stringify(stored.value) === JSON.stringify(value)
   )
     return;
-  await kv.put(durableKey(key), JSON.stringify({ storedAt: now, value }), {
-    expirationTtl: DURABLE_TTL_S,
-  });
+  await kv.put(durableKey(key), JSON.stringify({ storedAt: now, value }), key.startsWith('post/') ? undefined : { expirationTtl: DURABLE_TTL_S });
 }
 /**
  * Cache API por data center (fresco por 5 min) + stale-while-revalidate. Com `durable`, o KV
@@ -566,7 +572,7 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   }
   return entry;
 }
-export function refreshNewsIndex(context: NewsContext, scheduled = false): Promise<Entry[] | null> {
+export function refreshNewsIndex(context: NewsContext, scheduled = false, snapshot?: { generatedAt: string; entries: { id: number; slug: string; modified?: string }[] }): Promise<Entry[] | null> {
   const kv = newsKV(context);
   if (!kv) return Promise.reject(new Error('NEWS_INDEX binding required'));
   const pending = refreshing.get(kv);
@@ -579,7 +585,17 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
     ).join('');
     const previous = await readNewsIndex(kv);
     const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
+    const snapshotKey = 'news:snapshot:baseline:v1';
+    const baseline = snapshot && await kv.get<string>(snapshotKey, 'json');
+    if (scheduled && (previous || snapshot)) {
+      const old = new Map((snapshot && baseline !== snapshot.generatedAt ? snapshot.entries : previous?.value ?? []).map(item => [item.id, item]));
+      const changed = value.filter(item => old.get(item.id)?.modified !== item.modified || old.get(item.id)?.slug !== item.slug);
+      // Persiste detalhes antes do índice: se falhar, a próxima execução tenta novamente.
+      for (let i = 0; i < changed.length; i += 100)
+        await warmNewsPosts(context, changed.slice(i, i + 100), 100);
+    }
     if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
+    if (scheduled && snapshot && baseline !== snapshot.generatedAt) await kv.put(snapshotKey, JSON.stringify(snapshot.generatedAt));
     await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
     // (checked: 1 escrita/execução = 24/dia com cron horário)
     memo.set(kv, { readAt: Date.now(), entry });
@@ -645,6 +661,7 @@ const postKey = (slug: string) => `post/${encodeURIComponent(slug)}`;
 /** Detalhe completo da notícia. Middleware (metadados) e /api/news compartilham a mesma chave. */
 export async function newsPost(slug: string, context?: NewsContext): Promise<WPPost | null> {
   if (isBlockedNews(slug)) return null;
+  if (snapshotAvailable(context)) return snapshotPost(slug, context!);
   return cached(
     postKey(slug),
     context,
@@ -682,6 +699,76 @@ export async function newsPost(slug: string, context?: NewsContext): Promise<WPP
     },
     { durable: true },
   );
+}
+// O snapshot versionado garante que uma leitura fria nunca espere pelo WordPress.
+function snapshotAvailable(context?: NewsContext): boolean {
+  return Boolean(context?.next && context.request && !originScope(context));
+}
+async function snapshotAsset<T>(context: NewsContext, path: string): Promise<T | null> {
+  const url = new URL(`/news-snapshot/${path}`, context.request!.url);
+  const start = performance.now();
+  const response = await context.next!(new Request(url));
+  if (!response.ok || !response.headers.get('content-type')?.includes('json')) return null;
+  const value = await response.json() as T;
+  if (context.timings) context.timings.asset = (context.timings.asset || 0) + performance.now() - start;
+  return value;
+}
+let snapshotMemo: Promise<WPPost[]> | undefined;
+async function snapshotCards(context: NewsContext): Promise<WPPost[]> {
+  snapshotMemo ??= snapshotAsset<WPPost[]>(context, 'index.json').then(value => {
+    if (!value) throw new Error('News snapshot missing');
+    return value;
+  }).catch(error => { snapshotMemo = undefined; throw error; });
+  return snapshotMemo;
+}
+async function boundedKV<T>(task: Promise<T>, fallback: T, context: NewsContext): Promise<T> {
+  const start = performance.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([task.catch(() => fallback), new Promise<T>(resolve => { timer = setTimeout(() => resolve(fallback), 150); })]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+    if (context.timings) context.timings.kv = (context.timings.kv || 0) + performance.now() - start;
+  }
+}
+async function snapshotPost(slug: string, context: NewsContext): Promise<WPPost | null> {
+  const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
+  const canonical = row?.slug ?? slug;
+  const kv = newsKV(context);
+  const [stored, asset] = await Promise.all([
+    kv ? boundedKV(kv.get<Stored<WPPost>>(durableKey(postKey(canonical)), { type: 'json', cacheTtl: 60 }), null, context) : null,
+    snapshotAsset<WPPost>(context, `posts/${encodeURIComponent(canonical)}.json`),
+  ]);
+  return stored?.value && (!asset || (stored.value.modified || '') >= (asset.modified || '')) ? stored.value : asset;
+}
+async function snapshotListing(context: NewsContext): Promise<WPPost[]> {
+  const cards = await snapshotCards(context);
+  const kv = newsKV(context);
+  if (!kv) return cards;
+  const [index, recent] = await Promise.all([boundedKV(readNewsIndex(kv), null, context), boundedKV(readRecentCards(kv), null, context)]);
+  if (!index) return cards;
+  const old = new Map(cards.map(card => [card.id, card]));
+  const fresh = new Map(recent?.value.map(card => [card.id, card.post]));
+  const result = await Promise.all(index.value.map(async entry => {
+    const current = fresh.get(entry.id) ?? old.get(entry.id);
+    if (current && current.modified === entry.modified && current.slug === entry.slug) return current;
+    const stored = await boundedKV(kv.get<Stored<WPPost>>(durableKey(postKey(entry.slug)), { type: 'json', cacheTtl: 60 }), null, context);
+    return stored?.value ?? current;
+  }));
+  const merged = new Map(cards.map(post => [post.id, post]));
+  for (const post of result) if (post) merged.set(post.id, post);
+  return [...merged.values()].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+}
+async function snapshotPage(page: number, perPage: number, context: NewsContext): Promise<WPPostsPage> {
+  const posts = await snapshotListing(context);
+  return { posts: posts.slice((page - 1) * perPage, page * perPage), total: posts.length, totalPages: Math.ceil(posts.length / perPage) };
+}
+async function snapshotSearch(term: string, context: NewsContext): Promise<WPPost[]> {
+  const words = term.split(' ');
+  return (await snapshotListing(context)).filter(post => {
+    const text = `${post.title?.rendered ?? ''} ${post.excerpt?.rendered ?? ''}`.toLocaleLowerCase('pt-BR');
+    return words.every(word => text.includes(word));
+  }).slice(0, 10);
 }
 export const WARM_POSTS = 30;
 /**
@@ -728,6 +815,7 @@ export async function newsPage(
     perPage > 100
   )
     throw new RangeError('Invalid news pagination');
+  if (snapshotAvailable(context)) return snapshotPage(page, perPage, context!);
   const index = await newsIndex(context);
   const entries = index.slice((page - 1) * perPage, page * perPage);
   if (!entries.length)
@@ -794,6 +882,7 @@ export function normalizeSearch(term: string): string | null {
 export async function searchNews(term: string, context?: NewsContext): Promise<WPPost[]> {
   const normalized = normalizeSearch(term);
   if (normalized === null) throw new RangeError('Invalid news search');
+  if (snapshotAvailable(context)) return snapshotSearch(normalized, context!);
   // Resultados de busca mudam pouco: 5 min frescos, depois stale-while-revalidate.
   return cached(
     `search/${encodeURIComponent(normalized)}`,

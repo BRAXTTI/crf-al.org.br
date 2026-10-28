@@ -3,7 +3,7 @@ import { SITE_URL } from '../src/config/site';
 const FRESH_MS = 10 * 60_000;
 const RETENTION_S = 30 * 24 * 3600;
 const refreshing = new Set<string>();
-type Context = { waitUntil: (promise: Promise<unknown>) => void };
+type Context = { waitUntil: (promise: Promise<unknown>) => void; timings?: Record<string, number> };
 
 /** Chaves internas só incluem parâmetros que alteram o resultado; rastreadores são ignorados. */
 export function newsResponseKey(request: Request, scope: string, version = ''): Request {
@@ -32,13 +32,15 @@ export async function cachedNewsResponse(context: Context, key: Request, load: (
     copy.headers.set('Cache-Control', `public, max-age=${RETENTION_S}`);
     await cache.put(key, copy);
   };
-  const hit = await cache.match(key).catch(() => undefined);
+  const started = performance.now();
+  const hit = await Promise.race([cache.match(key).catch(() => undefined), new Promise<undefined>(resolve => setTimeout(resolve, 150))]);
+  if (context.timings) context.timings.cache = (context.timings.cache || 0) + performance.now() - started;
   if (hit) {
     if (Date.now() - Number(hit.headers.get('X-News-Cached-At') || 0) > FRESH_MS && !refreshing.has(key.url)) {
       refreshing.add(key.url);
       context.waitUntil(load().then(store).catch(() => undefined).finally(() => refreshing.delete(key.url)));
     }
-    const result = new Response(hit.body, hit);
+    const result = new Response(await hit.arrayBuffer(), hit);
     result.headers.delete('X-News-Cached-At');
     result.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000');
     return result;
