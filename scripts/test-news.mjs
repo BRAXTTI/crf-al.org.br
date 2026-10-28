@@ -261,7 +261,7 @@ try {
       await newsPost(slug, context); await Promise.all(pending.splice(0));
       assert.equal(requests.length, 0, 'Cache local fresco não consulta KV nem origem');
       const entry = [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(slug)}`));
-      assert.match(local.get(entry).headers.get('Cache-Control'), /max-age=604800/);
+      assert.match(local.get(entry).headers.get('Cache-Control'), /max-age=2592000/);
       const body = await local.get(entry).clone().json();
       local.set(entry, Response.json({ ...body, storedAt: Date.now() - 240_000 }));
       await newsPost(slug, context);
