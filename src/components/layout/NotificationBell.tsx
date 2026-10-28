@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useId, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -9,6 +9,9 @@ import { useFontesNotificacoes } from '@/features/notificacoes/fontes';
 const carregarPainel = () => import('@/features/notificacoes/NotificationPanel');
 const NotificationPanel = lazy(carregarPainel);
 
+/** Respiro entre a borda inferior do <header> e o painel, igual em todas as larguras. */
+const RESPIRO_PX = 8;
+
 /** Notícias entram depois da primeira abertura (ou já em cache, como na home): o sino não pesa nas outras páginas. */
 let painelJaAberto = false;
 
@@ -17,13 +20,14 @@ const VARIANTS = {
     button: 'relative flex h-11 w-11 items-center justify-center rounded-full text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue aria-expanded:bg-crfal-blue-lighter',
     icon: 'h-5 w-5',
     badge: 'ring-white',
-    panel: 'absolute right-0 top-full z-50 mt-3 w-[432px]',
+    // O topo é medido até o fim do <header> inteiro (barra utilitária, barra principal e borda).
+    panel: 'absolute right-0 top-[calc(100%+12px)] z-50 w-[432px]',
   },
   mobile: {
     button: 'relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-white aria-expanded:bg-white/10',
     icon: 'h-6 w-6',
     badge: 'ring-crfal-blue',
-    panel: 'fixed inset-x-2 top-[calc(var(--header-offset)+8px)] z-50 mx-auto max-w-[432px]',
+    panel: 'fixed inset-x-3 top-[calc(var(--header-offset)+8px)] z-50 mx-auto max-w-[432px]',
   },
 } as const;
 
@@ -40,6 +44,8 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [topoDesktop, setTopoDesktop] = useState<number>();
 
   // Fecha ao trocar de página (inclusive ao abrir um evento ou notícia pelo painel).
   if (lastPathname !== pathname) {
@@ -89,10 +95,27 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
     };
   }, [open]);
 
+  // Desktop: o sino fica no meio da barra; o painel desce até o fim do <header> + 8px. A distância
+  // sino→fim do header não muda quando a barra utilitária recolhe (os dois sobem juntos), então
+  // basta medir ao abrir e ao redimensionar.
+  useLayoutEffect(() => {
+    if (!open || variant !== 'desktop') return;
+    const medir = () => {
+      const wrapper = wrapperRef.current;
+      const header = wrapper?.closest('header');
+      if (!wrapper || !header) return;
+      const ate = header.getBoundingClientRect().bottom - wrapper.getBoundingClientRect().bottom;
+      setTopoDesktop(Math.max(0, Math.round(ate)) + RESPIRO_PX);
+    };
+    medir();
+    window.addEventListener('resize', medir);
+    return () => window.removeEventListener('resize', medir);
+  }, [open, variant]);
+
   const rotulo = naoLidas > 0 ? `Notificações, ${naoLidas} ${naoLidas === 1 ? 'não lida' : 'não lidas'}` : 'Notificações';
 
   return (
-    <div data-notification-bell className={variant === 'desktop' ? 'relative' : undefined}>
+    <div ref={wrapperRef} data-notification-bell className={variant === 'desktop' ? 'relative' : undefined}>
       <button
         ref={buttonRef}
         type="button"
@@ -125,7 +148,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
           aria-label="Notificações"
           tabIndex={-1}
           // Alvo de foco programático (não interativo): sem o contorno global de :focus-visible.
-          style={{ outline: 'none' }}
+          style={{ outline: 'none', ...(variant === 'desktop' && topoDesktop !== undefined ? { top: `calc(100% + ${topoDesktop}px)` } : null) }}
           onBlur={(event) => {
             const destino = event.relatedTarget as Node | null;
             if (destino && !event.currentTarget.contains(destino) && !buttonRef.current?.contains(destino)) fechar();

@@ -62,7 +62,7 @@ export interface LiveNotificationFeedProps extends React.ComponentProps<"div"> {
   interval?: number;
   /** Com autoplay, limpa o feed e recomeça depois da última chegada. */
   loop?: boolean;
-  /** Altura da lista rolável, qualquer medida CSS. */
+  /** Altura máxima da lista rolável, qualquer medida CSS. */
   height?: string;
   onOpen?: (id: string) => void;
   onAction?: (id: string, label: string) => void;
@@ -103,7 +103,9 @@ const CHECK_STAGGER_MS = 220;
 const SPRING = "cubic-bezier(0.2, 0.9, 0.25, 1.12)";
 const SETTLE = "cubic-bezier(0.2, 0.8, 0.2, 1)";
 const EXIT = "cubic-bezier(0.4, 0, 0.2, 1)";
-const DEFAULT_HEIGHT = "min(440px, calc(100svh - 12rem))";
+/* Cabe abaixo do cabeçalho do site com folga: cabeçalho do painel (~4.5rem), faixa "Mais notificações" (2.25rem) e margem inferior (~4rem). */
+const DEFAULT_HEIGHT = "min(480px, calc(100svh - var(--header-offset, 64px) - 10.5rem))";
+const FADE_PX = 40;
 const TINT = "color-mix(in oklab, currentColor 12%, transparent)";
 const REEL = Array.from({ length: 20 }, (_, i) => i % 10);
 const POP: Keyframe[] = [
@@ -169,6 +171,7 @@ const BELL = "M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 1.5h-15Z M10 20.5a2.2 2.2 0 0 0 
 const CLOSE = "M7 7l10 10M17 7 7 17";
 const CHECK = "M5 12.5l4.2 4.2L19 7";
 const LOCK = "M7.5 11V8.5a4.5 4.5 0 0 1 9 0V11 M6 11h12v9H6Z";
+const CHEVRON_DOWN = "M7 10l5 5 5-5";
 
 function AppTile({ kind, accent, play, delay, reduced }: { kind: NotificationKind; accent?: string; play: number; delay: number; reduced: boolean }) {
   const ringRef = React.useRef(null as HTMLSpanElement | null);
@@ -186,7 +189,7 @@ function AppTile({ kind, accent, play, delay, reduced }: { kind: NotificationKin
   return (
     <span
       data-tile
-      className={cx("relative grid size-9 shrink-0 place-items-center rounded-xl ring-1 ring-inset ring-current/15", !accent && "text-crfal-blue")}
+      className={cx("relative mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl ring-1 ring-inset ring-current/15", !accent && "text-crfal-blue")}
       style={{ color: accent, background: TINT }}
     >
       <Icon d={ICONS[kind]} className="size-[18px]" />
@@ -511,7 +514,7 @@ function Detail({ item, play, delay, reduced }: { item: LiveNotification; play: 
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crfal-blue";
 const OPEN_CLASS =
-  "mt-0.5 block w-full text-left text-sm font-bold leading-snug text-crfal-blue-dark outline-none after:absolute after:inset-0 after:rounded-2xl after:content-[''] focus-visible:after:ring-2 focus-visible:after:ring-crfal-blue";
+  "mt-1 block w-full text-left text-sm leading-[1.35] text-crfal-blue-dark outline-none after:absolute after:-inset-px after:rounded-2xl after:content-[''] focus-visible:after:ring-2 focus-visible:after:ring-crfal-blue focus-visible:after:ring-offset-2 focus-visible:after:ring-offset-crfal-gray-50";
 
 function NotificationCard({
   item,
@@ -553,7 +556,7 @@ function NotificationCard({
   const rowTransition = reduced ? "none" : `grid-template-rows ${duration}ms ${entry.leaving ? EXIT : SETTLE} ${lag}ms`;
   const cardTransition = reduced
     ? "none"
-    : `transform ${duration}ms ${entry.leaving ? EXIT : SPRING} ${lag}ms, opacity ${Math.round(duration * 0.7)}ms ease ${lag}ms, border-color 200ms ease, box-shadow 200ms ease`;
+    : `transform ${duration}ms ${entry.leaving ? EXIT : SPRING} ${lag}ms, opacity ${Math.round(duration * 0.7)}ms ease ${lag}ms, border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease`;
   const storyDelay = entry.fresh ? STORY_DELAY_MS + entry.delay : 0;
   const accentScope = { color: item.accent };
   const accentClass = item.accent ? undefined : "text-crfal-blue";
@@ -575,17 +578,22 @@ function NotificationCard({
       style={{ gridTemplateRows: shown ? "1fr" : "0fr", transition: rowTransition }}
     >
       <div className="min-h-0 overflow-hidden">
-        <div className="px-1 pb-2 pt-0.5">
+        <div className="px-1 pb-2.5 pt-0.5">
           <article
-            aria-label={`${item.app}: ${item.title}`}
-            className="group relative rounded-2xl border border-crfal-gray-200/80 bg-white p-3 text-crfal-gray-800 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_24px_-20px_rgba(11,25,44,0.35)] hover:border-crfal-blue/25 hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_32px_-20px_rgba(0,51,102,0.45)]"
+            aria-label={`${item.app}: ${item.title}${read ? "" : ", não lida"}`}
+            className={cx(
+              "group relative rounded-2xl border border-crfal-gray-200/80 p-3.5 text-crfal-gray-800",
+              "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_24px_-20px_rgba(11,25,44,0.35)] hover:border-crfal-blue/25 hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_32px_-20px_rgba(0,51,102,0.45)]",
+              // Lidas recuam um tom; não lidas ficam em branco pleno, título em negrito e com o ponto.
+              read ? "bg-white/70 hover:bg-white" : "bg-white",
+            )}
             style={{ transform: shown ? "none" : entry.leaving ? "translateX(18%) scale(0.98)" : "translateY(-16px) scale(0.96)", opacity: shown ? 1 : 0, transition: cardTransition }}
           >
             <div className="flex gap-3">
               <AppTile kind={item.kind} accent={item.accent} play={entry.play} delay={storyDelay} reduced={reduced} />
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 pr-6 text-xs text-crfal-gray-600">
-                  <span className="truncate font-semibold uppercase tracking-[0.08em] text-[10.5px]" style={accentScope}>
+                <div className="flex h-4 items-center gap-1.5 pr-7 text-xs leading-4 text-crfal-gray-600 [@media(hover:none)]:pr-10">
+                  <span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]" style={accentScope}>
                     <span className={accentClass}>{item.app}</span>
                   </span>
                   <span aria-hidden className="text-crfal-gold">·</span>
@@ -604,17 +612,17 @@ function NotificationCard({
                       onNavigate(item.href!);
                     }}
                     onKeyDown={dismissOnDelete}
-                    className={OPEN_CLASS}
+                    className={cx(OPEN_CLASS, read ? "font-semibold" : "font-bold")}
                   >
                     {item.title}
                   </a>
                 ) : (
-                  <button type="button" data-open onClick={onOpen} onKeyDown={dismissOnDelete} className={OPEN_CLASS}>
+                  <button type="button" data-open onClick={onOpen} onKeyDown={dismissOnDelete} className={cx(OPEN_CLASS, read ? "font-semibold" : "font-bold")}>
                     {item.title}
                   </button>
                 )}
-                {item.body && <p className="mt-0.5 text-[13px] leading-snug text-crfal-gray-600">{item.body}</p>}
-                <div className={cx("mt-2.5", accentClass)} style={accentScope}>
+                {item.body && <p className="mt-1 line-clamp-3 text-[13px] leading-normal text-crfal-gray-600">{item.body}</p>}
+                <div className={cx("mt-3", accentClass)} style={accentScope}>
                   <Detail item={item} play={entry.play} delay={storyDelay} reduced={reduced} />
                   {item.actions && item.actions.length > 0 && (
                     <div className="relative z-[1] mt-2.5 flex flex-wrap items-center gap-2">
@@ -652,7 +660,11 @@ function NotificationCard({
               <span
                 data-unread
                 aria-hidden
-                className={cx("absolute right-3.5 top-3.5 size-2 rounded-full ring-2 ring-white transition-opacity group-hover:opacity-0 [@media(hover:none)]:right-9 [@media(hover:none)]:group-hover:opacity-100", !item.accent && "bg-crfal-blue")}
+                className={cx(
+                  // Centro na linha do rótulo (22px), no lugar do "Dispensar" que surge no hover; sem hover, ao lado dele.
+                  "absolute right-[18px] top-[18px] size-2 rounded-full ring-2 ring-white transition-opacity group-focus-within:opacity-0 group-hover:opacity-0 [@media(hover:none)]:right-10 [@media(hover:none)]:group-focus-within:opacity-100",
+                  !item.accent && "bg-crfal-blue",
+                )}
                 style={item.accent ? { background: item.accent } : undefined}
               />
             )}
@@ -665,7 +677,8 @@ function NotificationCard({
                 onDismiss();
               }}
               className={cx(
-                "absolute right-2 top-2 z-[2] grid size-6 place-items-center rounded-full text-crfal-gray-600 opacity-0 transition-opacity hover:bg-crfal-blue-lighter hover:text-crfal-blue focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100",
+                // 28px visíveis; no toque, a área de clique cresce para 40px sem empurrar o layout.
+                "absolute right-2 top-2 z-[2] grid size-7 place-items-center rounded-full text-crfal-gray-600 opacity-0 transition-[opacity,background-color,color] hover:bg-crfal-blue-lighter hover:text-crfal-blue focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:before:absolute pointer-coarse:before:-inset-1.5 pointer-coarse:before:content-[''] [@media(hover:none)]:opacity-100",
                 FOCUS_RING,
               )}
             >
@@ -678,8 +691,9 @@ function NotificationCard({
   );
 }
 
+/* 32px com mouse, 44px em telas de toque. */
 const HEADER_BUTTON = cx(
-  "rounded-full px-2.5 py-1 text-xs font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter disabled:pointer-events-none disabled:text-crfal-gray-500 disabled:opacity-60",
+  "inline-flex h-8 items-center rounded-full px-3 text-xs font-semibold text-crfal-blue pointer-coarse:h-11 transition-colors hover:bg-crfal-blue-lighter disabled:pointer-events-none disabled:text-crfal-gray-500 disabled:opacity-60",
   FOCUS_RING,
 );
 
@@ -883,6 +897,28 @@ export function LiveNotificationFeed({
     paused.current = value;
   };
 
+  // Rolagem: o esmaecimento e o "Mais notificações" só aparecem quando há itens abaixo;
+  // no fim da lista o último card fica inteiro. O fio sob o cabeçalho marca a lista rolada.
+  const listRef = React.useRef(null as HTMLDivElement | null);
+  const [scroll, setScroll] = React.useState({ scrolled: false, more: false, overflow: false });
+  const measure = React.useCallback(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const scrolled = list.scrollTop > 1;
+    const more = list.scrollTop + list.clientHeight < list.scrollHeight - 2;
+    const overflow = list.scrollHeight > list.clientHeight + 2;
+    setScroll((prev) => (prev.scrolled === scrolled && prev.more === more && prev.overflow === overflow ? prev : { scrolled, more, overflow }));
+  }, []);
+  React.useLayoutEffect(measure, [measure, entries]);
+  React.useEffect(() => {
+    const list = listRef.current;
+    if (!list || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [measure]);
+  const fade = scroll.more ? `linear-gradient(to bottom, black calc(100% - ${FADE_PX}px), transparent)` : undefined;
+
   return (
     <div
       ref={ref}
@@ -917,8 +953,8 @@ export function LiveNotificationFeed({
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-24 opacity-60 [background-image:linear-gradient(to_right,rgb(0_51_102/0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgb(0_51_102/0.06)_1px,transparent_1px)] [background-size:16px_16px] [mask-image:linear-gradient(to_bottom,black,transparent)]"
       />
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 pb-2.5 pt-2">
-        <span className="grid size-7 place-items-center rounded-full bg-crfal-blue text-white ring-1 ring-crfal-gold/50">
+      <div className="flex items-center gap-2 pb-2 pl-3 pr-1.5 pt-2.5">
+        <span className="grid size-7 shrink-0 place-items-center rounded-full bg-crfal-blue text-white ring-1 ring-crfal-gold/50">
           <svg
             ref={bellRef}
             viewBox="0 0 24 24"
@@ -934,15 +970,15 @@ export function LiveNotificationFeed({
             <path d={BELL} />
           </svg>
         </span>
-        <h2 className="text-sm font-bold tracking-tight text-crfal-blue-dark">{title}</h2>
+        <h2 className="truncate text-[15px] font-bold leading-5 tracking-tight text-crfal-blue-dark">{title}</h2>
         <span
           data-count
           aria-label={`${unread} ${unread === 1 ? "não lida" : "não lidas"}`}
-          className={cx("min-w-5 rounded-full bg-crfal-blue px-1.5 text-center text-[11px] font-bold leading-5 text-white tabular-nums transition-opacity", unread === 0 && "opacity-0")}
+          className={cx("min-w-5 shrink-0 rounded-full bg-crfal-blue px-1.5 text-center text-[11px] font-bold leading-5 text-white tabular-nums transition-opacity", unread === 0 && "opacity-0")}
         >
           {unread}
         </span>
-        <div className="ml-auto flex items-center gap-0.5 whitespace-nowrap">
+        <div className="ml-auto flex shrink-0 items-center whitespace-nowrap">
           <button
             type="button"
             data-read-all
@@ -954,7 +990,10 @@ export function LiveNotificationFeed({
             }}
             className={HEADER_BUTTON}
           >
-            Marcar todas como lidas
+            {/* No celular, "Marcar lidas": o trecho oculto sai também do nome acessível. */}
+            <span>
+              Marcar <span className="hidden sm:inline">todas como </span>lidas
+            </span>
           </button>
           <button
             type="button"
@@ -972,15 +1011,15 @@ export function LiveNotificationFeed({
         </div>
       </div>
       <div className="relative">
+        <span aria-hidden className={cx("pointer-events-none absolute inset-x-3 top-0 z-[3] h-px bg-crfal-gray-200 motion-safe:transition-opacity", !scroll.scrolled && "opacity-0")} />
         <div
+          ref={listRef}
           role="list"
           aria-label={title}
-          className="overflow-y-auto overscroll-contain px-0.5 pb-6 [scrollbar-width:thin]"
-          style={{
-            height,
-            maskImage: "linear-gradient(to bottom, black calc(100% - 28px), transparent)",
-            WebkitMaskImage: "linear-gradient(to bottom, black calc(100% - 28px), transparent)",
-          }}
+          onScroll={measure}
+          onTransitionEnd={measure}
+          className="overflow-y-auto overscroll-contain px-0.5 pb-1 pt-1 [scrollbar-width:thin]"
+          style={{ maxHeight: height, scrollPaddingTop: 8, scrollPaddingBottom: FADE_PX, maskImage: fade, WebkitMaskImage: fade }}
         >
           {ordered.map((entry) => {
             const item = byId.get(entry.id);
@@ -1014,16 +1053,44 @@ export function LiveNotificationFeed({
           })}
         </div>
         {entries.length === 0 && (
-          <div data-empty className="pointer-events-none absolute inset-0 grid place-items-center text-center">
-            <div>
-              <span className="mx-auto grid size-10 place-items-center rounded-full bg-white text-crfal-blue ring-1 ring-crfal-gray-200">
-                <Icon d={CHECK} className="size-5" />
-              </span>
-              <p className="mt-2 text-sm font-bold text-crfal-blue-dark">Tudo em dia</p>
-              <p className="text-xs text-crfal-gray-600">Novas notificações aparecerão aqui.</p>
-            </div>
+          // No fluxo (a lista tem altura variável): é ele quem dá altura ao painel vazio.
+          <div data-empty className="px-6 pb-12 pt-10 text-center">
+            <span className="mx-auto grid size-12 place-items-center rounded-full bg-white text-crfal-blue shadow-[0_8px_20px_-12px_rgba(0,51,102,0.45)] ring-1 ring-crfal-gold/40">
+              <Icon d={CHECK} className="size-6" />
+            </span>
+            <p className="mt-3 text-sm font-bold text-crfal-blue-dark">Tudo em dia</p>
+            <p className="mt-1 text-[13px] leading-normal text-crfal-gray-600">Novas notificações aparecerão aqui.</p>
           </div>
         )}
+      </div>
+      {/* Faixa própria abaixo da lista, fora da área rolável: nunca cobre um card. A altura fica
+          reservada enquanto a lista rola (a pílula só aparece com itens abaixo) e abre/fecha
+          suave quando a lista passa a rolar ou deixa de rolar. */}
+      <div
+        data-more-strip
+        aria-hidden
+        className="grid"
+        style={{ gridTemplateRows: scroll.overflow ? "1fr" : "0fr", transition: reduced ? "none" : `grid-template-rows 220ms ${SETTLE}` }}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="flex h-9 items-center justify-center">
+            {/* Só para ponteiro: quem navega pelo teclado percorre os cards com Tab e a lista rola junto. */}
+            <span
+              data-more
+              onClick={() => {
+                const list = listRef.current;
+                list?.scrollBy({ top: list.clientHeight * 0.75, behavior: reduced ? "auto" : "smooth" });
+              }}
+              className={cx(
+                "inline-flex h-7 cursor-pointer select-none items-center gap-1 rounded-full bg-white/60 pl-3 pr-2 text-[11px] font-semibold text-crfal-blue ring-1 ring-crfal-gray-200 hover:bg-crfal-blue-lighter motion-safe:transition-[opacity,background-color] motion-safe:duration-200",
+                !scroll.more && "pointer-events-none opacity-0",
+              )}
+            >
+              Mais notificações
+              <Icon d={CHEVRON_DOWN} className="size-3.5" />
+            </span>
+          </div>
+        </div>
       </div>
       <p aria-live="polite" className="sr-only">
         {announcement}
