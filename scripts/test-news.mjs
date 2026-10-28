@@ -4,10 +4,10 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, NEWS_INDEX_MAX_PAGES, NEWS_INDEX_RETRY_MS, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, NEWS_INDEX_MAX_PAGES, NEWS_INDEX_RETRY_MS, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK, NEWS_RECENT_CARDS_KEY, NEWS_REFRESH_QUOTA_PREFIX } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
-const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
+const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', modified: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
 let posts = [...selected.map(post), post(find(2534)), { ...post(find(16023)), id: 999999, slug: 'spam-novo', categories: [3] }];
 let requests = []; let fail = false;
 const original = globalThis.fetch; const error = console.error; console.error = () => {};
@@ -89,6 +89,7 @@ try {
   const context = { env: { NEWS_INDEX: kv }, waitUntil: task => pending.push(task) };
   requests = [];
   const cold = await newsIndex(context);
+  await Promise.all(pending.splice(0));
   assert.ok(cold.length);
   assert.ok(values.has(NEWS_INDEX_KEY));
   assert.equal(writes.find(row => row.key === NEWS_INDEX_KEY).options, undefined, 'Índice sem expiração');
@@ -125,6 +126,7 @@ try {
   values.set(NEWS_INDEX_LOCK, JSON.stringify(released - NEWS_INDEX_RETRY_MS));
   fail = false;
   assert.ok((await refreshNewsIndex(context)).length, 'Novo refresh permitido depois do intervalo');
+  await Promise.all(pending.splice(0));
   fail = true;
   fail = false;
   values.delete(NEWS_INDEX_LOCK);
@@ -134,8 +136,77 @@ try {
   assert.equal(refreshA, refreshB, 'Refresh concorrente compartilha promise');
   const writesBefore = writes.filter(row => row.key === NEWS_INDEX_KEY).length;
   await refreshA;
+  await Promise.all(pending.splice(0));
   assert.equal(writes.filter(row => row.key === NEWS_INDEX_KEY).length, writesBefore, 'Índice igual não regrava payload');
   assert.equal(requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/posts').length, 1);
+  // Cartões recentes têm o mesmo formato da listagem e não consultam a origem.
+  {
+    const expected = await newsPage(1, 5);
+    requests = [];
+    assert.deepEqual(await newsPage(1, 5, context), expected);
+    assert.equal(requests.length, 0);
+    const cardRead = reads.find(row => row.key === NEWS_RECENT_CARDS_KEY);
+    assert.deepEqual(cardRead.options, { type: 'json', cacheTtl: 60 });
+    assert.equal(writes.find(row => row.key === NEWS_RECENT_CARDS_KEY).options.expirationTtl, 7 * 24 * 3600);
+    const originalCards = JSON.parse(values.get(NEWS_RECENT_CARDS_KEY));
+    values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify({ ...originalCards, value: originalCards.value.slice(0, 1) }));
+    clearNewsIndexMemo(kv); requests = [];
+    assert.deepEqual(await newsPage(1, 5, context), expected);
+    assert.ok(requests.some(url => url.searchParams.has('include')), 'Fatia não coberta usa caminho antigo');
+    values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify(originalCards));
+    // Legacy arrays remain readable and are migrated on refresh; fresh entries avoid writes.
+    for (const [stored, shouldWrite] of [
+      [{ ...originalCards, storedAt: Date.now() }, false],
+      [{ ...originalCards, storedAt: Date.now() - 24 * 3600_000 - 1 }, true],
+      [originalCards.value, true],
+    ]) {
+      values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify(stored));
+      clearNewsIndexMemo(kv); values.delete(NEWS_INDEX_LOCK);
+      const before = writes.filter(row => row.key === NEWS_RECENT_CARDS_KEY).length;
+      await refreshNewsIndex(context); await Promise.all(pending.splice(0));
+      assert.equal(writes.filter(row => row.key === NEWS_RECENT_CARDS_KEY).length - before, Number(shouldWrite));
+      assert.ok(Array.isArray(JSON.parse(values.get(NEWS_RECENT_CARDS_KEY)).value));
+    }
+    values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify(originalCards));
+    const savedIndex = values.get(NEWS_INDEX_KEY);
+    const indexEntry = JSON.parse(savedIndex);
+    indexEntry.value = [...Array.from({ length: 60 }, (_, i) => ({ ...cold[0], id: 990000 + i })), ...cold];
+    values.set(NEWS_INDEX_KEY, JSON.stringify(indexEntry));
+    values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify([]));
+    clearNewsIndexMemo(kv); requests = [];
+    assert.deepEqual((await newsPage(13, 5, context)).posts, expected.posts);
+    assert.ok(requests.some(url => url.searchParams.has('include')), 'Página antiga usa caminho anterior');
+    values.set(NEWS_INDEX_KEY, savedIndex);
+    values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify(originalCards));
+    clearNewsIndexMemo(kv); values.delete(NEWS_INDEX_LOCK);
+    const changedPost = posts.find(p => p.id === cold[0].id);
+    const originalModified = changedPost.modified;
+    changedPost.modified = '2021-01-01T00:00:00';
+    requests = [];
+    await refreshNewsIndex(context); await Promise.all(pending.splice(0));
+    const includes = requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/posts' && url.searchParams.has('include'));
+    assert.equal(includes.length, 1);
+    assert.equal(includes[0].searchParams.get('include'), String(changedPost.id));
+    changedPost.modified = originalModified;
+    const quotaKey = NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10);
+    values.set(quotaKey, '500'); values.delete(NEWS_INDEX_LOCK); requests = [];
+    assert.equal(await refreshNewsIndex(context), null);
+    assert.equal(requests.length, 0, 'Cota impede refresh');
+    values.delete(quotaKey);
+  }
+  {
+    const quotaValues = new Map([[NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10), '500']]);
+    const quotaWrites = [];
+    const quotaKV = {
+      async get(key) { return quotaValues.has(key) ? JSON.parse(quotaValues.get(key)) : null; },
+      async put(...args) { quotaWrites.push(args); },
+    };
+    const quotaPending = [];
+    const result = await newsIndex({ env: { NEWS_INDEX: quotaKV }, waitUntil: task => quotaPending.push(task) });
+    await Promise.all(quotaPending);
+    assert.ok(result.length, 'KV frio com cota esgotada constrói índice');
+    assert.equal(quotaWrites.length, 0, 'KV frio com cota esgotada não grava');
+  }
   // Detalhe: mídia e autor em paralelo; reserva no KV com SWR e escrita só quando muda.
   {
     const slug = find(16028).slug; const postKey = `news:cache:v1:post/${encodeURIComponent(slug)}`;
@@ -213,6 +284,7 @@ try {
     // Cron: uma consulta `include` aquece os mais recentes.
     values.clear(); writes.length = 0; requests = [];
     const recent = await refreshNewsIndex(context);
+    await Promise.all(pending.splice(0));
     requests = [];
     const warmed = await warmNewsPosts(context);
     assert.equal(warmed, recent.length);
