@@ -584,8 +584,6 @@ function NotificationCard({
             className={cx(
               "group relative rounded-2xl border border-crfal-gray-200/80 p-3.5 text-crfal-gray-800",
               "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_24px_-20px_rgba(11,25,44,0.35)] hover:border-crfal-blue/25 hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_32px_-20px_rgba(0,51,102,0.45)]",
-              // Lidas recuam um tom; não lidas ficam em branco pleno, título em negrito e com o ponto.
-              read ? "bg-white/70 hover:bg-white" : "bg-white",
             )}
             style={{ transform: shown ? "none" : entry.leaving ? "translateX(18%) scale(0.98)" : "translateY(-16px) scale(0.96)", opacity: shown ? 1 : 0, transition: cardTransition }}
           >
@@ -723,12 +721,11 @@ export function NotificationToastCard({
       aria-hidden={behind || undefined}
       inert={behind || undefined}
       className={cx(
-        "group relative isolate overflow-hidden rounded-[22px] border border-white/70 bg-white/95 p-3 pr-10 text-crfal-gray-800 backdrop-blur-xl",
+        "group relative isolate overflow-hidden rounded-[22px] border border-white/70 p-3 pr-10 text-crfal-gray-800 backdrop-blur-xl",
         "shadow-[0_1px_2px_rgba(15,23,42,0.06),0_18px_40px_-18px_rgba(11,25,44,0.5)] ring-1 ring-crfal-gray-200/70",
       )}
     >
       <span aria-hidden className="pointer-events-none absolute inset-x-6 top-0 -z-10 h-px bg-linear-to-r/srgb from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
-      <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 -z-10 size-28 rounded-full bg-crfal-blue-light/10 blur-2xl" />
       <div className={cx("flex gap-3", !reduced && "transition-opacity duration-200", behind && "opacity-0")}>
         <AppTile kind={item.kind} accent={item.accent} play={play} delay={STORY_DELAY_MS} reduced={reduced} />
         <div className="min-w-0 flex-1">
