@@ -10,6 +10,9 @@ import {
   MapPin,
   Monitor,
 } from 'lucide-react';
+import { useState } from 'react';
+import { IMAGE_PLACEHOLDER, handleImageError } from '@/lib/image-placeholder';
+import type { ImageSet } from '@/services/wordpress/image-set';
 import {
   MODALIDADE_ICONS,
   MODALIDADE_LABELS,
@@ -18,8 +21,6 @@ import {
   formatarData,
   type Evento,
 } from '../utils';
-
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'%3E%3C/svg%3E";
 
 /** Extrai dia e mês ("07", "SET") de "YYYY-MM-DD HH:mm:ss". */
 function diaEMes(data: string): { dia: string; mes: string } | null {
@@ -55,9 +56,7 @@ export function BannerEvento({ evento, className = '' }: { evento: Evento; class
         src={evento.banner}
         alt=""
         loading="lazy"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src = IMG_FALLBACK;
-        }}
+        onError={handleImageError}
         className={`absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${className}`}
       />
     );
@@ -70,6 +69,22 @@ export function BannerEvento({ evento, className = '' }: { evento: Evento; class
       <div className="absolute inset-0 opacity-15 bg-[radial-gradient(rgba(255,255,255,0.6)_1px,transparent_1px)] bg-size-[22px_22px]" />
       <CalendarDays className="absolute right-5 top-5 h-16 w-16 text-white/15" />
     </div>
+  );
+}
+
+/** Arte do evento aberto, inteira e sem corte. Se falhar, o placeholder ocupa a mesma caixa que a arte ocuparia. Sem capa, a página não mostra a caixa. */
+export function CapaEvento({ capa, titulo }: { capa: ImageSet; titulo: string }) {
+  const [failedSrc, setFailedSrc] = useState<string>();
+  const alt = capa.alt || `Arte de divulgação do evento «${titulo}»`;
+  const proporcao = capa.width && capa.height ? capa.width / capa.height : 3 / 2;
+  return (
+    <figure className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 shadow-card">
+      {failedSrc === capa.src ? (
+        <img src={IMAGE_PLACEHOLDER} alt={alt} style={{ aspectRatio: proporcao, width: `min(100%, 800px, min(75vh, 720px) * ${proporcao})` }} className="mx-auto block h-auto object-cover" />
+      ) : (
+        <img src={capa.src} srcSet={capa.srcSet} sizes="(min-width: 1024px) 800px, calc(100vw - 32px)" width={capa.width} height={capa.height} alt={alt} decoding="async" fetchPriority="high" onError={() => setFailedSrc(capa.src)} className="mx-auto block h-auto w-auto max-w-full max-h-[min(75vh,720px)]" />
+      )}
+    </figure>
   );
 }
 

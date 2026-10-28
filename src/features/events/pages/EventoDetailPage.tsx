@@ -21,7 +21,7 @@ import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { useEventBySlug, useRelatedEvents } from '@/services/wordpress/event-hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
 import type { WPEventListing } from '@/services/wordpress/types';
-import { EventoCard } from '../components/EventCards';
+import { CapaEvento, EventoCard } from '../components/EventCards';
 import {
   acoesDoEvento,
   MODALIDADE_ICONS,
@@ -219,11 +219,7 @@ export default function EventoDetailPage() {
           <div className="lg:col-span-8 empty:hidden">
           {evento.status === 'cancelado' && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"><Ban className="mr-2 inline h-5 w-5" aria-hidden />Este evento foi cancelado e não será realizado.</div>}
           {evento.status === 'encerrado' && <div className="mb-6 rounded-xl bg-crfal-gray-100 p-4 text-crfal-gray-700">Este evento já foi realizado em {formatarDataExtenso(evento.data, evento.dataFim)}.{evento.video && <> <a className="underline" href={evento.video} target="_blank" rel="noopener noreferrer">Assistir gravação<span className="sr-only"> (abre em uma nova aba)</span></a></>}</div>}
-          {capa && (
-          <figure className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 shadow-card">
-            <img src={capa.src} srcSet={capa.srcSet} sizes="(min-width: 1024px) 800px, calc(100vw - 32px)" width={capa.width} height={capa.height} alt={capa.alt || `Arte de divulgação do evento «${evento.titulo}»`} decoding="async" fetchPriority="high" className="mx-auto block h-auto w-auto max-w-full max-h-[min(75vh,720px)]" />
-          </figure>
-        )}
+          {capa && <CapaEvento capa={capa} titulo={evento.titulo} />}
 
           </div>
           <aside className="lg:col-start-9 lg:col-span-4 lg:row-span-2 lg:row-start-1 lg:self-start lg:sticky lg:top-(--header-offset)">

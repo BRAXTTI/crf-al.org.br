@@ -1,6 +1,7 @@
 import { useRef, useMemo } from 'react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
+import { NewsImage } from '@/components/ui/news-image';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Calendar, ArrowRight, Tag, ChevronRight, Newspaper, ChevronLeft } from 'lucide-react';
 import {
@@ -11,8 +12,6 @@ import {
 import { usePosts } from '@/services/wordpress/news-hooks';
 import type { ImageSet } from '@/services/wordpress/image-set';
 import type { WPPost } from '@/services/wordpress/types';
-
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'%3E%3C/svg%3E";
 
 interface Publication {
   id: string;
@@ -197,18 +196,12 @@ export default function NewsPage() {
                     to={pub.href}
                     className="group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white transition-colors hover:border-crfal-blue/40 hover:shadow-card focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 motion-reduce:transition-none sm:flex-row"
                   >
-                    <div className="relative aspect-video shrink-0 overflow-hidden bg-crfal-gray-100 sm:aspect-auto sm:w-48 lg:w-56">
-                      <img
-                        src={pub.image?.src ?? IMG_FALLBACK}
-                        srcSet={pub.image?.srcSet}
-                        sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) 192px, 224px"
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        className="h-full w-full object-contain sm:absolute sm:inset-0"
-                        onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.srcset = ""; e.currentTarget.src = IMG_FALLBACK; }}
-                      />
-                    </div>
+                    <NewsImage
+                      image={pub.image}
+                      sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) 192px, 224px"
+                      className="aspect-video shrink-0 sm:aspect-auto sm:w-48 lg:w-56"
+                      imgClassName="sm:absolute sm:inset-0"
+                    />
                     <div className="flex flex-1 flex-col items-start p-5 sm:p-6">
                       <span className={`mb-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-white ${pub.tagColor}`}>
                         <Tag className="h-3 w-3" aria-hidden="true" />
