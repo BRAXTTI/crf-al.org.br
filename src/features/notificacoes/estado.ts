@@ -3,7 +3,8 @@ import { useSyncExternalStore } from 'react';
 /**
  * Estado das notificações guardado só no navegador (`localStorage`, com try/catch):
  * quais foram lidas, quais foram dispensadas e quais o visitante já viu chegar
- * (as não vistas "chegam" com animação na próxima abertura do painel).
+ * (as não vistas "chegam" com animação na próxima abertura do painel) e quais já
+ * apareceram como toast (nunca reaparecem como toast).
  * O sino e o painel leem a mesma fonte; outras abas acompanham pelo evento `storage`.
  */
 export const STORAGE_KEY = 'crfal:notificacoes';
@@ -14,9 +15,11 @@ export interface EstadoNotificacoes {
   lidas: string[];
   dispensadas: string[];
   vistas: string[];
+  /** Já exibidas como toast ao carregar a página. */
+  mostradas: string[];
 }
 
-const VAZIO: EstadoNotificacoes = { lidas: [], dispensadas: [], vistas: [] };
+const VAZIO: EstadoNotificacoes = { lidas: [], dispensadas: [], vistas: [], mostradas: [] };
 const listeners = new Set<() => void>();
 let atual: EstadoNotificacoes | null = null;
 
@@ -26,7 +29,7 @@ function ler(): EstadoNotificacoes {
   try {
     const bruto = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null') as Partial<EstadoNotificacoes> | null;
     if (!bruto || typeof bruto !== 'object') return VAZIO;
-    return { lidas: lista(bruto.lidas), dispensadas: lista(bruto.dispensadas), vistas: lista(bruto.vistas) };
+    return { lidas: lista(bruto.lidas), dispensadas: lista(bruto.dispensadas), vistas: lista(bruto.vistas), mostradas: lista(bruto.mostradas) };
   } catch {
     return VAZIO;
   }
@@ -67,6 +70,7 @@ function acrescentar(campo: keyof EstadoNotificacoes, ids: string[]) {
 export const marcarLidas = (ids: string[]) => acrescentar('lidas', ids);
 export const dispensar = (ids: string[]) => acrescentar('dispensadas', ids);
 export const marcarVistas = (ids: string[]) => acrescentar('vistas', ids);
+export const marcarMostradas = (ids: string[]) => acrescentar('mostradas', ids);
 
 export function useEstadoNotificacoes(): EstadoNotificacoes {
   return useSyncExternalStore(subscribe, snapshot, () => VAZIO);

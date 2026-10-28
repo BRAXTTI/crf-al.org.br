@@ -50,7 +50,8 @@ export function useFontesNotificacoes(comNoticias: boolean) {
     [eventos, noticias],
   );
 
-  return { eventos, noticias, novidades: NOVIDADES, ids };
+  // `carregando`: a primeira resposta de eventos ainda não chegou (os toasts esperam por ela).
+  return { eventos, noticias, novidades: NOVIDADES, ids, carregando: eventosQuery.isPending };
 }
 
 export type FontesNotificacoes = ReturnType<typeof useFontesNotificacoes>;
