@@ -146,7 +146,7 @@ try {
     assert.equal(requests.length, 0);
     const cardRead = reads.find(row => row.key === NEWS_RECENT_CARDS_KEY);
     assert.deepEqual(cardRead.options, { type: 'json', cacheTtl: 60 });
-    assert.equal(writes.find(row => row.key === NEWS_RECENT_CARDS_KEY).options.expirationTtl, 7 * 24 * 3600);
+    assert.equal(writes.find(row => row.key === NEWS_RECENT_CARDS_KEY).options.expirationTtl, 30 * 24 * 3600);
     const originalCards = JSON.parse(values.get(NEWS_RECENT_CARDS_KEY));
     values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify({ ...originalCards, value: originalCards.value.slice(0, 1) }));
     clearNewsIndexMemo(kv); requests = [];
@@ -226,7 +226,7 @@ try {
     await Promise.all(pending.splice(0));
     assert.equal(first.content.rendered.length > 0, true, 'Detalhe completo (com conteúdo) também serve os metadados');
     assert.equal(writes.filter(row => row.key === postKey).length, 1);
-    assert.equal(writes.find(row => row.key === postKey).options.expirationTtl, 7 * 24 * 3600);
+    assert.equal(writes.find(row => row.key === postKey).options.expirationTtl, 30 * 24 * 3600);
     fail = true;
     assert.deepEqual(await newsPost(slug, context), first, 'Reserva do KV servida mesmo com a origem fora');
     await Promise.all(pending.splice(0));
