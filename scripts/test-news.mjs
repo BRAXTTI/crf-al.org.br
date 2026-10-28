@@ -60,9 +60,8 @@ try {
   assert.equal((await searchNews('farmacia')).length, selected.length);
   assert.deepEqual((await newsSitemapIndex()).map(p => p.slug), index.map(p => p.slug));
   assert.ok(BLOCKED_NEWS_SLUGS.includes('ola-mundo-2'));
-  // Um dos ausentes passa a existir por slug, sem atualização manual do ID.
-  posts.push({ ...post(find(107698)), id: 999998 });
-  assert.equal((await newsPost('107698')).id, 999998);
+  posts.push(post(find(107698)));
+  assert.equal((await newsPost('107698')).id, 16768);
   fail = true; assert.equal((await newsApi(new Request('https://example.test/api/news'))).status, 503);
   const mockFetch = globalThis.fetch;
   const inventory = Array.from({ length: 701 }, (_, i) => ({ ...post(selected[0]), id: 900000 + i, slug: `noticia-nova-${i}`, categories: [42] }));
@@ -255,7 +254,7 @@ try {
     await Promise.all(pending.splice(0));
     assert.equal(first.content.rendered.length > 0, true, 'Detalhe completo (com conteúdo) também serve os metadados');
     assert.equal(writes.filter(row => row.key === postKey).length, 1);
-    assert.equal(writes.find(row => row.key === postKey).options.expirationTtl, 30 * 24 * 3600);
+    assert.equal(writes.find(row => row.key === postKey).options, undefined);
     fail = true;
     assert.deepEqual(await newsPost(slug, context), first, 'Reserva do KV servida mesmo com a origem fora');
     await Promise.all(pending.splice(0));
@@ -290,22 +289,27 @@ try {
       await newsPost(slug, context); await Promise.all(pending.splice(0));
       assert.equal(requests.length, 0, 'Cache local fresco não consulta KV nem origem');
       const entry = [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(slug)}`));
+      assert.match(local.get(entry).headers.get('Cache-Control'), /max-age=2592000/);
       const body = await local.get(entry).clone().json();
-      local.set(entry, Response.json({ ...body, storedAt: Date.now() - 61_000 }));
+      local.set(entry, Response.json({ ...body, storedAt: Date.now() - 240_000 }));
+      await newsPost(slug, context);
+      assert.equal(pending.length, 0, 'Cache fresco por cinco minutos');
+      local.set(entry, Response.json({ ...body, storedAt: Date.now() - 301_000 }));
       await Promise.all([newsPost(slug, context), newsPost(slug, context)]);
       assert.equal(pending.length, 1, 'Revalidação single-flight');
       await Promise.all(pending.splice(0));
       assert.ok(values.has(postKey), 'Revalidação recompõe a reserva do KV');
       const saved = await local.get(entry).clone().json();
-      const old = Date.now() - 120_000;
-      local.set(entry, Response.json({ ...saved, storedAt: old }));
+      const old = Date.now() - 360_000;
+      local.set(entry, Response.json({ ...saved, storedAt: old, checkedAt: old }));
       fail = true;
       await newsPost(slug, context); await Promise.all(pending.splice(0));
       const checked = await local.get(entry).clone().json();
       assert.equal(checked.storedAt, old, 'Falha não renova a idade');
       assert.ok(checked.checkedAt > old);
       local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 86400_001 }));
-      await assert.rejects(newsPost(slug, context), /503/);
+      assert.equal((await newsPost(slug, context)).slug, slug, 'Reserva antiga continua disponível');
+      await Promise.all(pending.splice(0));
       fail = false;
 
     } finally { globalThis.caches = previousCaches; }
@@ -418,6 +422,17 @@ try {
     globalThis.fetch = async () => { calls++; return new Response('', { status: 503 }); };
     await assert.rejects(newsIndex(), /503/); assert.equal(calls, 2);
     calls = 0;
+    globalThis.fetch = async (input, options) => {
+      calls++;
+      assert.ok(options.signal, 'Toda consulta ao WP tem timeout');
+      if (calls === 1) throw new DOMException('timeout', 'TimeoutError');
+      return workingFetch(input, options);
+    };
+    assert.ok((await newsIndex()).length); assert.ok(calls >= 3, 'Timeout recuperado com nova tentativa');
+    calls = 0;
+    globalThis.fetch = async () => { calls++; throw new TypeError('network error'); };
+    await assert.rejects(newsIndex(), /network error/); assert.equal(calls, 2);
+    calls = 0;
     globalThis.fetch = async () => {
       calls++;
       return new Response(new ReadableStream({ start(controller) { controller.error(new DOMException('body timeout', 'TimeoutError')); } }));
@@ -426,7 +441,7 @@ try {
   } finally { globalThis.fetch = workingFetch; }
   // Orçamentos: SSR sem repetição, prazo total compartilhado; recarga em segundo plano sem prazo.
   {
-    assert.ok(PAGE_BUDGET_MS >= 4000 && PAGE_BUDGET_MS <= 5000); assert.equal(API_BUDGET_MS, 8000);
+    assert.ok(PAGE_BUDGET_MS > 0 && PAGE_BUDGET_MS < 3000); assert.equal(API_BUDGET_MS, 8000);
     const workingFetch = globalThis.fetch; let calls = 0;
     const page = withNewsBudget({ waitUntil() {} }, PAGE_BUDGET_MS, false);
     try {
@@ -452,6 +467,38 @@ try {
       await Promise.all(tasks.splice(0));
       assert.ok(requests.some(url => url.searchParams.get('rest_route') === '/wp/v2/media'), 'Revalidação completa apesar do prazo da requisição');
     } finally { globalThis.fetch = workingFetch; }
+  }
+  // O prazo também cobre KV e o índice compartilhado, que não usam o AbortSignal do WP.
+  {
+    const originalTimer = globalThis.setTimeout; const tasks = [];
+    let release;
+    const blocked = new Promise(resolve => { release = resolve; });
+    const kv = { async get() { await blocked; return null; }, async put() {}, async delete() {} };
+    try {
+      globalThis.setTimeout = (fn, ms, ...args) => originalTimer(fn, ms === API_BUDGET_MS ? 10 : ms, ...args);
+      const response = await newsApi(new Request('https://example.test/api/news?page=50&per_page=50'), { env: { NEWS_INDEX: kv }, waitUntil: task => tasks.push(task) });
+      assert.equal(response.status, 503);
+      assert.equal(tasks.length, 1, 'A coleta continua em waitUntil após o prazo');
+      release();
+      await Promise.all(tasks);
+    } finally { release(); globalThis.setTimeout = originalTimer; }
+  }
+  // Uma carga compartilhada que nunca resolve expira e libera a chave para nova tentativa.
+  {
+    const oldFetch = globalThis.fetch; const oldTimer = globalThis.setTimeout;
+    let calls = 0;
+    try {
+      globalThis.setTimeout = (fn, ms, ...args) => oldTimer(fn, ms === API_BUDGET_MS ? 30 : ms, ...args);
+      globalThis.fetch = () => { calls++; return new Promise(() => {}); };
+      const ctx = { waitUntil() {} };
+      const first = newsPost('single-flight-travado', ctx);
+      const second = newsPost('single-flight-travado', ctx);
+      const results = await Promise.allSettled([first, second]);
+      assert.ok(results.every(result => result.status === 'rejected'));
+      assert.equal(calls, 2, 'Post e categorias são compartilhados');
+      globalThis.fetch = oldFetch;
+      assert.equal(await newsPost('single-flight-travado', ctx), null);
+    } finally { globalThis.fetch = oldFetch; globalThis.setTimeout = oldTimer; }
   }
   // "Não encontrado" fica 5 min no cache local (sem escrita no KV); busca normalizada e limitada.
   {
@@ -490,13 +537,12 @@ try {
       for (const term of ['ab', '   a ', 'x'.repeat(121), 'abc\u0007']) assert.equal((await newsApi(new Request(`https://example.test/api/news?search=${encodeURIComponent(term)}`), ctx)).status, 400, JSON.stringify(term));
     } finally { globalThis.caches = previousCaches; }
   }
-  const cronUrl = await moduleUrl('../workers/news-index-cron/index.ts', { "'../../functions/_news'": JSON.stringify(await loadNews()) });
+  const cronUrl = await moduleUrl('../workers/news-index-cron/index.ts', { "'../../functions/_news'": JSON.stringify(await loadNews()), "'./snapshot.json'": JSON.stringify('data:text/javascript,export default undefined') });
   const cron = (await import(cronUrl)).default;
   values.delete(NEWS_INDEX_LOCK);
   await cron.scheduled({}, context.env, context);
   await assert.rejects(cron.scheduled({}, {}, context), /binding required/);
-  // A auditoria de corte precisa reprovar perdas de conteúdo, mas aceitar
-  // importações posteriores por slug sem exigir outro mapa de IDs.
+  // A auditoria de corte precisa reprovar perdas e identidades divergentes.
   const audit = inventory => spawnSync(process.execPath, ['--input-type=module'], { encoding: 'utf8', input: `
     const inventory = ${JSON.stringify(inventory)};
     globalThis.fetch = async () => Response.json(inventory, { headers: {
@@ -505,14 +551,14 @@ try {
     await import(${JSON.stringify(new URL('./generate-news-archive.mjs', import.meta.url).href)});
   ` });
   const mapped = NEWS_MAP.filter(row => row.newId !== null).map(row => ({ id: row.newId, slug: row.newSlug }));
-  const incomplete = audit(mapped);
+  const incomplete = audit(mapped.filter(row => row.id !== 16768));
   assert.equal(incomplete.status, 1);
-  assert.match(incomplete.stderr, /Migração incompleta/);
-  for (const row of NEWS_MAP.filter(row => !row.blocked && row.newId === null)) assert.ok(incomplete.stderr.includes(String(row.oldId)));
+  assert.match(incomplete.stderr, /Identidades divergentes/);
+  assert.ok(incomplete.stderr.includes("107698"));
   const complete = [...mapped, ...NEWS_MAP.filter(row => row.newId === null).map((row, i) => ({ id: 900000 + i, slug: row.newSlug }))];
   const success = audit(complete);
   assert.equal(success.status, 0, success.stderr);
-  assert.match(success.stdout, /3 resolvidas por slug/);
+  assert.match(success.stdout, /0 resolvidas por slug/);
   const mismatch = audit(complete.map((row, i) => i === 0 ? { ...row, slug: 'identidade-errada' } : row));
   assert.equal(mismatch.status, 1);
   assert.match(mismatch.stderr, /Identidades divergentes/);

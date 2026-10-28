@@ -1,6 +1,8 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
+import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, knownHistoricalSlugBySlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
+import { cachedNewsResponse, newsResponseKey } from './_news-response-cache';
+import { NEWS_SHELL, NEWS_SHELL_VERSION } from './_news-shell';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
@@ -79,7 +81,22 @@ async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | nul
 // ---------------------------------------------------------------------------
 
 async function resolveNews(slug: string, context: PagesContext): Promise<OgData | null> {
-  const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
+  // Também limita a espera por uma carga compartilhada iniciada pela API com prazo maior.
+  const loading = newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new DOMException('News page deadline', 'TimeoutError')), PAGE_BUDGET_MS);
+  });
+  let post: Awaited<typeof loading>;
+  try {
+    post = await Promise.race([loading, timeout]);
+  } catch (error) {
+    // Mantém a carga viva após entregar o shell; se falhar, tenta aquecer sem prazo da página.
+    context.waitUntil(loading.catch(() => newsPost(slug, context)).catch(() => undefined));
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
   if (!post) return null;
   const media = post._embedded?.['wp:featuredmedia']?.[0];
   const cover = mediaImageSet(media);
@@ -273,14 +290,33 @@ export function withSecurityHeaders(response: Response): Response {
   return secured;
 }
 
-export async function onRequest(context: PagesContext): Promise<Response> {
+async function handleRequest(context: PagesContext & { timings: Record<string, number> }): Promise<Response> {
   return withSecurityHeaders(await handle(context));
 }
 
-async function handle(context: PagesContext): Promise<Response> {
+async function handle(context: PagesContext & { timings: Record<string, number> }): Promise<Response> {
   const url = new URL(context.request.url);
   const pathname = url.pathname.replace(/\/$/, '') || '/';
+  // Endpoints do WordPress antigo não pertencem ao institucional, em qualquer método.
+  if (/^\/wp-admin/.test(pathname) || /^\/wp-json/.test(pathname) ||
+      /^\/(?:wp-login\.php|xmlrpc\.php|wp-cron\.php)$/.test(pathname) ||
+      /^\/(?:wp-includes|web\/wp)(?:\/|$)/.test(pathname) ||
+      (/^\/wp-content(?:\/|$)/.test(pathname) && !/^\/wp-content\/uploads(?:\/|$)/.test(pathname))) {
+    return new Response(context.request.method === 'HEAD' ? null : 'Conteúdo indisponível.', { status: 410, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Robots-Tag': 'noindex' } });
+  }
   if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
+  const remainingQuery = (param: string) => {
+    const params = new URLSearchParams(url.search);
+    params.delete(param);
+    const query = params.toString();
+    return query ? `?${query}` : '';
+  };
+  if (pathname === '/rss' || /(?:^|\/)feed$/.test(pathname) || (pathname === '/' && url.searchParams.has('feed'))) {
+    return Response.redirect(`${SITE_URL}/api/rss${url.searchParams.has('feed') ? remainingQuery('feed') : url.search}`, 301);
+  }
+  if (/^\/page\/\d+$/.test(pathname)) {
+    return Response.redirect(`${SITE_URL}/imprensa/noticias${url.search}`, 301);
+  }
   if (pathname === '/sitemap-news.xml') {
     try {
       const cache = (caches as CacheStorage & { default: Cache }).default;
@@ -299,8 +335,14 @@ async function handle(context: PagesContext): Promise<Response> {
     }
   }
 
-  const historicalId = pathname === '/' ? url.searchParams.get('p') : pathname.startsWith(NEWS_PREFIX) && /^\d+$/.test(pathname.slice(NEWS_PREFIX.length)) ? pathname.slice(NEWS_PREFIX.length) : null;
+  const idFromQuery = pathname === '/' || pathname === '/index.php';
+  const numericPath = pathname.match(/^\/(?:imprensa\/noticias|publicacao)\/(\d+)$/);
+  const historicalId = idFromQuery ? url.searchParams.get('p') : numericPath?.[1] ?? null;
+  const idQuery = idFromQuery ? remainingQuery('p') : url.search;
   const legacySlug = pathname.startsWith('/publicacao/') ? pathname.slice('/publicacao/'.length) : pathname.startsWith(NEWS_PREFIX) ? pathname.slice(NEWS_PREFIX.length) : '';
+  if (url.pathname.endsWith('/') && pathname.startsWith(NEWS_PREFIX) && legacySlug && !legacySlug.includes('/') && !historicalId) {
+    return Response.redirect(`${SITE_URL}${pathname}${url.search}`, 301);
+  }
   let decodedSlug = legacySlug;
   try { decodedSlug = decodeURIComponent(legacySlug); } catch { /* inválido: será tratado como 404 */ }
   if ((historicalId && isBlockedNews(historicalId)) || (decodedSlug && isBlockedNews(decodedSlug))) {
@@ -308,19 +350,29 @@ async function handle(context: PagesContext): Promise<Response> {
   }
   if (historicalId && /^\d+$/.test(historicalId)) {
     const knownSlug = knownHistoricalSlug(historicalId);
-    if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}`, 301);
+    if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}${idQuery}`, 301);
     try {
       const post = await newsPost(historicalId, withNewsBudget(context, PAGE_BUDGET_MS, false));
-      if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);
+      if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}${idQuery}`, 301);
       return new Response('Notícia não encontrada.', { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
     } catch {
       return new Response('Notícia temporariamente indisponível.', { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' } });
     }
   }
-  if (pathname === '/instituicao/missao-visao') return Response.redirect(`${SITE_URL}/instituicao/sobre-conselho`, 301);
-  if (pathname === '/imprensa/noticias-cff') return Response.redirect(`${SITE_URL}/imprensa/publicacoes-cff`, 301);
+  if (pathname === '/instituicao/missao-visao') return Response.redirect(`${SITE_URL}/instituicao/sobre-conselho${url.search}`, 301);
+  if (pathname === '/imprensa/noticias-cff') return Response.redirect(`${SITE_URL}/imprensa/publicacoes-cff${url.search}`, 301);
   if (pathname.startsWith('/publicacao/') && pathname.slice('/publicacao/'.length) && !pathname.slice('/publicacao/'.length).includes('/')) {
-    return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${pathname.slice('/publicacao/'.length)}`, 301);
+    return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${encodeURIComponent(knownHistoricalSlugBySlug(decodedSlug) || decodedSlug)}${url.search}`, 301);
+  }
+  // Apenas um segmento conhecido do mapa pode ser uma notícia legada na raiz.
+  // Rotas da SPA e nomes de assets têm precedência mesmo se colidirem com o mapa.
+  const rootSlug = pathname.match(/^\/([^/.]+)$/)?.[1];
+  if (rootSlug && !Object.hasOwn(PAGE_METADATA, pathname) &&
+      !/^(?:assets|images|fonts|api|documentos|instituicao|servicos|imprensa|publicacao|fiscalizacao|eventos)$/.test(rootSlug)) {
+    let decoded = rootSlug;
+    try { decoded = decodeURIComponent(rootSlug); } catch { /* slug inválido segue para o 404 */ }
+    const known = knownHistoricalSlugBySlug(decoded);
+    if (known) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${encodeURIComponent(known)}${url.search}`, 301);
   }
   const staticData = Object.hasOwn(PAGE_METADATA, pathname) ? PAGE_METADATA[pathname] : undefined;
   const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));
@@ -334,7 +386,11 @@ async function handle(context: PagesContext): Promise<Response> {
     headers.delete('If-Modified-Since');
     upstream = new Request(upstream, { headers });
   }
-  const asset = await context.next(upstream);
+  const assetStart = performance.now();
+  const asset = prefix === NEWS_PREFIX
+    ? new Response(NEWS_SHELL, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+    : await context.next(upstream);
+  context.timings.asset += performance.now() - assetStart;
   if (!asset.ok || !asset.headers.get('content-type')?.includes('text/html')) return asset;
   // Pages falls back to index.html for missing files and routes in a SPA.
   // Keep real assets/API responses, but never report that HTML fallback as success.
@@ -354,15 +410,34 @@ async function handle(context: PagesContext): Promise<Response> {
   try {
     if (prefix === NEWS_PREFIX && /^\d+$/.test(slug)) {
       const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
-      return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301) : notFound(asset, pathname);
+      return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}${idQuery}`, 301) : notFound(asset, pathname);
     }
     // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.
-    const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
-    if (og?.title) return injectOg(asset, og);
-    return notFound(asset, pathname);
+    const render = async () => {
+      const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
+      if (!og?.title) return notFound(asset, pathname);
+      const rewriteStart = performance.now();
+      const rewritten = injectOg(asset, og);
+      const response = new Response(await rewritten.arrayBuffer(), rewritten);
+      context.timings.rewriter += performance.now() - rewriteStart;
+      if (prefix === NEWS_PREFIX) response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000');
+      return response;
+    };
+    // A versão do shell impede servir HTML com bundles de um deploy anterior.
+    const version = prefix === NEWS_PREFIX ? NEWS_SHELL_VERSION : asset.headers.get('ETag');
+    if (prefix === NEWS_PREFIX && context.request.method === 'GET' && version) {
+      const scope = `${context.env?.WP_SITE_URL || ''}|${context.env?.NEWS_ARCHIVE_API_URL || ''}`;
+      return await cachedNewsResponse(context, newsResponseKey(context.request, scope, version), render, true);
+    }
+    return await render();
   } catch (error) {
     // Temporary origin failures are neither successful pages nor missing content.
     console.error(JSON.stringify({ event: 'page_metadata_failed', path: pathname, message: error instanceof Error ? error.message : String(error) }));
+    if (prefix === NEWS_PREFIX) {
+      const response = injectOg(asset, { title: 'Notícias', description: 'Notícias do CRF-AL.', canonical: `${SITE_URL}${pathname}` });
+      response.headers.set('Cache-Control', 'no-store');
+      return response;
+    }
     const response = new Response(asset.body, { status: 503, headers: asset.headers });
     response.headers.set('Cache-Control', 'no-store');
     response.headers.set('Retry-After', '60');
@@ -381,4 +456,28 @@ function notFound(asset: Response, pathname: string): Response {
   return injectOg(new Response(asset.body, { status: 404, headers }), {
     title: 'Página não encontrada', description: 'O conteúdo solicitado não foi encontrado.', canonical: `${SITE_URL}${pathname}`, noindex: true,
   });
+}
+
+export async function onRequest(context: PagesContext): Promise<Response> {
+  const timings = { cache: 0, kv: 0, asset: 0, rewriter: 0, origin: 0 };
+  // Asset repassado sem alteração volta intacto (mesmo objeto, sem Server-Timing): é o que o
+  // _routes.json pressupõe ao tirar esses arquivos das Functions.
+  let passthrough: Response | undefined;
+  const next = context.next;
+  const task = handleRequest(Object.assign(context, {
+    timings,
+    next: async (...args: Parameters<typeof next>) => (passthrough = await next(...args)),
+  }));
+  const isNews = new URL(context.request.url).pathname.startsWith(NEWS_PREFIX);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const fallback = () => withSecurityHeaders(new Response(NEWS_SHELL, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  }));
+  const response = isNews ? await Promise.race([task.then(async response => new Response(await response.arrayBuffer(), response)).catch(fallback), new Promise<Response>(resolve => {
+    timer = setTimeout(() => resolve(fallback()), PAGE_BUDGET_MS + 300);
+  })]).finally(() => { if (timer !== undefined) clearTimeout(timer); }) : await task;
+  if (response === passthrough) return response;
+  const result = new Response(context.request.method === 'HEAD' ? null : response.body, response);
+  result.headers.set('Server-Timing', Object.entries(timings).map(([name, value]) => `${name};dur=${value.toFixed(1)}`).join(', '));
+  return result;
 }

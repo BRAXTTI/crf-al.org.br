@@ -12,12 +12,15 @@ const metadataUrl = moduleUrl(await readFile(new URL('../src/config/page-metadat
 const imageSetUrl = moduleUrl(await readFile(new URL('../src/services/wordpress/image-set.ts', import.meta.url), 'utf8'));
 const siteUrl = moduleUrl(await readFile(new URL('../src/config/site.ts', import.meta.url), 'utf8'));
 const bannersUrl = moduleUrl((await readFile(new URL('../src/data/banners.ts', import.meta.url), 'utf8')).replace("'../config/site'", JSON.stringify(siteUrl)));
+const responseCacheUrl = moduleUrl((await readFile(new URL('../functions/_news-response-cache.ts', import.meta.url), 'utf8')).replace("'../src/config/site'", JSON.stringify(siteUrl)));
 const source = (await readFile(new URL('../functions/_middleware.ts', import.meta.url), 'utf8'))
   .replace("'../src/config/site'", JSON.stringify(siteUrl))
   .replace("'../src/data/banners'", JSON.stringify(bannersUrl))
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
-  .replace("'./_news'", JSON.stringify(await loadNews()));
+  .replace("'./_news'", JSON.stringify(await loadNews()))
+  .replace("'./_news-response-cache'", JSON.stringify(responseCacheUrl))
+  .replace("'./_news-shell'", JSON.stringify(moduleUrl(await readFile(new URL('../functions/_news-shell.ts', import.meta.url), 'utf8'))));
 const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders } = await import(moduleUrl(source));
 const { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } = await import(bannersUrl);
 const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
@@ -29,7 +32,10 @@ let stored = new Map();
 let background = [];
 
 globalThis.HTMLRewriter = class {
-  on() { return this; }
+  on(_selector, handlers) {
+    for (const handler of Object.values(handlers)) assert.notEqual(handler.constructor.name, 'AsyncFunction', 'HTMLRewriter não aguarda operações assíncronas');
+    return this;
+  }
   transform(response) { return response; }
 };
 globalThis.caches = { default: {
@@ -50,7 +56,13 @@ async function request(path, options = {}) {
   background = [];
   return onRequest({
     request: new Request(`https://institucional.crf-al.org.br${path}`, { method: options.method || 'GET', headers: options.headers }),
-    next: async upstream => { forwarded = upstream; return options.response || shell(); },
+    next: async upstream => {
+      if (upstream && new URL(upstream.url).pathname.startsWith('/news-snapshot/')) {
+        try { return new Response(await readFile(new URL(`../public${new URL(upstream.url).pathname}`, import.meta.url)), { headers: { 'Content-Type': 'application/json' } }); }
+        catch { return new Response('missing', { status: 404 }); }
+      }
+      forwarded = upstream; return options.next ? options.next(upstream) : options.response || shell();
+    },
     waitUntil: promise => background.push(promise),
   });
 }
@@ -155,13 +167,64 @@ try {
   const complete = new Response('', { headers: SECURITY_HEADERS });
   assert.equal(withSecurityHeaders(complete), complete, 'Resposta completa não é copiada');
 
-  for (const [path, target] of [['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia'], ['/imprensa/noticias-cff', '/imprensa/publicacoes-cff']]) {
+  for (const [path, target] of [['/feed', '/api/rss'], ['/feed/', '/api/rss'], ['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia'], ['/imprensa/noticias-cff', '/imprensa/publicacoes-cff']]) {
     const response = await request(path);
     assert.equal(response.status, 301);
     assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br${target}`);
   }
 
+  // URLs legadas são resolvidas sem acessar WordPress, inclusive durante falha da origem.
+  origin = () => { throw new Error('WordPress não deve ser consultado'); };
+  const beforeLegacy = fetches;
+  for (const path of ['/wp-admin', '/wp-admin/admin-ajax.php', '/wp-admin-extra', '/wp-json', '/wp-json/wp/v2/posts', '/wp-login.php', '/xmlrpc.php', '/wp-cron.php', '/wp-includes/js/a.js', '/web/wp/index.php', '/wp-content/plugins/a.php', '/wp-content/uploads-malicious/a']) {
+    for (const method of ['GET', 'HEAD', 'POST']) {
+      const response = await request(`${path}?feed=rss2`, { method });
+      assert.equal(response.status, 410, `${method} ${path}`);
+      if (method === 'HEAD') assert.equal(await response.text(), '');
+    }
+  }
+  const media = new Response('media', { headers: { 'Content-Type': 'image/png' } });
+  await assertPassThrough(await request('/wp-content/uploads/2020/a.png', { response: media.clone() }), media, 'Uploads seguem para o próximo handler');
+  for (const path of ['/feed', '/feed/', '/categoria/feed', '/categoria/sub/feed/', '/rss']) {
+    const response = await request(`${path}?utm=a%2Fb&tag=um&tag=dois`);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), 'https://institucional.crf-al.org.br/api/rss?utm=a%2Fb&tag=um&tag=dois', path);
+  }
+  for (const path of ['/?feed=rss2&utm=teste', '/?feed=atom&utm=teste', '/?feed=&utm=teste']) {
+    const response = await request(path);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), 'https://institucional.crf-al.org.br/api/rss?utm=teste', path);
+  }
+  for (const path of ['/page/2', '/page/42/']) {
+    const response = await request(`${path}?utm=a%2Fb&tag=um&tag=dois`);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), 'https://institucional.crf-al.org.br/imprensa/noticias?utm=a%2Fb&tag=um&tag=dois', path);
+  }
+  const slug = 'crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp';
+  for (const path of [`/${slug}`, `/${slug}/`, `/publicacao/${slug}`, `/publicacao/${slug}/`, '/?p=107698', '/index.php?p=107698', '/imprensa/noticias/107698/', '/publicacao/107698/']) {
+    const separator = path.includes('?') ? '&' : '?';
+    const response = await request(`${path}${separator}utm=teste&tag=um&tag=dois`);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${slug}?utm=teste&tag=um&tag=dois`, path);
+  }
+  await expectMissing('/slug-legado-desconhecido');
+  await expectMissing('/page/nao-numerica');
+  assert.equal(fetches, beforeLegacy, 'Rotas legadas e slug desconhecido não consultam WordPress');
+
   origin = () => Response.json([]);
+  // Um stream do HTMLRewriter que nunca fecha não impede o envio do shell.
+  {
+    const Rewriter = globalThis.HTMLRewriter;
+    globalThis.HTMLRewriter = class { on() { return this; } transform(response) {
+      return new Response(new ReadableStream({ start() {} }), response);
+    } };
+    try {
+      const result = await request('/imprensa/noticias/teste-stream-pendente');
+      assert.equal(result.status, 200);
+      assert.equal(result.headers.get('Cache-Control'), 'no-store');
+      assert.match(await result.text(), /<html/i);
+    } finally { globalThis.HTMLRewriter = Rewriter; }
+  }
   await expectMissing('/imprensa/noticias/noticia-inexistente');
   await expectMissing('/eventos/evento-inexistente');
   origin = () => new Response('', { status: 404 });
@@ -174,6 +237,14 @@ try {
   assert.equal(fetches, missingFetches, 'Não encontrado fica em cache por 5 min');
 
   const post = { id: 16028, slug: 'esclarecimentos-acerca-do-registro-de-responsabilidade-tecnica-do-farmaceutico-atraves-do-contrato-de-trabalho', date: '2026-10-10T09:00:00', title: { rendered: 'Título &amp; notícia' }, excerpt: { rendered: '<p>Resumo</p>' }, categories: [1] };
+  origin = () => new Response('', { status: 503 });
+  const beforeSlash = fetches;
+  for (const method of ['GET', 'HEAD']) {
+    const redirect = await request(`/imprensa/noticias/${post.slug}/?utm_source=test&tag=a%2Fb&tag=dois`, { method });
+    assert.equal(redirect.status, 301);
+    assert.equal(redirect.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${post.slug}?utm_source=test&tag=a%2Fb&tag=dois`);
+  }
+  assert.equal(fetches, beforeSlash, 'Redirect da barra não consulta a origem');
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
   let response = await request('/imprensa/noticias/16028');
   assert.equal(response.status, 301);
@@ -186,13 +257,26 @@ try {
   origin = () => new Response('', { status: 503 });
   assert.equal((await request('/?p=16193')).status, 301, 'O mapa garante o redirect durante falha da origem');
   assert.equal((await request('/imprensa/noticias/16150')).status, 301);
-  assert.equal((await request('/?p=107698')).status, 503, 'Ausente precisa ser verificado na origem');
+  for (const [id, slug] of [[107698, 'crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp'], [5967, 'pagamento-de-anuidades-ferramenta-crf-web-sofre-mudancas'], [8995, 'crf_al_publica_de_nota_de_repudio_em_defesa_de_farmaceuticos_de_palmeira_dos_indios']]) {
+    const beforeRedirect = fetches;
+    const redirect = await request(`/?p=${id}`);
+    assert.equal(redirect.status, 301);
+    assert.equal(redirect.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${slug}`);
+    assert.equal(fetches, beforeRedirect, 'Mapa dispensa consulta à origem');
+  }
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
-  response = await request(`/imprensa/noticias/${post.slug}`);
+  response = await Promise.race([
+    request(`/imprensa/noticias/${post.slug}`, { next: () => new Promise(() => {}) }),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('HTML aguardou o asset')), 1000)),
+  ]);
   assert.equal(response.status, 200);
+  assert.match(await response.text(), /<div id="root"/);
+  assert.match(response.headers.get('Server-Timing'), /cache;dur=.*kv;dur=.*asset;dur=.*rewriter;dur=.*origin;dur=/);
+  assert.equal(await (await request(`/imprensa/noticias/${post.slug}`, { method: 'HEAD', next: () => new Promise(() => {}) })).text(), '');
   await Promise.all(background);
   const before = fetches;
   assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test`)).status, 200);
+  assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test&tag=a%2Fb&tag=dois`)).status, 200, 'Destino do redirect responde sem outro salto');
   assert.equal(fetches, before, 'Metadata cache ignores tracking query strings');
 
   // Metadados de evento: stale-while-revalidate, servidos mesmo com a origem fora.
@@ -247,17 +331,20 @@ try {
   for (const status of [404, 403, 500, 503]) {
     stored = new Map();
     origin = () => new Response('', { status });
-    // A missing API collection means the integration is broken, not that all
-    // articles/events disappeared. Individual 404s were covered above.
-    for (const path of ['/imprensa/noticias/noticia', '/eventos/evento']) {
-      response = await request(path);
-      assert.equal(response.status, 503, `${path}: origin ${status}`);
-      assert.equal(response.headers.get('Cache-Control'), 'no-store');
-      assert.equal(response.headers.get('Retry-After'), '60');
-      assert.equal(response.headers.get('X-Robots-Tag'), null, 'Do not deindex valid content during an outage');
-      assert.equal(response.headers.get('ETag'), null);
-    }
-    assert.equal(stored.size, 0, 'Never cache origin errors');
+    response = await Promise.race([
+    request(`/imprensa/noticias/${post.slug}`, { next: () => new Promise(() => {}) }),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('HTML aguardou o asset')), 1000)),
+  ]);
+    assert.equal(response.status, 200, `snapshot durante falha ${status}`);
+    response = await request('/imprensa/noticias/noticia-inexistente');
+    assert.equal(response.status, 404);
+    response = await request('/eventos/evento');
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get('Cache-Control'), 'no-store');
+    assert.equal(response.headers.get('Retry-After'), '60');
+    assert.equal(response.headers.get('X-Robots-Tag'), null);
+    assert.equal(response.headers.get('ETag'), null);
+
   }
   origin = () => { throw new TypeError('Network unavailable'); };
   assert.equal((await request('/imprensa/galeria-de-fotos/album')).status, 503);

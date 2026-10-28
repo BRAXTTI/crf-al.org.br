@@ -36,7 +36,7 @@ export interface NewsEnv {
   NEWS_ARCHIVE_API_URL?: string;
   NEWS_INDEX?: KVNamespace;
 }
-/** Prazo total das chamadas ao WordPress de uma requisição; sem ele, 15 s por chamada e uma repetição. */
+/** Prazo total das chamadas ao WordPress de uma requisição; sem ele, 8 s por chamada e uma repetição. */
 export interface NewsBudget {
   deadline: number;
   retry: boolean;
@@ -45,14 +45,20 @@ interface NewsContext {
   env?: NewsEnv;
   waitUntil: (promise: Promise<unknown>) => void;
   budget?: NewsBudget;
+  next?: (request: Request) => Promise<Response>;
+  request?: Request;
+  timings?: Record<string, number>;
 }
-/** HTML: ~4,5 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
-export const PAGE_BUDGET_MS = 4500;
-export const API_BUDGET_MS = 8000;
-const CALL_TIMEOUT_MS = 15_000;
+/** HTML: ~1,8 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
+export const PAGE_BUDGET_MS = 1800;
+export const API_BUDGET_MS = 8_000;
+const CALL_TIMEOUT_MS = 8_000;
 export function withNewsBudget(context: NewsContext, ms: number, retry: boolean): NewsContext {
   return {
     env: context.env,
+    next: context.next,
+    request: context.request,
+    timings: context.timings,
     waitUntil: (promise) => context.waitUntil(promise),
     budget: { deadline: Date.now() + ms, retry },
   };
@@ -60,6 +66,10 @@ export function withNewsBudget(context: NewsContext, ms: number, retry: boolean)
 /** Recargas em segundo plano e o índice compartilhado não herdam o prazo da requisição. */
 function background(context?: NewsContext): NewsContext | undefined {
   return context && { env: context.env, waitUntil: (promise) => context.waitUntil(promise) };
+}
+function boundedNews<T>(task: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  return Promise.race([task, new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new DOMException('News timeout', 'TimeoutError')), ms); })]).finally(() => clearTimeout(timer));
 }
 interface PublicCache {
   match: (request: Request) => Promise<Response | undefined>;
@@ -115,19 +125,20 @@ async function request(
     if (remaining <= 0) throw new DOMException('News budget exhausted', 'TimeoutError');
     const retry = attempt === 0 && (!budget || budget.retry);
     let response: Response;
+    const originStart = performance.now();
     try {
       const upstream = await fetch(url, {
         ...ORIGIN_CACHE,
         signal: AbortSignal.timeout(Math.min(remaining, CALL_TIMEOUT_MS)),
       });
+      if (context?.timings) context.timings.origin = (context.timings.origin || 0) + performance.now() - originStart;
       // Inclui a leitura do corpo na tentativa: timeout pode ocorrer após os headers.
       response = new Response(await upstream.arrayBuffer(), {
         status: upstream.status,
         headers: upstream.headers,
       });
     } catch (error) {
-      if (retry && error instanceof Error && ['TimeoutError', 'AbortError'].includes(error.name))
-        continue;
+      if (retry) continue;
       throw error;
     }
     if (retry && response.status >= 500) {
@@ -144,8 +155,7 @@ async function request(
   }
 }
 type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
-const MAX_STALE_MS = 24 * 3600_000;
-const FRESH_MS = 60_000;
+const FRESH_MS = 300_000;
 // Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
 // 30 dias: a reserva só é regravada quando o conteúdo muda (ou ao expirar).
 const DURABLE_TTL_S = 30 * 24 * 3600;
@@ -166,16 +176,14 @@ async function storeDurable<T>(
   const stored =
     previous === undefined ? await kv.get<Stored<T>>(durableKey(key), 'json') : previous;
   if (
-    stored &&
+    stored && Date.now() - stored.storedAt < DURABLE_REWRITE_MS &&
     JSON.stringify(stored.value) === JSON.stringify(value)
   )
     return;
-  await kv.put(durableKey(key), JSON.stringify({ storedAt: now, value }), {
-    expirationTtl: DURABLE_TTL_S,
-  });
+  await kv.put(durableKey(key), JSON.stringify({ storedAt: now, value }), key.startsWith('post/') ? undefined : { expirationTtl: DURABLE_TTL_S });
 }
 /**
- * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, o KV
+ * Cache API por data center (fresco por 5 min) + stale-while-revalidate. Com `durable`, o KV
  * NEWS_INDEX guarda uma reserva compartilhada entre data centers, servida de imediato quando
  * o cache local está vazio. Recargas em segundo plano são single-flight por isolate e marcam
  * apenas a tentativa com checkedAt, sem renovar a idade do conteúdo. Resultados `null` (não encontrado)
@@ -233,26 +241,28 @@ async function cachedLoad<T>(
     }
     await Promise.all([cache && putLocal(value), kv && storeDurable(kv, key, value, previous)]);
   };
-  let entry = await readLocal<T>(cache, request);
+  let entry = await boundedNews(readLocal<T>(cache, request), 150).catch(() => undefined);
+  if (entry && (typeof entry.storedAt !== 'number' || !('value' in entry))) entry = undefined;
   // "Não encontrado" não tem stale-while-revalidate: após 5 min consulta a origem de novo.
   if (entry?.value === null && Date.now() - entry.storedAt > NOT_FOUND_S * 1000) entry = undefined;
   let fromDurable = false;
   if (!entry && kv) {
-    entry = (await kv.get<Stored<T>>(durableKey(key), 'json')) ?? undefined;
+    entry = (await boundedNews(kv.get<Stored<T>>(durableKey(key), 'json'), 150).catch(() => null)) ?? undefined;
+    if (entry && (typeof entry.storedAt !== 'number' || !('value' in entry))) entry = undefined;
     fromDurable = Boolean(entry);
   }
-  if (entry && Date.now() - entry.storedAt <= MAX_STALE_MS) {
+  if (entry) {
     const stale = entry;
     if (
       stale.value !== null &&
       (fromDurable || Date.now() - (stale.checkedAt ?? stale.storedAt) > freshMs) &&
       !revalidating.has(scopeKey)
     ) {
-      const task = (async () => {
+      const task = boundedNews((async () => {
         if (cache) await putLocal(stale.value, stale.storedAt, Date.now());
         // Reserva lida do KV evita uma segunda leitura; vinda do cache local, confere o KV.
         await persist(await load(background(context)), kv && !fromDurable ? undefined : stale);
-      })()
+      })(), API_BUDGET_MS)
         .catch(() => undefined)
         .finally(() => revalidating.delete(scopeKey));
       revalidating.set(scopeKey, task);
@@ -262,7 +272,7 @@ async function cachedLoad<T>(
   }
   const value = await load(context);
   if (cache || (kv && value !== null))
-    await persist(value, kv ? (entry ?? null) : undefined).catch(() => undefined);
+    await boundedNews(persist(value, kv ? (entry ?? null) : undefined), 150).catch(() => undefined);
   return value;
 }
 // Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
@@ -276,7 +286,7 @@ function cached<T>(
   const scopeKey = `${originScope(context)}/${key}`;
   const pending = loading.get(scopeKey);
   if (pending) return pending as Promise<T>;
-  const task = cachedLoad(key, context, load, options).finally(() => loading.delete(scopeKey));
+  const task = boundedNews(cachedLoad(key, context, load, options), API_BUDGET_MS).finally(() => loading.delete(scopeKey));
   loading.set(scopeKey, task);
   return task;
 }
@@ -296,6 +306,10 @@ export function isBlockedNews(slug: string): boolean {
 }
 export function knownHistoricalSlug(id: string): string | null {
   const row = byOldId.get(Number(id));
+  return row && !row.blocked && row.newId !== null ? row.slug : null;
+}
+export function knownHistoricalSlugBySlug(slug: string): string | null {
+  const row = bySlug.get(slug) || byNewSlug.get(slug);
   return row && !row.blocked && row.newId !== null ? row.slug : null;
 }
 function historical(post: { id: number; slug: string }): HistoricalNews | undefined {
@@ -595,7 +609,7 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   }
   return entry;
 }
-export function refreshNewsIndex(context: NewsContext, scheduled = false): Promise<Entry[] | null> {
+export function refreshNewsIndex(context: NewsContext, scheduled = false, snapshot?: { generatedAt: string; entries: { id: number; slug: string; modified?: string }[] }): Promise<Entry[] | null> {
   const kv = newsKV(context);
   if (!kv) return Promise.reject(new Error('NEWS_INDEX binding required'));
   const pending = refreshing.get(kv);
@@ -608,7 +622,17 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
     ).join('');
     const previous = await readNewsIndex(kv);
     const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
+    const snapshotKey = 'news:snapshot:baseline:v1';
+    const baseline = snapshot && await kv.get<string>(snapshotKey, 'json');
+    if (scheduled && (previous || snapshot)) {
+      const old = new Map((snapshot && baseline !== snapshot.generatedAt ? snapshot.entries : previous?.value ?? []).map(item => [item.id, item]));
+      const changed = value.filter(item => old.get(item.id)?.modified !== item.modified || old.get(item.id)?.slug !== item.slug);
+      // Persiste detalhes antes do índice: se falhar, a próxima execução tenta novamente.
+      for (let i = 0; i < changed.length; i += 100)
+        await warmNewsPosts(context, changed.slice(i, i + 100), 100);
+    }
     if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
+    if (scheduled && snapshot && baseline !== snapshot.generatedAt) await kv.put(snapshotKey, JSON.stringify(snapshot.generatedAt));
     await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
     // (checked: 1 escrita/execução = 24/dia com cron horário)
     memo.set(kv, { readAt: Date.now(), entry });
@@ -618,7 +642,7 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
     // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
     return value;
   };
-  const task = (async () => {
+  const task = boundedNews((async () => {
     // Cron: execução única por hora, sem contador nem lease no KV (2 escritas a menos).
     if (scheduled) return commit(await buildNewsIndex(background(context)));
     const quotaKey = NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10);
@@ -646,7 +670,7 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
       throw error;
     }
     return commit(value);
-  })().finally(() => refreshing.delete(kv));
+  })(), scheduled ? 120_000 : API_BUDGET_MS).finally(() => refreshing.delete(kv));
   refreshing.set(kv, task);
   return task;
 }
@@ -674,6 +698,7 @@ const postKey = (slug: string) => `post/${encodeURIComponent(slug)}`;
 /** Detalhe completo da notícia. Middleware (metadados) e /api/news compartilham a mesma chave. */
 export async function newsPost(slug: string, context?: NewsContext): Promise<WPPost | null> {
   if (isBlockedNews(slug)) return null;
+  if (snapshotAvailable(context)) return snapshotPost(slug, context!);
   return cached(
     postKey(slug),
     context,
@@ -711,6 +736,79 @@ export async function newsPost(slug: string, context?: NewsContext): Promise<WPP
     },
     { durable: true },
   );
+}
+// O snapshot versionado garante que uma leitura fria nunca espere pelo WordPress.
+function snapshotAvailable(context?: NewsContext): boolean {
+  return Boolean(context?.next && context.request && !originScope(context));
+}
+async function snapshotAsset<T>(context: NewsContext, path: string): Promise<T | null> {
+  const url = new URL(`/news-snapshot/${path}`, context.request!.url);
+  const start = performance.now();
+  const response = await boundedNews(context.next!(new Request(url)), 1000);
+  if (!response.ok || !response.headers.get('content-type')?.includes('json')) return null;
+  const value = await boundedNews(response.json(), 1000) as T;
+  if (context.timings) context.timings.asset = (context.timings.asset || 0) + performance.now() - start;
+  return value;
+}
+let snapshotMemo: Promise<WPPost[]> | undefined;
+async function snapshotCards(context: NewsContext): Promise<WPPost[]> {
+  snapshotMemo ??= snapshotAsset<WPPost[]>(context, 'index.json').then(value => {
+    if (!value) throw new Error('News snapshot missing');
+    return value;
+  }).catch(error => { snapshotMemo = undefined; throw error; });
+  return snapshotMemo;
+}
+async function boundedKV<T>(task: Promise<T>, fallback: T, context: NewsContext): Promise<T> {
+  const start = performance.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([task.catch(() => fallback), new Promise<T>(resolve => { timer = setTimeout(() => resolve(fallback), 150); })]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+    if (context.timings) context.timings.kv = (context.timings.kv || 0) + performance.now() - start;
+  }
+}
+async function snapshotPost(slug: string, context: NewsContext): Promise<WPPost | null> {
+  const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
+  const canonical = row?.slug ?? slug;
+  const kv = newsKV(context);
+  const [stored, assetResult] = await Promise.all([
+    kv ? boundedKV(kv.get<Stored<WPPost>>(durableKey(postKey(canonical)), { type: 'json', cacheTtl: 60 }), null, context) : null,
+    snapshotAsset<WPPost>(context, `posts/${encodeURIComponent(canonical)}.json`).then(value => ({ value }), error => ({ error })),
+  ]);
+  const valid = stored?.value && typeof stored.value.slug === 'string' && typeof stored.value.title?.rendered === 'string' ? stored.value : null;
+  if ('error' in assetResult && !valid) throw assetResult.error;
+  const asset = 'value' in assetResult ? assetResult.value : null;
+  return valid && (!asset || (valid.modified || '') >= (asset.modified || '')) ? valid : asset;
+}
+async function snapshotListing(context: NewsContext): Promise<WPPost[]> {
+  const cards = await snapshotCards(context);
+  const kv = newsKV(context);
+  if (!kv) return cards;
+  const [index, recent] = await Promise.all([boundedKV(readNewsIndex(kv), null, context), boundedKV(readRecentCards(kv), null, context)]);
+  if (!index) return cards;
+  const old = new Map(cards.map(card => [card.id, card]));
+  const fresh = new Map(recent?.value.map(card => [card.id, card.post]));
+  const result = await Promise.all(index.value.map(async entry => {
+    const current = fresh.get(entry.id) ?? old.get(entry.id);
+    if (current && current.modified === entry.modified && current.slug === entry.slug) return current;
+    const stored = await boundedKV(kv.get<Stored<WPPost>>(durableKey(postKey(entry.slug)), { type: 'json', cacheTtl: 60 }), null, context);
+    return stored?.value ?? current;
+  }));
+  const merged = new Map(cards.map(post => [post.id, post]));
+  for (const post of result) if (post) merged.set(post.id, post);
+  return [...merged.values()].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+}
+async function snapshotPage(page: number, perPage: number, context: NewsContext): Promise<WPPostsPage> {
+  const posts = await snapshotListing(context);
+  return { posts: posts.slice((page - 1) * perPage, page * perPage), total: posts.length, totalPages: Math.ceil(posts.length / perPage) };
+}
+async function snapshotSearch(term: string, context: NewsContext): Promise<WPPost[]> {
+  const words = term.split(' ');
+  return (await snapshotListing(context)).filter(post => {
+    const text = `${post.title?.rendered ?? ''} ${post.excerpt?.rendered ?? ''}`.toLocaleLowerCase('pt-BR');
+    return words.every(word => text.includes(word));
+  }).slice(0, 10);
 }
 export const WARM_POSTS = 30;
 /**
@@ -757,6 +855,7 @@ export async function newsPage(
     perPage > 100
   )
     throw new RangeError('Invalid news pagination');
+  if (snapshotAvailable(context)) return snapshotPage(page, perPage, context!);
   const index = await newsIndex(context);
   const entries = index.slice((page - 1) * perPage, page * perPage);
   if (!entries.length)
@@ -799,7 +898,7 @@ export async function newsPage(
       taxonomy,
       scoped,
     );
-  });
+  }, { durable: true });
   return { posts, total: index.length, totalPages: Math.ceil(index.length / perPage) };
 }
 const SEARCH_MAX_LENGTH = 120;
@@ -823,6 +922,7 @@ export function normalizeSearch(term: string): string | null {
 export async function searchNews(term: string, context?: NewsContext): Promise<WPPost[]> {
   const normalized = normalizeSearch(term);
   if (normalized === null) throw new RangeError('Invalid news search');
+  if (snapshotAvailable(context)) return snapshotSearch(normalized, context!);
   // Resultados de busca mudam pouco: 5 min frescos, depois stale-while-revalidate.
   return cached(
     `search/${encodeURIComponent(normalized)}`,
@@ -850,10 +950,32 @@ export async function searchNews(term: string, context?: NewsContext): Promise<W
         .sort((a, b) => b.date.localeCompare(a.date))
         .slice(0, 10);
     },
-    { freshMs: 5 * 60_000 },
+    { durable: true, freshMs: 5 * 60_000 },
   );
 }
 export async function newsApi(request: Request, base?: NewsContext): Promise<Response> {
+  return newsDeadline(newsApiLoad(request, base), base);
+}
+
+/** Inclui também cache e KV no prazo, mesmo quando não respeitam AbortSignal. */
+export async function newsDeadline(task: Promise<Response>, base?: NewsContext): Promise<Response> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const deadline = new Promise<Response>((resolve) => {
+    timer = setTimeout(() => resolve(Response.json(
+      { error: 'Notícias temporariamente indisponíveis.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' } },
+    )), API_BUDGET_MS);
+  });
+  try {
+    const response = await Promise.race([task, deadline]);
+    if (response.status === 503 && base) base.waitUntil(task.catch(() => undefined));
+    return response;
+  } finally {
+    if (timer !== null) clearTimeout(timer);
+  }
+}
+
+async function newsApiLoad(request: Request, base?: NewsContext): Promise<Response> {
   if (!['GET', 'HEAD'].includes(request.method))
     return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
   const url = new URL(request.url);
@@ -867,7 +989,7 @@ export async function newsApi(request: Request, base?: NewsContext): Promise<Res
           { status: 400, headers: { 'Cache-Control': 'no-store' } },
         );
       return Response.json(await searchNews(search, context), {
-        headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=600' },
+        headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000' },
       });
     }
     const slug = url.searchParams.get('slug');
@@ -887,7 +1009,7 @@ export async function newsApi(request: Request, base?: NewsContext): Promise<Res
       status: result ? 200 : 404,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': result ? 'public, max-age=60' : 'no-store',
+        'Cache-Control': result ? 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000' : 'no-store',
       },
     });
   } catch (error) {
