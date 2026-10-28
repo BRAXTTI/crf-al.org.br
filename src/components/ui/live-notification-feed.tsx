@@ -7,13 +7,37 @@ import * as React from "react";
   chegada, anúncio `aria-live`, pausa com ponteiro/foco e autoplay opcional (desligado
   por padrão). Mudou o visual (tokens do CRF-AL), os textos (pt-BR) e os kinds: cada
   kind continua com o seu detalhe animado, agora para eventos, novidades do site,
-  serviços e notícias. Com movimento reduzido nada anima e tudo nasce no estado final.
+  serviços e notícias. Notícias e eventos mostram a foto de capa real (WordPress);
+  novidades do site, sem foto, ganham uma faixa da marca. Com movimento reduzido nada
+  anima e tudo nasce no estado final.
 */
 
 export interface NotificationAction {
   label: string;
   /** Exibido no lugar dos botões depois que a ação é escolhida, ex.: "Inscrição aberta". */
   done?: string;
+}
+
+/** Foto de capa real: `src`/`srcSet` para a capa larga e `thumb` (miniatura 150×150) para os toasts. */
+export interface NotificationImage {
+  src: string;
+  srcSet?: string;
+  thumb?: string;
+  /** URL original da API, quando `src` é uma variante (ex.: `large`): última tentativa da capa larga. */
+  original?: string;
+}
+
+/** Identidade da capa: muda quando qualquer URL muda, para reiniciar as tentativas e o "sem foto". */
+const coverKey = (image: NotificationImage) => [image.src, image.srcSet, image.original].join("|");
+
+/**
+ * Falha da imagem atual, presa à URL: zera sempre que a URL muda (inclusive A → B → A),
+ * então uma capa que já falhou volta a ser tentada quando reaparece.
+ */
+function useImageFailure(key: string | undefined) {
+  const [failure, setFailure] = React.useState({ key, failed: false });
+  if (failure.key !== key) setFailure({ key, failed: false });
+  return [failure.key === key && failure.failed, () => setFailure({ key, failed: true })] as const;
 }
 
 interface NotificationBase {
@@ -30,18 +54,19 @@ interface NotificationBase {
   /** Destino ao abrir a notificação. Com `onNavigate`, cliques simples navegam pelo SPA. */
   href?: string;
   actions?: NotificationAction[];
+  /** Capa (notícias e eventos). Sem ela, ou se não carregar, o card usa o detalhe do tipo. */
+  image?: NotificationImage;
 }
 
-/** Evento da agenda: folhinha que é arrancada até a data do evento. */
+/** Evento da agenda: capa do evento e folhinha que é arrancada até a data. */
 export type EventoNotification = NotificationBase & { kind: "evento"; date: string; tags?: string[]; locale?: string };
-/** Página nova ou renovada: o endereço é digitado e a página se monta. */
-export type NovidadeNotification = NotificationBase & { kind: "novidade"; host: string; path: string };
+/** Página nova ou renovada: faixa da marca com a seção do site e o selo "Nova". */
+export type NovidadeNotification = NotificationBase & { kind: "novidade"; section?: string };
 /** Serviço ou requerimento: itens conferidos um a um, com contagem em rolo. */
 export type ServicoNotification = NotificationBase & { kind: "servico"; counts: { label: string; value: number }[] };
 /** Notícia: a capa é revelada por uma varredura e os dados entram palavra a palavra. */
 export type NoticiaNotification = NotificationBase & {
   kind: "noticia";
-  image?: { src: string; srcSet?: string };
   category?: string;
   date?: string;
 };
@@ -98,7 +123,6 @@ const LEAVE_MS = 340;
 const SWEEP_STAGGER_MS = 60;
 const STORY_DELAY_MS = 260;
 const RESTART_HOLD = 2.2;
-const TYPE_MS = 28;
 const CHECK_STAGGER_MS = 220;
 const SPRING = "cubic-bezier(0.2, 0.9, 0.25, 1.12)";
 const SETTLE = "cubic-bezier(0.2, 0.8, 0.2, 1)";
@@ -170,10 +194,99 @@ function Icon({ d, className }: { d: string; className?: string }) {
 const BELL = "M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 1.5h-15Z M10 20.5a2.2 2.2 0 0 0 4 0";
 const CLOSE = "M7 7l10 10M17 7 7 17";
 const CHECK = "M5 12.5l4.2 4.2L19 7";
-const LOCK = "M7.5 11V8.5a4.5 4.5 0 0 1 9 0V11 M6 11h12v9H6Z";
+const ARROW = "M5 12h14 M13 6l6 6-6 6";
 const CHEVRON_DOWN = "M7 10l5 5 5-5";
 
-function AppTile({ kind, accent, play, delay, reduced }: { kind: NotificationKind; accent?: string; play: number; delay: number; reduced: boolean }) {
+/* -------------------------------------------------------------------------- */
+/* Foto de capa real                                                           */
+/* -------------------------------------------------------------------------- */
+
+/** Capa larga do painel: proporção fixa 2:1, recortada pelo centro-topo (onde costuma estar o título da arte). */
+const COVER_SIZES = "(max-width: 480px) 80vw, 300px";
+
+/**
+ * Foto real com recorte fixo, sem prioridade (lazy, decodificação assíncrona, nunca
+ * pré-carregada: não disputa o LCP). Tentativas em ordem: `srcSet`/variante, depois a URL
+ * original da API (`original`, ou `src` sem `srcSet`); se todas falharem, `onFail` e o card
+ * volta ao detalhe sem foto. Aparece com um esmaecimento curto ao carregar.
+ */
+function CoverImage({
+  image,
+  width,
+  height,
+  sizes,
+  className,
+  onFail,
+}: {
+  image: NotificationImage;
+  width: number;
+  height: number;
+  sizes?: string;
+  className?: string;
+  onFail: () => void;
+}) {
+  const attempts = React.useMemo(() => {
+    const list: { src: string; srcSet?: string }[] = [{ src: image.src, srcSet: image.srcSet }];
+    const fallback = image.original ?? image.src;
+    if (image.srcSet || fallback !== image.src) list.push({ src: fallback });
+    return list;
+  }, [image]);
+  const [attempt, setAttempt] = React.useState(0);
+  const [loaded, setLoaded] = React.useState(false);
+  const current = attempts[Math.min(attempt, attempts.length - 1)];
+  return (
+    <img
+      key={current.src + (current.srcSet ?? "")}
+      src={current.src}
+      srcSet={current.srcSet}
+      sizes={current.srcSet ? sizes : undefined}
+      width={width}
+      height={height}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      onLoad={() => setLoaded(true)}
+      onError={() => {
+        if (attempt + 1 < attempts.length) setAttempt(attempt + 1);
+        else onFail();
+      }}
+      className={cx("size-full object-cover object-[50%_30%] motion-safe:transition-opacity motion-safe:duration-300", !loaded && "opacity-0", className)}
+    />
+  );
+}
+
+/** Moldura da capa: cantos arredondados, fundo neutro enquanto carrega e borda interna sutil. */
+function CoverFrame({ children, className, frameRef }: { children: React.ReactNode; className?: string; frameRef?: React.Ref<HTMLSpanElement> }) {
+  return (
+    <span ref={frameRef} aria-hidden className={cx("relative block overflow-hidden bg-crfal-gray-100", className)}>
+      {children}
+      <span className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-black/[0.06]" />
+    </span>
+  );
+}
+
+function AppTile({
+  kind,
+  accent,
+  play,
+  delay,
+  reduced,
+  thumb,
+  onThumbFail,
+}: {
+  kind: NotificationKind;
+  accent?: string;
+  play: number;
+  delay: number;
+  reduced: boolean;
+  /**
+   * Toasts: a miniatura 150×150 ocupa a placa e o ícone do tipo vira um selo no canto (como
+   * no iOS). Só ela é pedida (sem `srcSet` nem a capa larga); se falhar, `onThumbFail`.
+   */
+  thumb?: string;
+  onThumbFail?: () => void;
+}) {
   const ringRef = React.useRef(null as HTMLSpanElement | null);
   React.useEffect(() => {
     if (play === 0 || reduced) return;
@@ -186,6 +299,19 @@ function AppTile({ kind, accent, play, delay, reduced }: { kind: NotificationKin
     );
     return () => animation?.cancel();
   }, [play, delay, reduced]);
+  if (thumb) {
+    return (
+      <span data-tile data-photo className={cx("relative mt-0.5 size-10 shrink-0", !accent && "text-crfal-blue")} style={{ color: accent }}>
+        <CoverFrame className="size-10 rounded-xl">
+          <CoverImage key={thumb} image={{ src: thumb }} width={40} height={40} onFail={() => onThumbFail?.()} />
+        </CoverFrame>
+        <span aria-hidden className="absolute -bottom-1 -right-1 grid size-[18px] place-items-center rounded-md bg-white shadow-[0_1px_3px_rgba(11,25,44,0.25)] ring-1 ring-crfal-gray-200">
+          <Icon d={ICONS[kind]} className="size-3" />
+        </span>
+        <span ref={ringRef} aria-hidden className="pointer-events-none absolute inset-0 rounded-xl border-2 border-current opacity-0" />
+      </span>
+    );
+  }
   return (
     <span
       data-tile
@@ -216,8 +342,57 @@ function DateSheet({ day, locale }: { day: Date; locale: string }) {
   );
 }
 
+/** Capa larga revelada de cima para baixo, com um brilho que desce junto (notícias e eventos). */
+function useCoverReveal(animate: boolean, play: number, delay: number) {
+  const coverRef = React.useRef(null as HTMLSpanElement | null);
+  const scanRef = React.useRef(null as HTMLSpanElement | null);
+  React.useEffect(() => {
+    if (!animate) return;
+    const start = Math.max(80, delay);
+    const effects = [
+      coverRef.current?.animate([{ clipPath: "inset(0 0 100% 0 round 12px)" }, { clipPath: "inset(0 0 0 0 round 12px)" }], { duration: 560, delay: start, easing: SETTLE, fill: "backwards" }),
+      scanRef.current?.animate(
+        [
+          { transform: "translateY(-100%)", opacity: 0 },
+          { transform: "translateY(40%)", opacity: 1, offset: 0.6 },
+          { transform: "translateY(200%)", opacity: 0 },
+        ],
+        { duration: 760, delay: start, easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" },
+      ),
+    ];
+    return () => effects.forEach((effect) => effect?.cancel());
+  }, [play, animate, delay]);
+  return { coverRef, scanRef };
+}
+
+function WideCover({
+  image,
+  coverRef,
+  scanRef,
+  onFail,
+}: {
+  image: NotificationImage;
+  coverRef: React.Ref<HTMLSpanElement>;
+  scanRef: React.Ref<HTMLSpanElement>;
+  onFail: () => void;
+}) {
+  return (
+    <CoverFrame frameRef={coverRef} className="aspect-[2/1] w-full rounded-xl">
+      <CoverImage image={image} width={600} height={300} sizes={COVER_SIZES} onFail={onFail} />
+      <span
+        ref={scanRef}
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-0"
+        style={{ background: "linear-gradient(to bottom, transparent, color-mix(in oklab, white 35%, transparent))" }}
+      />
+    </CoverFrame>
+  );
+}
+
 function EventoDetail({ item, play, delay, reduced }: StoryProps & { item: EventoNotification }) {
   const animate = play > 0 && !reduced;
+  const cover = item.image && coverKey(item.image);
+  const [noCover, setNoCover] = useImageFailure(cover);
+  const { coverRef, scanRef } = useCoverReveal(animate && Boolean(cover) && !noCover, play, delay);
   const locale = item.locale ?? "pt-BR";
   const event = React.useMemo(() => parseDay(item.date), [item.date]);
   const torn = React.useMemo(() => [1, 2, 3, 4].map((back) => addDays(event, -back)), [event]);
@@ -247,117 +422,84 @@ function EventoDetail({ item, play, delay, reduced }: StoryProps & { item: Event
   }, [play, animate, delay]);
 
   return (
-    <div data-detail="evento" className="flex items-center gap-3">
-      <div className="relative h-14 w-12 shrink-0 [perspective:420px]">
-        <DateSheet day={event} locale={locale} />
-        {animate && (
-          <div ref={sheetsRef} data-sheets aria-hidden className="absolute inset-0">
-            {torn.map((day) => (
-              <DateSheet key={day.getTime()} day={day} locale={locale} />
+    <div data-detail="evento" className="space-y-2.5">
+      {item.image && cover && !noCover && <WideCover key={cover} image={item.image} coverRef={coverRef} scanRef={scanRef} onFail={setNoCover} />}
+      <div className="flex items-center gap-3">
+        <div className="relative h-14 w-12 shrink-0 [perspective:420px]">
+          <DateSheet day={event} locale={locale} />
+          {animate && (
+            <div ref={sheetsRef} data-sheets aria-hidden className="absolute inset-0">
+              {torn.map((day) => (
+                <DateSheet key={day.getTime()} day={day} locale={locale} />
+              ))}
+            </div>
+          )}
+        </div>
+        {tags.length > 0 && (
+          <div ref={tagsRef} className="flex min-w-0 flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span key={tag} className="max-w-full truncate rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: TINT }}>
+                <span className="text-crfal-blue-dark">{tag}</span>
+              </span>
             ))}
           </div>
         )}
       </div>
-      {tags.length > 0 && (
-        <div ref={tagsRef} className="flex min-w-0 flex-wrap gap-1.5">
-          {tags.map((tag) => (
-            <span key={tag} className="max-w-full truncate rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: TINT }}>
-              <span className="text-crfal-blue-dark">{tag}</span>
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* Novidade no site: o endereço é digitado e a página se monta                 */
+/* Novidade no site: faixa da marca (sem foto), com brilho e selo "Nova"       */
 /* -------------------------------------------------------------------------- */
 
 function NovidadeDetail({ item, play, delay, reduced }: StoryProps & { item: NovidadeNotification }) {
   const animate = play > 0 && !reduced;
-  const pathRef = React.useRef(null as HTMLSpanElement | null);
-  const caretRef = React.useRef(null as HTMLSpanElement | null);
-  const blocksRef = React.useRef(null as HTMLDivElement | null);
+  const sheenRef = React.useRef(null as HTMLSpanElement | null);
+  const tileRef = React.useRef(null as HTMLSpanElement | null);
+  const textRef = React.useRef(null as HTMLSpanElement | null);
   const badgeRef = React.useRef(null as HTMLSpanElement | null);
 
   React.useEffect(() => {
-    const path = pathRef.current;
-    const settle = () => {
-      if (path) path.textContent = item.path;
-    };
-    if (!animate || !path) {
-      settle();
-      return;
-    }
+    if (!animate) return;
     const start = Math.max(80, delay);
-    const chars = Array.from(item.path);
-    const typed = start + chars.length * TYPE_MS;
-    path.textContent = "";
-    const timers = chars.map((_, i) => window.setTimeout(() => (path.textContent = chars.slice(0, i + 1).join("")), start + (i + 1) * TYPE_MS));
-    const effects: Animation[] = [];
-    const caret = caretRef.current?.animate(
-      [
-        { opacity: 1, offset: 0 },
-        { opacity: 1, offset: 0.5 },
-        { opacity: 0, offset: 0.51 },
-        { opacity: 0, offset: 1 },
-      ],
-      { duration: 520, delay: start, iterations: Math.ceil((typed - start) / 520) + 1 },
-    );
-    if (caret) effects.push(caret);
-    const blocks = Array.from(blocksRef.current?.children ?? []);
-    blocks.forEach((block, i) =>
-      effects.push(
-        block.animate(
-          [
-            { transform: "scaleX(0)", opacity: 0 },
-            { transform: "scaleX(1)", opacity: 1 },
-          ],
-          { duration: 420, delay: typed + 60 + i * 90, easing: SETTLE, fill: "backwards" },
-        ),
+    const effects = [
+      sheenRef.current?.animate(
+        [
+          { transform: "translateX(-120%) skewX(-18deg)", opacity: 0 },
+          { transform: "translateX(60%) skewX(-18deg)", opacity: 1, offset: 0.5 },
+          { transform: "translateX(320%) skewX(-18deg)", opacity: 0 },
+        ],
+        { duration: 1100, delay: start, easing: "cubic-bezier(0.3, 0.6, 0.2, 1)" },
       ),
-    );
-    const pop = badgeRef.current?.animate(POP, { duration: 380, delay: typed + 120 + blocks.length * 90, easing: "ease-out", fill: "backwards" });
-    if (pop) effects.push(pop);
-    return () => {
-      timers.forEach((timer) => window.clearTimeout(timer));
-      effects.forEach((effect) => effect.cancel());
-      settle();
-    };
-  }, [play, animate, delay, item.path]);
+      tileRef.current?.animate(POP, { duration: 380, delay: start + 80, easing: "ease-out", fill: "backwards" }),
+      ...Array.from(textRef.current?.children ?? []).map((part, i) => part.animate(WORD_IN, { duration: 260, delay: start + 180 + i * 70, easing: "ease-out", fill: "backwards" })),
+      badgeRef.current?.animate(POP, { duration: 380, delay: start + 420, easing: "ease-out", fill: "backwards" }),
+    ];
+    return () => effects.forEach((effect) => effect?.cancel());
+  }, [play, animate, delay]);
 
   return (
-    <div data-detail="novidade" className="overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-50">
-      <span className="sr-only">
-        Endereço: {item.host}
-        {item.path}
+    <div data-detail="novidade" className="relative isolate flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-white" style={{ background: "var(--notif-grad-pill)" }}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-70 [background-image:radial-gradient(circle_at_85%_-20%,rgb(232_203_118/0.28),transparent_55%),linear-gradient(to_right,rgb(255_255_255/0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgb(255_255_255/0.05)_1px,transparent_1px)] [background-size:100%_100%,14px_14px,14px_14px]"
+      />
+      <span aria-hidden className="pointer-events-none absolute inset-x-4 top-0 h-px bg-linear-to-r/srgb from-crfal-gold/0 via-crfal-gold/80 to-crfal-gold/0" />
+      <span ref={sheenRef} aria-hidden className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-1/3 bg-linear-to-r/srgb from-white/0 via-white/15 to-white/0 opacity-0" />
+      <span ref={tileRef} aria-hidden className="grid size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-crfal-gold ring-1 ring-inset ring-white/15 backdrop-blur-sm">
+        <Icon d={ICONS.novidade} className="size-4" />
       </span>
-      <div aria-hidden className="flex items-center gap-2 border-b border-crfal-gray-200 bg-white px-2.5 py-1.5">
-        <span className="flex shrink-0 gap-1">
-          <span className="size-1.5 rounded-full bg-crfal-gray-300" />
-          <span className="size-1.5 rounded-full bg-crfal-gray-300" />
-          <span className="size-1.5 rounded-full bg-crfal-gray-300" />
-        </span>
-        <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden rounded-full bg-crfal-gray-100 px-2 py-0.5 font-mono text-[10.5px] leading-4 text-crfal-gray-600">
-          <Icon d={LOCK} className="size-2.5 shrink-0" />
-          {/* O domínio cede espaço primeiro: a rota é o que importa. */}
-          <span className="min-w-0 truncate">{item.host}</span>
-          <span ref={pathRef} className="-ml-1 min-w-0 max-w-[70%] shrink-0 truncate font-semibold text-crfal-blue-dark">
-            {item.path}
-          </span>
-          <span ref={caretRef} className="-ml-0.5 inline-block h-3 w-px shrink-0 bg-crfal-blue-dark opacity-0" />
-        </span>
-        <span ref={badgeRef} className="shrink-0 rounded-full px-1.5 py-px text-[9.5px] font-bold uppercase tracking-wide" style={{ background: "currentColor" }}>
-          <span className="text-white">Nova</span>
-        </span>
-      </div>
-      <div ref={blocksRef} aria-hidden className="space-y-1.5 px-2.5 py-2">
-        <span className="block h-2 w-2/5 origin-left rounded-full" style={{ background: "currentColor" }} />
-        <span className="block h-1.5 w-full origin-left rounded-full bg-crfal-gray-200" />
-        <span className="block h-1.5 w-4/5 origin-left rounded-full bg-crfal-gray-200" />
-      </div>
+      <span ref={textRef} className="min-w-0 flex-1 leading-tight">
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60">Agora no site</span>
+        <span className="mt-0.5 block truncate text-[13px] font-semibold">{item.section ?? "Portal do CRF-AL"}</span>
+      </span>
+      <span ref={badgeRef} className="shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-crfal-blue-dark" style={{ background: "var(--notif-grad-badge)" }}>
+        Nova
+      </span>
+      <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15">
+        <Icon d={ARROW} className="size-3" />
+      </span>
     </div>
   );
 }
@@ -445,43 +587,22 @@ function ServicoDetail({ item, play, delay, reduced }: StoryProps & { item: Serv
 
 function NoticiaDetail({ item, play, delay, reduced }: StoryProps & { item: NoticiaNotification }) {
   const animate = play > 0 && !reduced;
-  const coverRef = React.useRef(null as HTMLSpanElement | null);
-  const scanRef = React.useRef(null as HTMLSpanElement | null);
+  const cover = item.image && coverKey(item.image);
+  const [noCover, setNoCover] = useImageFailure(cover);
+  const { coverRef, scanRef } = useCoverReveal(animate && Boolean(cover) && !noCover, play, delay);
   const metaRef = React.useRef(null as HTMLSpanElement | null);
 
   React.useEffect(() => {
     if (!animate) return;
     const start = Math.max(80, delay);
-    const effects: (Animation | undefined)[] = [
-      coverRef.current?.animate([{ clipPath: "inset(0 0 100% 0 round 8px)" }, { clipPath: "inset(0 0 0 0 round 8px)" }], { duration: 560, delay: start, easing: SETTLE, fill: "backwards" }),
-      scanRef.current?.animate(
-        [
-          { transform: "translateY(-100%)", opacity: 0 },
-          { transform: "translateY(40%)", opacity: 1, offset: 0.6 },
-          { transform: "translateY(200%)", opacity: 0 },
-        ],
-        { duration: 760, delay: start, easing: "cubic-bezier(0.3, 0.7, 0.2, 1)" },
-      ),
-      ...Array.from(metaRef.current?.children ?? []).map((part, i) => part.animate(WORD_IN, { duration: 260, delay: start + 320 + i * 60, easing: "ease-out", fill: "backwards" })),
-    ];
-    return () => effects.forEach((effect) => effect?.cancel());
+    const words = Array.from(metaRef.current?.children ?? []).map((part, i) => part.animate(WORD_IN, { duration: 260, delay: start + 320 + i * 60, easing: "ease-out", fill: "backwards" }));
+    return () => words.forEach((word) => word.cancel());
   }, [play, animate, delay]);
 
   const meta = [item.category, item.date].filter((part): part is string => Boolean(part));
   return (
-    <div data-detail="noticia" className="flex items-center gap-3">
-      {item.image && (
-        <span ref={coverRef} aria-hidden className="relative block h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-crfal-gray-100 ring-1 ring-crfal-gray-200">
-          {/* A arte do WordPress nunca é cortada: inteira, sobre uma cópia desfocada dela mesma. */}
-          <img src={item.image.src} srcSet={item.image.srcSet} sizes="64px" alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full scale-125 object-cover opacity-60 blur-md" />
-          <img src={item.image.src} srcSet={item.image.srcSet} sizes="64px" alt="" loading="lazy" decoding="async" className="relative size-full object-contain" />
-          <span
-            ref={scanRef}
-            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-0"
-            style={{ background: "linear-gradient(to bottom, transparent, color-mix(in oklab, currentColor 45%, transparent) 85%, white)" }}
-          />
-        </span>
-      )}
+    <div data-detail="noticia" className="space-y-2.5">
+      {item.image && cover && !noCover && <WideCover key={cover} image={item.image} coverRef={coverRef} scanRef={scanRef} onFail={setNoCover} />}
       {meta.length > 0 && (
         <span ref={metaRef} className="flex min-w-0 flex-wrap items-center gap-1.5 text-[11px]">
           {meta.map((part, i) => (
@@ -690,8 +811,9 @@ function NotificationCard({
 }
 
 /**
- * Versão compacta do card para os toasts do carregamento (banner estilo iOS): mesmo
- * ícone com anel de chegada, rótulo de origem e título do feed, sem o detalhe animado.
+ * Versão compacta do card para os toasts do carregamento (banner estilo iOS): rótulo de
+ * origem e título do feed, sem o detalhe animado. Com miniatura (150×150 do WordPress),
+ * a placa mostra a foto com o ícone do tipo num selo; sem ela, ou se falhar, o ícone.
  * `behind`: card de trás na pilha (só a "placa" aparece; nada focável).
  */
 export function NotificationToastCard({
@@ -713,6 +835,8 @@ export function NotificationToastCard({
 }) {
   const accentScope = { color: item.accent };
   const accentClass = item.accent ? undefined : "text-crfal-blue";
+  const thumb = item.image?.thumb;
+  const [noThumb, setNoThumb] = useImageFailure(thumb);
   return (
     <article
       data-toast-card={item.id}
@@ -727,7 +851,15 @@ export function NotificationToastCard({
     >
       <span aria-hidden className="pointer-events-none absolute inset-x-6 top-0 -z-10 h-px bg-linear-to-r/srgb from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
       <div className={cx("flex gap-3", !reduced && "transition-opacity duration-200", behind && "opacity-0")}>
-        <AppTile kind={item.kind} accent={item.accent} play={play} delay={STORY_DELAY_MS} reduced={reduced} />
+        <AppTile
+          kind={item.kind}
+          accent={item.accent}
+          play={play}
+          delay={STORY_DELAY_MS}
+          reduced={reduced}
+          thumb={noThumb ? undefined : thumb}
+          onThumbFail={setNoThumb}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex h-4 items-center gap-1.5 text-xs leading-4 text-crfal-gray-600">
             <span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]" style={accentScope}>

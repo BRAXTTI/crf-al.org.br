@@ -1,10 +1,10 @@
 import type { LiveNotification } from '@/components/ui/live-notification-feed';
-import { SITE_URL } from '@/config/site';
 import { corporateMenu, individualMenu } from '@/data/requerimentos';
 import { MODALIDADE_LABELS, formatarData, parseWPDateTime, rotuloContagem, type Evento } from '@/features/events/utils';
-import { getPostCategory, getPostImageSet, stripHTML } from '@/services/wordpress/client';
+import { getPostCategory, stripHTML } from '@/services/wordpress/client';
 import type { WPPost } from '@/services/wordpress/types';
 import type { Novidade } from '@/config/novidades';
+import { capaDaMidia, capaDoBanner } from './capas';
 import { idEvento, idNoticia, idNovidade, type FontesNotificacoes } from './fontes';
 
 /* Cards das notificações montados a partir das fontes: usados pelo painel do sino e pelos toasts. */
@@ -16,7 +16,15 @@ const ACCENT = {
   servico: '#00875a',
   noticia: '#8A6A12',
 } as const;
-const HOST = new URL(SITE_URL).host;
+/** Seção do site exibida na faixa das novidades (pelo primeiro trecho da rota). */
+const SECOES: Record<string, string> = {
+  eventos: 'Eventos',
+  servicos: 'Serviços',
+  imprensa: 'Imprensa',
+  instituicao: 'Institucional',
+  fiscalizacao: 'Fiscalização',
+  legislacao: 'Legislação',
+};
 const CATEGORIAS_GENERICAS = new Set(['Blog', 'Geral']);
 
 const contarItens = (menu: typeof individualMenu) => menu.reduce((soma, categoria) => soma + categoria.items.length, 0);
@@ -60,6 +68,7 @@ function deEvento(evento: Evento): Montado {
       date: evento.data.slice(0, 10),
       tags: [hora && hora !== '00:00' ? hora.replace(':', 'h') : '', MODALIDADE_LABELS[evento.modalidade]].filter(Boolean),
       href: `/eventos/${evento.slug}`,
+      image: capaDoBanner(evento.banner),
     },
   };
 }
@@ -77,12 +86,12 @@ function deNovidade(novidade: Novidade, agora: number): Montado {
         : [];
     return { ordem, item: { ...base, kind: 'servico', app: 'Serviços', accent: ACCENT.servico, counts } };
   }
-  return { ordem, item: { ...base, kind: 'novidade', app: 'Novidade no site', accent: ACCENT.novidade, host: HOST, path: novidade.href } };
+  const section = SECOES[novidade.href.split('/')[1] ?? ''];
+  return { ordem, item: { ...base, kind: 'novidade', app: 'Novidade no site', accent: ACCENT.novidade, section } };
 }
 
 function deNoticia(post: WPPost, agora: number): Montado {
   const categoria = getPostCategory(post);
-  const imagem = getPostImageSet(post);
   return {
     ordem: Date.parse(post.date),
     item: {
@@ -93,7 +102,7 @@ function deNoticia(post: WPPost, agora: number): Montado {
       title: stripHTML(post.title.rendered),
       body: resumir(stripHTML(post.excerpt.rendered)) || undefined,
       time: haQuanto(post.date, agora),
-      image: imagem ? { src: imagem.src, srcSet: imagem.srcSet } : undefined,
+      image: capaDaMidia(post._embedded?.['wp:featuredmedia']?.[0]),
       category: CATEGORIAS_GENERICAS.has(categoria) ? undefined : categoria,
       date: formatarData(post.date),
       href: `/imprensa/noticias/${post.slug}`,
