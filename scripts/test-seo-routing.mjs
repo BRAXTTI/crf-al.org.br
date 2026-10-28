@@ -12,12 +12,14 @@ const metadataUrl = moduleUrl(await readFile(new URL('../src/config/page-metadat
 const imageSetUrl = moduleUrl(await readFile(new URL('../src/services/wordpress/image-set.ts', import.meta.url), 'utf8'));
 const siteUrl = moduleUrl(await readFile(new URL('../src/config/site.ts', import.meta.url), 'utf8'));
 const bannersUrl = moduleUrl((await readFile(new URL('../src/data/banners.ts', import.meta.url), 'utf8')).replace("'../config/site'", JSON.stringify(siteUrl)));
+const responseCacheUrl = moduleUrl((await readFile(new URL('../functions/_news-response-cache.ts', import.meta.url), 'utf8')).replace("'../src/config/site'", JSON.stringify(siteUrl)));
 const source = (await readFile(new URL('../functions/_middleware.ts', import.meta.url), 'utf8'))
   .replace("'../src/config/site'", JSON.stringify(siteUrl))
   .replace("'../src/data/banners'", JSON.stringify(bannersUrl))
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
-  .replace("'./_news'", JSON.stringify(await loadNews()));
+  .replace("'./_news'", JSON.stringify(await loadNews()))
+  .replace("'./_news-response-cache'", JSON.stringify(responseCacheUrl));
 const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders } = await import(moduleUrl(source));
 const { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } = await import(bannersUrl);
 const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
@@ -304,9 +306,9 @@ try {
     // articles/events disappeared. Individual 404s were covered above.
     for (const path of ['/imprensa/noticias/noticia', '/eventos/evento']) {
       response = await request(path);
-      assert.equal(response.status, 503, `${path}: origin ${status}`);
+      assert.equal(response.status, path.startsWith('/imprensa/noticias/') ? 200 : 503, `${path}: origin ${status}`);
       assert.equal(response.headers.get('Cache-Control'), 'no-store');
-      assert.equal(response.headers.get('Retry-After'), '60');
+      assert.equal(response.headers.get('Retry-After'), path.startsWith('/imprensa/noticias/') ? null : '60');
       assert.equal(response.headers.get('X-Robots-Tag'), null, 'Do not deindex valid content during an outage');
       assert.equal(response.headers.get('ETag'), null);
     }

@@ -1,6 +1,7 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
 import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, knownHistoricalSlugBySlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
+import { cachedNewsResponse, newsResponseKey } from './_news-response-cache';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
@@ -79,7 +80,22 @@ async function fetchJson<T>(url: string, allowNotFound = false): Promise<T | nul
 // ---------------------------------------------------------------------------
 
 async function resolveNews(slug: string, context: PagesContext): Promise<OgData | null> {
-  const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
+  // Também limita a espera por uma carga compartilhada iniciada pela API com prazo maior.
+  const loading = newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new DOMException('News page deadline', 'TimeoutError')), PAGE_BUDGET_MS);
+  });
+  let post: Awaited<typeof loading>;
+  try {
+    post = await Promise.race([loading, timeout]);
+  } catch (error) {
+    // Mantém a carga viva após entregar o shell; se falhar, tenta aquecer sem prazo da página.
+    context.waitUntil(loading.catch(() => newsPost(slug, context)).catch(() => undefined));
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
   if (!post) return null;
   const media = post._embedded?.['wp:featuredmedia']?.[0];
   const cover = mediaImageSet(media);
@@ -392,12 +408,28 @@ async function handle(context: PagesContext): Promise<Response> {
       return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}${idQuery}`, 301) : notFound(asset, pathname);
     }
     // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.
-    const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
-    if (og?.title) return injectOg(asset, og);
-    return notFound(asset, pathname);
+    const render = async () => {
+      const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
+      if (!og?.title) return notFound(asset.clone(), pathname);
+      const response = injectOg(asset.clone(), og);
+      if (prefix === NEWS_PREFIX) response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000');
+      return response;
+    };
+    // A versão do shell impede servir HTML com bundles de um deploy anterior.
+    const version = asset.headers.get('ETag');
+    if (prefix === NEWS_PREFIX && context.request.method === 'GET' && version) {
+      const scope = `${context.env?.WP_SITE_URL || ''}|${context.env?.NEWS_ARCHIVE_API_URL || ''}`;
+      return await cachedNewsResponse(context, newsResponseKey(context.request, scope, version), render);
+    }
+    return await render();
   } catch (error) {
     // Temporary origin failures are neither successful pages nor missing content.
     console.error(JSON.stringify({ event: 'page_metadata_failed', path: pathname, message: error instanceof Error ? error.message : String(error) }));
+    if (prefix === NEWS_PREFIX) {
+      const response = injectOg(asset, { title: 'Notícias', description: 'Notícias do CRF-AL.', canonical: `${SITE_URL}${pathname}` });
+      response.headers.set('Cache-Control', 'no-store');
+      return response;
+    }
     const response = new Response(asset.body, { status: 503, headers: asset.headers });
     response.headers.set('Cache-Control', 'no-store');
     response.headers.set('Retry-After', '60');

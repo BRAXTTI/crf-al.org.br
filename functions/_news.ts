@@ -45,8 +45,8 @@ interface NewsContext {
   waitUntil: (promise: Promise<unknown>) => void;
   budget?: NewsBudget;
 }
-/** HTML: ~4,5 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
-export const PAGE_BUDGET_MS = 4500;
+/** HTML: ~1,8 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
+export const PAGE_BUDGET_MS = 1800;
 export const API_BUDGET_MS = 20_000;
 const CALL_TIMEOUT_MS = 8_000;
 export function withNewsBudget(context: NewsContext, ms: number, retry: boolean): NewsContext {
@@ -142,7 +142,6 @@ async function request(
   }
 }
 type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
-const MAX_STALE_MS = 24 * 3600_000;
 const FRESH_MS = 300_000;
 // Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
 // 30 dias: a reserva só é regravada quando o conteúdo muda (ou ao expirar).
@@ -164,7 +163,7 @@ async function storeDurable<T>(
   const stored =
     previous === undefined ? await kv.get<Stored<T>>(durableKey(key), 'json') : previous;
   if (
-    stored &&
+    stored && Date.now() - stored.storedAt < DURABLE_REWRITE_MS &&
     JSON.stringify(stored.value) === JSON.stringify(value)
   )
     return;
@@ -239,7 +238,7 @@ async function cachedLoad<T>(
     entry = (await kv.get<Stored<T>>(durableKey(key), 'json')) ?? undefined;
     fromDurable = Boolean(entry);
   }
-  if (entry && Date.now() - entry.storedAt <= MAX_STALE_MS) {
+  if (entry) {
     const stale = entry;
     if (
       stale.value !== null &&
@@ -771,7 +770,7 @@ export async function newsPage(
       taxonomy,
       scoped,
     );
-  });
+  }, { durable: true });
   return { posts, total: index.length, totalPages: Math.ceil(index.length / perPage) };
 }
 const SEARCH_MAX_LENGTH = 120;
@@ -822,7 +821,7 @@ export async function searchNews(term: string, context?: NewsContext): Promise<W
         .sort((a, b) => b.date.localeCompare(a.date))
         .slice(0, 10);
     },
-    { freshMs: 5 * 60_000 },
+    { durable: true, freshMs: 5 * 60_000 },
   );
 }
 export async function newsApi(request: Request, base?: NewsContext): Promise<Response> {
@@ -839,7 +838,7 @@ export async function newsApi(request: Request, base?: NewsContext): Promise<Res
           { status: 400, headers: { 'Cache-Control': 'no-store' } },
         );
       return Response.json(await searchNews(search, context), {
-        headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=600' },
+        headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000' },
       });
     }
     const slug = url.searchParams.get('slug');
@@ -859,7 +858,7 @@ export async function newsApi(request: Request, base?: NewsContext): Promise<Res
       status: result ? 200 : 404,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': result ? 'public, max-age=60' : 'no-store',
+        'Cache-Control': result ? 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000' : 'no-store',
       },
     });
   } catch (error) {

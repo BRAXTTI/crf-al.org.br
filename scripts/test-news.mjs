@@ -280,7 +280,8 @@ try {
       assert.equal(checked.storedAt, old, 'Falha não renova a idade');
       assert.ok(checked.checkedAt > old);
       local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 86400_001 }));
-      await assert.rejects(newsPost(slug, context), /503/);
+      assert.equal((await newsPost(slug, context)).slug, slug, 'Reserva antiga continua disponível');
+      await Promise.all(pending.splice(0));
       fail = false;
 
     } finally { globalThis.caches = previousCaches; }
@@ -412,7 +413,7 @@ try {
   } finally { globalThis.fetch = workingFetch; }
   // Orçamentos: SSR sem repetição, prazo total compartilhado; recarga em segundo plano sem prazo.
   {
-    assert.ok(PAGE_BUDGET_MS >= 4000 && PAGE_BUDGET_MS <= 5000); assert.equal(API_BUDGET_MS, 20000);
+    assert.ok(PAGE_BUDGET_MS > 0 && PAGE_BUDGET_MS < 3000); assert.equal(API_BUDGET_MS, 20000);
     const workingFetch = globalThis.fetch; let calls = 0;
     const page = withNewsBudget({ waitUntil() {} }, PAGE_BUDGET_MS, false);
     try {
