@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { popups, type Popup as PopupData } from '@/data/popups';
+import { fimDoPrazo, popupDaVez, popupNoAr, type Popup as PopupData } from '@/data/popups';
 import {
   Dialog,
   DialogClose,
@@ -15,7 +15,17 @@ import { EVENTO_TOASTS_FIM } from '@/features/notificacoes/sinal';
 const DEFAULT_DELAY_MS = 3000;
 const DEFAULT_DISMISS_DAYS = 1;
 const STORAGE_PREFIX = 'crfal:popup:';
-const INTERACTION_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
+const QUIET_MS = 1500;
+// Com o popup aberto, confere o prazo `ate` ao menos uma vez por minuto (relógio do
+// sistema ajustado, aba suspensa) além do timer exato até o vencimento.
+const EXPIRY_CHECK_MS = 60_000;
+const INTERACTION_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'touchmove'] as const;
+// Nenhuma interação aqui conta (nem rolagem): cabeçalho, menu, diálogos e sino.
+const CHROME_SELECTOR = 'header, [role="dialog"], #mobile-navigation, [data-notification-bell], [data-notification-panel], [data-notification-toasts]';
+// Toque, clique ou tecla aqui é o começo de uma ação do usuário: não abre o popup por cima.
+const CONTROL_SELECTOR = `a, button, input, select, textarea, summary, [role="button"], [role="menuitem"], ${CHROME_SELECTOR}`;
+// Menu mobile, megamenu, sino ou qualquer outro diálogo aberto agora.
+const BUSY_SELECTOR = 'header [aria-expanded="true"], [data-notification-bell] [aria-expanded="true"], [role="dialog"]:not([data-site-popup])';
 
 function dismissDays(popup: PopupData) {
   return popup.dismissDays ?? DEFAULT_DISMISS_DAYS;
@@ -58,7 +68,8 @@ interface PopupProps {
 /**
  * Popup do site, nativo em React (sem plugin de WordPress).
  *
- * - Abre após um delay e a primeira interação, uma vez por usuário (frequência configurável).
+ * - Abre após um delay e uma interação em área neutra (não em controles, cabeçalho ou menu),
+ *   uma vez por usuário (frequência configurável).
  * - Responsivo: usa `imageMobile` em telas < 640px quando informado.
  * - Link interno (`/...`) via react-router; externo (`https://...`) em nova aba.
  */
@@ -66,32 +77,52 @@ export default function Popup({ popup }: PopupProps) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
-  const active = useMemo(
-    () => (popup !== undefined ? popup : popups.find((item) => item.active !== false) ?? null),
-    [popup]
-  );
+  const active = useMemo(() => {
+    if (popup === undefined) return popupDaVez();
+    return popup && popupNoAr(popup) ? popup : null;
+  }, [popup]);
 
   useEffect(() => {
     if (!active || isDismissed(active)) return;
-    // Abre só após o delay E a primeira interação do usuário: depois de uma interação o
+    // Abre só após o delay E uma interação do usuário: depois de uma interação o
     // navegador encerra a medição do LCP, então a arte do popup não vira o LCP da página.
-    // Sem `scroll`: rolagens programáticas (âncoras) também disparam esse evento.
+    // Só conta interação em área neutra (rolagem, clique fora de controles): o toque no ☰,
+    // num link ou no megamenu é uma ação em curso e o popup não pode abrir por cima dela.
+    // Sem `scroll`: rolagens programáticas (âncoras) também disparam esse evento; a rolagem
+    // do usuário já chega aqui por roda, toque, teclado ou barra de rolagem.
     let delayDone = false;
     let interacted = false;
-    const bellOpen = () => Boolean(document.querySelector('[data-notification-bell] [aria-expanded="true"]'));
+    let lastInteraction = 0;
+    let quietTimer = 0;
+    const busy = () => Boolean(document.querySelector(BUSY_SELECTOR));
     // Toasts das notificações na tela: o pop-up espera eles voarem para o sino.
     const toastsOnScreen = () => Boolean(document.querySelector('[data-notification-toasts]'));
     const tryOpen = () => {
-      if (delayDone && interacted && !bellOpen() && !toastsOnScreen()) {
-        removeListeners();
-        setOpen(true);
+      window.clearTimeout(quietTimer);
+      if (!delayDone || !interacted) return;
+      // ~1,5 s sem nova interação: nunca abre no meio de uma ação que acabou de começar.
+      const wait = lastInteraction + QUIET_MS - performance.now();
+      if (wait > 0) {
+        quietTimer = window.setTimeout(tryOpen, wait);
+        return;
       }
+      // Menu, sino ou diálogo aberto: espera a próxima interação (ex.: fechar o menu).
+      if (busy() || toastsOnScreen()) return;
+      removeListeners();
+      if (popupNoAr(active)) setOpen(true);
     };
     const onInteract = (event: Event) => {
-      if (bellOpen() || event.composedPath().some((target) =>
-        target instanceof Element && target.matches('[data-notification-bell], [data-notification-panel], [data-notification-toasts]')
-      )) {
+      lastInteraction = performance.now();
+      // Rolar sobre um link ainda é rolar; tocar nele não.
+      const scrolling = event.type === 'wheel' || event.type === 'touchmove';
+      const ignored = scrolling ? CHROME_SELECTOR : CONTROL_SELECTOR;
+      const inIgnored = event.composedPath().some((target) => target instanceof Element && target.matches(ignored));
+      if (inIgnored) {
+        // Toque/clique/tecla num controle (ou rolagem no cabeçalho/menu/sino) começa uma
+        // ação: descarta a interação anterior e o timer pendente; só uma nova interação
+        // neutra volta a armar o popup.
         interacted = false;
+        window.clearTimeout(quietTimer);
         return;
       }
       interacted = true;
@@ -115,10 +146,28 @@ export default function Popup({ popup }: PopupProps) {
     }, active.delayMs ?? DEFAULT_DELAY_MS);
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(quietTimer);
       window.clearTimeout(afterToasts);
       removeListeners();
     };
   }, [active]);
+
+  // Aberto quando o prazo `ate` vence (23:59:59 em Maceió): fecha sozinho.
+  useEffect(() => {
+    if (!open || !active?.ate) return;
+    const fim = fimDoPrazo(active);
+    let timer = 0;
+    const check = () => {
+      if (!popupNoAr(active)) {
+        setOpen(false);
+        return;
+      }
+      const wait = fim === null ? EXPIRY_CHECK_MS : Math.min(Math.max(fim - Date.now(), 0), EXPIRY_CHECK_MS);
+      timer = window.setTimeout(check, wait);
+    };
+    check();
+    return () => window.clearTimeout(timer);
+  }, [open, active]);
 
   const handleOpenChange = useCallback(
     (next: boolean) => {
