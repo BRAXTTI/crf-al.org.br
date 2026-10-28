@@ -235,12 +235,20 @@ async function cachedLoad<T>(
   let entry = await readLocal<T>(cache, request);
   // "Não encontrado" não tem stale-while-revalidate: após 5 min consulta a origem de novo.
   if (entry?.value === null && Date.now() - entry.storedAt > NOT_FOUND_S * 1000) entry = undefined;
+  const usable = (stored?: Stored<T>): stored is Stored<T> =>
+    Boolean(stored) && Date.now() - stored!.storedAt <= MAX_STALE_MS;
+  // Reserva do KV: undefined = não lida; null = lida e ausente.
+  let durableEntry: Stored<T> | null | undefined;
   let fromDurable = false;
-  if (!entry && kv) {
-    entry = (await kv.get<Stored<T>>(durableKey(key), 'json')) ?? undefined;
-    fromDurable = Boolean(entry);
+  // Cópia local ausente ou com mais de 24 h: a reserva do KV pode ser mais recente.
+  if (!usable(entry) && kv) {
+    durableEntry = (await kv.get<Stored<T>>(durableKey(key), 'json')) ?? null;
+    if (durableEntry) {
+      entry = durableEntry;
+      fromDurable = true;
+    }
   }
-  if (entry && Date.now() - entry.storedAt <= MAX_STALE_MS) {
+  if (usable(entry)) {
     const stale = entry;
     if (
       stale.value !== null &&
@@ -259,13 +267,42 @@ async function cachedLoad<T>(
     }
     return stale.value;
   }
-  const value = await load(context);
+  let value: T;
+  try {
+    value = await load(context);
+  } catch (error) {
+    // O storedAt da reserva só é regravado quando o conteúdo muda ou passa de 24 h: com a
+    // origem fora, uma reserva antiga (até o TTL do KV) é melhor do que 503. Só a do KV vale,
+    // pois uma remoção apaga a reserva compartilhada, mas não as cópias locais de outros data centers.
+    if (durableEntry && durableEntry.value !== null) return durableEntry.value;
+    throw error;
+  }
   if (cache || (kv && value !== null))
-    await persist(value, kv ? (entry ?? null) : undefined).catch(() => undefined);
+    await persist(value, kv ? (durableEntry ?? null) : undefined).catch(() => undefined);
   return value;
 }
+// Sem prazo (recargas em segundo plano): 15 s por chamada e uma repetição.
+const UNBOUNDED: NewsBudget = { deadline: Infinity, retry: true };
+/** A carga de `owner` dá ao chamador tudo o que a política dele permitiria. */
+const covers = (owner: NewsBudget, caller: NewsBudget) =>
+  owner.deadline >= caller.deadline && (owner.retry || !caller.retry);
+function untilDeadline<T>(task: Promise<T>, deadline: number): Promise<T> {
+  if (deadline === Infinity) return task;
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new DOMException('News budget exhausted', 'TimeoutError')),
+      Math.max(0, deadline - Date.now()),
+    );
+    task.then(resolve, reject).finally(() => clearTimeout(timer));
+  });
+}
 // Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
-const loading = new Map<string, Promise<unknown>>();
+const loading = new Map<string, { task: Promise<unknown>; budget: NewsBudget }>();
+/**
+ * A carga compartilhada segue o prazo e a política de repetição de quem a iniciou. Quem chega
+ * depois a aguarda só até o próprio prazo; se ela falhar por uma política mais restrita que a
+ * sua (prazo menor ou sem repetição) e ainda houver tempo, tenta de novo com a própria.
+ */
 function cached<T>(
   key: string,
   context: NewsContext | undefined,
@@ -273,11 +310,19 @@ function cached<T>(
   options: CacheOptions = {},
 ): Promise<T> {
   const scopeKey = `${originScope(context)}/${key}`;
-  const pending = loading.get(scopeKey);
-  if (pending) return pending as Promise<T>;
-  const task = cachedLoad(key, context, load, options).finally(() => loading.delete(scopeKey));
-  loading.set(scopeKey, task);
-  return task;
+  const budget = context?.budget ?? UNBOUNDED;
+  const shared = loading.get(scopeKey);
+  if (shared)
+    return untilDeadline(shared.task as Promise<T>, budget.deadline).catch((error: unknown) => {
+      if (covers(shared.budget, budget) || Date.now() >= budget.deadline) throw error;
+      return cached(key, context, load, options);
+    });
+  const entry = { budget, task: undefined as unknown as Promise<T> };
+  entry.task = cachedLoad(key, context, load, options).finally(() => {
+    if (loading.get(scopeKey) === entry) loading.delete(scopeKey);
+  });
+  loading.set(scopeKey, entry);
+  return entry.task;
 }
 function hasTitle(post: { title?: { rendered: string } }) {
   return Boolean(

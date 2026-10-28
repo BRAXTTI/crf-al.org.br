@@ -7,6 +7,7 @@ globalThis.window = dom.window;
 const realPurify = `data:text/javascript;base64,${Buffer.from(
   `import createDOMPurify from ${JSON.stringify(import.meta.resolve('dompurify'))}; export default createDOMPurify(globalThis.window);`
 ).toString('base64')}`;
+const { default: globalPurify } = await import(realPurify);
 const { sanitizeWP, SANITIZE_CONFIG, filterIframe, secureLink } = await import(await moduleUrl('../src/services/wordpress/sanitize.ts', {
   "'dompurify'": JSON.stringify(realPurify),
   "'@/config/site'": JSON.stringify(await moduleUrl('../src/config/site.ts')),
@@ -93,6 +94,10 @@ assert.equal(links[3].getAttribute('target'), '_self');
 assert.equal(links[4].getAttribute('href'), 'https://www.crf-al.org.br/app/uploads/2024/08/edital.pdf#page=2', 'Upload legado não vira caminho do portal');
 assert.equal(links[4].getAttribute('rel'), 'noopener noreferrer');
 assert.equal(links[5].getAttribute('href'), 'https://crf-al.org.br/servicos/', 'Página legada sem rota no portal');
+// Hooks ficam na instância própria: o DOMPurify global segue sem eles.
+const untouched = new JSDOM(globalPurify.sanitize('<iframe src="https://evil.example/embed/x"></iframe><a href="https://external.example/" target="_blank">X</a>', { ADD_TAGS: ['iframe'], ADD_ATTR: ['target'] })).window.document;
+assert.equal(untouched.querySelector('iframe').getAttribute('src'), 'https://evil.example/embed/x', 'Hook de iframe não vaza para o global');
+assert.equal(untouched.querySelector('a').getAttribute('rel'), null, 'Hook de links não vaza para o global');
 dom.window.close();
 delete globalThis.window;
 console.log('DOMPurify real: XSS, srcdoc, SVG, iframe e DOM clobbering validados em jsdom.');

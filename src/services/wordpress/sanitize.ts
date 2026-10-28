@@ -60,18 +60,21 @@ export function secureLink(node: HookElement, origins: string[]): void {
   if (!internal) node.setAttribute('rel', 'noopener noreferrer');
 }
 
-let configured = false;
-function configure() {
-  if (configured) return;
-  configured = true;
+type Purifier = ReturnType<typeof DOMPurify>;
+let purifier: Purifier | undefined;
+/** Instância própria: os hooks não vazam para outros usos do DOMPurify global. */
+function instance(): Purifier {
+  if (purifier) return purifier;
   // Origem do deploy atual (ex.: preview) e o domínio canônico; "null" (about:blank) é ignorado.
   const origins = [...new Set([globalThis.location?.origin, new URL(SITE_URL).origin].filter((value): value is string => Boolean(value) && /^https?:/.test(value!)))];
-  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+  purifier = DOMPurify();
+  purifier.addHook('uponSanitizeElement', (node, data) => {
     if (data.tagName === 'iframe') filterIframe(node as Element);
   });
-  DOMPurify.addHook('afterSanitizeAttributes', node => {
+  purifier.addHook('afterSanitizeAttributes', node => {
     if ((node as Element).tagName === 'A') secureLink(node as Element, origins);
   });
+  return purifier;
 }
 
 /**
@@ -79,6 +82,5 @@ function configure() {
  * Módulo separado do client para o DOMPurify ir só nos chunks das páginas de detalhe.
  */
 export function sanitizeWP(html: string): string {
-  configure();
-  return DOMPurify.sanitize(html, SANITIZE_CONFIG);
+  return instance().sanitize(html, SANITIZE_CONFIG);
 }

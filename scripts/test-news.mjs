@@ -276,9 +276,29 @@ try {
       const checked = await local.get(entry).clone().json();
       assert.equal(checked.storedAt, old, 'Falha não renova a idade');
       assert.ok(checked.checkedAt > old);
+      // Cópia local com mais de 24 h: a reserva do KV (mais recente) é consultada antes da origem.
       local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 86400_001 }));
+      assert.deepEqual(await newsPost(slug, context), saved.value, 'Cópia local antiga recorre ao KV');
+      assert.equal(pending.length, 1, 'Reserva do KV com menos de 24 h: servida já, revalidação em segundo plano');
+      await Promise.all(pending.splice(0));
+      // Reserva do KV com mais de 24 h (storedAt só é regravado quando o conteúdo muda) e origem fora.
+      const durable = JSON.parse(values.get(postKey));
+      values.set(postKey, JSON.stringify({ ...durable, storedAt: Date.now() - 86400_001 }));
+      local.delete(entry); requests = [];
+      assert.deepEqual(await newsPost(slug, context), durable.value, 'Origem fora: reserva antiga do KV em vez de 503');
+      assert.ok(requests.length, 'Reserva com mais de 24 h ainda tenta a origem primeiro');
+      local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 86400_001 }));
+      assert.deepEqual(await newsPost(slug, context), durable.value, 'Cópias local e do KV antigas: serve a do KV');
+      assert.equal((await newsApi(new Request(`https://example.test/api/news?slug=${encodeURIComponent(slug)}`), context)).status, 200, 'API também serve a reserva antiga');
+      // Sem reserva no KV, a cópia local antiga não é servida: pode ter sido removida em outro data center.
+      values.delete(postKey);
       await assert.rejects(newsPost(slug, context), /503/);
+      assert.equal((await newsApi(new Request(`https://example.test/api/news?slug=${encodeURIComponent(slug)}`), context)).status, 503);
       fail = false;
+      values.set(postKey, JSON.stringify({ ...durable, storedAt: Date.now() - 86400_001 }));
+      local.delete(entry);
+      await newsPost(slug, context);
+      assert.ok(Date.now() - JSON.parse(values.get(postKey)).storedAt < 60_000, 'Origem de volta renova a reserva antiga');
 
     } finally { globalThis.caches = previousCaches; }
     // Cron: uma consulta `include` aquece os mais recentes.
@@ -327,6 +347,60 @@ try {
         assert.equal(await newsPost(find(16028).slug), null, String(status));
       }
     } finally { globalThis.fetch = previousFetch; }
+  }
+  // Notícia já na reserva (fallback stale) e depois despublicada: deixa de ser servida.
+  {
+    const previousFetch = globalThis.fetch; const previousCaches = globalThis.caches;
+    const local = new Map(); const store = new Map(); const tasks = [];
+    globalThis.caches = { default: {
+      async match(req) { return local.get(req.url)?.clone(); },
+      async put(req, response) { local.set(req.url, response); },
+      async delete(req) { return local.delete(req.url); },
+    } };
+    const kvStore = { async get(key) { return store.has(key) ? JSON.parse(store.get(key)) : null; }, async put(key, value) { store.set(key, value); }, async delete(key) { store.delete(key); } };
+    const ctx = { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task) };
+    const slug = find(16028).slug; const durable = `news:cache:v1:post/${encodeURIComponent(slug)}`;
+    const localKey = () => [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(slug)}`));
+    const apiStatus = async () => (await newsApi(new Request(`https://example.test/api/news?slug=${encodeURIComponent(slug)}`), ctx)).status;
+    const setLocal = async patch => local.set(localKey(), Response.json({ ...(await local.get(localKey()).clone().json()), ...patch }));
+    // Variações da reserva: cópia local antiga, só no KV e no KV com mais de 24 h.
+    const reserves = {
+      local: async () => setLocal({ storedAt: Date.now() - 120_000, checkedAt: undefined }),
+      kv: async () => local.delete(localKey()),
+      'kv antigo': async () => {
+        local.delete(localKey());
+        store.set(durable, JSON.stringify({ ...JSON.parse(store.get(durable)), storedAt: Date.now() - 86400_001 }));
+      },
+    };
+    try {
+      for (const status of [401, 403, 404, 410]) for (const [name, prepare] of Object.entries(reserves)) {
+        const label = `${status} (${name})`;
+        globalThis.fetch = previousFetch;
+        local.clear(); store.clear();
+        assert.equal((await newsPost(slug, ctx)).slug, slug, label); await Promise.all(tasks.splice(0));
+        assert.ok(store.has(durable), `${label}: reserva gravada`);
+        await prepare();
+        globalThis.fetch = async (input, init) => new URL(input).searchParams.get('rest_route').startsWith('/wp/v2/posts/')
+          ? new Response(null, { status }) : previousFetch(input, init);
+        const first = await newsPost(slug, ctx);
+        // Dentro de 24 h, o primeiro acesso ainda recebe a reserva (stale-while-revalidate).
+        if (name === 'kv antigo') assert.equal(first, null, `${label}: reserva antiga não é servida`);
+        else assert.equal(first.slug, slug, `${label}: stale-while-revalidate`);
+        await Promise.all(tasks.splice(0));
+        assert.equal(store.has(durable), false, `${label}: reserva do KV apagada`);
+        assert.equal(await newsPost(slug, ctx), null, `${label}: não é mais servida`);
+        assert.equal(await apiStatus(), 404, label);
+        assert.equal(tasks.length, 0, `${label}: "não encontrado" não revalida`);
+        // Passado o cache de "não encontrado", segue fora (KV vazio, origem ainda nega).
+        await setLocal({ storedAt: Date.now() - 301_000 });
+        assert.equal(await newsPost(slug, ctx), null, `${label}: após 5 min`);
+        // Mesmo com a origem fora, a reserva removida não volta.
+        globalThis.fetch = async () => new Response('', { status: 503 });
+        await setLocal({ storedAt: Date.now() - 301_000 });
+        await assert.rejects(newsPost(slug, ctx), /503/, `${label}: sem reserva para ressuscitar`);
+        await Promise.all(tasks.splice(0));
+      }
+    } finally { globalThis.fetch = previousFetch; globalThis.caches = previousCaches; }
   }
   {
     const previousFetch = globalThis.fetch;
@@ -423,6 +497,55 @@ try {
       assert.equal(served.slug, slug);
       await Promise.all(tasks.splice(0));
       assert.ok(requests.some(url => url.searchParams.get('rest_route') === '/wp/v2/media'), 'Revalidação completa apesar do prazo da requisição');
+    } finally { globalThis.fetch = workingFetch; }
+  }
+  // Carga compartilhada: cada chamador respeita o próprio prazo e a própria política de repetição.
+  {
+    const workingFetch = globalThis.fetch;
+    const base = { waitUntil() {} };
+    const slug = find(16028).slug;
+    const html = ms => withNewsBudget(base, ms, false);
+    const apiCtx = () => withNewsBudget(base, API_BUDGET_MS, true);
+    // Atraso que respeita o AbortSignal, como o fetch real.
+    const slow = ms => async (input, init) => {
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(resolve, ms);
+        init?.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(init.signal.reason); });
+      });
+      return workingFetch(input, init);
+    };
+    try {
+      // API primeiro (8 s): o HTML que chega depois desiste no próprio prazo, sem esperar a API.
+      globalThis.fetch = slow(150);
+      const apiFirst = newsPost(slug, apiCtx());
+      const started = Date.now();
+      await assert.rejects(newsPost(slug, html(40)), error => error.name === 'TimeoutError');
+      assert.ok(Date.now() - started < 120, `HTML esperou ${Date.now() - started} ms pela carga da API`);
+      assert.equal((await apiFirst).slug, slug, 'A carga da API segue até o fim');
+      // HTML primeiro (prazo curto): a API que chega depois não herda o prazo dele.
+      const htmlFirst = newsPost(slug, html(40));
+      const apiLater = newsPost(slug, apiCtx());
+      await assert.rejects(htmlFirst, error => error.name === 'TimeoutError');
+      assert.equal((await apiLater).slug, slug, 'API não herda o prazo do HTML');
+      // HTML primeiro (sem repetição): a API que chega depois ainda tem a sua repetição.
+      const failedOnce = new Set();
+      globalThis.fetch = async (input, init) => {
+        const route = new URL(input).searchParams.get('rest_route');
+        await new Promise(resolve => setTimeout(resolve, 20));
+        if (!failedOnce.has(route)) { failedOnce.add(route); return new Response('', { status: 503 }); }
+        return workingFetch(input, init);
+      };
+      const htmlNoRetry = newsPost(slug, html(PAGE_BUDGET_MS));
+      const apiRetry = newsPost(slug, apiCtx());
+      await assert.rejects(htmlNoRetry, /503/);
+      assert.equal((await apiRetry).slug, slug, 'API não herda a ausência de repetição do HTML');
+      // Política equivalente ou mais ampla: quem chega depois só compartilha, sem nova carga.
+      let calls = 0;
+      globalThis.fetch = async () => { calls++; await new Promise(resolve => setTimeout(resolve, 20)); return new Response('', { status: 503 }); };
+      const owner = newsPost(slug, apiCtx());
+      const joiner = newsPost(slug, html(PAGE_BUDGET_MS));
+      await assert.rejects(owner, /503/); await assert.rejects(joiner, /503/);
+      assert.equal(calls, 4, 'HTML compartilha a falha da API (post e categorias, com repetição)');
     } finally { globalThis.fetch = workingFetch; }
   }
   // "Não encontrado" fica 5 min no cache local (sem escrita no KV); busca normalizada e limitada.

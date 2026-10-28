@@ -32,15 +32,14 @@ function contentParameters(input: URL) {
   const slug = input.searchParams.get('slug');
   const id = input.searchParams.get('id');
   const related = input.searchParams.get('related');
-  const requestedPage = Number(input.searchParams.get('page') ?? 1);
-  const page = requestedPage;
+  const page = Number(input.searchParams.get('page') ?? 1);
   if (
     (slug !== null && (!slug || slug.length > 200 || /[/?#]/.test(slug))) ||
     (id !== null && !/^[1-9]\d*$/.test(id)) ||
     (related !== null && !/^[1-9]\d*$/.test(related)) ||
-    !Number.isSafeInteger(requestedPage) ||
-    requestedPage < 1 ||
-    requestedPage > MAX_GALLERY_PAGE
+    !Number.isSafeInteger(page) ||
+    page < 1 ||
+    page > MAX_GALLERY_PAGE
   )
     return null;
   return { slug, id, related, page };

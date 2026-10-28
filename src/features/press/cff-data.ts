@@ -1,3 +1,4 @@
+import { CFF_CLIENT_TIMEOUT_MS } from '@/config/cff';
 import { requestJson, retryTransient } from '@/services/http';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,7 +12,10 @@ export const CFF_COVER_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w
 const slugify = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 async function fetchCffPublications(signal: AbortSignal): Promise<CffCollection[]> {
-  const data = await requestJson<{ collections?: Omit<CffCollection, 'slug'>[] }>('/api/cff-publicacoes', { signal });
+  const data = await requestJson<{ collections?: Omit<CffCollection, 'slug'>[] }>('/api/cff-publicacoes', {
+    signal,
+    timeoutMs: CFF_CLIENT_TIMEOUT_MS,
+  });
   const collections = Array.isArray(data.collections) ? data.collections : [];
   return collections
     .map((c) => ({ title: c.title, slug: slugify(c.title), items: (c.items ?? []).filter((item) => /^https?:\/\//.test(item.link)) }))

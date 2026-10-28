@@ -1,5 +1,5 @@
 /** Pages Function: Publicações do CFF (só links para os PDFs), com reserva guardada na borda. */
-import { getCffPublications } from './_cff';
+import { CFF_BACKGROUND_BUDGET_MS, getCffPublications } from './_cff';
 
 const FRESH_TTL_SECONDS = 6 * 3600;
 const BACKUP_TTL_SECONDS = 7 * 86400;
@@ -57,7 +57,7 @@ export async function onRequestGet(context) {
       context.waitUntil((async () => {
         // Marca a tentativa antes de ir à origem: outros isolates não disparam outra em seguida.
         await cache.put(cacheKey, storedResponse({ ...current, checkedAt: Date.now() }));
-        await cache.put(cacheKey, storedResponse({ collections: await getCffPublications(), fetchedAt: Date.now() }));
+        await cache.put(cacheKey, storedResponse({ collections: await getCffPublications(CFF_BACKGROUND_BUDGET_MS), fetchedAt: Date.now() }));
       })().catch((error) => {
         console.error(JSON.stringify({ event: 'cff_origin_failed', message: String(error), usingBackup: true }));
       }).finally(() => refreshing.delete(cacheKey.url)));
@@ -66,6 +66,7 @@ export async function onRequestGet(context) {
   }
 
   try {
+    // Com o navegador esperando: prazo abaixo do timeout dele (CFF_CLIENT_TIMEOUT_MS).
     const body = { collections: await getCffPublications(), fetchedAt: Date.now() };
     context.waitUntil(cache.put(cacheKey, storedResponse(body)).catch((error) => {
       console.error(JSON.stringify({ event: 'cff_cache_failed', message: String(error) }));
