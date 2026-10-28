@@ -35,7 +35,7 @@ export interface NewsEnv {
   NEWS_ARCHIVE_API_URL?: string;
   NEWS_INDEX?: KVNamespace;
 }
-/** Prazo total das chamadas ao WordPress de uma requisição; sem ele, 15 s por chamada e uma repetição. */
+/** Prazo total das chamadas ao WordPress de uma requisição; sem ele, 8 s por chamada e uma repetição. */
 export interface NewsBudget {
   deadline: number;
   retry: boolean;
@@ -47,8 +47,8 @@ interface NewsContext {
 }
 /** HTML: ~4,5 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
 export const PAGE_BUDGET_MS = 4500;
-export const API_BUDGET_MS = 8000;
-const CALL_TIMEOUT_MS = 15_000;
+export const API_BUDGET_MS = 20_000;
+const CALL_TIMEOUT_MS = 8_000;
 export function withNewsBudget(context: NewsContext, ms: number, retry: boolean): NewsContext {
   return {
     env: context.env,
@@ -125,8 +125,7 @@ async function request(
         headers: upstream.headers,
       });
     } catch (error) {
-      if (retry && error instanceof Error && ['TimeoutError', 'AbortError'].includes(error.name))
-        continue;
+      if (retry) continue;
       throw error;
     }
     if (retry && response.status >= 500) {
@@ -144,7 +143,7 @@ async function request(
 }
 type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
 const MAX_STALE_MS = 24 * 3600_000;
-const FRESH_MS = 60_000;
+const FRESH_MS = 300_000;
 // Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
 const DURABLE_TTL_S = 7 * 24 * 3600;
 // KV cobra cada escrita: só regrava quando o conteúdo muda ou a reserva envelhece.
@@ -174,7 +173,7 @@ async function storeDurable<T>(
   });
 }
 /**
- * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, o KV
+ * Cache API por data center (fresco por 5 min) + stale-while-revalidate. Com `durable`, o KV
  * NEWS_INDEX guarda uma reserva compartilhada entre data centers, servida de imediato quando
  * o cache local está vazio. Recargas em segundo plano são single-flight por isolate e marcam
  * apenas a tentativa com checkedAt, sem renovar a idade do conteúdo. Resultados `null` (não encontrado)

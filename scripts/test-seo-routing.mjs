@@ -155,7 +155,7 @@ try {
   const complete = new Response('', { headers: SECURITY_HEADERS });
   assert.equal(withSecurityHeaders(complete), complete, 'Resposta completa não é copiada');
 
-  for (const [path, target] of [['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia'], ['/imprensa/noticias-cff', '/imprensa/publicacoes-cff']]) {
+  for (const [path, target] of [['/feed', '/api/rss'], ['/feed/', '/api/rss'], ['/instituicao/missao-visao', '/instituicao/sobre-conselho'], ['/publicacao/noticia', '/imprensa/noticias/noticia'], ['/imprensa/noticias-cff', '/imprensa/publicacoes-cff']]) {
     const response = await request(path);
     assert.equal(response.status, 301);
     assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br${target}`);
@@ -186,7 +186,13 @@ try {
   origin = () => new Response('', { status: 503 });
   assert.equal((await request('/?p=16193')).status, 301, 'O mapa garante o redirect durante falha da origem');
   assert.equal((await request('/imprensa/noticias/16150')).status, 301);
-  assert.equal((await request('/?p=107698')).status, 503, 'Ausente precisa ser verificado na origem');
+  for (const [id, slug] of [[107698, 'crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp'], [5967, 'pagamento-de-anuidades-ferramenta-crf-web-sofre-mudancas'], [8995, 'crf_al_publica_de_nota_de_repudio_em_defesa_de_farmaceuticos_de_palmeira_dos_indios']]) {
+    const beforeRedirect = fetches;
+    const redirect = await request(`/?p=${id}`);
+    assert.equal(redirect.status, 301);
+    assert.equal(redirect.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${slug}`);
+    assert.equal(fetches, beforeRedirect, 'Mapa dispensa consulta à origem');
+  }
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
   response = await request(`/imprensa/noticias/${post.slug}`);
   assert.equal(response.status, 200);

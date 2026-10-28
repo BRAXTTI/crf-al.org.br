@@ -281,6 +281,7 @@ async function handle(context: PagesContext): Promise<Response> {
   const url = new URL(context.request.url);
   const pathname = url.pathname.replace(/\/$/, '') || '/';
   if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
+  if (pathname === '/feed') return Response.redirect(`${SITE_URL}/api/rss`, 301);
   if (pathname === '/sitemap-news.xml') {
     try {
       const cache = (caches as CacheStorage & { default: Cache }).default;

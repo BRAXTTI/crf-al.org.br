@@ -56,7 +56,7 @@ As APIs locais de conteúdo usam a origem padrão; validar configurações runti
 
 As notícias usam exclusivamente o WordPress novo. O mapa versionado preserva IDs e URLs históricos; falhas de origem retornam erro controlado e os resultados recentes permanecem em cache.
 
-**Concluir e conferir a migração antes do corte.** Em 27/10/2026, as notícias históricas `107698`, `5967` e `8995` ainda estavam ausentes no WP novo: retornam 404 e não entram no sitemap. Importá-las com os slugs reservados permite a resolução sem alterar seus IDs históricos. Não há fallback para o WP antigo e `NEWS_ARCHIVE_API_URL` não altera esse comportamento. A validação editorial de corpos e mídias continua indispensável; o mapa não é backup do WP. Confirmar também a exposição REST dos eventos expirados e validar listagens, detalhes, sitemap e falha da origem nova no preview. Preservar o legado e as mídias enquanto houver dependências. Eventos relacionados no detalhe usam consulta limitada a 3 itens; nenhum catálogo completo é baixado nessa página.
+Os IDs históricos `107698`, `5967` e `8995` estão associados aos IDs `16768`, `16769` e `16770` no WP novo, com títulos e datas conferidos via REST. A validação editorial de corpos e mídias continua indispensável; o mapa não é backup do WP. Confirmar também a exposição REST dos eventos expirados e validar listagens, detalhes, sitemap e falha da origem nova no preview. Preservar o legado e as mídias enquanto houver dependências. Eventos relacionados no detalhe usam consulta limitada a 3 itens; nenhum catálogo completo é baixado nessa página.
 
 ## Deploy e operação
 

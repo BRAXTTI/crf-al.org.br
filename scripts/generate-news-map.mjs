@@ -15,12 +15,14 @@ const blockedOld = suspects(oldPosts, 22);
 const blockedNew = suspects(newPosts, 3);
 // IDs identificados na seção "11 posts sem título no novo" do levantamento.
 const titleIds = new Set([8657, 8453, 8215, 7571, 7466, 7334, 7108, 6991, 6774, 6610, 6227]);
+// Importações posteriores à fotografia do levantamento, verificadas na REST do WP novo.
+const imported = new Map([[107698, 16768], [5967, 16769], [8995, 16770]]);
 const rows = pairs.map(pair => {
   const old = oldById.get(pair.antigo_id), current = pair.novo_id == null ? null : newById.get(pair.novo_id);
   if (!old || (pair.novo_id != null && !current) || pair.candidatos.length > 1) throw new Error(`Par inválido ou ambíguo: ${pair.antigo_id}`);
-  return { oldId: old.id, newId: current?.id ?? null, slug: old.slug, newSlug: current?.slug ?? old.slug, ...(titleIds.has(old.id) ? { title: old.title.rendered } : {}), ...(blockedOld.has(old.id) || (current && blockedNew.has(current.id)) ? { blocked: true } : {}) };
+  return { oldId: old.id, newId: current?.id ?? imported.get(old.id) ?? null, slug: old.slug, newSlug: current?.slug ?? old.slug, ...(titleIds.has(old.id) ? { title: old.title.rendered } : {}), ...(blockedOld.has(old.id) || (current && blockedNew.has(current.id)) ? { blocked: true } : {}) };
 });
-if (rows.length !== oldPosts.length || rows.filter(row => row.title).length !== 11 || rows.filter(row => row.newId === null).length !== 3 || conflicts.length !== 3) throw new Error('Inventário inesperado');
+if (rows.length !== oldPosts.length || rows.filter(row => row.title).length !== 11 || rows.filter(row => row.newId === null).length !== 0 || conflicts.length !== 3) throw new Error('Inventário inesperado');
 const blockedSlugs = [...new Set([...oldPosts.filter(post => blockedOld.has(post.id)), ...newPosts.filter(post => blockedNew.has(post.id))].map(post => post.slug))].sort();
 const output = `// Gerado por scripts/generate-news-map.mjs a partir do levantamento público.\nexport interface HistoricalNews { oldId: number; newId: number | null; slug: string; newSlug: string; title?: string; blocked?: boolean }\nexport const NEWS_MAP: HistoricalNews[] = ${JSON.stringify(rows)};\nexport const BLOCKED_NEWS_SLUGS: string[] = ${JSON.stringify(blockedSlugs)};\nexport const BLOCKED_NEW_IDS: number[] = ${JSON.stringify([...blockedNew].sort((a,b)=>a-b))};\nexport const OCCUPIED_HISTORICAL_IDS = ${JSON.stringify(conflicts)};\n`;
 await writeFile(new URL('../functions/_news-map.ts', import.meta.url), output);
