@@ -829,7 +829,7 @@ export async function newsApi(request: Request, base?: NewsContext): Promise<Res
           { status: 400, headers: { 'Cache-Control': 'no-store' } },
         );
       return Response.json(await searchNews(search, context), {
-        headers: { 'Cache-Control': 'public, max-age=300' },
+        headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=600' },
       });
     }
     const slug = url.searchParams.get('slug');
