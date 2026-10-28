@@ -460,7 +460,14 @@ function notFound(asset: Response, pathname: string): Response {
 
 export async function onRequest(context: PagesContext): Promise<Response> {
   const timings = { cache: 0, kv: 0, asset: 0, rewriter: 0, origin: 0 };
-  const task = handleRequest(Object.assign(context, { timings }));
+  // Asset repassado sem alteração volta intacto (mesmo objeto, sem Server-Timing): é o que o
+  // _routes.json pressupõe ao tirar esses arquivos das Functions.
+  let passthrough: Response | undefined;
+  const next = context.next;
+  const task = handleRequest(Object.assign(context, {
+    timings,
+    next: async (...args: Parameters<typeof next>) => (passthrough = await next(...args)),
+  }));
   const isNews = new URL(context.request.url).pathname.startsWith(NEWS_PREFIX);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const fallback = () => withSecurityHeaders(new Response(NEWS_SHELL, {
@@ -469,6 +476,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   const response = isNews ? await Promise.race([task.then(async response => new Response(await response.arrayBuffer(), response)).catch(fallback), new Promise<Response>(resolve => {
     timer = setTimeout(() => resolve(fallback()), PAGE_BUDGET_MS + 300);
   })]).finally(() => { if (timer !== undefined) clearTimeout(timer); }) : await task;
+  if (response === passthrough) return response;
   const result = new Response(context.request.method === 'HEAD' ? null : response.body, response);
   result.headers.set('Server-Timing', Object.entries(timings).map(([name, value]) => `${name};dur=${value.toFixed(1)}`).join(', '));
   return result;

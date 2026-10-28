@@ -16,6 +16,8 @@ const { onRequest, SECURITY_HEADERS } = await import(await moduleUrl('../functio
   "'../src/config/page-metadata'": JSON.stringify(metadataUrl),
   "'../src/services/wordpress/image-set'": JSON.stringify(await moduleUrl('../src/services/wordpress/image-set.ts')),
   "'./_news'": JSON.stringify(await loadNews()),
+  "'./_news-response-cache'": JSON.stringify(await moduleUrl('../functions/_news-response-cache.ts', { "'../src/config/site'": JSON.stringify(siteUrl) })),
+  "'./_news-shell'": JSON.stringify(await moduleUrl('../functions/_news-shell.ts')),
 }));
 const { PAGE_METADATA } = await import(metadataUrl);
 
