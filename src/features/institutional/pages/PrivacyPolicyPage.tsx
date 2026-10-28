@@ -53,7 +53,7 @@ const AVISOS: { icon: ComponentType<{ className?: string }>; title: string; text
   {
     icon: HardDrive,
     title: 'Preferências no seu aparelho',
-    text: 'Listas de documentos marcadas e avisos fechados ficam guardados apenas no seu navegador. Nada disso é enviado ao CRF-AL.',
+    text: 'Listas de documentos marcadas, avisos fechados e notificações lidas ou dispensadas ficam guardados apenas no seu navegador. Nada disso é enviado ao CRF-AL.',
   },
 ];
 

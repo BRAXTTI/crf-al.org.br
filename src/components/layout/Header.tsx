@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronDown, ExternalLink, Info, Search, User } from 'lucide-react';
 import MobileHeaderSearch from '@/components/layout/MobileHeaderSearch';
 import MobileNavigation from '@/components/layout/MobileNavigation';
+import NotificationBell from '@/components/layout/NotificationBell';
 import { serviceProfiles } from '@/config/service-profiles';
 import { CRF_EM_CASA_URL, SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
 import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
@@ -216,11 +217,15 @@ export default function Header() {
               ))}
             </nav>
 
-            <button ref={searchButtonRef} type="button" onClick={() => { searchTriggerRef.current = searchButtonRef.current; setIsMobileMenuOpen(false); setIsSearchOpen(true); }} aria-label="Buscar páginas e serviços" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-white lg:hidden">
-              <Search className="h-6 w-6" aria-hidden="true" />
-            </button>
+            <div className="flex shrink-0 items-center lg:hidden">
+              <NotificationBell variant="mobile" />
+              <button ref={searchButtonRef} type="button" onClick={() => { searchTriggerRef.current = searchButtonRef.current; setIsMobileMenuOpen(false); setIsSearchOpen(true); }} aria-label="Buscar páginas e serviços" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-white">
+                <Search className="h-6 w-6" aria-hidden="true" />
+              </button>
+            </div>
 
             <div className="hidden shrink-0 items-center gap-2 lg:flex">
+              <NotificationBell variant="desktop" />
               <button
                 ref={desktopSearchRef}
                 type="button"
