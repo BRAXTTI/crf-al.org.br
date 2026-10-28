@@ -174,6 +174,14 @@ try {
   assert.equal(fetches, missingFetches, 'Não encontrado fica em cache por 5 min');
 
   const post = { id: 16028, slug: 'esclarecimentos-acerca-do-registro-de-responsabilidade-tecnica-do-farmaceutico-atraves-do-contrato-de-trabalho', date: '2026-10-10T09:00:00', title: { rendered: 'Título &amp; notícia' }, excerpt: { rendered: '<p>Resumo</p>' }, categories: [1] };
+  origin = () => new Response('', { status: 503 });
+  const beforeSlash = fetches;
+  for (const method of ['GET', 'HEAD']) {
+    const redirect = await request(`/imprensa/noticias/${post.slug}/?utm_source=test&tag=a%2Fb&tag=dois`, { method });
+    assert.equal(redirect.status, 301);
+    assert.equal(redirect.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${post.slug}?utm_source=test&tag=a%2Fb&tag=dois`);
+  }
+  assert.equal(fetches, beforeSlash, 'Redirect da barra não consulta a origem');
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
   let response = await request('/imprensa/noticias/16028');
   assert.equal(response.status, 301);
@@ -199,6 +207,7 @@ try {
   await Promise.all(background);
   const before = fetches;
   assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test`)).status, 200);
+  assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test&tag=a%2Fb&tag=dois`)).status, 200, 'Destino do redirect responde sem outro salto');
   assert.equal(fetches, before, 'Metadata cache ignores tracking query strings');
 
   // Metadados de evento: stale-while-revalidate, servidos mesmo com a origem fora.

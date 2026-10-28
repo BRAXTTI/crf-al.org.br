@@ -302,6 +302,9 @@ async function handle(context: PagesContext): Promise<Response> {
 
   const historicalId = pathname === '/' ? url.searchParams.get('p') : pathname.startsWith(NEWS_PREFIX) && /^\d+$/.test(pathname.slice(NEWS_PREFIX.length)) ? pathname.slice(NEWS_PREFIX.length) : null;
   const legacySlug = pathname.startsWith('/publicacao/') ? pathname.slice('/publicacao/'.length) : pathname.startsWith(NEWS_PREFIX) ? pathname.slice(NEWS_PREFIX.length) : '';
+  if (url.pathname.endsWith('/') && pathname.startsWith(NEWS_PREFIX) && legacySlug && !legacySlug.includes('/') && !historicalId) {
+    return Response.redirect(`${SITE_URL}${pathname}${url.search}`, 301);
+  }
   let decodedSlug = legacySlug;
   try { decodedSlug = decodeURIComponent(legacySlug); } catch { /* inválido: será tratado como 404 */ }
   if ((historicalId && isBlockedNews(historicalId)) || (decodedSlug && isBlockedNews(decodedSlug))) {
