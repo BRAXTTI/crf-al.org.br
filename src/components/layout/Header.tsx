@@ -100,7 +100,7 @@ export default function Header() {
   };
 
   const navLinkBase =
-    'relative flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-2 text-[14px] font-semibold xl:gap-1.5 xl:px-3 xl:text-[14.5px] transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue';
+    'relative flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-2 text-[14px] font-semibold 2xl:gap-1.5 2xl:px-3 2xl:text-[14.5px] transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue';
 
   const renderSocial = (
     itemClassName: string,
@@ -163,7 +163,7 @@ export default function Header() {
       {/* Barra principal: logo, menu, busca e CRF AL em Casa. */}
       <div className={`relative transition-[background-color,box-shadow] duration-300 lg:border-b ${scrolled ? 'glass-blue shadow-[0_8px_32px_-12px_rgba(11,25,44,0.35)] lg:glass-light lg:border-white/50' : 'bg-crfal-blue lg:border-crfal-gray-200/80 lg:bg-white'}`}>
         <div className="container-crfal relative">
-          <div className="flex h-16 items-center justify-between gap-2 lg:h-[72px] lg:gap-4">
+          <div className="flex h-16 items-center justify-between gap-2 lg:h-[72px] lg:gap-2 2xl:gap-4">
             <button
               ref={menuButtonRef}
               type="button"
@@ -193,7 +193,7 @@ export default function Header() {
                   className="h-9 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-11"
                 />
               </picture>
-              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-3 leading-tight xl:block">
+              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-3 leading-tight 2xl:block">
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Conselho Regional de Farmácia</span>
                 <span className="block text-[15px] font-bold text-crfal-blue-dark">Estado de Alagoas</span>
               </span>
