@@ -4,10 +4,12 @@ import {
   ArrowRight,
   Calendar,
   CalendarDays,
+  CalendarPlus,
   ChevronRight,
   Clock,
   ExternalLink,
   MapPin,
+  Monitor,
   RefreshCw,
   Search,
   Sparkles,
@@ -133,7 +135,7 @@ export default function EventosPage() {
       />
 
       <div className="container-crfal py-8 md:py-12">
-        <a href="/api/events?format=ics" className="mb-6 inline-flex min-h-11 items-center underline">Baixar calendário de eventos (.ics)</a>
+        <a href="/api/events?format=ics" className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:bg-crfal-blue hover:text-white focus-visible:ring-2 focus-visible:ring-crfal-gold"><CalendarPlus className="h-4 w-4" aria-hidden />Baixar calendário de eventos (.ics)</a>
         {isLoading ? (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -173,7 +175,7 @@ export default function EventosPage() {
               <section aria-labelledby="destaque-titulo">
                 <SecaoTitulo id="destaque-titulo" titulo="Próximo evento" contador={1} />
                 <article className="group relative grid overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-card transition-all duration-500 hover:shadow-card-hover   md:grid-cols-2">
-                  <div className="relative aspect-16/10 overflow-hidden sm:aspect-16/8 md:aspect-auto md:min-h-[340px]">
+                  <div className="relative aspect-16/10 overflow-hidden sm:aspect-16/8 md:aspect-video">
                     <BannerEvento evento={destaque} />
                     <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-crfal-gold px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
                       <Sparkles className="h-3.5 w-3.5" />
@@ -225,7 +227,7 @@ export default function EventosPage() {
                       </p>
                       {destaque.local && (
                         <p className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 shrink-0 text-crfal-blue " />
+                          {destaque.modalidade === 'online' ? <Monitor className="h-4 w-4 shrink-0 text-crfal-blue" aria-hidden /> : <MapPin className="h-4 w-4 shrink-0 text-crfal-blue" aria-hidden />}
                           {destaque.local}
                         </p>
                       )}
@@ -258,8 +260,8 @@ export default function EventosPage() {
 
             {/* Barra de filtros */}
             <div className="sticky top-(--header-offset) z-30 glass-light rounded-2xl border border-white/70 p-3 shadow-[0_12px_32px_-16px_rgba(11,25,44,0.35)] ring-1 ring-crfal-gray-200/70 sm:p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <div className="relative lg:max-w-xs lg:flex-1">
+              <div className="flex flex-col gap-3">
+                <div className="relative w-full">
                   <label htmlFor="busca-evento" className="sr-only">Buscar evento</label>
                   <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-crfal-gray-400" />
                   <input
@@ -284,14 +286,14 @@ export default function EventosPage() {
                 <div
                   role="group"
                   aria-label="Filtrar por status"
-                  className="flex gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
+                  className="flex flex-wrap gap-1.5 p-0.5"
                 >
                   {filtros.map((filtro) => (
                     <button
                       key={filtro.value}
                       onClick={() => setFiltroStatus(filtro.value)}
                       aria-pressed={filtroStatus === filtro.value}
-                      className={`inline-flex min-h-[44px] shrink-0 snap-start items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                      className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                         filtroStatus === filtro.value
                           ? 'bg-crfal-blue text-white shadow-md'
                           : 'bg-crfal-gray-100 text-crfal-gray-600 hover:bg-crfal-gray-200 hover:text-crfal-blue   '
@@ -314,7 +316,7 @@ export default function EventosPage() {
                 <div
                   role="group"
                   aria-label="Filtrar por modalidade"
-                  className="flex gap-1.5 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden lg:ml-auto"
+                  className="flex flex-wrap gap-1.5 p-0.5"
                 >
                   {modalidades.map((modalidade) => {
                     const ativo = filtroModalidade === modalidade.value;
@@ -325,7 +327,7 @@ export default function EventosPage() {
                         key={modalidade.value}
                         onClick={() => setFiltroModalidade(modalidade.value)}
                         aria-pressed={ativo}
-                        className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
+                        className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-2 text-xs font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light ${
                           ativo
                             ? 'border-crfal-blue bg-crfal-blue text-white'
                             : 'border-crfal-gray-200 bg-white text-crfal-gray-600 hover:border-crfal-blue/40 hover:text-crfal-blue   '
@@ -354,7 +356,7 @@ export default function EventosPage() {
               )}
             </div>
 
-            {totalResultados === 0 ? (
+            {totalResultados === 0 && !destaque ? (
               <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white py-14 text-center  ">
                 <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300 " />
                 <h2 className="font-display text-lg font-semibold text-neutral-800 ">

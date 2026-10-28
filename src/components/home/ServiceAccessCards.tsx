@@ -16,8 +16,23 @@ function CardContent({ title, description, image, action, shortAction, external 
   const Arrow = external ? ArrowUpRight : ArrowRight;
   return (
     <>
-      <img src={image} alt="" width={1672} height={941} decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-right" />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-linear-to-r/srgb from-crfal-blue via-crfal-blue/90 to-crfal-blue/30 group-last:from-crfal-blue-light group-last:via-crfal-blue-light/90 md:to-crfal-blue/10 md:group-last:from-crfal-blue md:group-last:via-crfal-blue/90" />
+      <picture>
+        <source media="(min-width: 768px)" srcSet={image} />
+        <img alt="" width={1672} height={941} decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-right" />
+      </picture>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_85%_35%,rgba(0,102,204,0.38),transparent_55%),linear-gradient(110deg,#0b192c_0%,#003366_65%,#004582_100%)] group-last:bg-[radial-gradient(ellipse_at_85%_35%,rgba(0,102,204,0.55),transparent_55%),linear-gradient(110deg,#003366_0%,#004b95_65%,#0066cc_100%)] md:hidden" />
+      <svg aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 h-full w-[60%] md:hidden" viewBox="0 0 240 104" preserveAspectRatio="xMaxYMid slice" fill="none">
+        <g stroke="#e6f0f8" strokeWidth="1" opacity=".18">
+          <path d="M120-20l22 13v26l-22 13-22-13V-7z M164-20l22 13v26l-22 13-22-13V-7z M208-20l22 13v26l-22 13-22-13V-7z M98 19l22 13v26L98 71 76 58V32z M142 19l22 13v26l-22 13-22-13V32z M186 19l22 13v26l-22 13-22-13V32z M230 19l22 13v26l-22 13-22-13V32z M120 58l22 13v26l-22 13-22-13V71z M164 58l22 13v26l-22 13-22-13V71z M208 58l22 13v26l-22 13-22-13V71z" />
+        </g>
+        <g fill="#e6f0f8" opacity=".09">
+          <path d="M164-20l22 13v26l-22 13-22-13V-7z M186 19l22 13v26l-22 13-22-13V32z M120 58l22 13v26l-22 13-22-13V71z" />
+        </g>
+        <g stroke="#e6f0f8" strokeWidth=".7" opacity=".09">
+          <path d="M157-10l34 20v40l-34 20-34-20V10z M225-10l34 20v40l-34 20-34-20V10z M191 50l34 20v40l-34 20-34-20V70z" />
+        </g>
+      </svg>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden bg-linear-to-r/srgb from-crfal-blue via-crfal-blue/90 to-crfal-blue/30 group-last:from-crfal-blue-light group-last:via-crfal-blue-light/90 md:block md:to-crfal-blue/10 md:group-last:from-crfal-blue md:group-last:via-crfal-blue/90" />
       <div className="relative flex w-full flex-1 items-center justify-between gap-4 md:h-full md:flex-col md:items-start">
         <h2 className="min-w-0 max-w-76 text-lg font-bold leading-tight sm:text-2xl sm:leading-8 md:text-2xl">{title}</h2>
         <p className="mb-5 mt-2 hidden max-w-76 text-sm leading-relaxed text-white/90 md:block">{description}</p>

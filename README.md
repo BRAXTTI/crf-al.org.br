@@ -4,7 +4,7 @@ React 19 + TypeScript + Vite 7, publicado como SPA no Cloudflare Pages com Pages
 
 ## Desenvolvimento e validação
 
-Requer Node 22.19 ou superior (CI usa Node 22) e npm.
+Requer Node `^22.22.2 || ^24.15.0 || >=26` (exigência do vitest/jsdom; CI usa Node 22.22.2+) e npm.
 
 ```sh
 npm ci
