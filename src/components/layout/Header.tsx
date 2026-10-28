@@ -260,7 +260,7 @@ export default function Header() {
       )} />
     </header>
       {pathname === '/' && (
-        <nav aria-label="Acesso rápido por perfil" className="absolute left-0 right-0 top-16 z-40 h-[72px] border-b border-crfal-gray-200 bg-white lg:hidden">
+        <nav aria-label="Acesso rápido por perfil" data-toasts-abaixo className="absolute left-0 right-0 top-16 z-40 h-[72px] border-b border-crfal-gray-200 bg-white lg:hidden">
           <div className="container-crfal grid h-full grid-cols-3 items-stretch divide-x divide-crfal-gray-200 py-2">
             {serviceProfiles.map(({ label, href, icon: Icon }) => (
               <Link
