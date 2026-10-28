@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
+import { EVENTO_TOASTS_FIM } from '@/features/notificacoes/sinal';
 
 const DEFAULT_DELAY_MS = 3000;
 const DEFAULT_DISMISS_DAYS = 1;
@@ -78,15 +79,17 @@ export default function Popup({ popup }: PopupProps) {
     let delayDone = false;
     let interacted = false;
     const bellOpen = () => Boolean(document.querySelector('[data-notification-bell] [aria-expanded="true"]'));
+    // Toasts das notificações na tela: o pop-up espera eles voarem para o sino.
+    const toastsOnScreen = () => Boolean(document.querySelector('[data-notification-toasts]'));
     const tryOpen = () => {
-      if (delayDone && interacted && !bellOpen()) {
+      if (delayDone && interacted && !bellOpen() && !toastsOnScreen()) {
         removeListeners();
         setOpen(true);
       }
     };
     const onInteract = (event: Event) => {
       if (bellOpen() || event.composedPath().some((target) =>
-        target instanceof Element && target.matches('[data-notification-bell], [data-notification-panel]')
+        target instanceof Element && target.matches('[data-notification-bell], [data-notification-panel], [data-notification-toasts]')
       )) {
         interacted = false;
         return;
@@ -94,14 +97,25 @@ export default function Popup({ popup }: PopupProps) {
       interacted = true;
       tryOpen();
     };
-    const removeListeners = () => INTERACTION_EVENTS.forEach((type) => window.removeEventListener(type, onInteract, true));
+    let afterToasts = 0;
+    const onToastsEnd = () => {
+      window.clearTimeout(afterToasts);
+      // Depois do evento, o React ainda desmonta os toasts: tenta no quadro seguinte.
+      afterToasts = window.setTimeout(tryOpen, 200);
+    };
+    const removeListeners = () => {
+      INTERACTION_EVENTS.forEach((type) => window.removeEventListener(type, onInteract, true));
+      window.removeEventListener(EVENTO_TOASTS_FIM, onToastsEnd);
+    };
     INTERACTION_EVENTS.forEach((type) => window.addEventListener(type, onInteract, { passive: true, capture: true }));
+    window.addEventListener(EVENTO_TOASTS_FIM, onToastsEnd);
     const timer = window.setTimeout(() => {
       delayDone = true;
       tryOpen();
     }, active.delayMs ?? DEFAULT_DELAY_MS);
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(afterToasts);
       removeListeners();
     };
   }, [active]);
@@ -140,6 +154,7 @@ export default function Popup({ popup }: PopupProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
+        data-site-popup
         showCloseButton={false}
         className="w-fit max-w-[94vw] gap-0 overflow-hidden rounded-2xl border-0 p-0 shadow-card sm:max-w-[94vw]"
       >
