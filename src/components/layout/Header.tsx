@@ -100,7 +100,7 @@ export default function Header() {
   };
 
   const navLinkBase =
-    'relative flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-2 text-[14px] font-semibold 2xl:gap-1.5 2xl:px-3 2xl:text-[14.5px] transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue';
+    'relative flex items-center gap-1 whitespace-nowrap rounded-full px-1 py-2 text-[13px] font-semibold xl:px-2 xl:text-[14px] transition-colors duration-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue';
 
   const renderSocial = (
     itemClassName: string,
@@ -163,7 +163,7 @@ export default function Header() {
       {/* Barra principal: logo, menu, busca e CRF AL em Casa. */}
       <div className={`relative transition-[background-color,box-shadow] duration-300 lg:border-b ${scrolled ? 'glass-blue shadow-[0_8px_32px_-12px_rgba(11,25,44,0.35)] lg:glass-light lg:border-white/50' : 'bg-crfal-blue lg:border-crfal-gray-200/80 lg:bg-white'}`}>
         <div className="container-crfal relative">
-          <div className="flex h-16 items-center justify-between gap-2 lg:h-[72px] lg:gap-2 2xl:gap-4">
+          <div className="flex h-16 items-center justify-between gap-2 lg:h-[72px]">
             <button
               ref={menuButtonRef}
               type="button"
@@ -183,23 +183,19 @@ export default function Header() {
             <Link
               to="/"
               onClick={handleLogoClick}
-              className="group absolute left-1/2 flex -translate-x-1/2 items-center rounded-lg px-3 py-1.5 focus-visible:outline-white lg:static lg:shrink-0 lg:translate-x-0 lg:gap-3 lg:p-0 lg:focus-visible:outline-crfal-blue"
+              className="group absolute left-1/2 flex max-w-[calc(100%-14rem)] -translate-x-1/2 items-center rounded-lg py-1.5 focus-visible:outline-white lg:static lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:p-0 lg:focus-visible:outline-crfal-blue"
             >
-              <picture>
+              <picture className="min-w-0">
                 <source media="(max-width: 1023px)" srcSet="/images/logo-crf-branca.webp" />
                 <img
                   src="/images/logo-crf-azul.webp"
                   alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
-                  className="h-9 w-auto shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-11"
+                  className="h-auto max-h-9 w-auto max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-11 lg:max-h-none lg:max-w-none"
                 />
               </picture>
-              <span className="hidden min-w-0 border-l border-crfal-gray-200 pl-3 leading-tight 2xl:block">
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Conselho Regional de Farmácia</span>
-                <span className="block text-[15px] font-bold text-crfal-blue-dark">Estado de Alagoas</span>
-              </span>
             </Link>
 
-            <nav aria-label="Navegação principal" className="hidden min-w-0 flex-1 items-center justify-center lg:flex">
+            <nav aria-label="Navegação principal" className="hidden flex-1 items-center justify-center lg:flex">
               {navItems.filter((item) => item.columns || !item.href.startsWith('http')).map((item, index) => (
                 <DesktopNavEntry
                   key={item.label}
@@ -224,7 +220,7 @@ export default function Header() {
               </button>
             </div>
 
-            <div className="hidden shrink-0 items-center gap-2 lg:flex">
+            <div className="hidden shrink-0 items-center gap-0 xl:gap-2 lg:flex">
               <NotificationBell variant="desktop" />
               <button
                 ref={desktopSearchRef}
@@ -240,7 +236,7 @@ export default function Header() {
                 href={CRF_EM_CASA_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full bg-crfal-blue px-4 text-sm font-bold text-white shadow-[0_6px_16px_-6px_rgba(0,51,102,0.55)] transition-colors hover:bg-crfal-blue-dark focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
+                className="group inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-full bg-crfal-blue px-3 text-sm font-bold text-white shadow-[0_6px_16px_-6px_rgba(0,51,102,0.55)] transition-colors hover:bg-crfal-blue-dark focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 xl:gap-2 xl:px-4"
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/15 ring-1 ring-crfal-gold/50"><User className="h-3.5 w-3.5" aria-hidden="true" /></span>
                 CRF AL em Casa
