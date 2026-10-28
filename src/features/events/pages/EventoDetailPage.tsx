@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState, type ElementType } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   AlertCircle,
@@ -7,27 +7,30 @@ import {
   Ban,
   Building2,
   Calendar,
-  ChevronRight,
   ExternalLink,
   MapPin,
   Monitor,
   RefreshCw,
-  Video,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
-import PageHero from '@/components/block/page-hero';
-import { getPostImage, stripHTML } from '@/services/wordpress/client';
+import { SITE_URL } from '@/config/site';
+import { eventsCalendar } from '@/lib/calendar';
+import PageHero, { PageHeroAction } from '@/components/block/page-hero';
+import { getPostImage, getPostImageSet, stripHTML } from '@/services/wordpress/client';
 import { sanitizeWP } from '@/services/wordpress/sanitize';
 import { useEventBySlug, useRelatedEvents } from '@/services/wordpress/event-hooks';
 import type { CRFEvent } from '@/services/wordpress/types';
 import type { WPEventListing } from '@/services/wordpress/types';
+import { EventoCard } from '../components/EventCards';
 import {
+  acoesDoEvento,
   MODALIDADE_ICONS,
   MODALIDADE_LABELS,
   STATUS_COLORS,
   STATUS_LABELS,
-  formatarData,
-  formatarDataHora,
+  formatarDataExtenso,
+  formatarHorario,
+  rotuloContagem,
   mapEvent,
   type Evento,
 } from '../utils';
@@ -43,8 +46,8 @@ function paraCRFEvent(evento: WPEventListing, bannerFallback?: string | null): C
     excerpt: resumoTexto.length > 160 ? `${resumoTexto.slice(0, 157)}...` : resumoTexto,
     status: evento.status,
     banner: getPostImage(evento) ?? bannerFallback ?? null,
-    startDate: detalhes?.startDate ?? '',
-    endDate: detalhes?.endDate ?? '',
+    startDate: detalhes?.startDate?.includes(' ') ? detalhes.startDate : [detalhes?.startDate, detalhes?.startTime].filter(Boolean).join(' '),
+    endDate: detalhes?.endDate?.includes(' ') ? detalhes.endDate : [detalhes?.endDate, detalhes?.endTime].filter(Boolean).join(' '),
     location: detalhes?.location ?? '',
     online: detalhes?.online ?? false,
     cancelled: detalhes?.cancelled ?? false,
@@ -57,23 +60,25 @@ function paraCRFEvent(evento: WPEventListing, bannerFallback?: string | null): C
   };
 }
 
-function InfoRow({ icon: Icon, rotulo, valor }: { icon: typeof Calendar; rotulo: string; valor: string }) {
+function InfoRow({ icon: Icon, rotulo, valor, dateTime }: { icon: ElementType; rotulo: string; valor: string; dateTime?: string }) {
   return (
     <div className="flex items-start gap-3">
       <div className="p-2 rounded-lg bg-crfal-blue-lighter  shrink-0">
-        <Icon className="w-4 h-4 text-crfal-blue " />
+        <Icon className="w-4 h-4 text-crfal-blue " aria-hidden />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-400 ">
+        <dt className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-600 ">
           {rotulo}
-        </p>
-        <p className="text-sm text-neutral-700  wrap-break-word">{valor}</p>
+        </dt>
+        <dd className="text-sm text-neutral-800 wrap-break-word">{dateTime ? <time dateTime={dateTime}>{valor}</time> : valor}</dd>
       </div>
     </div>
   );
 }
 
 export default function EventoDetailPage() {
+  const [agora, setAgora] = useState(() => Date.now());
+  useEffect(() => { const timer = window.setInterval(() => setAgora(Date.now()), 60_000); return () => window.clearInterval(timer); }, []);
   const { slug } = useParams<{ slug: string }>();
   const porSlug = useEventBySlug(slug ?? '');
   const eventoCompleto = porSlug.data;
@@ -83,9 +88,9 @@ export default function EventoDetailPage() {
   const relacionados = useRelatedEvents(eventoCompleto?.id);
 
   const evento: Evento | null = useMemo(() => {
-    if (eventoCompleto) return mapEvent(paraCRFEvent(eventoCompleto));
+    if (eventoCompleto) { void agora; return mapEvent(paraCRFEvent(eventoCompleto)); }
     return null;
-  }, [eventoCompleto]);
+  }, [eventoCompleto, agora]);
 
   const outrosEventos = useMemo(() => {
     if (!relacionados.data || !evento) return [];
@@ -115,12 +120,7 @@ export default function EventoDetailPage() {
 
   if (!evento && carregandoEvento) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-10 h-10 border-4 border-crfal-blue border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-crfal-gray-500 ">Carregando evento...</p>
-        </div>
-      </div>
+      <div className="container-crfal py-10" role="status"><span className="sr-only">Carregando evento...</span><div className="grid gap-8 lg:grid-cols-12 animate-pulse"><div className="aspect-video rounded-2xl bg-crfal-gray-200 lg:col-span-8" /><div className="h-80 rounded-2xl bg-crfal-gray-200 lg:col-span-4" /></div></div>
     );
   }
 
@@ -147,12 +147,21 @@ export default function EventoDetailPage() {
     );
   }
 
+  const capa = eventoCompleto ? getPostImageSet(eventoCompleto) : undefined;
   const statusConfig = STATUS_COLORS[evento.status];
   const StatusIcon = statusConfig.icon;
   const ModalidadeIcon = MODALIDADE_ICONS[evento.modalidade];
   const conteudo = eventoCompleto ? sanitizeWP(eventoCompleto.content?.rendered ?? '') : '';
-  const inscricaoAberta =
-    Boolean(evento.link) && evento.status !== 'cancelado' && evento.status !== 'encerrado';
+  const acoes = acoesDoEvento(evento);
+  const horario = formatarHorario(evento.horaInicio, evento.horaFim, evento.data, evento.dataFim);
+  const baixarAgenda = () => {
+    if (!eventoCompleto) return;
+    const url = URL.createObjectURL(new Blob([eventsCalendar([paraCRFEvent(eventoCompleto)], SITE_URL)], { type: 'text/calendar;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url; link.download = `${evento.slug}.ics`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const dataISO = evento.horaInicio ? `${evento.data.slice(0, 10)}T${evento.horaInicio}-03:00` : evento.data.slice(0, 10);
 
   return (
     <div className="min-h-screen ">
@@ -173,28 +182,24 @@ export default function EventoDetailPage() {
         title={evento.titulo}
         eyebrow="Evento"
         section="imprensa"
+        actions={<>{acoes.map((acao, i) => <PageHeroAction key={acao.href} href={acao.href} variant={i === 0 ? "primary" : "secondary"}>{acao.label}</PageHeroAction>)}{evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 rounded-full border border-white/30 px-5 py-2.5 text-sm font-bold text-white focus-visible:ring-2 focus-visible:ring-white">Adicionar à agenda</button>}</>}
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
             <StatusIcon className="w-3 h-3" />
             {STATUS_LABELS[evento.status]}
           </span>
-          {evento.status === 'cancelado' && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50  text-red-600 ">
-              <Ban className="w-3 h-3" />
-              Não será realizado
-            </span>
-          )}
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/10 text-white border border-white/20">
             <ModalidadeIcon className="w-3 h-3" />
             {MODALIDADE_LABELS[evento.modalidade]}
           </span>
+          {evento.status === 'em-breve' && rotuloContagem(evento.data) && <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white">{rotuloContagem(evento.data)}</span>}
         </div>
 
         <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
           <span className="inline-flex items-center gap-1.5">
             <Calendar className="w-4 h-4" />
-            {formatarData(evento.data, evento.dataFim)}
+            {formatarDataExtenso(evento.data, evento.dataFim)}{horario && ` · ${horario}`}
           </span>
           {evento.local && (
             <span className="inline-flex items-center gap-1.5">
@@ -209,15 +214,43 @@ export default function EventoDetailPage() {
         </div>
       </PageHero>
 
-      <div className="container-crfal py-10 md:py-16">
-        {evento.banner && (
-          <div className="rounded-xl overflow-hidden mb-10 border border-crfal-gray-200  shadow-card">
-            <img src={evento.banner} alt={evento.titulo} className="w-full h-auto object-cover max-h-[420px]" />
-          </div>
+      <div className="container-crfal pt-6 lg:pt-10 pb-12 lg:pb-16">
+        <div className="grid gap-6 lg:gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-8 empty:hidden">
+          {evento.status === 'cancelado' && <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"><Ban className="mr-2 inline h-5 w-5" aria-hidden />Este evento foi cancelado e não será realizado.</div>}
+          {evento.status === 'encerrado' && <div className="mb-6 rounded-xl bg-crfal-gray-100 p-4 text-crfal-gray-700">Este evento já foi realizado em {formatarDataExtenso(evento.data, evento.dataFim)}.{evento.video && <> <a className="underline" href={evento.video} target="_blank" rel="noopener noreferrer">Assistir gravação<span className="sr-only"> (abre em uma nova aba)</span></a></>}</div>}
+          {capa && (
+          <figure className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 shadow-card">
+            <img src={capa.src} srcSet={capa.srcSet} sizes="(min-width: 1024px) 800px, calc(100vw - 32px)" width={capa.width} height={capa.height} alt={capa.alt || `Arte de divulgação do evento «${evento.titulo}»`} decoding="async" fetchPriority="high" className="mx-auto block h-auto w-auto max-w-full max-h-[min(75vh,720px)]" />
+          </figure>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-          <div className="lg:col-span-2 min-w-0">
+          </div>
+          <aside className="lg:col-start-9 lg:col-span-4 lg:row-span-2 lg:row-start-1 lg:self-start lg:sticky lg:top-(--header-offset)">
+            <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card">
+              <h2 className="font-display text-xl font-semibold text-neutral-800 md:text-2xl mb-6">
+                Informações do evento
+              </h2>
+
+              <dl className="space-y-4">
+                {evento.data && <InfoRow icon={Calendar} rotulo="Data" valor={formatarDataExtenso(evento.data, evento.dataFim)} dateTime={evento.data.slice(0, 10)} />}
+                {horario && <InfoRow icon={Calendar} rotulo="Horário" valor={horario} dateTime={dataISO} />}
+                <InfoRow icon={ModalidadeIcon} rotulo="Modalidade" valor={MODALIDADE_LABELS[evento.modalidade]} />
+                {evento.local && <InfoRow icon={evento.modalidade === 'online' ? Monitor : MapPin} rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'} valor={evento.local} />}
+                {evento.modalidade === 'hibrido' && evento.video && <InfoRow icon={Monitor} rotulo="Transmissão" valor={evento.video} />}
+                {evento.publico && <InfoRow icon={Building2} rotulo="Público" valor={evento.publico} />}
+                <InfoRow icon={Calendar} rotulo="Situação" valor={`${STATUS_LABELS[evento.status]}${evento.status === 'em-andamento' ? ' · Ao vivo agora' : evento.status === 'em-breve' && rotuloContagem(evento.data) ? ` · ${rotuloContagem(evento.data)}` : ''}`} />
+              </dl>
+
+              {(acoes.length > 0 || (evento.status === 'em-breve' && evento.data)) && <div className="hidden lg:block mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
+                {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
+                  {acao.label}<ExternalLink className="w-4 h-4" aria-hidden /><span className="sr-only"> (abre em uma nova aba)</span>
+                </a>)}
+                {evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 w-full rounded-full border border-crfal-blue px-5 py-3 text-sm font-semibold text-crfal-blue focus-visible:ring-2 focus-visible:ring-crfal-gold">Adicionar à agenda</button>}
+              </div>}
+            </div>
+          </aside>
+          <div className="lg:col-span-8 min-w-0 rounded-2xl border border-crfal-gray-200 bg-white p-6 md:p-8 shadow-card">
             <h2 className="font-display text-xl font-semibold text-neutral-800  md:text-2xl mb-6">Sobre o evento</h2>
 
             {erroEvento ? (
@@ -241,7 +274,7 @@ export default function EventoDetailPage() {
               </div>
             ) : conteudo ? (
               <div
-                className="text-crfal-gray-600  leading-relaxed
+                className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed
                   [&_a]:text-crfal-blue [&_a]:underline
                   [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]:mt-6 [&_h2]:mb-3
                   [&_h3]:font-bold [&_h3]:text-neutral-800 [&_h3]:mt-6 [&_h3]:mb-3
@@ -253,7 +286,7 @@ export default function EventoDetailPage() {
                 dangerouslySetInnerHTML={{ __html: conteudo }}
               />
             ) : evento.descricao ? (
-              <p className="text-crfal-gray-600  leading-relaxed">{evento.descricao}</p>
+              <p className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed">{evento.descricao}</p>
             ) : (
               <p className="text-crfal-gray-500 ">
                 A descrição completa deste evento ainda não foi disponibilizada.
@@ -261,60 +294,6 @@ export default function EventoDetailPage() {
             )}
           </div>
 
-          <aside className="lg:col-span-1">
-            <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card lg:sticky lg:top-24">
-              <h2 className="text-lg font-bold text-neutral-800  mb-6">
-                Informações do evento
-              </h2>
-
-              <div className="space-y-5">
-                {evento.data && <InfoRow icon={Calendar} rotulo="Início" valor={formatarDataHora(evento.data)} />}
-                {evento.dataFim && <InfoRow icon={Calendar} rotulo="Término" valor={formatarDataHora(evento.dataFim)} />}
-                {evento.local && (
-                  <InfoRow
-                    icon={evento.modalidade === 'online' ? Monitor : MapPin}
-                    rotulo={evento.modalidade === 'online' ? 'Transmissão' : 'Local'}
-                    valor={evento.local}
-                  />
-                )}
-                {evento.publico && <InfoRow icon={Building2} rotulo="Público-alvo" valor={evento.publico} />}
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-crfal-gray-200 ">
-                {inscricaoAberta ? (
-                  <a
-                    href={evento.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 px-5 py-3 bg-crfal-blue text-white text-sm font-semibold rounded-full hover:bg-crfal-blue-dark transition-colors"
-                  >
-                    Inscreva-se
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                ) : (
-                  <p className="text-sm text-crfal-gray-500  text-center">
-                    {evento.status === 'cancelado'
-                      ? 'Este evento foi cancelado.'
-                      : evento.status === 'encerrado'
-                        ? 'As inscrições deste evento já foram encerradas.'
-                        : 'Inscrições em breve.'}
-                  </p>
-                )}
-
-                {evento.status === 'em-andamento' && eventoCompleto?.event_details?.videoUrl && (
-                  <a
-                    href={eventoCompleto.event_details.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 px-5 py-3 border border-crfal-blue text-crfal-blue  text-sm font-semibold rounded-full hover:bg-crfal-blue hover:text-white transition-colors"
-                  >
-                    <Video className="w-4 h-4" />
-                    Assistir transmissão
-                  </a>
-                )}
-              </div>
-            </div>
-          </aside>
         </div>
 
         {outrosEventos.length > 0 && (
@@ -327,24 +306,8 @@ export default function EventoDetailPage() {
               </Link>
             </div>
 
-            <div className="space-y-3">
-              {outrosEventos.map((outro) => (
-                <Link
-                  key={outro.id}
-                  to={`/eventos/${outro.slug}`}
-                  className="flex items-center justify-between gap-4 bg-white  rounded-xl border border-crfal-gray-200  px-5 py-4 hover:border-crfal-blue/30 hover:shadow-card transition-all group"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-neutral-800  truncate group-hover:text-crfal-blue  transition-colors">
-                      {outro.titulo}
-                    </p>
-                    <p className="text-xs text-crfal-gray-500  mt-0.5">
-                      {formatarData(outro.data, outro.dataFim)} · {STATUS_LABELS[outro.status]}
-                    </p>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-crfal-gray-300  group-hover:text-crfal-blue transition-colors shrink-0" />
-                </Link>
-              ))}
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {outrosEventos.map((outro, index) => <EventoCard key={outro.id} evento={outro} index={index} />)}
             </div>
           </div>
         )}

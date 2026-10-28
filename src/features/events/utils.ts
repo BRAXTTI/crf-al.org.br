@@ -1,4 +1,5 @@
 import type { ElementType } from 'react';
+import { formatDate, weekday, todayInMaceio, daysUntil } from '@/lib/maceio';
 import { Building2, CheckCircle2, Clock, MapPin, Monitor, XCircle } from 'lucide-react';
 import { stripHTML } from '@/services/wordpress/client';
 import type { CRFEvent } from '@/services/wordpress/types';
@@ -13,11 +14,14 @@ export interface Evento {
   descricao: string;
   data: string;
   dataFim?: string;
+  horaInicio?: string;
+  horaFim?: string;
   local: string;
   modalidade: ModalidadeEvento;
   status: StatusEvento;
   publico?: string;
   link?: string;
+  video?: string;
   banner?: string | null;
 }
 
@@ -110,7 +114,7 @@ function derivarStatus(
 /** Mapeia um evento da API para o modelo de exibição da listagem/detalhe. */
 export function mapEvent(evento: CRFEvent): Evento {
   const inicio = parseWPDateTime(evento.startDate);
-  const fim = parseWPDateTime(evento.endDate);
+  const fim = parseWPDateTime(evento.endDate) ?? (evento.startDate ? parseWPDateTime(`${evento.startDate.slice(0, 10)} 23:59:59`) : null);
   const modalidade = derivarModalidade(evento.modalidade, evento.online);
   const multiDia =
     Boolean(evento.startDate) &&
@@ -124,11 +128,14 @@ export function mapEvent(evento: CRFEvent): Evento {
     descricao: stripHTML(evento.excerpt),
     data: evento.startDate,
     dataFim: multiDia ? evento.endDate : undefined,
-    local: stripHTML(evento.location) || (modalidade === 'online' ? 'Evento Online' : ''),
+    horaInicio: evento.startDate.slice(11, 16) || undefined,
+    horaFim: evento.endDate.slice(11, 16) || undefined,
+    local: stripHTML(evento.location),
     modalidade,
     status: derivarStatus(evento, inicio, fim),
     publico: stripHTML(evento.publico) || undefined,
-    link: evento.registrationUrl || undefined,
+    link: urlSegura(evento.registrationUrl),
+    video: urlSegura(evento.videoUrl),
     banner: evento.banner,
   };
 }
@@ -165,22 +172,35 @@ export function formatarDataHora(valor: string): string {
 export function rotuloContagem(data: string): string | null {
   const ts = parseWPDateTime(data);
   if (ts === null) return null;
-  const inicio = new Date(ts);
-  const hoje = new Date();
-  if (
-    inicio.getFullYear() === hoje.getFullYear() &&
-    inicio.getMonth() === hoje.getMonth() &&
-    inicio.getDate() === hoje.getDate()
-  ) {
-    return 'É hoje!';
-  }
-  const diffDias = Math.round(
-    (new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate()).getTime() -
-      new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).getTime()) /
-      86_400_000
-  );
+  const diffDias = daysUntil(data.slice(0, 10), todayInMaceio());
+  if (diffDias === 0) return 'É hoje!';
   if (diffDias === 1) return 'Amanhã';
   if (diffDias > 1) return `Em ${diffDias} dias`;
   return null;
 }
 
+
+function urlSegura(valor: string): string | undefined {
+  try { const url = new URL(valor); return ['http:', 'https:'].includes(url.protocol) ? url.href : undefined; } catch { return undefined; }
+}
+
+export function acoesDoEvento(evento: Evento): { label: string; href: string }[] {
+  if (evento.status === 'cancelado') return [];
+  if (evento.status === 'encerrado') return evento.video ? [{ label: 'Assistir gravação', href: evento.video }] : [];
+  const video = evento.video ? [{ label: 'Assistir ao vivo', href: evento.video }] : [];
+  const inscricao = evento.link ? [{ label: 'Inscreva-se', href: evento.link }] : [];
+  return evento.status === 'em-andamento' ? [...video, ...inscricao] : [...inscricao, ...video];
+}
+
+export function formatarDataExtenso(data: string, fim?: string): string {
+  if (!data) return '';
+  const fmt = (d: string) => formatDate(d.slice(0, 10), { day: 'numeric', month: 'long', year: 'numeric' });
+  return fim ? `${fmt(data)} a ${fmt(fim)}` : `${weekday(data.slice(0, 10))}, ${fmt(data)}`;
+}
+export function formatarHorario(inicio?: string, fim?: string, data?: string, dataFim?: string): string {
+  if (!inicio) return '';
+  const hora = (v: string) => `${Number(v.slice(0, 2))}h${v.slice(3, 5) === '00' ? '' : v.slice(3, 5)}`;
+  const dia = (v: string) => `${Number(v.slice(8, 10))}/${Number(v.slice(5, 7))}`;
+  const texto = data && dataFim && fim ? `Início ${dia(data)} às ${hora(inicio)} · término ${dia(dataFim)} às ${hora(fim)}` : fim ? `${hora(inicio)} às ${hora(fim)}` : `A partir das ${hora(inicio)}`;
+  return `${texto} (horário de Brasília)`;
+}
