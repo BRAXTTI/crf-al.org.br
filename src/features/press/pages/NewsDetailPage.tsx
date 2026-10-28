@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import { NewsImage } from '@/components/ui/news-image';
 import { LOGO_IMAGE, SITE_NAME, SITE_URL } from '@/config/site';
+import { IMAGE_PLACEHOLDER } from '@/lib/image-placeholder';
 import {
   getPostAuthor,
   getPostCategory,
@@ -21,8 +23,6 @@ interface RelatedItem {
   title: string;
   date: string;
 }
-
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect width='400' height='200' fill='%23e5e7eb'%3E%3C/svg%3E";
 
 function formatarData(dataISO: string) {
   return new Date(dataISO).toLocaleDateString('pt-BR', {
@@ -78,7 +78,7 @@ export default function NewsDetailPage() {
     })) ?? [];
 
   const postImage = post ? getPostImage(post) : undefined;
-  const featuredImage = postImage || IMG_FALLBACK;
+  const featuredImage = postImage || IMAGE_PLACEHOLDER;
   const cover = post ? getPostImageSet(post) : undefined;
   const categoria = (post && getPostCategory(post)) || 'Notícia';
   const autor = post ? getPostAuthor(post) : undefined;
@@ -104,7 +104,7 @@ export default function NewsDetailPage() {
       '@type': 'NewsArticle',
       headline,
       description: description || undefined,
-      image: featuredImage !== IMG_FALLBACK ? [featuredImage] : undefined,
+      image: featuredImage !== IMAGE_PLACEHOLDER ? [featuredImage] : undefined,
       datePublished: post.date,
       dateModified: post.modified ?? post.date,
       mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
@@ -143,7 +143,7 @@ export default function NewsDetailPage() {
             : 'Leia as últimas notícias do CRFAL — Conselho Regional de Farmácia do Estado de Alagoas.'
         }
         path={`/imprensa/noticias/${post?.slug ?? slug ?? ''}`}
-        image={featuredImage !== IMG_FALLBACK ? featuredImage : undefined}
+        image={featuredImage !== IMAGE_PLACEHOLDER ? featuredImage : undefined}
         type="article"
         publishedAt={post?.date}
         modifiedAt={post?.modified}
@@ -255,16 +255,13 @@ export default function NewsDetailPage() {
               <div className="lg:col-span-8">
                 <article className="bg-white  rounded-xl border border-crfal-gray-200  overflow-hidden">
                   {cover && (
-                    <img
-                      src={cover.src}
-                      srcSet={cover.srcSet}
-                      sizes={cover.srcSet ? NEWS_COVER_SIZES : undefined}
-                      width={cover.width}
-                      height={cover.height}
+                    <NewsImage
+                      image={cover}
+                      sizes={NEWS_COVER_SIZES}
                       alt={cover.alt}
                       fetchPriority="high"
                       loading="eager"
-                      className="aspect-video w-full object-cover"
+                      className="aspect-16/10 w-full"
                     />
                   )}
                   <div className="p-4 sm:p-6">
