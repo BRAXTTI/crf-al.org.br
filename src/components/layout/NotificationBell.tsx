@@ -59,30 +59,33 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
     setOpen(true);
   };
 
-  const fechar = (devolverFoco: boolean) => {
+  const fechar = () => {
     setOpen(false);
-    if (devolverFoco) buttonRef.current?.focus();
+    buttonRef.current?.focus({ preventScroll: true });
   };
 
   useEffect(() => {
     if (!open) return;
+    const button = buttonRef.current;
     panelRef.current?.focus({ preventScroll: true });
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
-      setOpen(false);
-      buttonRef.current?.focus();
+      fechar();
     };
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
       if (panelRef.current?.contains(target) || buttonRef.current?.contains(target)) return;
-      setOpen(false);
+      fechar();
+      // O foco padrão do ponteiro ocorre depois de pointerdown.
+      requestAnimationFrame(() => buttonRef.current?.focus({ preventScroll: true }));
     };
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('pointerdown', onPointerDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('pointerdown', onPointerDown);
+      button?.focus({ preventScroll: true });
     };
   }, [open]);
 
@@ -97,7 +100,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        onClick={() => (open ? fechar(false) : abrir())}
+        onClick={() => (open ? fechar() : abrir())}
         onPointerEnter={() => void carregarPainel()}
         onFocus={() => void carregarPainel()}
         className={styles.button}
@@ -115,6 +118,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
 
       {open && (
         <div
+          data-notification-panel
           ref={panelRef}
           id={panelId}
           role="dialog"
@@ -124,7 +128,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
           style={{ outline: 'none' }}
           onBlur={(event) => {
             const destino = event.relatedTarget as Node | null;
-            if (destino && !event.currentTarget.contains(destino) && !buttonRef.current?.contains(destino)) setOpen(false);
+            if (destino && !event.currentTarget.contains(destino) && !buttonRef.current?.contains(destino)) fechar();
           }}
           className={`${styles.panel} motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-300`}
         >
@@ -135,7 +139,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
               </div>
             }
           >
-            <NotificationPanel fontes={fontes} estado={estado} onNavigate={(href) => { setOpen(false); navigate(href); }} />
+            <NotificationPanel fontes={fontes} estado={estado} onNavigate={(href) => { fechar(); navigate(href); }} />
           </Suspense>
         </div>
       )}
