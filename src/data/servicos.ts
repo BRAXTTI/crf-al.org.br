@@ -13,11 +13,11 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { getRequerimento, perfilDoRequerimento } from '@/data/requerimentos';
-import { BOLETOS_URL } from '@/config/site';
+import { BOLETOS_URL, VIDEOS_URL } from '@/config/site';
 
 export type TutorialPerfil = 'pessoa-fisica' | 'pessoa-juridica';
 
-/** Vídeo vertical (9:16) em motion, servido de `public/images/tutoriais/`. */
+/** Vídeo vertical (9:16) em motion, servido do R2 (`VIDEOS_URL/tutoriais/`); a capa fica em `public/images/tutoriais/`. */
 export interface TutorialMotion {
   src: string;
   poster: string;
@@ -121,7 +121,7 @@ const fontes: TutorialSource[] = [
     perfil: 'pessoa-fisica',
     prazo: 'Imediato',
     videoUrl: 'https://www.youtube.com/watch?v=1EfNUxgilW0',
-    motion: { src: '/images/tutoriais/baixa-rt.mp4', poster: '/images/tutoriais/baixa-rt-poster.webp', duracao: '0:19' },
+    motion: { src: `${VIDEOS_URL}/tutoriais/baixa-rt.mp4`, poster: '/images/tutoriais/baixa-rt-poster.webp', duracao: '0:19' },
     steps: [
       'Faça login no CRF AL em Casa como Pessoa Física.',
       'Clique em "Baixa de Contrato de Trabalho".',
@@ -200,7 +200,7 @@ const fontes: TutorialSource[] = [
     category: 'Protocolos e Boletos',
     perfil: 'ambos',
     prazo: 'Imediato',
-    motion: { src: '/images/tutoriais/protocolos.mp4', poster: '/images/tutoriais/protocolos-poster.webp', duracao: '0:30' },
+    motion: { src: `${VIDEOS_URL}/tutoriais/protocolos.mp4`, poster: '/images/tutoriais/protocolos-poster.webp', duracao: '0:30' },
     steps: [
       'Faça login no CRF AL em Casa.',
       'Na página inicial, clique em "Protocolos Web".',
@@ -216,7 +216,7 @@ const fontes: TutorialSource[] = [
     category: 'Protocolos e Boletos',
     perfil: 'ambos',
     prazo: 'Imediato',
-    motion: { src: '/images/tutoriais/boletos.mp4', poster: '/images/tutoriais/boletos-poster.webp', duracao: '0:30' },
+    motion: { src: `${VIDEOS_URL}/tutoriais/boletos.mp4`, poster: '/images/tutoriais/boletos-poster.webp', duracao: '0:30' },
     acesso: { url: BOLETOS_URL, label: 'Emitir boleto' },
     steps: [
       'Clique em "Emitir boleto" abaixo para abrir a "Impressão de Anuidades do Ano Corrente", sem login.',

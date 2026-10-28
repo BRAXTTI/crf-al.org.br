@@ -6,6 +6,12 @@ export const SITE_NAME = 'CRFAL - Conselho Regional de Farmácia do Estado de Al
 /** Logo institucional (usado em dados estruturados, ex.: publisher.logo). */
 export const LOGO_IMAGE = `${SITE_URL}/images/logo-crf-azul.png`;
 
+/**
+ * Vídeos do site (manual e tutoriais), servidos do bucket R2 `crf-al-midias`
+ * no prefixo `site/videos/`, com cache immutable. Ver README.
+ */
+export const VIDEOS_URL = 'https://midias.crf-al.org.br/site/videos';
+
 /** Imagem de compartilhamento (Open Graph / Twitter Card): 1200×630 (1,91:1). */
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.jpg`;
 

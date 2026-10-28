@@ -46,7 +46,7 @@ Sucesso, como definido pelo encarregado do projeto: **imagem institucional** —
 
 ## Evidence on Hand
 
-- Dados reais de requerimentos, tutoriais, manual com vídeos de demonstração (`public/images/manual-crf-em-casa/`), plenárias, diretoria com fotos e minicurrículos, setores e contatos.
+- Dados reais de requerimentos, tutoriais, manual com vídeos de demonstração (no R2, `https://midias.crf-al.org.br/site/videos/`; capas em `public/images/manual-crf-em-casa/`), plenárias, diretoria com fotos e minicurrículos, setores e contatos.
 - Notícias, eventos, galerias e Instagram reais via WordPress.
 - Lista de conselheiros ainda vazia: mostrar “Composição em atualização”, nunca nomes fictícios.
 - Não inventar: atas, pautas ou links inexistentes, estatísticas, depoimentos, números que ainda não carregaram (nunca exibir 0 ou —).

@@ -25,9 +25,3 @@
 
 /images/*.webp
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
-
-/images/*.mp4
-  Cache-Control: public, max-age=604800
-
-/images/*.webm
-  Cache-Control: public, max-age=604800
