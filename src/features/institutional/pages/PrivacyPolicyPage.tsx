@@ -74,8 +74,8 @@ const COOKIES: { icon: ComponentType<{ className?: string }>; tipo: string; fina
   {
     icon: HardDrive,
     tipo: 'Armazenamento local',
-    finalidade: 'Lembrar os documentos marcados no checklist dos requerimentos, o perfil escolhido na página inicial (Empresas, Farmacêuticos ou Cidadão) e não repetir um aviso já fechado. Fica só no seu navegador.',
-    duracao: 'Até você limpar os dados do navegador (avisos: 1 dia)',
+    finalidade: 'Lembrar os documentos marcados no checklist dos requerimentos, o perfil escolhido na página inicial (Empresas, Farmacêuticos ou Cidadão), as notificações já vistas, lidas ou dispensadas no sino do cabeçalho e não repetir um aviso já fechado. Eventos e notícias públicos ficam temporariamente no sessionStorage para evitar requisições repetidas. Fica só no seu navegador.',
+    duracao: 'Até você limpar os dados do navegador (avisos: 1 dia; eventos e notícias: sessão, atualizados após cerca de 10 minutos)',
   },
 ];
 
