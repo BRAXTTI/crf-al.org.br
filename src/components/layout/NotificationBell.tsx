@@ -4,6 +4,7 @@ import { Bell } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEstadoNotificacoes } from '@/features/notificacoes/estado';
 import { useFontesNotificacoes } from '@/features/notificacoes/fontes';
+import { EVENTO_CHEGADA, definirPainelAberto, useSinalNotificacoes } from '@/features/notificacoes/sinal';
 
 // O feed (e as animações de cada tipo) só é baixado quando o painel abre ou o sino recebe ponteiro/foco.
 const carregarPainel = () => import('@/features/notificacoes/NotificationPanel');
@@ -11,6 +12,10 @@ const NotificationPanel = lazy(carregarPainel);
 
 /** Respiro entre a borda inferior do <header> e o painel, igual em todas as larguras. */
 const RESPIRO_PX = 8;
+
+/** Pulso do contador (escala 1→1,08) com halo dourado por trás; nada com movimento reduzido. */
+const PULSO =
+  "motion-safe:animate-notif-pulse motion-safe:before:absolute motion-safe:before:inset-0 motion-safe:before:-z-10 motion-safe:before:rounded-full motion-safe:before:bg-crfal-gold motion-safe:before:content-[''] motion-safe:before:animate-notif-halo";
 
 /** Notícias entram depois da primeira abertura (ou já em cache, como na home): o sino não pesa nas outras páginas. */
 let painelJaAberto = false;
@@ -38,6 +43,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
   const [comNoticias, setComNoticias] = useState(painelJaAberto);
   const fontes = useFontesNotificacoes(comNoticias);
   const estado = useEstadoNotificacoes();
+  const { emTransito } = useSinalNotificacoes();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [lastPathname, setLastPathname] = useState(pathname);
@@ -45,6 +51,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
   const panelRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLSpanElement>(null);
   const [topoDesktop, setTopoDesktop] = useState<number>();
 
   // Fecha ao trocar de página (inclusive ao abrir um evento ou notícia pelo painel).
@@ -55,7 +62,9 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
 
   const lidas = new Set(estado.lidas);
   const dispensadas = new Set(estado.dispensadas);
-  const naoLidas = fontes.ids.filter((id) => !lidas.has(id) && !dispensadas.has(id)).length;
+  // Toasts ainda na tela ou voando não contam: o contador sobe quando eles chegam ao sino.
+  const voando = new Set(emTransito);
+  const naoLidas = fontes.ids.filter((id) => !lidas.has(id) && !dispensadas.has(id) && !voando.has(id)).length;
 
   const abrir = () => {
     void queryClient.refetchQueries({ queryKey: ['wp', 'events'], stale: true });
@@ -95,6 +104,33 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
     };
   }, [open]);
 
+  // Os toasts só aparecem (e somem, se já estiverem na tela) com o painel fechado.
+  useEffect(() => {
+    if (!open) return;
+    definirPainelAberto(true);
+    return () => definirPainelAberto(false);
+  }, [open]);
+
+  // "Bump" de recebimento quando os toasts chegam ao sino (o contador atualiza junto).
+  useEffect(() => {
+    const onChegada = () => {
+      const icon = iconRef.current;
+      if (!icon || icon.getBoundingClientRect().width === 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      icon.animate(
+        [
+          { transform: 'scale(1) rotate(0deg)' },
+          { transform: 'scale(1.22) rotate(-10deg)', offset: 0.3 },
+          { transform: 'scale(0.94) rotate(7deg)', offset: 0.55 },
+          { transform: 'scale(1.04) rotate(-3deg)', offset: 0.78 },
+          { transform: 'scale(1) rotate(0deg)' },
+        ],
+        { duration: 520, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' },
+      );
+    };
+    window.addEventListener(EVENTO_CHEGADA, onChegada);
+    return () => window.removeEventListener(EVENTO_CHEGADA, onChegada);
+  }, []);
+
   // Desktop: o sino fica no meio da barra; o painel desce até o fim do <header> + 8px. A distância
   // sino→fim do header não muda quando a barra utilitária recolhe (os dois sobem juntos), então
   // basta medir ao abrir e ao redimensionar.
@@ -128,13 +164,24 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
         onFocus={() => void carregarPainel()}
         className={styles.button}
       >
-        <Bell className={styles.icon} aria-hidden="true" />
+        <span ref={iconRef} data-bell-icon className="grid place-items-center" style={{ transformOrigin: '50% 15%' }}>
+          <Bell className={styles.icon} aria-hidden="true" />
+        </span>
         {naoLidas > 0 && (
+          // Pulso leve e contínuo (escala + halo dourado) enquanto há não lidas e o painel está fechado.
           <span
             aria-hidden
-            className={`absolute right-1 top-1 min-w-[18px] rounded-full bg-crfal-gold px-1 text-center text-[10.5px] font-bold leading-[18px] text-crfal-blue-dark tabular-nums ring-2 motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:duration-300 ${styles.badge}`}
+            data-bell-count={naoLidas}
+            data-pulsing={open ? undefined : ''}
+            className={`absolute right-1 top-1 isolate rounded-full ${open ? '' : PULSO}`}
           >
-            {naoLidas > 9 ? '9+' : naoLidas}
+            {/* A chave refaz o "pop" a cada mudança do número (ex.: quando os toasts chegam). */}
+            <span
+              key={naoLidas}
+              className={`relative block min-w-[18px] rounded-full bg-crfal-gold px-1 text-center text-[10.5px] font-bold leading-[18px] text-crfal-blue-dark tabular-nums ring-2 motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:duration-300 ${styles.badge}`}
+            >
+              {naoLidas > 9 ? '9+' : naoLidas}
+            </span>
           </span>
         )}
       </button>
