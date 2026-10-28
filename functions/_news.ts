@@ -47,7 +47,7 @@ interface NewsContext {
 }
 /** HTML: ~1,8 s no total e sem repetição; com cache (inclusive antigo), a origem nem é consultada. */
 export const PAGE_BUDGET_MS = 1800;
-export const API_BUDGET_MS = 20_000;
+export const API_BUDGET_MS = 8_000;
 const CALL_TIMEOUT_MS = 8_000;
 export function withNewsBudget(context: NewsContext, ms: number, retry: boolean): NewsContext {
   return {
@@ -825,6 +825,28 @@ export async function searchNews(term: string, context?: NewsContext): Promise<W
   );
 }
 export async function newsApi(request: Request, base?: NewsContext): Promise<Response> {
+  return newsDeadline(newsApiLoad(request, base), base);
+}
+
+/** Inclui também cache e KV no prazo, mesmo quando não respeitam AbortSignal. */
+export async function newsDeadline(task: Promise<Response>, base?: NewsContext): Promise<Response> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  const deadline = new Promise<Response>((resolve) => {
+    timer = setTimeout(() => resolve(Response.json(
+      { error: 'Notícias temporariamente indisponíveis.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' } },
+    )), API_BUDGET_MS);
+  });
+  try {
+    const response = await Promise.race([task, deadline]);
+    if (response.status === 503 && base) base.waitUntil(task.catch(() => undefined));
+    return response;
+  } finally {
+    if (timer !== null) clearTimeout(timer);
+  }
+}
+
+async function newsApiLoad(request: Request, base?: NewsContext): Promise<Response> {
   if (!['GET', 'HEAD'].includes(request.method))
     return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
   const url = new URL(request.url);

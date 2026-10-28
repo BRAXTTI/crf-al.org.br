@@ -27,7 +27,7 @@ export async function cachedNewsResponse(context: Context, key: Request, load: (
   if (!cache) return load();
   const store = async (response: Response) => {
     if (response.status !== 200 || response.headers.get('Cache-Control')?.includes('no-store')) return;
-    const copy = new Response(response.clone().body, response);
+    const copy = response;
     copy.headers.set('X-News-Cached-At', String(Date.now()));
     copy.headers.set('Cache-Control', `public, max-age=${RETENTION_S}`);
     await cache.put(key, copy);
@@ -44,6 +44,9 @@ export async function cachedNewsResponse(context: Context, key: Request, load: (
     return result;
   }
   const response = await load();
-  context.waitUntil(store(response).catch(() => undefined));
-  return response;
+  // Consume the transformed stream once before returning: cloning a streaming response
+  // tees it and can couple the client to an abandoned or slow cache branch.
+  const body = await response.arrayBuffer();
+  context.waitUntil(store(new Response(body, response)).catch(() => undefined));
+  return new Response(body, response);
 }

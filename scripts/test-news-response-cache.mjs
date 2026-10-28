@@ -25,5 +25,13 @@ try {
   const fallback = key('/api/news?slug=fallback');
   await cachedNewsResponse(ctx, fallback, async () => new Response('fallback', { headers: { 'Cache-Control': 'no-store' } }));
   await Promise.all(tasks.splice(0)); assert.equal(entries.has(fallback.url), false);
+  // O consumidor recebe um corpo independente do armazenamento, mesmo que put nunca termine.
+  const put = globalThis.caches.default.put;
+  globalThis.caches.default.put = () => new Promise(() => {});
+  const streamed = await cachedNewsResponse(ctx, key('/api/news?slug=stream'), async () => new Response(new ReadableStream({
+    start(controller) { controller.enqueue(new TextEncoder().encode('corpo completo')); controller.close(); },
+  })));
+  assert.equal(await streamed.text(), 'corpo completo');
+  globalThis.caches.default.put = put;
 } finally { globalThis.caches = saved; }
 console.log('Cache HTTP: chaves, isolamento de deploy, SWR e falhas validados.');

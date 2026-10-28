@@ -31,7 +31,10 @@ let stored = new Map();
 let background = [];
 
 globalThis.HTMLRewriter = class {
-  on() { return this; }
+  on(_selector, handlers) {
+    for (const handler of Object.values(handlers)) assert.notEqual(handler.constructor.name, 'AsyncFunction', 'HTMLRewriter não aguarda operações assíncronas');
+    return this;
+  }
   transform(response) { return response; }
 };
 globalThis.caches = { default: {

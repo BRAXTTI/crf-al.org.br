@@ -410,8 +410,8 @@ async function handle(context: PagesContext): Promise<Response> {
     // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.
     const render = async () => {
       const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
-      if (!og?.title) return notFound(asset.clone(), pathname);
-      const response = injectOg(asset.clone(), og);
+      if (!og?.title) return notFound(asset, pathname);
+      const response = injectOg(asset, og);
       if (prefix === NEWS_PREFIX) response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=600, stale-if-error=2592000');
       return response;
     };

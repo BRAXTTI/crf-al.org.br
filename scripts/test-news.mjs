@@ -413,7 +413,7 @@ try {
   } finally { globalThis.fetch = workingFetch; }
   // Orçamentos: SSR sem repetição, prazo total compartilhado; recarga em segundo plano sem prazo.
   {
-    assert.ok(PAGE_BUDGET_MS > 0 && PAGE_BUDGET_MS < 3000); assert.equal(API_BUDGET_MS, 20000);
+    assert.ok(PAGE_BUDGET_MS > 0 && PAGE_BUDGET_MS < 3000); assert.equal(API_BUDGET_MS, 8000);
     const workingFetch = globalThis.fetch; let calls = 0;
     const page = withNewsBudget({ waitUntil() {} }, PAGE_BUDGET_MS, false);
     try {
@@ -439,6 +439,21 @@ try {
       await Promise.all(tasks.splice(0));
       assert.ok(requests.some(url => url.searchParams.get('rest_route') === '/wp/v2/media'), 'Revalidação completa apesar do prazo da requisição');
     } finally { globalThis.fetch = workingFetch; }
+  }
+  // O prazo também cobre KV e o índice compartilhado, que não usam o AbortSignal do WP.
+  {
+    const originalTimer = globalThis.setTimeout; const tasks = [];
+    let release;
+    const blocked = new Promise(resolve => { release = resolve; });
+    const kv = { async get() { await blocked; return null; }, async put() {}, async delete() {} };
+    try {
+      globalThis.setTimeout = (fn, ms, ...args) => originalTimer(fn, ms === API_BUDGET_MS ? 10 : ms, ...args);
+      const response = await newsApi(new Request('https://example.test/api/news?page=50&per_page=50'), { env: { NEWS_INDEX: kv }, waitUntil: task => tasks.push(task) });
+      assert.equal(response.status, 503);
+      assert.equal(tasks.length, 1, 'A coleta continua em waitUntil após o prazo');
+      release();
+      await Promise.all(tasks);
+    } finally { release(); globalThis.setTimeout = originalTimer; }
   }
   // "Não encontrado" fica 5 min no cache local (sem escrita no KV); busca normalizada e limitada.
   {
