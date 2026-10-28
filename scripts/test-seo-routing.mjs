@@ -161,6 +161,44 @@ try {
     assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br${target}`);
   }
 
+  // URLs legadas são resolvidas sem acessar WordPress, inclusive durante falha da origem.
+  origin = () => { throw new Error('WordPress não deve ser consultado'); };
+  const beforeLegacy = fetches;
+  for (const path of ['/wp-admin', '/wp-admin/admin-ajax.php', '/wp-admin-extra', '/wp-json', '/wp-json/wp/v2/posts', '/wp-login.php', '/xmlrpc.php', '/wp-cron.php', '/wp-includes/js/a.js', '/web/wp/index.php', '/wp-content/plugins/a.php', '/wp-content/uploads-malicious/a']) {
+    for (const method of ['GET', 'HEAD', 'POST']) {
+      const response = await request(`${path}?feed=rss2`, { method });
+      assert.equal(response.status, 410, `${method} ${path}`);
+      if (method === 'HEAD') assert.equal(await response.text(), '');
+    }
+  }
+  const media = new Response('media', { headers: { 'Content-Type': 'image/png' } });
+  await assertPassThrough(await request('/wp-content/uploads/2020/a.png', { response: media.clone() }), media, 'Uploads seguem para o próximo handler');
+  for (const path of ['/feed', '/feed/', '/categoria/feed', '/categoria/sub/feed/', '/rss']) {
+    const response = await request(`${path}?utm=a%2Fb&tag=um&tag=dois`);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), 'https://institucional.crf-al.org.br/api/rss?utm=a%2Fb&tag=um&tag=dois', path);
+  }
+  for (const path of ['/?feed=rss2&utm=teste', '/?feed=atom&utm=teste', '/?feed=&utm=teste']) {
+    const response = await request(path);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), 'https://institucional.crf-al.org.br/api/rss?utm=teste', path);
+  }
+  for (const path of ['/page/2', '/page/42/']) {
+    const response = await request(`${path}?utm=a%2Fb&tag=um&tag=dois`);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), 'https://institucional.crf-al.org.br/imprensa/noticias?utm=a%2Fb&tag=um&tag=dois', path);
+  }
+  const slug = 'crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp';
+  for (const path of [`/${slug}`, `/${slug}/`, `/publicacao/${slug}`, `/publicacao/${slug}/`, '/?p=107698', '/index.php?p=107698', '/imprensa/noticias/107698/', '/publicacao/107698/']) {
+    const separator = path.includes('?') ? '&' : '?';
+    const response = await request(`${path}${separator}utm=teste&tag=um&tag=dois`);
+    assert.equal(response.status, 301, path);
+    assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br/imprensa/noticias/${slug}?utm=teste&tag=um&tag=dois`, path);
+  }
+  await expectMissing('/slug-legado-desconhecido');
+  await expectMissing('/page/nao-numerica');
+  assert.equal(fetches, beforeLegacy, 'Rotas legadas e slug desconhecido não consultam WordPress');
+
   origin = () => Response.json([]);
   await expectMissing('/imprensa/noticias/noticia-inexistente');
   await expectMissing('/eventos/evento-inexistente');

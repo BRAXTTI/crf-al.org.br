@@ -1,5 +1,5 @@
 /** Deliver page metadata in initial HTML for browsers and sharing crawlers alike. */
-import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
+import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, knownHistoricalSlugBySlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
@@ -280,8 +280,26 @@ export async function onRequest(context: PagesContext): Promise<Response> {
 async function handle(context: PagesContext): Promise<Response> {
   const url = new URL(context.request.url);
   const pathname = url.pathname.replace(/\/$/, '') || '/';
+  // Endpoints do WordPress antigo não pertencem ao institucional, em qualquer método.
+  if (/^\/wp-admin/.test(pathname) || /^\/wp-json/.test(pathname) ||
+      /^\/(?:wp-login\.php|xmlrpc\.php|wp-cron\.php)$/.test(pathname) ||
+      /^\/(?:wp-includes|web\/wp)(?:\/|$)/.test(pathname) ||
+      (/^\/wp-content(?:\/|$)/.test(pathname) && !/^\/wp-content\/uploads(?:\/|$)/.test(pathname))) {
+    return new Response(context.request.method === 'HEAD' ? null : 'Conteúdo indisponível.', { status: 410, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Robots-Tag': 'noindex' } });
+  }
   if (!['GET', 'HEAD'].includes(context.request.method)) return context.next();
-  if (pathname === '/feed') return Response.redirect(`${SITE_URL}/api/rss`, 301);
+  const remainingQuery = (param: string) => {
+    const params = new URLSearchParams(url.search);
+    params.delete(param);
+    const query = params.toString();
+    return query ? `?${query}` : '';
+  };
+  if (pathname === '/rss' || /(?:^|\/)feed$/.test(pathname) || (pathname === '/' && url.searchParams.has('feed'))) {
+    return Response.redirect(`${SITE_URL}/api/rss${url.searchParams.has('feed') ? remainingQuery('feed') : url.search}`, 301);
+  }
+  if (/^\/page\/\d+$/.test(pathname)) {
+    return Response.redirect(`${SITE_URL}/imprensa/noticias${url.search}`, 301);
+  }
   if (pathname === '/sitemap-news.xml') {
     try {
       const cache = (caches as CacheStorage & { default: Cache }).default;
@@ -300,7 +318,10 @@ async function handle(context: PagesContext): Promise<Response> {
     }
   }
 
-  const historicalId = pathname === '/' ? url.searchParams.get('p') : pathname.startsWith(NEWS_PREFIX) && /^\d+$/.test(pathname.slice(NEWS_PREFIX.length)) ? pathname.slice(NEWS_PREFIX.length) : null;
+  const idFromQuery = pathname === '/' || pathname === '/index.php';
+  const numericPath = pathname.match(/^\/(?:imprensa\/noticias|publicacao)\/(\d+)$/);
+  const historicalId = idFromQuery ? url.searchParams.get('p') : numericPath?.[1] ?? null;
+  const idQuery = idFromQuery ? remainingQuery('p') : url.search;
   const legacySlug = pathname.startsWith('/publicacao/') ? pathname.slice('/publicacao/'.length) : pathname.startsWith(NEWS_PREFIX) ? pathname.slice(NEWS_PREFIX.length) : '';
   if (url.pathname.endsWith('/') && pathname.startsWith(NEWS_PREFIX) && legacySlug && !legacySlug.includes('/') && !historicalId) {
     return Response.redirect(`${SITE_URL}${pathname}${url.search}`, 301);
@@ -312,19 +333,29 @@ async function handle(context: PagesContext): Promise<Response> {
   }
   if (historicalId && /^\d+$/.test(historicalId)) {
     const knownSlug = knownHistoricalSlug(historicalId);
-    if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}`, 301);
+    if (knownSlug) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${knownSlug}${idQuery}`, 301);
     try {
       const post = await newsPost(historicalId, withNewsBudget(context, PAGE_BUDGET_MS, false));
-      if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301);
+      if (post) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}${idQuery}`, 301);
       return new Response('Notícia não encontrada.', { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
     } catch {
       return new Response('Notícia temporariamente indisponível.', { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '60' } });
     }
   }
-  if (pathname === '/instituicao/missao-visao') return Response.redirect(`${SITE_URL}/instituicao/sobre-conselho`, 301);
-  if (pathname === '/imprensa/noticias-cff') return Response.redirect(`${SITE_URL}/imprensa/publicacoes-cff`, 301);
+  if (pathname === '/instituicao/missao-visao') return Response.redirect(`${SITE_URL}/instituicao/sobre-conselho${url.search}`, 301);
+  if (pathname === '/imprensa/noticias-cff') return Response.redirect(`${SITE_URL}/imprensa/publicacoes-cff${url.search}`, 301);
   if (pathname.startsWith('/publicacao/') && pathname.slice('/publicacao/'.length) && !pathname.slice('/publicacao/'.length).includes('/')) {
-    return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${pathname.slice('/publicacao/'.length)}`, 301);
+    return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${encodeURIComponent(knownHistoricalSlugBySlug(decodedSlug) || decodedSlug)}${url.search}`, 301);
+  }
+  // Apenas um segmento conhecido do mapa pode ser uma notícia legada na raiz.
+  // Rotas da SPA e nomes de assets têm precedência mesmo se colidirem com o mapa.
+  const rootSlug = pathname.match(/^\/([^/.]+)$/)?.[1];
+  if (rootSlug && !Object.hasOwn(PAGE_METADATA, pathname) &&
+      !/^(?:assets|images|fonts|api|documentos|instituicao|servicos|imprensa|publicacao|fiscalizacao|eventos)$/.test(rootSlug)) {
+    let decoded = rootSlug;
+    try { decoded = decodeURIComponent(rootSlug); } catch { /* slug inválido segue para o 404 */ }
+    const known = knownHistoricalSlugBySlug(decoded);
+    if (known) return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${encodeURIComponent(known)}${url.search}`, 301);
   }
   const staticData = Object.hasOwn(PAGE_METADATA, pathname) ? PAGE_METADATA[pathname] : undefined;
   const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));
@@ -358,7 +389,7 @@ async function handle(context: PagesContext): Promise<Response> {
   try {
     if (prefix === NEWS_PREFIX && /^\d+$/.test(slug)) {
       const post = await newsPost(slug, withNewsBudget(context, PAGE_BUDGET_MS, false));
-      return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}`, 301) : notFound(asset, pathname);
+      return post?.slug ? Response.redirect(`${SITE_URL}${NEWS_PREFIX}${post.slug}${idQuery}`, 301) : notFound(asset, pathname);
     }
     // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.
     const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
