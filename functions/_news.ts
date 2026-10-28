@@ -146,7 +146,8 @@ type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
 const MAX_STALE_MS = 24 * 3600_000;
 const FRESH_MS = 60_000;
 // Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
-const DURABLE_TTL_S = 7 * 24 * 3600;
+// 30 dias: a reserva só é regravada quando o conteúdo muda (ou ao expirar).
+const DURABLE_TTL_S = 30 * 24 * 3600;
 // KV cobra cada escrita: só regrava quando o conteúdo muda ou a reserva envelhece.
 const DURABLE_REWRITE_MS = 24 * 3600_000;
 const revalidating = new Map<string, Promise<void>>();
@@ -165,7 +166,6 @@ async function storeDurable<T>(
     previous === undefined ? await kv.get<Stored<T>>(durableKey(key), 'json') : previous;
   if (
     stored &&
-    now - stored.storedAt < DURABLE_REWRITE_MS &&
     JSON.stringify(stored.value) === JSON.stringify(value)
   )
     return;
@@ -494,7 +494,8 @@ const RECENT_LIMIT = 60;
 // Reserva 6 escritas por refresh (contador, lease, índice, checked, cartões e falha).
 // A cada 25 min: até 58 refreshes/dia, ou 348 escritas reservadas; teto 500.
 const REFRESH_WRITES = 6;
-const REFRESH_MS = 25 * 60_000;
+// O cron (de hora em hora) é a fonte regular; visitantes só disparam refresh se o cron falhar.
+const REFRESH_MS = 3 * 3600_000;
 const NEWS_INDEX_CHECK = 'news:index:checked:v1';
 const LEASE_MS = 120_000;
 // Após falha, o lease vira um intervalo curto: sem 503 por 2 min com o KV vazio e sem martelar a origem.
@@ -563,12 +564,32 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   }
   return entry;
 }
-export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> {
+export function refreshNewsIndex(context: NewsContext, scheduled = false): Promise<Entry[] | null> {
   const kv = newsKV(context);
   if (!kv) return Promise.reject(new Error('NEWS_INDEX binding required'));
   const pending = refreshing.get(kv);
   if (pending) return pending;
+  const commit = async (value: Entry[]) => {
+    const bytes = new TextEncoder().encode(JSON.stringify(value));
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest), (byte) =>
+      byte.toString(16).padStart(2, '0'),
+    ).join('');
+    const previous = await readNewsIndex(kv);
+    const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
+    if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
+    await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
+    // (checked: 1 escrita/execução = 24/dia com cron horário)
+    memo.set(kv, { readAt: Date.now(), entry });
+    context.waitUntil(refreshRecentCards(kv, value, background(context)!).catch((error) => {
+      console.error(JSON.stringify({ event: 'news_recent_cards_refresh_failed', message: String(error) }));
+    }));
+    // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
+    return value;
+  };
   const task = (async () => {
+    // Cron: execução única por hora, sem contador nem lease no KV (2 escritas a menos).
+    if (scheduled) return commit(await buildNewsIndex(background(context)));
     const quotaKey = NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10);
     const used = (await kv.get<number>(quotaKey, 'json')) ?? 0;
     if (used + REFRESH_WRITES > 500) {
@@ -593,21 +614,7 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
         .catch(() => undefined);
       throw error;
     }
-    const bytes = new TextEncoder().encode(JSON.stringify(value));
-    const digest = await crypto.subtle.digest('SHA-256', bytes);
-    const hash = Array.from(new Uint8Array(digest), (byte) =>
-      byte.toString(16).padStart(2, '0'),
-    ).join('');
-    const previous = await readNewsIndex(kv);
-    const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
-    if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
-    await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
-    memo.set(kv, { readAt: Date.now(), entry });
-    context.waitUntil(refreshRecentCards(kv, value, background(context)!).catch((error) => {
-      console.error(JSON.stringify({ event: 'news_recent_cards_refresh_failed', message: String(error) }));
-    }));
-    // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
-    return value;
+    return commit(value);
   })().finally(() => refreshing.delete(kv));
   refreshing.set(kv, task);
   return task;
