@@ -33,5 +33,20 @@ try {
   })));
   assert.equal(await streamed.text(), 'corpo completo');
   globalThis.caches.default.put = put;
+  // O cache HTTP travado não soma sua espera à consulta de metadados.
+  const match = globalThis.caches.default.match;
+  globalThis.caches.default.match = () => new Promise(() => {});
+  const fast = await Promise.race([
+    cachedNewsResponse(ctx, key('/imprensa/noticias/parallel'), async () => new Response('KV'), true),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Consulta serial ao cache')), 80)),
+  ]);
+  assert.equal(await fast.text(), 'KV');
+  globalThis.caches.default.match = match;
+  const cachedPage = key('/imprensa/noticias/stale');
+  entries.set(cachedPage.url, new Response('reserva', { headers: { 'X-News-Cached-At': String(Date.now()) } }));
+  globalThis.caches.default.match = async req => { await new Promise(resolve => setTimeout(resolve, 20)); return entries.get(req.url)?.clone(); };
+  const preserved = await cachedNewsResponse(ctx, cachedPage, async () => new Response('erro', { status: 404 }), true);
+  assert.equal(await preserved.text(), 'reserva');
+  globalThis.caches.default.match = match;
 } finally { globalThis.caches = saved; }
 console.log('Cache HTTP: chaves, isolamento de deploy, SWR e falhas validados.');

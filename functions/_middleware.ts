@@ -2,6 +2,7 @@
 import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, knownHistoricalSlugBySlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
 import { cachedNewsResponse, newsResponseKey } from './_news-response-cache';
+import { NEWS_SHELL, NEWS_SHELL_VERSION } from './_news-shell';
 import { PAGE_METADATA } from '../src/config/page-metadata';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
@@ -386,7 +387,9 @@ async function handle(context: PagesContext & { timings: Record<string, number> 
     upstream = new Request(upstream, { headers });
   }
   const assetStart = performance.now();
-  const asset = await context.next(upstream);
+  const asset = prefix === NEWS_PREFIX
+    ? new Response(NEWS_SHELL, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+    : await context.next(upstream);
   context.timings.asset += performance.now() - assetStart;
   if (!asset.ok || !asset.headers.get('content-type')?.includes('text/html')) return asset;
   // Pages falls back to index.html for missing files and routes in a SPA.
@@ -421,10 +424,10 @@ async function handle(context: PagesContext & { timings: Record<string, number> 
       return response;
     };
     // A versão do shell impede servir HTML com bundles de um deploy anterior.
-    const version = asset.headers.get('ETag');
+    const version = prefix === NEWS_PREFIX ? NEWS_SHELL_VERSION : asset.headers.get('ETag');
     if (prefix === NEWS_PREFIX && context.request.method === 'GET' && version) {
       const scope = `${context.env?.WP_SITE_URL || ''}|${context.env?.NEWS_ARCHIVE_API_URL || ''}`;
-      return await cachedNewsResponse(context, newsResponseKey(context.request, scope, version), render);
+      return await cachedNewsResponse(context, newsResponseKey(context.request, scope, version), render, true);
     }
     return await render();
   } catch (error) {
@@ -458,7 +461,7 @@ function notFound(asset: Response, pathname: string): Response {
 export async function onRequest(context: PagesContext): Promise<Response> {
   const timings = { cache: 0, kv: 0, asset: 0, rewriter: 0, origin: 0 };
   const response = await handleRequest(Object.assign(context, { timings }));
-  const result = new Response(response.body, response);
+  const result = new Response(context.request.method === 'HEAD' ? null : response.body, response);
   result.headers.set('Server-Timing', Object.entries(timings).map(([name, value]) => `${name};dur=${value.toFixed(1)}`).join(', '));
   return result;
 }

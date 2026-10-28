@@ -19,7 +19,8 @@ const source = (await readFile(new URL('../functions/_middleware.ts', import.met
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
   .replace("'./_news'", JSON.stringify(await loadNews()))
-  .replace("'./_news-response-cache'", JSON.stringify(responseCacheUrl));
+  .replace("'./_news-response-cache'", JSON.stringify(responseCacheUrl))
+  .replace("'./_news-shell'", JSON.stringify(moduleUrl(await readFile(new URL('../functions/_news-shell.ts', import.meta.url), 'utf8'))));
 const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders } = await import(moduleUrl(source));
 const { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } = await import(bannersUrl);
 const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
@@ -60,7 +61,7 @@ async function request(path, options = {}) {
         try { return new Response(await readFile(new URL(`../public${new URL(upstream.url).pathname}`, import.meta.url)), { headers: { 'Content-Type': 'application/json' } }); }
         catch { return new Response('missing', { status: 404 }); }
       }
-      forwarded = upstream; return options.response || shell();
+      forwarded = upstream; return options.next ? options.next(upstream) : options.response || shell();
     },
     waitUntil: promise => background.push(promise),
   });
@@ -251,9 +252,14 @@ try {
     assert.equal(fetches, beforeRedirect, 'Mapa dispensa consulta à origem');
   }
   origin = url => new URL(url).searchParams.get('rest_route') === '/wp/v2/categories' ? Response.json([]) : Response.json(post);
-  response = await request(`/imprensa/noticias/${post.slug}`);
+  response = await Promise.race([
+    request(`/imprensa/noticias/${post.slug}`, { next: () => new Promise(() => {}) }),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('HTML aguardou o asset')), 1000)),
+  ]);
   assert.equal(response.status, 200);
+  assert.match(await response.text(), /<div id="root"/);
   assert.match(response.headers.get('Server-Timing'), /cache;dur=.*kv;dur=.*asset;dur=.*rewriter;dur=.*origin;dur=/);
+  assert.equal(await (await request(`/imprensa/noticias/${post.slug}`, { method: 'HEAD', next: () => new Promise(() => {}) })).text(), '');
   await Promise.all(background);
   const before = fetches;
   assert.equal((await request(`/imprensa/noticias/${post.slug}?utm_source=test`)).status, 200);
@@ -312,7 +318,10 @@ try {
   for (const status of [404, 403, 500, 503]) {
     stored = new Map();
     origin = () => new Response('', { status });
-    response = await request(`/imprensa/noticias/${post.slug}`);
+    response = await Promise.race([
+    request(`/imprensa/noticias/${post.slug}`, { next: () => new Promise(() => {}) }),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('HTML aguardou o asset')), 1000)),
+  ]);
     assert.equal(response.status, 200, `snapshot durante falha ${status}`);
     response = await request('/imprensa/noticias/noticia-inexistente');
     assert.equal(response.status, 404);
