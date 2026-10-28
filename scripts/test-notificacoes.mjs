@@ -38,7 +38,11 @@ let estado = await carregarEstado();
 estado.marcarLidas(['evento-1', 'evento-1', 'novidade-a']);
 estado.dispensar(['noticia-9']);
 let salvo = JSON.parse(store.get(estado.STORAGE_KEY));
-assert.deepEqual(salvo, { lidas: ['evento-1', 'novidade-a'], dispensadas: ['noticia-9'], vistas: [] }, 'JSON corrompido é descartado e ids não se repetem');
+assert.deepEqual(salvo, { lidas: ['evento-1', 'novidade-a'], dispensadas: ['noticia-9'], vistas: [], mostradas: [] }, 'JSON corrompido é descartado e ids não se repetem');
+
+estado.marcarMostradas(['evento-1', 'novidade-a', 'evento-1']);
+salvo = JSON.parse(store.get(estado.STORAGE_KEY));
+assert.deepEqual(salvo.mostradas, ['evento-1', 'novidade-a'], 'Toasts já mostrados ficam guardados sem repetição');
 
 estado.marcarVistas(Array.from({ length: 250 }, (_, i) => `evento-${i}`));
 salvo = JSON.parse(store.get(estado.STORAGE_KEY));
@@ -51,4 +55,38 @@ bloqueado = true;
 assert.doesNotThrow(() => estado.marcarLidas(['z']), 'Armazenamento bloqueado não quebra o site');
 assert.deepEqual(JSON.parse(store.get(estado.STORAGE_KEY)), { lidas: ['x', 3, null], dispensadas: 'y' }, 'Nada gravado com o armazenamento bloqueado');
 
-console.log(`Notificações: ${NOVIDADES.length} novidades com rota publicada; estado local validado.`);
+// Sinais sino ↔ toasts: painel aberto e pop-up bloqueiam; sessão sem storage não mostra toasts.
+const sessao = new Map();
+let sessaoBloqueada = false;
+let popupAberto = false;
+globalThis.window.sessionStorage = {
+  getItem: key => { if (sessaoBloqueada) throw new Error('SecurityError'); return sessao.get(key) ?? null; },
+  setItem: (key, value) => { if (sessaoBloqueada) throw new Error('SecurityError'); sessao.set(key, value); },
+};
+globalThis.document = { querySelector: seletor => (seletor === '[data-site-popup]' && popupAberto ? {} : null) };
+const sinal = await import(await moduleUrl('../src/features/notificacoes/sinal.ts', {
+  "import { useSyncExternalStore } from 'react';": 'const useSyncExternalStore = () => {};',
+}));
+assert.equal(sinal.MAX_TOASTS, 3, 'No máximo 3 toasts');
+let avisos = 0;
+const parar = sinal.observarSinal(() => { avisos += 1; });
+assert.equal(sinal.toastsBloqueados(), false, 'Sem painel nem pop-up, os toasts podem aparecer');
+sinal.definirPainelAberto(true);
+sinal.definirPainelAberto(true);
+assert.equal(avisos, 1, 'Painel aberto avisa uma vez');
+assert.equal(sinal.toastsBloqueados(), true, 'Painel do sino aberto bloqueia os toasts');
+sinal.definirPainelAberto(false);
+popupAberto = true;
+assert.equal(sinal.toastsBloqueados(), true, 'Pop-up aberto bloqueia os toasts');
+popupAberto = false;
+sinal.definirEmTransito(['evento-1']);
+assert.deepEqual(sinal.lerSinal().emTransito, ['evento-1'], 'Ids em trânsito ficam fora do contador');
+parar();
+assert.equal(sinal.toastsJaMostradosNaSessao(), false, 'Sessão nova: toasts liberados');
+sinal.marcarSessaoToasts();
+assert.equal(sinal.toastsJaMostradosNaSessao(), true, 'Uma vez por sessão');
+sessaoBloqueada = true;
+assert.equal(sinal.toastsJaMostradosNaSessao(), true, 'Sem sessionStorage, nada de toasts (não repetem a cada página)');
+assert.doesNotThrow(() => sinal.marcarSessaoToasts(), 'Sessão bloqueada não quebra o site');
+
+console.log(`Notificações: ${NOVIDADES.length} novidades com rota publicada; estado local e sinais dos toasts validados.`);
