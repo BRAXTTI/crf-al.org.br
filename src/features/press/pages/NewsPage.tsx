@@ -37,10 +37,10 @@ function formatDate(isoDate: string) {
 
 function getTagColor(tagName: string) {
   const map: Record<string, string> = {
-    'Notícias': 'bg-blue-500',
-    'Institucional': 'bg-purple-500',
-    'Cursos': 'bg-green-500',
-    'Eventos': 'bg-orange-500',
+    'Notícias': 'bg-blue-700',
+    'Institucional': 'bg-purple-700',
+    'Cursos': 'bg-green-700',
+    'Eventos': 'bg-orange-700',
   };
   return map[tagName] || 'bg-crfal-blue';
 }
@@ -219,7 +219,7 @@ export default function NewsPage() {
                       </h2>
                       <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-crfal-gray-600">{pub.excerpt}</p>
                       <div className="mt-auto flex w-full flex-wrap items-center justify-between gap-3 border-t border-crfal-gray-100 pt-4">
-                        <span className="inline-flex items-center gap-2 text-xs text-crfal-gray-500">
+                        <span className="inline-flex items-center gap-2 text-xs text-crfal-gray-600">
                           <Calendar className="h-4 w-4" aria-hidden="true" />
                           {pub.date}
                         </span>

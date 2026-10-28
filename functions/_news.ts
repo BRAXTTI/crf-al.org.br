@@ -146,7 +146,8 @@ type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
 const MAX_STALE_MS = 24 * 3600_000;
 const FRESH_MS = 60_000;
 // Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
-const DURABLE_TTL_S = 7 * 24 * 3600;
+// 30 dias: a reserva só é regravada quando o conteúdo muda (ou ao expirar).
+const DURABLE_TTL_S = 30 * 24 * 3600;
 // KV cobra cada escrita: só regrava quando o conteúdo muda ou a reserva envelhece.
 const DURABLE_REWRITE_MS = 24 * 3600_000;
 const revalidating = new Map<string, Promise<void>>();
@@ -165,7 +166,6 @@ async function storeDurable<T>(
     previous === undefined ? await kv.get<Stored<T>>(durableKey(key), 'json') : previous;
   if (
     stored &&
-    now - stored.storedAt < DURABLE_REWRITE_MS &&
     JSON.stringify(stored.value) === JSON.stringify(value)
   )
     return;
@@ -488,7 +488,14 @@ async function buildNewsIndex(context?: NewsContext): Promise<Entry[]> {
 }
 export const NEWS_INDEX_KEY = 'news:index:v1';
 export const NEWS_INDEX_LOCK = 'news:index:refresh:v1';
-const REFRESH_MS = 25 * 60_000;
+export const NEWS_RECENT_CARDS_KEY = 'news:recent-cards:v1';
+export const NEWS_REFRESH_QUOTA_PREFIX = 'news:refresh-quota:v1:';
+const RECENT_LIMIT = 60;
+// Reserva 6 escritas por refresh (contador, lease, índice, checked, cartões e falha).
+// A cada 25 min: até 58 refreshes/dia, ou 348 escritas reservadas; teto 500.
+const REFRESH_WRITES = 6;
+// O cron (de hora em hora) é a fonte regular; visitantes só disparam refresh se o cron falhar.
+const REFRESH_MS = 3 * 3600_000;
 const NEWS_INDEX_CHECK = 'news:index:checked:v1';
 const LEASE_MS = 120_000;
 // Após falha, o lease vira um intervalo curto: sem 503 por 2 min com o KV vazio e sem martelar a origem.
@@ -499,9 +506,49 @@ const refreshing = new WeakMap<KVNamespace, Promise<Entry[] | null>>();
 // por minuto em cada isolate. Um índice novo aparece em até ~2 min (memória + borda do KV).
 export const NEWS_INDEX_MEMO_MS = 60_000;
 const memo = new WeakMap<KVNamespace, { readAt: number; entry: StoredIndex }>();
+type RecentCard = { id: number; slug: string; modified?: string; post: WPPost };
+const cardsMemo = new WeakMap<KVNamespace, { readAt: number; value: Stored<RecentCard[]> }>();
 /** Somente para testes: descarta a cópia em memória do índice. */
 export function clearNewsIndexMemo(kv: KVNamespace) {
   memo.delete(kv);
+  cardsMemo.delete(kv);
+}
+async function readRecentCards(kv: KVNamespace): Promise<Stored<RecentCard[]> | null> {
+  const hit = cardsMemo.get(kv);
+  if (hit && Date.now() - hit.readAt < NEWS_INDEX_MEMO_MS) return hit.value;
+  const raw = await kv.get<Stored<RecentCard[]> | RecentCard[]>(NEWS_RECENT_CARDS_KEY, { type: 'json', cacheTtl: 60 });
+  const value = Array.isArray(raw) ? { storedAt: 0, value: raw } : raw;
+  if (value) cardsMemo.set(kv, { readAt: Date.now(), value });
+  return value;
+}
+async function refreshRecentCards(kv: KVNamespace, index: Entry[], context: NewsContext) {
+  const entries = index.slice(0, RECENT_LIMIT);
+  const previous = await readRecentCards(kv);
+  const old = new Map(previous?.value.map((card) => [card.id, card]));
+  const changed = entries.filter((entry) => {
+    const card = old.get(entry.id);
+    return !entry.modified || card?.modified !== entry.modified || card.slug !== entry.slug;
+  });
+  const fresh = new Map<number, WPPost>();
+  if (changed.length) {
+    const ids = changed.map((entry) => entry.id);
+    const [response, taxonomy] = await Promise.all([
+      request('posts', { include: ids.join(','), per_page: String(ids.length), _fields: fields.replace('content,', '') }, false, false, context),
+      categories(context),
+    ]);
+    const rows = ((await response!.json()) as WPPost[])
+      .filter((post) => acceptable(post, taxonomy.category, taxonomy.spam)).map(normalize);
+    const lookup = new Map(rows.map((post) => [post.id, post]));
+    if (changed.some((entry) => lookup.get(entry.id)?.slug !== entry.slug))
+      throw new Error('News inventory changed during listing');
+    for (const post of await enrich(changed.map((entry) => lookup.get(entry.id)!), taxonomy, context)) fresh.set(post.id, post);
+  }
+  const value = entries.map((entry) => ({ id: entry.id, slug: entry.slug, modified: entry.modified, post: fresh.get(entry.id) ?? old.get(entry.id)!.post }));
+  if (!previous || Date.now() - previous.storedAt >= DURABLE_REWRITE_MS || JSON.stringify(previous.value) !== JSON.stringify(value)) {
+    const stored = { storedAt: Date.now(), value };
+    await kv.put(NEWS_RECENT_CARDS_KEY, JSON.stringify(stored), { expirationTtl: DURABLE_TTL_S });
+    cardsMemo.set(kv, { readAt: Date.now(), value: stored });
+  }
 }
 async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   const hit = memo.get(kv);
@@ -517,14 +564,42 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   }
   return entry;
 }
-export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> {
+export function refreshNewsIndex(context: NewsContext, scheduled = false): Promise<Entry[] | null> {
   const kv = newsKV(context);
   if (!kv) return Promise.reject(new Error('NEWS_INDEX binding required'));
   const pending = refreshing.get(kv);
   if (pending) return pending;
+  const commit = async (value: Entry[]) => {
+    const bytes = new TextEncoder().encode(JSON.stringify(value));
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = Array.from(new Uint8Array(digest), (byte) =>
+      byte.toString(16).padStart(2, '0'),
+    ).join('');
+    const previous = await readNewsIndex(kv);
+    const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
+    if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
+    await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
+    // (checked: 1 escrita/execução = 24/dia com cron horário)
+    memo.set(kv, { readAt: Date.now(), entry });
+    context.waitUntil(refreshRecentCards(kv, value, background(context)!).catch((error) => {
+      console.error(JSON.stringify({ event: 'news_recent_cards_refresh_failed', message: String(error) }));
+    }));
+    // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
+    return value;
+  };
   const task = (async () => {
+    // Cron: execução única por hora, sem contador nem lease no KV (2 escritas a menos).
+    if (scheduled) return commit(await buildNewsIndex(background(context)));
+    const quotaKey = NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10);
+    const used = (await kv.get<number>(quotaKey, 'json')) ?? 0;
+    if (used + REFRESH_WRITES > 500) {
+      console.error(JSON.stringify({ event: 'news_refresh_quota_exceeded', used }));
+      if (await readNewsIndex(kv)) return null;
+      return cached('index', context, () => buildNewsIndex(background(context)));
+    }
     const lock = await kv.get<number>(NEWS_INDEX_LOCK, 'json');
     if (lock && Date.now() - lock < LEASE_MS) return null;
+    await kv.put(quotaKey, JSON.stringify(used + REFRESH_WRITES), { expirationTtl: DURABLE_TTL_S });
     // KV não oferece compare-and-swap: lease distribuído best-effort + single-flight local.
     await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: LEASE_MS / 1000 });
     let value: Entry[];
@@ -539,18 +614,7 @@ export function refreshNewsIndex(context: NewsContext): Promise<Entry[] | null> 
         .catch(() => undefined);
       throw error;
     }
-    const bytes = new TextEncoder().encode(JSON.stringify(value));
-    const digest = await crypto.subtle.digest('SHA-256', bytes);
-    const hash = Array.from(new Uint8Array(digest), (byte) =>
-      byte.toString(16).padStart(2, '0'),
-    ).join('');
-    const previous = await readNewsIndex(kv);
-    const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
-    if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
-    await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
-    memo.set(kv, { readAt: Date.now(), entry });
-    // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
-    return value;
+    return commit(value);
   })().finally(() => refreshing.delete(kv));
   refreshing.set(kv, task);
   return task;
@@ -667,6 +731,16 @@ export async function newsPage(
   if (!entries.length)
     return { posts: [], total: index.length, totalPages: Math.ceil(index.length / perPage) };
   const ids = entries.map((entry) => entry.id);
+  const kv = newsKV(context);
+  const cards = kv && (await readRecentCards(kv));
+  if (cards) {
+    const lookup = new Map(cards.value.map((card) => [card.id, card]));
+    if (entries.every((entry) => {
+      const card = lookup.get(entry.id);
+      return card && card.slug === entry.slug && card.modified === entry.modified;
+    }))
+      return { posts: entries.map((entry) => lookup.get(entry.id)!.post), total: index.length, totalPages: Math.ceil(index.length / perPage) };
+  }
   const posts = await cached<WPPost[]>(`list/${ids.join(',')}`, context, async (scoped) => {
     const [response, taxonomy] = await Promise.all([
       request(
@@ -762,7 +836,7 @@ export async function newsApi(request: Request, base?: NewsContext): Promise<Res
           { status: 400, headers: { 'Cache-Control': 'no-store' } },
         );
       return Response.json(await searchNews(search, context), {
-        headers: { 'Cache-Control': 'public, max-age=300' },
+        headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=600' },
       });
     }
     const slug = url.searchParams.get('slug');

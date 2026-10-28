@@ -83,6 +83,31 @@
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
   --animate-border-beam: border-beam 6s linear infinite;
+  /* Contador do sino: pulso leve e halo dourado enquanto houver não lidas. */
+  --animate-notif-pulse: notif-pulse 2.4s ease-in-out infinite;
+  --animate-notif-halo: notif-halo 2.4s ease-out infinite;
+
+  @keyframes notif-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.08);
+    }
+  }
+
+  @keyframes notif-halo {
+    0% {
+      transform: scale(1);
+      opacity: 0.45;
+    }
+    70%,
+    100% {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
 
   @keyframes slide-up {
     from {
@@ -370,6 +395,18 @@
     --crfal-green-light: #e6f5ef;
     --crfal-gold: #c59b27;
 
+    /* Superfícies opacas; contraste WCAG (extremos, na ordem dos stops):
+       título #0b192c / descrição #566579: evento 17.35–15.54 / 5.84–5.23;
+       novidade 17.28–15.56 / 5.82–5.24; serviço 17.37–15.78 / 5.85–5.31;
+       notícia 17.24–15.48 / 5.80–5.21. Pílula #fff: 17.65–12.61;
+       badge #0b192c: 11.13–6.80. Interpolação sRGB entre stops opacos. */
+    --notif-grad-evento: linear-gradient(135deg, #fffdf7, #f7f0df);
+    --notif-grad-novidade: linear-gradient(135deg, #fafdff, #e8f2fa);
+    --notif-grad-servico: linear-gradient(135deg, #fbfefa, #e9f5ef);
+    --notif-grad-noticia: linear-gradient(135deg, #fcfcff, #edf0f8);
+    --notif-grad-pill: linear-gradient(135deg, #0b192c, #003366);
+    --notif-grad-badge: linear-gradient(135deg, #e8cb76, #c59b27);
+
     --crfal-gray: #f8fafc;
     --crfal-gray-medium: #e2e8f0;
     --crfal-gray-dark: #1e293b;
@@ -546,3 +583,15 @@
     line-height: 1.5;
   }
 }
+
+/* O mesmo acento por tipo acompanha o painel e os toasts. */
+[data-notification][data-kind="evento"] > div > div > article,
+[data-toast-card][data-kind="evento"] { background: var(--notif-grad-evento); }
+[data-notification][data-kind="novidade"] > div > div > article,
+[data-toast-card][data-kind="novidade"] { background: var(--notif-grad-novidade); }
+[data-notification][data-kind="servico"] > div > div > article,
+[data-toast-card][data-kind="servico"] { background: var(--notif-grad-servico); }
+[data-notification][data-kind="noticia"] > div > div > article,
+[data-toast-card][data-kind="noticia"] { background: var(--notif-grad-noticia); }
+[data-notification-pill] { background: var(--notif-grad-pill); }
+[data-bell-count] > span { background: var(--notif-grad-badge); }

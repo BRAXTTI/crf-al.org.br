@@ -32,7 +32,7 @@ export const serviceProfiles = [
   {
     id: 'cidadao', label: 'Cidadão', icon: UserRound, href: '/servicos/ouvidoria',
     description: 'Denúncias, transparência e informação sobre a fiscalização.',
-    action: 'Acessar a Ouvidoria',
+    action: 'Acesse a Ouvidoria',
     services: [
       { label: 'Ouvidoria: manifestações e denúncias', href: '/servicos/ouvidoria' },
       { label: 'Transparência e acesso à informação', href: TRANSPARENCIA_URL },

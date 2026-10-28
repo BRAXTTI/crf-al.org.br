@@ -4,6 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import HashScroll from './HashScroll';
 import Popup from '@/components/ui/popup';
+import ToastsGate from '@/features/notificacoes/ToastsGate';
 
 export default function Layout() {
   const { pathname } = useLocation();
@@ -24,6 +25,7 @@ export default function Layout() {
       </main>
       <Footer />
       <Popup />
+      <ToastsGate />
     </div>
   );
 }

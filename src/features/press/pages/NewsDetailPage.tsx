@@ -154,7 +154,7 @@ export default function NewsDetailPage() {
         <div className="container-crfal flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-2 sm:min-h-5">
           <nav
             aria-label="Breadcrumb"
-            className="flex flex-wrap items-center gap-2 text-xs text-crfal-gray-500 sm:text-sm"
+            className="flex flex-wrap items-center gap-2 text-xs text-crfal-gray-600 sm:text-sm"
           >
             <Link to="/" className="transition-colors hover:text-crfal-blue">Início</Link>
             <ChevronRight className="h-4 w-4" />
@@ -240,7 +240,7 @@ export default function NewsDetailPage() {
                       {autor}
                     </p>
                   )}
-                  <p className="text-xs text-crfal-gray-500 sm:text-sm">
+                  <p className="text-xs text-crfal-gray-600 sm:text-sm">
                     Publicado em {formatarDataHoraPublicacao(post.date)}
                   </p>
                 </div>
@@ -301,7 +301,7 @@ export default function NewsDetailPage() {
                           to={`/imprensa/noticias/${item.slug}`}
                           className="block p-3 rounded-xl border border-crfal-gray-200  hover:border-crfal-blue/40 transition-colors"
                         >
-                          <p className="text-xs text-crfal-gray-500  mb-1">{item.date}</p>
+                          <p className="text-xs text-crfal-gray-600  mb-1">{item.date}</p>
                           <p className="text-sm font-semibold text-neutral-800  line-clamp-2">{item.title}</p>
                         </Link>
                       ))}
