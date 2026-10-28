@@ -1,33 +1,15 @@
 import { Reveal } from '@/components/ui/reveal';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { NewsImage } from '@/components/ui/news-image';
 import { getPostCategory, getPostImageSet, stripHTML } from '@/services/wordpress/client';
 import { usePosts } from '@/services/wordpress/news-hooks';
-import type { WPPost } from '@/services/wordpress/types';
 import { formatDate } from '@/lib/maceio';
 
-const IMG_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect width='600' height='400' fill='%23E6F0F8'/%3E%3C/svg%3E";
 const GENERIC_CATEGORIES = new Set(['blog', 'geral', 'notícias', 'sem categoria']);
 const focusClass = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4';
 const motionClass = 'transition duration-300 motion-reduce:transition-none';
-
-function handleImageError(event: React.SyntheticEvent<HTMLImageElement>) {
-  event.currentTarget.onerror = null;
-  event.currentTarget.srcset = "";
-  event.currentTarget.src = IMG_FALLBACK;
-}
-
-/** Imagem inteira (as artes têm texto e proporções variadas) sobre um fundo desfocado da própria imagem. */
-function NewsImage({ post, sizes, className = '' }: { post: WPPost; sizes: string; className?: string }) {
-  const image = getPostImageSet(post);
-  const src = image?.src || IMG_FALLBACK;
-  return (
-    <div className={`relative isolate overflow-hidden bg-crfal-blue-dark ${className}`}>
-      <img src={src} srcSet={image?.srcSet} sizes={sizes} alt="" aria-hidden="true" loading="lazy" decoding="async" onError={handleImageError} className="absolute inset-0 -z-10 h-full w-full scale-150 object-cover opacity-60 blur-2xl" />
-      <img src={src} srcSet={image?.srcSet} sizes={sizes} alt="" loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-contain drop-shadow-lg group-hover:scale-[1.03] ${motionClass}`} />
-    </div>
-  );
-}
+const newsImageMotion = `drop-shadow-lg group-hover:scale-[1.03] ${motionClass}`;
 
 function NewsDate({ date }: { date: string }) {
   return (
@@ -88,7 +70,7 @@ export default function Publications() {
             <article>
               <Link to={`/imprensa/noticias/${featured.slug}`} className={`group flex h-full flex-col overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs hover:-translate-y-0.5 hover:shadow-xl hover:shadow-crfal-blue/10 motion-reduce:hover:translate-y-0 ${motionClass} ${focusClass}`}>
                 <div className="relative">
-                  <NewsImage post={featured} sizes="(max-width: 1023px) calc(100vw - 64px), (max-width: 1279px) 45vw, 560px" className="aspect-16/10" />
+                  <NewsImage image={getPostImageSet(featured)} sizes="(max-width: 1023px) calc(100vw - 64px), (max-width: 1279px) 45vw, 560px" className="aspect-16/10" imgClassName={newsImageMotion} />
                   <span className="absolute left-4 top-4 rounded-full bg-crfal-blue-dark px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-crfal-gold shadow-sm ring-1 ring-crfal-gold/40">Em destaque</span>
                 </div>
                 <div className="flex flex-1 flex-col items-start border-t-2 border-crfal-gold p-6 sm:p-8">
@@ -111,7 +93,7 @@ export default function Publications() {
                 <li key={`${post.newsSource}:${post.id}`} className="flex flex-1 py-2 first:pt-0 last:pb-0">
                   <article className="w-full">
                     <Link to={`/imprensa/noticias/${post.slug}`} className={`group -mx-3 flex h-full items-center gap-4 rounded-xl border border-transparent p-3 hover:border-crfal-gray-200 hover:bg-white hover:shadow-md hover:shadow-crfal-blue/5 sm:gap-5 ${motionClass} ${focusClass}`}>
-                      <NewsImage post={post} sizes="(max-width: 639px) 112px, 144px" className="aspect-4/3 w-28 shrink-0 rounded-lg sm:w-36" />
+                      <NewsImage image={getPostImageSet(post)} sizes="(max-width: 639px) 112px, 144px" className="aspect-4/3 w-28 shrink-0 rounded-lg sm:w-36" imgClassName={newsImageMotion} />
                       <div className="min-w-0 flex-1">
                         <NewsDate date={post.date} />
                         <h3 className="mt-1.5 line-clamp-3 text-[15px] font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue sm:text-base">{stripHTML(post.title.rendered)}</h3>
