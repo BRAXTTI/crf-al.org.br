@@ -455,6 +455,23 @@ try {
       await Promise.all(tasks);
     } finally { release(); globalThis.setTimeout = originalTimer; }
   }
+  // Uma carga compartilhada que nunca resolve expira e libera a chave para nova tentativa.
+  {
+    const oldFetch = globalThis.fetch; const oldTimer = globalThis.setTimeout;
+    let calls = 0;
+    try {
+      globalThis.setTimeout = (fn, ms, ...args) => oldTimer(fn, ms === API_BUDGET_MS ? 30 : ms, ...args);
+      globalThis.fetch = () => { calls++; return new Promise(() => {}); };
+      const ctx = { waitUntil() {} };
+      const first = newsPost('single-flight-travado', ctx);
+      const second = newsPost('single-flight-travado', ctx);
+      const results = await Promise.allSettled([first, second]);
+      assert.ok(results.every(result => result.status === 'rejected'));
+      assert.equal(calls, 2, 'Post e categorias são compartilhados');
+      globalThis.fetch = oldFetch;
+      assert.equal(await newsPost('single-flight-travado', ctx), null);
+    } finally { globalThis.fetch = oldFetch; globalThis.setTimeout = oldTimer; }
+  }
   // "Não encontrado" fica 5 min no cache local (sem escrita no KV); busca normalizada e limitada.
   {
     const local = new Map(); const previousCaches = globalThis.caches; const tasks = [];

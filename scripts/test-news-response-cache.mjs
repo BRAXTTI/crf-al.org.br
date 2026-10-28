@@ -43,10 +43,23 @@ try {
   assert.equal(await fast.text(), 'KV');
   globalThis.caches.default.match = match;
   const cachedPage = key('/imprensa/noticias/stale');
-  entries.set(cachedPage.url, new Response('reserva', { headers: { 'X-News-Cached-At': String(Date.now()) } }));
+  entries.set(cachedPage.url, new Response('<html>reserva</html>', { headers: { 'X-News-Cached-At': String(Date.now()) } }));
   globalThis.caches.default.match = async req => { await new Promise(resolve => setTimeout(resolve, 20)); return entries.get(req.url)?.clone(); };
   const preserved = await cachedNewsResponse(ctx, cachedPage, async () => new Response('erro', { status: 404 }), true);
-  assert.equal(await preserved.text(), 'reserva');
+  assert.equal(await preserved.text(), '<html>reserva</html>');
+  globalThis.caches.default.match = match;
+  // Entradas danificadas, inclusive streams que nunca fecham, são substituídas.
+  for (const [suffix, bad] of [
+    ['invalid', new Response('não é JSON', { headers: { 'X-News-Cached-At': String(Date.now()) } })],
+    ['stuck', new Response(new ReadableStream({ start(controller) { controller.enqueue(new TextEncoder().encode('{')); } }), { headers: { 'X-News-Cached-At': String(Date.now()) } })],
+  ]) {
+    const damaged = key(`/api/news?slug=${suffix}`);
+    globalThis.caches.default.match = async () => bad;
+    const result = await cachedNewsResponse(ctx, damaged, async () => Response.json({ repaired: true }));
+    assert.deepEqual(await result.json(), { repaired: true });
+    await Promise.all(tasks.splice(0));
+    assert.deepEqual(await entries.get(damaged.url).clone().json(), { repaired: true });
+  }
   globalThis.caches.default.match = match;
 } finally { globalThis.caches = saved; }
 console.log('Cache HTTP: chaves, isolamento de deploy, SWR e falhas validados.');

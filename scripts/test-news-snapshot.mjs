@@ -21,5 +21,12 @@ try {
   const start = Date.now();
   assert.equal((await newsPost(old.slug,ctx)).slug,old.slug);
   assert.ok(Date.now() - start < 1000, 'KV lento não bloqueia o snapshot');
+  // A mesma promise compartilhada de snapshot travada não prende as próximas chamadas.
+  const stuck = { ...ctx, next: () => new Promise(() => {}) };
+  const [a, b] = await Promise.all([
+    newsApi(new Request(`https://preview.example/api/news?slug=${old.slug}`), stuck),
+    newsApi(new Request(`https://preview.example/api/news?slug=${old.slug}`), stuck),
+  ]);
+  assert.equal(a.status, 503); assert.equal(b.status, 503);
 } finally { globalThis.fetch=saved; }
 console.log('Snapshot: detalhes históricos, página, busca e edição em KV sem WP.');

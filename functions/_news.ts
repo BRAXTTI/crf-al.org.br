@@ -66,6 +66,10 @@ export function withNewsBudget(context: NewsContext, ms: number, retry: boolean)
 function background(context?: NewsContext): NewsContext | undefined {
   return context && { env: context.env, waitUntil: (promise) => context.waitUntil(promise) };
 }
+function boundedNews<T>(task: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  return Promise.race([task, new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new DOMException('News timeout', 'TimeoutError')), ms); })]).finally(() => clearTimeout(timer));
+}
 interface PublicCache {
   match: (request: Request) => Promise<Response | undefined>;
   put: (request: Request, response: Response) => Promise<void>;
@@ -236,12 +240,14 @@ async function cachedLoad<T>(
     }
     await Promise.all([cache && putLocal(value), kv && storeDurable(kv, key, value, previous)]);
   };
-  let entry = await readLocal<T>(cache, request);
+  let entry = await boundedNews(readLocal<T>(cache, request), 150).catch(() => undefined);
+  if (entry && (typeof entry.storedAt !== 'number' || !('value' in entry))) entry = undefined;
   // "Não encontrado" não tem stale-while-revalidate: após 5 min consulta a origem de novo.
   if (entry?.value === null && Date.now() - entry.storedAt > NOT_FOUND_S * 1000) entry = undefined;
   let fromDurable = false;
   if (!entry && kv) {
-    entry = (await kv.get<Stored<T>>(durableKey(key), 'json')) ?? undefined;
+    entry = (await boundedNews(kv.get<Stored<T>>(durableKey(key), 'json'), 150).catch(() => null)) ?? undefined;
+    if (entry && (typeof entry.storedAt !== 'number' || !('value' in entry))) entry = undefined;
     fromDurable = Boolean(entry);
   }
   if (entry) {
@@ -251,11 +257,11 @@ async function cachedLoad<T>(
       (fromDurable || Date.now() - (stale.checkedAt ?? stale.storedAt) > freshMs) &&
       !revalidating.has(scopeKey)
     ) {
-      const task = (async () => {
+      const task = boundedNews((async () => {
         if (cache) await putLocal(stale.value, stale.storedAt, Date.now());
         // Reserva lida do KV evita uma segunda leitura; vinda do cache local, confere o KV.
         await persist(await load(background(context)), kv && !fromDurable ? undefined : stale);
-      })()
+      })(), API_BUDGET_MS)
         .catch(() => undefined)
         .finally(() => revalidating.delete(scopeKey));
       revalidating.set(scopeKey, task);
@@ -265,7 +271,7 @@ async function cachedLoad<T>(
   }
   const value = await load(context);
   if (cache || (kv && value !== null))
-    await persist(value, kv ? (entry ?? null) : undefined).catch(() => undefined);
+    await boundedNews(persist(value, kv ? (entry ?? null) : undefined), 150).catch(() => undefined);
   return value;
 }
 // Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
@@ -279,7 +285,7 @@ function cached<T>(
   const scopeKey = `${originScope(context)}/${key}`;
   const pending = loading.get(scopeKey);
   if (pending) return pending as Promise<T>;
-  const task = cachedLoad(key, context, load, options).finally(() => loading.delete(scopeKey));
+  const task = boundedNews(cachedLoad(key, context, load, options), API_BUDGET_MS).finally(() => loading.delete(scopeKey));
   loading.set(scopeKey, task);
   return task;
 }
@@ -605,7 +611,7 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false, snapsh
     // Em caso de sucesso o lease segue até expirar, cobrindo a propagação do KV.
     return value;
   };
-  const task = (async () => {
+  const task = boundedNews((async () => {
     // Cron: execução única por hora, sem contador nem lease no KV (2 escritas a menos).
     if (scheduled) return commit(await buildNewsIndex(background(context)));
     const quotaKey = NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10);
@@ -633,7 +639,7 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false, snapsh
       throw error;
     }
     return commit(value);
-  })().finally(() => refreshing.delete(kv));
+  })(), scheduled ? 120_000 : API_BUDGET_MS).finally(() => refreshing.delete(kv));
   refreshing.set(kv, task);
   return task;
 }
@@ -707,9 +713,9 @@ function snapshotAvailable(context?: NewsContext): boolean {
 async function snapshotAsset<T>(context: NewsContext, path: string): Promise<T | null> {
   const url = new URL(`/news-snapshot/${path}`, context.request!.url);
   const start = performance.now();
-  const response = await context.next!(new Request(url));
+  const response = await boundedNews(context.next!(new Request(url)), 1000);
   if (!response.ok || !response.headers.get('content-type')?.includes('json')) return null;
-  const value = await response.json() as T;
+  const value = await boundedNews(response.json(), 1000) as T;
   if (context.timings) context.timings.asset = (context.timings.asset || 0) + performance.now() - start;
   return value;
 }
@@ -735,11 +741,14 @@ async function snapshotPost(slug: string, context: NewsContext): Promise<WPPost 
   const row = /^\d+$/.test(slug) ? byOldId.get(Number(slug)) : bySlug.get(slug) || byNewSlug.get(slug);
   const canonical = row?.slug ?? slug;
   const kv = newsKV(context);
-  const [stored, asset] = await Promise.all([
+  const [stored, assetResult] = await Promise.all([
     kv ? boundedKV(kv.get<Stored<WPPost>>(durableKey(postKey(canonical)), { type: 'json', cacheTtl: 60 }), null, context) : null,
-    snapshotAsset<WPPost>(context, `posts/${encodeURIComponent(canonical)}.json`),
+    snapshotAsset<WPPost>(context, `posts/${encodeURIComponent(canonical)}.json`).then(value => ({ value }), error => ({ error })),
   ]);
-  return stored?.value && (!asset || (stored.value.modified || '') >= (asset.modified || '')) ? stored.value : asset;
+  const valid = stored?.value && typeof stored.value.slug === 'string' && typeof stored.value.title?.rendered === 'string' ? stored.value : null;
+  if ('error' in assetResult && !valid) throw assetResult.error;
+  const asset = 'value' in assetResult ? assetResult.value : null;
+  return valid && (!asset || (valid.modified || '') >= (asset.modified || '')) ? valid : asset;
 }
 async function snapshotListing(context: NewsContext): Promise<WPPost[]> {
   const cards = await snapshotCards(context);

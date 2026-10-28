@@ -212,6 +212,19 @@ try {
   assert.equal(fetches, beforeLegacy, 'Rotas legadas e slug desconhecido não consultam WordPress');
 
   origin = () => Response.json([]);
+  // Um stream do HTMLRewriter que nunca fecha não impede o envio do shell.
+  {
+    const Rewriter = globalThis.HTMLRewriter;
+    globalThis.HTMLRewriter = class { on() { return this; } transform(response) {
+      return new Response(new ReadableStream({ start() {} }), response);
+    } };
+    try {
+      const result = await request('/imprensa/noticias/teste-stream-pendente');
+      assert.equal(result.status, 200);
+      assert.equal(result.headers.get('Cache-Control'), 'no-store');
+      assert.match(await result.text(), /<html/i);
+    } finally { globalThis.HTMLRewriter = Rewriter; }
+  }
   await expectMissing('/imprensa/noticias/noticia-inexistente');
   await expectMissing('/eventos/evento-inexistente');
   origin = () => new Response('', { status: 404 });
