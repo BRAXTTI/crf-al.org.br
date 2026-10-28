@@ -691,6 +691,97 @@ function NotificationCard({
   );
 }
 
+/**
+ * Versão compacta do card para os toasts do carregamento (banner estilo iOS): mesmo
+ * ícone com anel de chegada, rótulo de origem e título do feed, sem o detalhe animado.
+ * `behind`: card de trás na pilha (só a "placa" aparece; nada focável).
+ */
+export function NotificationToastCard({
+  item,
+  play,
+  reduced,
+  behind = false,
+  onOpen,
+  onNavigate,
+  onDismiss,
+}: {
+  item: LiveNotification;
+  play: number;
+  reduced: boolean;
+  behind?: boolean;
+  onOpen: () => void;
+  onNavigate?: (href: string) => void;
+  onDismiss: () => void;
+}) {
+  const accentScope = { color: item.accent };
+  const accentClass = item.accent ? undefined : "text-crfal-blue";
+  return (
+    <article
+      data-toast-card={item.id}
+      data-kind={item.kind}
+      aria-label={`${item.app}: ${item.title}`}
+      aria-hidden={behind || undefined}
+      inert={behind || undefined}
+      className={cx(
+        "group relative isolate overflow-hidden rounded-[22px] border border-white/70 bg-white/95 p-3 pr-10 text-crfal-gray-800 backdrop-blur-xl",
+        "shadow-[0_1px_2px_rgba(15,23,42,0.06),0_18px_40px_-18px_rgba(11,25,44,0.5)] ring-1 ring-crfal-gray-200/70",
+      )}
+    >
+      <span aria-hidden className="pointer-events-none absolute inset-x-6 top-0 -z-10 h-px bg-linear-to-r/srgb from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
+      <span aria-hidden className="pointer-events-none absolute -right-10 -top-12 -z-10 size-28 rounded-full bg-crfal-blue-light/10 blur-2xl" />
+      <div className={cx("flex gap-3", !reduced && "transition-opacity duration-200", behind && "opacity-0")}>
+        <AppTile kind={item.kind} accent={item.accent} play={play} delay={STORY_DELAY_MS} reduced={reduced} />
+        <div className="min-w-0 flex-1">
+          <div className="flex h-4 items-center gap-1.5 text-xs leading-4 text-crfal-gray-600">
+            <span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]" style={accentScope}>
+              <span className={accentClass}>{item.app}</span>
+            </span>
+            <span aria-hidden className="text-crfal-gold">·</span>
+            <span className="shrink-0 tabular-nums">{item.time ?? "agora"}</span>
+          </div>
+          {item.href ? (
+            <a
+              href={item.href}
+              data-open
+              draggable={false}
+              onClick={(event) => {
+                onOpen();
+                if (!onNavigate || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                onNavigate(item.href!);
+              }}
+              className={cx(OPEN_CLASS, "line-clamp-2 font-bold focus-visible:after:ring-offset-white")}
+            >
+              {item.title}
+            </a>
+          ) : (
+            <button type="button" data-open onClick={onOpen} className={cx(OPEN_CLASS, "line-clamp-2 font-bold focus-visible:after:ring-offset-white")}>
+              {item.title}
+            </button>
+          )}
+          {item.body && <p className="mt-0.5 line-clamp-1 text-[13px] leading-normal text-crfal-gray-600">{item.body}</p>}
+        </div>
+      </div>
+      <button
+        type="button"
+        data-dismiss
+        aria-label={`Fechar aviso: ${item.title}`}
+        onClick={(event) => {
+          event.stopPropagation();
+          onDismiss();
+        }}
+        className={cx(
+          "absolute right-2 top-2 z-[2] grid size-7 place-items-center rounded-full text-crfal-gray-600 transition-[background-color,color,opacity] hover:bg-crfal-blue-lighter hover:text-crfal-blue pointer-coarse:before:absolute pointer-coarse:before:-inset-1.5 pointer-coarse:before:content-['']",
+          FOCUS_RING,
+          behind && "opacity-0",
+        )}
+      >
+        <Icon d={CLOSE} className="size-3.5" />
+      </button>
+    </article>
+  );
+}
+
 /* 32px com mouse, 44px em telas de toque. */
 const HEADER_BUTTON = cx(
   "inline-flex h-8 items-center rounded-full px-3 text-xs font-semibold text-crfal-blue pointer-coarse:h-11 transition-colors hover:bg-crfal-blue-lighter disabled:pointer-events-none disabled:text-crfal-gray-500 disabled:opacity-60",
