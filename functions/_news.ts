@@ -568,7 +568,13 @@ async function refreshRecentCards(kv: KVNamespace, index: Entry[], context: News
       throw new Error('News inventory changed during listing');
     for (const post of await enrich(changed.map((entry) => lookup.get(entry.id)!), taxonomy, context)) fresh.set(post.id, post);
   }
-  const value = entries.map((entry) => ({ id: entry.id, slug: entry.slug, modified: entry.modified, post: fresh.get(entry.id) ?? old.get(entry.id)!.post }));
+  const value = entries.map((entry) => {
+    const post = fresh.get(entry.id) ?? old.get(entry.id)!.post;
+    const cover = !post._embedded?.['wp:featuredmedia']?.length && legacyCover(post.featured_media);
+    return { id: entry.id, slug: entry.slug, modified: entry.modified, post: cover
+      ? { ...post, _embedded: { ...post._embedded, 'wp:featuredmedia': [cover] } }
+      : post };
+  });
   if (!previous || Date.now() - previous.storedAt >= DURABLE_REWRITE_MS || JSON.stringify(previous.value) !== JSON.stringify(value)) {
     const stored = { storedAt: Date.now(), value };
     await kv.put(NEWS_RECENT_CARDS_KEY, JSON.stringify(stored), { expirationTtl: DURABLE_TTL_S });

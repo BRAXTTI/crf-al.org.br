@@ -175,6 +175,26 @@ try {
       assert.equal(writes.filter(row => row.key === NEWS_RECENT_CARDS_KEY).length - before, Number(shouldWrite));
       assert.ok(Array.isArray(JSON.parse(values.get(NEWS_RECENT_CARDS_KEY)).value));
     }
+    // Cron migra cartões antigos sem imagem mesmo quando modified e slug não mudaram.
+    const legacyCards = structuredClone(originalCards);
+    legacyCards.storedAt = Date.now();
+    legacyCards.value[0].post.featured_media = 16032;
+    delete legacyCards.value[0].post._embedded['wp:featuredmedia'];
+    legacyCards.value[1].post.featured_media = 16032; // Uma imagem real já incorporada prevalece.
+    legacyCards.value[2].post.featured_media = 55; // Sem capa legada, continua sem imagem.
+    delete legacyCards.value[2].post._embedded['wp:featuredmedia'];
+    values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify(legacyCards));
+    clearNewsIndexMemo(kv); requests = [];
+    const beforeMigration = writes.filter(row => row.key === NEWS_RECENT_CARDS_KEY).length;
+    await refreshNewsIndex(context, true); await Promise.all(pending.splice(0));
+    const migrated = JSON.parse(values.get(NEWS_RECENT_CARDS_KEY));
+    assert.equal(migrated.value[0].post._embedded['wp:featuredmedia'][0].source_url, legacyCover(16032).source_url);
+    assert.deepEqual(migrated.value[1].post._embedded['wp:featuredmedia'], legacyCards.value[1].post._embedded['wp:featuredmedia']);
+    assert.equal(migrated.value[2].post._embedded['wp:featuredmedia'], undefined);
+    assert.equal(requests.filter(url => url.searchParams.has('include')).length, 0);
+    assert.equal(writes.filter(row => row.key === NEWS_RECENT_CARDS_KEY).length - beforeMigration, 1);
+    await refreshNewsIndex(context, true); await Promise.all(pending.splice(0));
+    assert.equal(writes.filter(row => row.key === NEWS_RECENT_CARDS_KEY).length - beforeMigration, 1, 'Migração não repete escrita');
     values.set(NEWS_RECENT_CARDS_KEY, JSON.stringify(originalCards));
     const savedIndex = values.get(NEWS_INDEX_KEY);
     const indexEntry = JSON.parse(savedIndex);
