@@ -35,7 +35,7 @@ function VideoDemonstracao({ secao }: { secao: ManualSecao }) {
         setCarregar(true);
         perto.disconnect();
       }
-    }, { rootMargin: '300px 0px' });
+    }, { rootMargin: '100px 0px' });
     const visivel = new IntersectionObserver(([entry]) => {
       if (reduzido) return;
       if (entry.isIntersecting) video.play().catch(() => {});
@@ -66,8 +66,8 @@ function VideoDemonstracao({ secao }: { secao: ManualSecao }) {
       muted
       loop
       playsInline
-      // Só metadados: o download completo (até ~5 MB por vídeo) começa ao tocar.
-      preload="metadata"
+      // Nada antes do src; depois, só metadados: o download completo (até ~5 MB por vídeo) começa ao tocar.
+      preload={carregar ? 'metadata' : 'none'}
       controls={reduzido}
       className="block aspect-4/3 h-auto w-full rounded-xl bg-crfal-blue-lighter/40 object-cover shadow-xs"
     />
