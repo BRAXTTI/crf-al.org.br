@@ -73,7 +73,7 @@ export default function ServiceProfiles() {
           })}
         </div>
 
-        <div className="grid gap-5 min-[981px]:grid-cols-3 min-[981px]:grid-rows-[auto_auto_1fr_auto] min-[981px]:gap-x-6 min-[981px]:gap-y-0">
+        <div className="grid gap-5 min-[981px]:grid-cols-3 min-[981px]:grid-rows-[auto_auto_1fr] min-[981px]:gap-x-6 min-[981px]:gap-y-0">
           {serviceProfiles.map((profile, indice) => {
             const Icon = profile.icon;
             return (
@@ -83,8 +83,8 @@ export default function ServiceProfiles() {
                 id={`services-panel-${profile.id}`}
                 role="tabpanel"
                 aria-labelledby={`services-tab-${profile.id}`}
-                style={{ backgroundImage: `linear-gradient(to top, rgb(11 25 44 / 0.55), rgb(11 25 44 / 0) 32%), url(/images/servicos-card-${profile.id}.webp?v=37)` }}
-                className={`max-[980px]:[--reveal-delay:0ms]! relative isolate grid-rows-[auto_auto_auto_1fr] gap-0 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue-dark bg-cover bg-bottom bg-no-repeat p-6 text-white shadow-lg shadow-crfal-blue/10 sm:p-8 min-[981px]:row-span-4 min-[981px]:grid min-[981px]:grid-rows-subgrid ${profile.id === perfil ? 'grid' : 'hidden'}`}
+                style={{ backgroundImage: `linear-gradient(to top, rgb(11 25 44 / 0.55), rgb(11 25 44 / 0) 32%), url(/images/servicos-card-${profile.id}.webp?v=40)` }}
+                className={`max-[980px]:[--reveal-delay:0ms]! relative isolate grid-rows-[auto_auto_1fr] gap-0 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue-dark bg-cover bg-bottom bg-no-repeat p-6 text-white shadow-lg shadow-crfal-blue/10 sm:p-8 min-[981px]:row-span-3 min-[981px]:grid min-[981px]:grid-rows-subgrid ${profile.id === perfil ? 'grid' : 'hidden'}`}
               >
                 <div className="flex items-center gap-4">
                     <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40">
@@ -97,7 +97,7 @@ export default function ServiceProfiles() {
                   </div>
                   <p className="mt-4 text-sm leading-relaxed text-white/82">{profile.description}</p>
 
-                  <ul className="mt-6 mb-6 self-start divide-y divide-white/15 border-y border-white/15">
+                  <ul className="mt-6 self-start divide-y divide-white/15 border-y border-white/15">
                     {profile.services.map(service => {
                       const external = service.href.startsWith('https:');
                       const Arrow = external ? ArrowUpRight : ChevronRight;
@@ -118,16 +118,6 @@ export default function ServiceProfiles() {
                       );
                     })}
                   </ul>
-
-                <div className="self-end">
-                  <Link
-                    to={profile.href}
-                    className="group inline-flex min-h-11 w-full items-center justify-between gap-3 rounded-full bg-white px-5 py-3 text-sm font-bold text-[#003366] shadow-sm transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-white motion-reduce:transition-none"
-                  >
-                    {profile.action}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true" />
-                  </Link>
-                </div>
               </Reveal>
             );
           })}

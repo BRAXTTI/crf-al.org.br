@@ -8,7 +8,6 @@ export const serviceProfiles = [
   {
     id: 'empresas', label: 'Empresas', icon: Building2, href: corporate,
     description: 'Registro, responsabilidade técnica e regularização de estabelecimentos.',
-    action: 'Requerimentos para Empresas',
     services: [
       { label: 'Registro de estabelecimentos', href: `${corporate}&categoria=registro-inicial` },
       { label: 'Responsabilidade técnica', href: `${corporate}&categoria=responsabilidade-tecnica` },
@@ -20,7 +19,6 @@ export const serviceProfiles = [
   {
     id: 'farmaceuticos', label: 'Farmacêuticos', icon: PillBottle, href: individual,
     description: 'Inscrição, certidões e serviços da sua vida profissional.',
-    action: 'Requerimentos para Farmacêuticos',
     services: [
       { label: 'Inscrições profissionais', href: `${individual}&categoria=inscricoes-pf` },
       { label: 'Carteira profissional e certidões', href: `${individual}&categoria=carteira-certidoes-pf` },
@@ -32,7 +30,6 @@ export const serviceProfiles = [
   {
     id: 'cidadao', label: 'Cidadão', icon: UserRound, href: '/servicos/ouvidoria',
     description: 'Denúncias, transparência e informação sobre a fiscalização.',
-    action: 'Acesse a Ouvidoria',
     services: [
       { label: 'Ouvidoria: manifestações e denúncias', href: '/servicos/ouvidoria' },
       { label: 'Transparência e acesso à informação', href: TRANSPARENCIA_URL },
