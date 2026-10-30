@@ -30,4 +30,9 @@ export const SETOR_CONTATOS = {
 } as const;
 export const EXPEDIENTE = { abre: 9, fecha: 17, dias: 'Segunda a sexta' } as const;
 export const HORARIO_ATENDIMENTO = `${EXPEDIENTE.dias}, das ${EXPEDIENTE.abre}h às ${EXPEDIENTE.fecha}h`;
+/** Dias sem expediente (feriados, pontos facultativos), com data YYYY-MM-DD no horário de Maceió. */
+export type DiaSemExpediente = { data: string; motivo?: string };
+export const DIAS_SEM_EXPEDIENTE: DiaSemExpediente[] = [
+  { data: '2026-10-30', motivo: 'sem expediente' },
+];
 export const telefoneHref = (telefone: string) => `tel:+55${telefone.replace(/\D/g, '')}`;
