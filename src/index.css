@@ -567,21 +567,22 @@
 [data-bell-count] > span { background: var(--notif-grad-badge); }
 
 /*
-  Banner de novidades: chega em 260ms desacelerando, da borda de baixo no celular e de sob o
-  cabeçalho no desktop, e sai mais rápido (160ms, igual a SAIDA_MS) acelerando de volta.
-  Só `transform` e `opacity`: fixo e sem efeito no layout. Movimento reduzido: só esmaece; a
-  especificidade do seletor vence a regra global que zera `animation-duration`.
+  Banner de novidades: dentro do cabeçalho, chega em 260ms desacelerando, 6px de cima, e sai
+  mais rápido (160ms, igual a SAIDA_MS) acelerando de volta. Só `transform` e `opacity`: fixo e
+  sem efeito no layout. Movimento reduzido: só esmaece; a especificidade do seletor vence a
+  regra global que zera `animation-duration`.
 */
 [data-notification-banner] {
-  --banner-desde: 16px;
+  --banner-desde: -6px;
   animation: banner-entrada 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 [data-notification-banner][data-state="saindo"] {
   pointer-events: none;
   animation: banner-saida 160ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
-@media (min-width: 1024px) {
-  [data-notification-banner] { --banner-desde: -12px; }
+/* Abaixo de 768px, o banner só cabe no lugar do logo, que volta quando ele sai. */
+@media (max-width: 767.98px) {
+  header:has([data-notification-banner]) [data-site-logo] { visibility: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   [data-notification-banner] {

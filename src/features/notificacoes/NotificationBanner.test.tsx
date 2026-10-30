@@ -109,17 +109,51 @@ describe('NotificationBanner', () => {
     expect(banner().dataset.state).toBe('saindo');
   });
 
-  it('rolar a página o tira do caminho', () => {
-    montar();
+  describe('ao rolar', () => {
     const rolar = (y: number) => act(() => {
       Object.defineProperty(window, 'scrollY', { value: y, configurable: true });
       window.dispatchEvent(new Event('scroll'));
     });
-    rolar(40);
-    expect(banner().dataset.state).toBe('visivel');
-    rolar(120);
-    expect(banner().dataset.state).toBe('saindo');
-    rolar(0);
+    const largura = (px: number) => Object.defineProperty(window, 'innerWidth', { value: px, configurable: true });
+
+    afterEach(() => {
+      Object.defineProperty(window, 'scrollY', { value: 0, configurable: true });
+      largura(1024);
+    });
+
+    it('abaixo do desktop, sai depois de 80px', () => {
+      largura(800);
+      montar();
+      rolar(40);
+      expect(banner().dataset.state).toBe('visivel');
+      rolar(120);
+      expect(banner().dataset.state).toBe('saindo');
+    });
+
+    it('no desktop, sai quando a faixa utilitária recolhe, mesmo com foco', () => {
+      document.body.innerHTML = '<div data-notification-bell><button type="button" id="sino">Sino</button></div>';
+      const sino = document.getElementById('sino')!;
+      vi.spyOn(sino, 'getBoundingClientRect').mockReturnValue({ width: 44 } as DOMRect);
+      montar();
+      act(() => document.querySelector<HTMLElement>('[data-banner-close]')!.focus());
+      rolar(8);
+      expect(banner().dataset.state).toBe('visivel');
+      rolar(9);
+      expect(banner().dataset.state).toBe('saindo');
+      expect(document.activeElement).toBe(sino);
+    });
+
+    it('no desktop, não aparece com a faixa já recolhida', () => {
+      Object.defineProperty(window, 'scrollY', { value: 300, configurable: true });
+      montar();
+      expect(onFim).toHaveBeenCalledOnce();
+    });
+  });
+
+  it('fica dentro do cabeçalho, sobre espaço livre', () => {
+    document.body.innerHTML = '<header id="cabecalho"></header>';
+    montar();
+    expect(banner().parentElement?.id).toBe('cabecalho');
   });
 
   it('não aparece com um diálogo aberto', () => {

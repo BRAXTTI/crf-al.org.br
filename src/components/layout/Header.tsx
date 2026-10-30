@@ -182,6 +182,7 @@ export default function Header() {
 
             <Link
               to="/"
+              data-site-logo
               onClick={handleLogoClick}
               className="group absolute left-1/2 flex max-w-[calc(100%-14rem)] -translate-x-1/2 items-center rounded-lg py-1.5 focus-visible:outline-white lg:static lg:max-w-none lg:shrink-0 lg:translate-x-0 lg:p-0 lg:focus-visible:outline-crfal-blue"
             >

@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Bell, X } from 'lucide-react';
 import { marcarMostradas } from './estado';
 import { EVENTO_BANNER_FIM, EVENTO_NOVIDADE, abrirPainel, bannerBloqueado, marcarSessaoBanner, observarSinal, lerSinal } from './sinal';
 
 /*
   Banner único de novidades: avisa que há o que ver, sem listar o conteúdo, que fica só no
-  painel do sino. Sobe da borda de baixo no celular e desce de sob o cabeçalho no desktop,
-  perto do sino. A animação é CSS (`[data-notification-banner]` em src/index.css).
+  painel do sino. Mora dentro do cabeçalho, em espaço livre, para nunca cobrir controles nem
+  títulos da página: na faixa utilitária no desktop; abaixo disso, no vão entre o menu e o
+  sino (abaixo de 768px o vão só existe com o logo oculto, ver `[data-site-logo]` em
+  src/index.css). A animação é CSS (`[data-notification-banner]` em src/index.css).
 
   Some sozinho depois de VISIVEL_MS (pausa com ponteiro, foco ou aba oculta; ao retomar,
-  pelo menos RETOMADA_MS) e assim que o visitante rola a página (ROLAGEM_PX), porque fica
-  sobre o conteúdo e não pode atrapalhar o que está por baixo. O sino continua com o contador.
+  pelo menos RETOMADA_MS) e ao rolar a página: no desktop assim que a faixa utilitária recolhe
+  (FAIXA_RECOLHE_PX), abaixo disso depois de ROLAGEM_PX. O sino continua com o contador.
 */
 
 const VISIVEL_MS = 8000;
@@ -19,7 +22,10 @@ const RETOMADA_MS = 2000;
 const SAIDA_MS = 160;
 /** A região viva precisa existir antes do texto para o leitor de tela anunciar. */
 const ANUNCIO_MS = 150;
-const RESPIRO_PX = 10;
+/** Mesma largura do `lg` e do menu móvel do cabeçalho. */
+const DESKTOP_PX = 1024;
+/** Igual ao limite de `scrolled` do cabeçalho: depois disso a faixa utilitária recolhe. */
+const FAIXA_RECOLHE_PX = 8;
 /** Rolagem que tira o banner do caminho (menos que isso pode ser só um toque impreciso). */
 const ROLAGEM_PX = 80;
 
@@ -28,7 +34,7 @@ function sinoVisivel() {
   return [...document.querySelectorAll<HTMLElement>('[data-notification-bell] > button')].find((botao) => botao.getBoundingClientRect().width > 0);
 }
 
-const medirTopo = () => Math.round(document.querySelector('header')?.getBoundingClientRect().bottom ?? 0) + RESPIRO_PX;
+const faixaRecolhida = () => window.innerWidth >= DESKTOP_PX && window.scrollY > FAIXA_RECOLHE_PX;
 
 interface NotificationBannerProps {
   /** Candidatas do portão: ficam como já avisadas assim que o banner aparece. */
@@ -41,7 +47,6 @@ interface NotificationBannerProps {
 export default function NotificationBanner({ ids, naoLidas, onFim }: NotificationBannerProps) {
   const [saindo, setSaindo] = useState(false);
   const [aviso, setAviso] = useState('');
-  const [topo, setTopo] = useState(medirTopo);
   const [ponteiro, setPonteiro] = useState(false);
   const [foco, setFoco] = useState(false);
   const [oculta, setOculta] = useState(() => document.hidden);
@@ -62,11 +67,11 @@ export default function NotificationBanner({ ids, naoLidas, onFim }: Notificatio
     onFim();
   }, [onFim]);
 
-  // Bloqueado ao montar (pop-up ou menu abriram enquanto os dados chegavam): nada aparece e a sessão não conta.
+  // Bloqueado ao montar (pop-up ou menu abriram enquanto os dados chegavam, ou a faixa do desktop já recolheu): nada aparece e a sessão não conta.
   useLayoutEffect(() => {
     if (iniciou.current) return;
     iniciou.current = true;
-    if (bannerBloqueado()) return terminar();
+    if (bannerBloqueado() || faixaRecolhida()) return terminar();
     marcarSessaoBanner();
     marcarMostradas(ids);
     window.dispatchEvent(new Event(EVENTO_NOVIDADE));
@@ -116,26 +121,23 @@ export default function NotificationBanner({ ids, naoLidas, onFim }: Notificatio
     };
   }, [fechar]);
 
-  // Desktop: o topo acompanha o cabeçalho (a faixa utilitária recolhe ao rolar).
   useEffect(() => {
-    let quadro = 0;
     const inicio = window.scrollY;
     const atualizar = () => {
+      // Sem a faixa utilitária não há onde ficar: sai mesmo com foco, que volta para o sino.
+      if (faixaRecolhida()) return fechar();
       // Com foco de teclado dentro do banner, a rolagem não o tira de baixo do visitante.
-      if (Math.abs(window.scrollY - inicio) > ROLAGEM_PX && !raizRef.current?.contains(document.activeElement)) setSaindo(true);
-      cancelAnimationFrame(quadro);
-      quadro = requestAnimationFrame(() => setTopo(medirTopo()));
+      if (window.innerWidth < DESKTOP_PX && Math.abs(window.scrollY - inicio) > ROLAGEM_PX && !raizRef.current?.contains(document.activeElement)) setSaindo(true);
     };
     window.addEventListener('scroll', atualizar, { passive: true });
     window.addEventListener('resize', atualizar);
     return () => {
-      cancelAnimationFrame(quadro);
       window.removeEventListener('scroll', atualizar);
       window.removeEventListener('resize', atualizar);
     };
-  }, []);
+  }, [fechar]);
 
-  return (
+  const conteudo = (
     <>
       <p role="status" aria-live="polite" className="sr-only">
         {aviso}
@@ -146,8 +148,8 @@ export default function NotificationBanner({ ids, naoLidas, onFim }: Notificatio
         aria-label="Aviso de novidades"
         data-notification-banner
         data-state={saindo ? 'saindo' : 'visivel'}
-        className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-[432px] items-center overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-[0_12px_32px_-12px_rgba(11,25,44,0.45)] lg:inset-x-auto lg:bottom-auto lg:right-[max(2rem,calc((100vw_-_80rem)/2_+_2rem))] lg:top-(--banner-topo) lg:mx-0 lg:w-[320px] lg:transition-[top] lg:duration-300 motion-reduce:transition-none"
-        style={{ '--banner-topo': `${topo}px` } as React.CSSProperties}
+        // Larguras do menu (44px) e do sino com a busca (88px), mais 2px de respiro; no desktop, antes das redes sociais.
+        className="fixed left-[calc(1rem+46px)] right-[calc(1rem+90px)] top-2.5 z-10 mx-auto flex h-11 w-fit items-stretch overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-[0_8px_20px_-10px_rgba(11,25,44,0.5)] sm:left-[calc(1.5rem+46px)] sm:right-[calc(1.5rem+90px)] md:left-auto md:mx-0 lg:right-[calc(max(2rem,calc((100vw_-_80rem)/2_+_2rem))+8rem)] lg:top-0.5 lg:h-7 lg:rounded-lg lg:shadow-none"
         onPointerEnter={(event) => event.pointerType !== 'touch' && setPonteiro(true)}
         onPointerLeave={() => setPonteiro(false)}
         onFocus={() => setFoco(true)}
@@ -163,26 +165,25 @@ export default function NotificationBanner({ ids, naoLidas, onFim }: Notificatio
             setSaindo(true);
             abrirPainel();
           }}
-          className="group flex min-h-14 min-w-0 flex-1 items-center gap-3 py-2 pl-3 pr-1 text-left transition-colors hover:bg-crfal-blue-lighter/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-crfal-blue"
+          className="group flex min-w-0 flex-1 items-center gap-2 pl-2.5 pr-0.5 text-left whitespace-nowrap transition-colors hover:bg-crfal-blue-lighter/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-crfal-blue"
         >
-          <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-crfal-blue-lighter text-crfal-blue">
-            <Bell className="size-[18px]" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-sm font-bold leading-5 text-crfal-blue-dark">Há novidades no site</span>
-            <span className="block text-[13px] font-semibold leading-[18px] text-crfal-blue tabular-nums group-hover:underline">Ver {texto}</span>
-          </span>
+          <Bell aria-hidden className="hidden size-3.5 shrink-0 text-crfal-blue lg:block" />
+          <span className="hidden text-[13px] font-bold text-crfal-blue-dark lg:inline">Há novidades no site</span>
+          <span className="truncate text-[13px] font-semibold text-crfal-blue tabular-nums group-hover:underline">Ver {texto}</span>
         </button>
         <button
           type="button"
           data-banner-close
           aria-label="Fechar aviso de novidades"
           onClick={fechar}
-          className="mr-1 grid size-11 shrink-0 place-items-center rounded-xl text-crfal-gray-600 transition-colors hover:bg-crfal-blue-lighter hover:text-crfal-blue focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-crfal-blue"
+          className="grid w-8 shrink-0 place-items-center text-crfal-gray-600 transition-colors hover:bg-crfal-blue-lighter hover:text-crfal-blue focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-crfal-blue"
         >
-          <X className="size-4" aria-hidden />
+          <X className="size-3.5" aria-hidden />
         </button>
       </div>
     </>
   );
+
+  const cabecalho = document.querySelector('header');
+  return cabecalho ? createPortal(conteudo, cabecalho) : conteudo;
 }
