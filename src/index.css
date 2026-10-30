@@ -83,31 +83,6 @@
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-scale-in: scale-in 0.3s ease-out;
   --animate-border-beam: border-beam 6s linear infinite;
-  /* Contador do sino: pulso leve e halo dourado enquanto houver não lidas. */
-  --animate-notif-pulse: notif-pulse 2.4s ease-in-out infinite;
-  --animate-notif-halo: notif-halo 2.4s ease-out infinite;
-
-  @keyframes notif-pulse {
-    0%,
-    100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.08);
-    }
-  }
-
-  @keyframes notif-halo {
-    0% {
-      transform: scale(1);
-      opacity: 0.45;
-    }
-    70%,
-    100% {
-      transform: scale(1.9);
-      opacity: 0;
-    }
-  }
 
   @keyframes slide-up {
     from {
@@ -589,3 +564,31 @@
 [data-notification][data-kind="servico"] > div > div > article { background: var(--notif-grad-servico); }
 [data-notification][data-kind="noticia"] > div > div > article { background: var(--notif-grad-noticia); }
 [data-bell-count] > span { background: var(--notif-grad-badge); }
+
+/*
+  Banner de novidades: chega em 260ms desacelerando, da borda de baixo no celular e de sob o
+  cabeçalho no desktop, e sai mais rápido (160ms, igual a SAIDA_MS) acelerando de volta.
+  Só `transform` e `opacity`: fixo e sem efeito no layout. Movimento reduzido: só opacidade.
+*/
+[data-notification-banner] {
+  --banner-desde: 16px;
+  animation: banner-entrada 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-notification-banner][data-state="saindo"] {
+  pointer-events: none;
+  animation: banner-saida 160ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@media (min-width: 1024px) {
+  [data-notification-banner] { --banner-desde: -12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-notification-banner] { --banner-desde: 0px; }
+}
+@keyframes banner-entrada {
+  from { opacity: 0; transform: translateY(var(--banner-desde)); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes banner-saida {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(var(--banner-desde)); }
+}

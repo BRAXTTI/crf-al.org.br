@@ -4,7 +4,7 @@ import { Bell } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { contarNaoLidas, useEstadoNotificacoes } from '@/features/notificacoes/estado';
 import { useFontesNotificacoes } from '@/features/notificacoes/fontes';
-import { EVENTO_ABRIR_PAINEL, definirPainelAberto } from '@/features/notificacoes/sinal';
+import { EVENTO_ABRIR_PAINEL, EVENTO_NOVIDADE, definirPainelAberto } from '@/features/notificacoes/sinal';
 
 // O feed (e as animações de cada tipo) só é baixado quando o painel abre ou o sino recebe ponteiro/foco.
 const carregarPainel = () => import('@/features/notificacoes/NotificationPanel');
@@ -12,10 +12,6 @@ const NotificationPanel = lazy(carregarPainel);
 
 /** Respiro entre a borda inferior do <header> e o painel, igual em todas as larguras. */
 const RESPIRO_PX = 8;
-
-/** Pulso do contador (escala 1→1,08) com halo dourado por trás; nada com movimento reduzido. */
-const PULSO =
-  "motion-safe:animate-notif-pulse motion-safe:before:absolute motion-safe:before:inset-0 motion-safe:before:-z-10 motion-safe:before:rounded-full motion-safe:before:bg-crfal-gold motion-safe:before:content-[''] motion-safe:before:animate-notif-halo";
 
 /** Notícias entram depois da primeira abertura (ou já em cache, como na home): o sino não pesa nas outras páginas. */
 let painelJaAberto = false;
@@ -50,6 +46,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
   const panelRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLSpanElement>(null);
   const [topoDesktop, setTopoDesktop] = useState<number>();
 
   // Fecha ao trocar de página (inclusive ao abrir um evento ou notícia pelo painel).
@@ -105,6 +102,26 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
     return () => definirPainelAberto(false);
   }, [open]);
 
+  // Quando o banner avisa de novidades, o sino balança uma vez e amortece, como um sino de verdade.
+  useEffect(() => {
+    const onNovidade = () => {
+      const icon = iconRef.current;
+      if (!icon || icon.getBoundingClientRect().width === 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      icon.animate(
+        [
+          { transform: 'rotate(0deg)' },
+          { transform: 'rotate(-9deg)', offset: 0.25 },
+          { transform: 'rotate(6deg)', offset: 0.55 },
+          { transform: 'rotate(-2deg)', offset: 0.8 },
+          { transform: 'rotate(0deg)' },
+        ],
+        { duration: 500, easing: 'ease-out' },
+      );
+    };
+    window.addEventListener(EVENTO_NOVIDADE, onNovidade);
+    return () => window.removeEventListener(EVENTO_NOVIDADE, onNovidade);
+  }, []);
+
   // O clique no banner abre o painel do sino visível (o outro está oculto por CSS).
   useEffect(() => {
     const onAbrir = () => {
@@ -147,16 +164,11 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
         onFocus={() => void carregarPainel()}
         className={styles.button}
       >
-        <span data-bell-icon className="grid place-items-center" style={{ transformOrigin: '50% 15%' }}>
+        <span ref={iconRef} data-bell-icon className="grid place-items-center" style={{ transformOrigin: '50% 15%' }}>
           <Bell className={styles.icon} aria-hidden="true" />
         </span>
         {naoLidas > 0 && (
-          <span
-            aria-hidden
-            data-bell-count={naoLidas}
-            data-pulsing={open ? undefined : ''}
-            className={`absolute right-1 top-1 isolate rounded-full ${open ? '' : PULSO}`}
-          >
+          <span aria-hidden data-bell-count={naoLidas} className="absolute right-1 top-1 rounded-full">
             {/* A chave refaz o "pop" a cada mudança do número. */}
             <span
               key={naoLidas}
