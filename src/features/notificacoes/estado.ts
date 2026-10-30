@@ -4,7 +4,7 @@ import { useSyncExternalStore } from 'react';
  * Estado das notificações guardado só no navegador (`localStorage`, com try/catch):
  * quais foram lidas, quais foram dispensadas e quais o visitante já viu chegar
  * (as não vistas "chegam" com animação na próxima abertura do painel) e quais já
- * apareceram como toast (nunca reaparecem como toast).
+ * foram avisadas pelo banner de novidades (não voltam a acionar o banner).
  * O sino e o painel leem a mesma fonte; outras abas acompanham pelo evento `storage`.
  */
 export const STORAGE_KEY = 'crfal:notificacoes';
@@ -15,7 +15,7 @@ export interface EstadoNotificacoes {
   lidas: string[];
   dispensadas: string[];
   vistas: string[];
-  /** Já exibidas como toast ao carregar a página. */
+  /** Já avisadas pelo banner de novidades. */
   mostradas: string[];
 }
 
@@ -71,6 +71,18 @@ export const marcarLidas = (ids: string[]) => acrescentar('lidas', ids);
 export const dispensar = (ids: string[]) => acrescentar('dispensadas', ids);
 export const marcarVistas = (ids: string[]) => acrescentar('vistas', ids);
 export const marcarMostradas = (ids: string[]) => acrescentar('mostradas', ids);
+
+/** Não lidas e não dispensadas: o número do sino e do banner. */
+export function contarNaoLidas(ids: string[], estado: EstadoNotificacoes) {
+  const fora = new Set([...estado.lidas, ...estado.dispensadas]);
+  return ids.filter((id) => !fora.has(id)).length;
+}
+
+/** O que ainda justifica o banner: nem lido, nem dispensado, nem visto no painel, nem já avisado. */
+export function candidatasDoBanner(ids: string[], estado: EstadoNotificacoes) {
+  const fora = new Set([...estado.lidas, ...estado.dispensadas, ...estado.vistas, ...estado.mostradas]);
+  return ids.filter((id) => !fora.has(id));
+}
 
 export function useEstadoNotificacoes(): EstadoNotificacoes {
   return useSyncExternalStore(subscribe, snapshot, () => VAZIO);

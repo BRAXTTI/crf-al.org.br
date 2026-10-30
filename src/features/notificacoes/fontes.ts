@@ -50,7 +50,7 @@ export function useFontesNotificacoes(comNoticias: boolean) {
     [eventos, noticias],
   );
 
-  // `carregando`: a primeira resposta de eventos ainda não chegou (os toasts esperam por ela).
+  // `carregando`: a primeira resposta de eventos ainda não chegou (o banner espera por ela).
   return { eventos, noticias, novidades: NOVIDADES, ids, carregando: eventosQuery.isPending };
 }
 

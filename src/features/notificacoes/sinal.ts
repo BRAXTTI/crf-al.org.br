@@ -1,26 +1,24 @@
 import { useSyncExternalStore } from 'react';
 
 /**
- * Sinais entre o sino e os toasts (só nesta aba, sem armazenamento): se o painel está
- * aberto, quais toasts ainda estão "voando" (o contador do sino só os conta ao chegarem)
- * e o aviso de chegada que dispara o "bump" do sino. Fica no chunk principal: é minúsculo.
+ * Sinais entre o sino e o banner de novidades (só nesta aba, sem armazenamento): se o painel
+ * está aberto e os avisos de novidade, de pedido de abertura e de fim do banner.
  */
 export interface SinalNotificacoes {
   painelAberto: boolean;
-  emTransito: readonly string[];
 }
 
-/** No máximo três toasts: as mais recentes entre as candidatas. */
-export const MAX_TOASTS = 3;
-/** `sessionStorage`: os toasts aparecem uma vez por sessão do navegador. */
-const SESSAO_TOASTS = 'crfal:notificacoes:toasts';
+/** `sessionStorage`: o banner aparece uma vez por sessão do navegador. */
+const SESSAO_BANNER = 'crfal:notificacoes:banner';
 
-/** Disparado em `window` quando os toasts chegam ao sino (o sino faz o "bump"). */
-export const EVENTO_CHEGADA = 'crfal:notificacoes:chegada';
-/** Disparado em `window` quando os toasts terminam (o pop-up pode abrir). */
-export const EVENTO_TOASTS_FIM = 'crfal:notificacoes:toasts-fim';
+/** Disparado em `window` quando o banner aparece (o sino balança uma vez). */
+export const EVENTO_NOVIDADE = 'crfal:notificacoes:novidade';
+/** Disparado em `window` para o sino visível abrir o painel. */
+export const EVENTO_ABRIR_PAINEL = 'crfal:notificacoes:abrir-painel';
+/** Disparado em `window` quando o banner termina (o pop-up pode abrir). */
+export const EVENTO_BANNER_FIM = 'crfal:notificacoes:banner-fim';
 
-let atual: SinalNotificacoes = { painelAberto: false, emTransito: [] };
+let atual: SinalNotificacoes = { painelAberto: false };
 const listeners = new Set<() => void>();
 
 function publicar(proximo: Partial<SinalNotificacoes>) {
@@ -32,7 +30,7 @@ export const lerSinal = () => atual;
 export function definirPainelAberto(painelAberto: boolean) {
   if (atual.painelAberto !== painelAberto) publicar({ painelAberto });
 }
-export const definirEmTransito = (emTransito: readonly string[]) => publicar({ emTransito });
+export const abrirPainel = () => window.dispatchEvent(new Event(EVENTO_ABRIR_PAINEL));
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
@@ -45,25 +43,25 @@ export function useSinalNotificacoes() {
   return useSyncExternalStore(subscribe, lerSinal, lerSinal);
 }
 
-/** Inscrição fora do React (os toasts reagem ao painel abrir no meio da animação). */
+/** Inscrição fora do React (o banner some quando o painel abre). */
 export const observarSinal = (listener: () => void) => subscribe(listener);
 
-/** Pop-up do site aberto ou painel do sino aberto: os toasts não aparecem. */
-export function toastsBloqueados() {
-  return atual.painelAberto || Boolean(document.querySelector('[data-site-popup]'));
+/** Painel do sino, menu do celular, outro diálogo ou pop-up abertos: o banner não aparece. */
+export function bannerBloqueado() {
+  return atual.painelAberto || Boolean(document.querySelector('[data-site-popup], [role="dialog"]'));
 }
 
-export function toastsJaMostradosNaSessao() {
+export function bannerJaMostradoNaSessao() {
   try {
-    return window.sessionStorage.getItem(SESSAO_TOASTS) !== null;
+    return window.sessionStorage.getItem(SESSAO_BANNER) !== null;
   } catch {
     return true;
   }
 }
 
-export function marcarSessaoToasts() {
+export function marcarSessaoBanner() {
   try {
-    window.sessionStorage.setItem(SESSAO_TOASTS, String(Date.now()));
+    window.sessionStorage.setItem(SESSAO_BANNER, String(Date.now()));
   } catch {
     /* sem sessionStorage: vale só nesta visita */
   }

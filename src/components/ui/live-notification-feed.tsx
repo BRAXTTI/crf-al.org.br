@@ -18,11 +18,10 @@ export interface NotificationAction {
   done?: string;
 }
 
-/** Foto de capa real: `src`/`srcSet` para a capa larga e `thumb` (miniatura 150×150) para os toasts. */
+/** Foto de capa real: `src`/`srcSet` para a capa larga. */
 export interface NotificationImage {
   src: string;
   srcSet?: string;
-  thumb?: string;
   /** URL original da API, quando `src` é uma variante (ex.: `large`): última tentativa da capa larga. */
   original?: string;
 }
@@ -272,20 +271,12 @@ function AppTile({
   play,
   delay,
   reduced,
-  thumb,
-  onThumbFail,
 }: {
   kind: NotificationKind;
   accent?: string;
   play: number;
   delay: number;
   reduced: boolean;
-  /**
-   * Toasts: a miniatura 150×150 ocupa a placa e o ícone do tipo vira um selo no canto (como
-   * no iOS). Só ela é pedida (sem `srcSet` nem a capa larga); se falhar, `onThumbFail`.
-   */
-  thumb?: string;
-  onThumbFail?: () => void;
 }) {
   const ringRef = React.useRef(null as HTMLSpanElement | null);
   React.useEffect(() => {
@@ -299,19 +290,6 @@ function AppTile({
     );
     return () => animation?.cancel();
   }, [play, delay, reduced]);
-  if (thumb) {
-    return (
-      <span data-tile data-photo className={cx("relative mt-0.5 size-10 shrink-0", !accent && "text-crfal-blue")} style={{ color: accent }}>
-        <CoverFrame className="size-10 rounded-xl">
-          <CoverImage key={thumb} image={{ src: thumb }} width={40} height={40} onFail={() => onThumbFail?.()} />
-        </CoverFrame>
-        <span aria-hidden className="absolute -bottom-1 -right-1 grid size-[18px] place-items-center rounded-md bg-white shadow-[0_1px_3px_rgba(11,25,44,0.25)] ring-1 ring-crfal-gray-200">
-          <Icon d={ICONS[kind]} className="size-3" />
-        </span>
-        <span ref={ringRef} aria-hidden className="pointer-events-none absolute inset-0 rounded-xl border-2 border-current opacity-0" />
-      </span>
-    );
-  }
   return (
     <span
       data-tile
@@ -807,107 +785,6 @@ function NotificationCard({
         </div>
       </div>
     </div>
-  );
-}
-
-/**
- * Versão compacta do card para os toasts do carregamento (banner estilo iOS): rótulo de
- * origem e título do feed, sem o detalhe animado. Com miniatura (150×150 do WordPress),
- * a placa mostra a foto com o ícone do tipo num selo; sem ela, ou se falhar, o ícone.
- * `behind`: card de trás na pilha (só a "placa" aparece; nada focável).
- */
-export function NotificationToastCard({
-  item,
-  play,
-  reduced,
-  behind = false,
-  onOpen,
-  onNavigate,
-  onDismiss,
-}: {
-  item: LiveNotification;
-  play: number;
-  reduced: boolean;
-  behind?: boolean;
-  onOpen: () => void;
-  onNavigate?: (href: string) => void;
-  onDismiss: () => void;
-}) {
-  const accentScope = { color: item.accent };
-  const accentClass = item.accent ? undefined : "text-crfal-blue";
-  const thumb = item.image?.thumb;
-  const [noThumb, setNoThumb] = useImageFailure(thumb);
-  return (
-    <article
-      data-toast-card={item.id}
-      data-kind={item.kind}
-      aria-label={`${item.app}: ${item.title}`}
-      aria-hidden={behind || undefined}
-      inert={behind || undefined}
-      className={cx(
-        "group relative isolate overflow-hidden rounded-[22px] border border-white/70 p-3 pr-10 text-crfal-gray-800 backdrop-blur-xl",
-        "shadow-[0_1px_2px_rgba(15,23,42,0.06),0_18px_40px_-18px_rgba(11,25,44,0.5)] ring-1 ring-crfal-gray-200/70",
-      )}
-    >
-      <span aria-hidden className="pointer-events-none absolute inset-x-6 top-0 -z-10 h-px bg-linear-to-r/srgb from-crfal-gold/0 via-crfal-gold to-crfal-gold/0" />
-      <div className={cx("flex gap-3", !reduced && "transition-opacity duration-200", behind && "opacity-0")}>
-        <AppTile
-          kind={item.kind}
-          accent={item.accent}
-          play={play}
-          delay={STORY_DELAY_MS}
-          reduced={reduced}
-          thumb={noThumb ? undefined : thumb}
-          onThumbFail={setNoThumb}
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex h-4 items-center gap-1.5 text-xs leading-4 text-crfal-gray-600">
-            <span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]" style={accentScope}>
-              <span className={accentClass}>{item.app}</span>
-            </span>
-            <span aria-hidden className="text-crfal-gold">·</span>
-            <span className="shrink-0 tabular-nums">{item.time ?? "agora"}</span>
-          </div>
-          {item.href ? (
-            <a
-              href={item.href}
-              data-open
-              draggable={false}
-              onClick={(event) => {
-                onOpen();
-                if (!onNavigate || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-                event.preventDefault();
-                onNavigate(item.href!);
-              }}
-              className={cx(OPEN_CLASS, "line-clamp-2 font-bold focus-visible:after:ring-offset-white")}
-            >
-              {item.title}
-            </a>
-          ) : (
-            <button type="button" data-open onClick={onOpen} className={cx(OPEN_CLASS, "line-clamp-2 font-bold focus-visible:after:ring-offset-white")}>
-              {item.title}
-            </button>
-          )}
-          {item.body && <p className="mt-0.5 line-clamp-1 text-[13px] leading-normal text-crfal-gray-600">{item.body}</p>}
-        </div>
-      </div>
-      <button
-        type="button"
-        data-dismiss
-        aria-label={`Fechar aviso: ${item.title}`}
-        onClick={(event) => {
-          event.stopPropagation();
-          onDismiss();
-        }}
-        className={cx(
-          "absolute right-2 top-2 z-[2] grid size-7 place-items-center rounded-full text-crfal-gray-600 transition-[background-color,color,opacity] hover:bg-crfal-blue-lighter hover:text-crfal-blue pointer-coarse:before:absolute pointer-coarse:before:-inset-1.5 pointer-coarse:before:content-['']",
-          FOCUS_RING,
-          behind && "opacity-0",
-        )}
-      >
-        <Icon d={CLOSE} className="size-3.5" />
-      </button>
-    </article>
   );
 }
 
