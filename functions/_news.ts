@@ -152,11 +152,12 @@ const FRESH_MS = 60_000;
 // a origem nas primeiras 24 h após a última gravação (MAX_STALE_MS) e expira em 30 dias; depois
 // das 24 h, a visita consulta a origem e a cópia serve só para evitar escritas iguais.
 const DURABLE_TTL_S = 30 * 24 * 3600;
-// O cron renova as cópias com mais de 20 h, mesmo sem mudança: como roda de hora em hora, regrava
-// a cada 20–21 h (34–36 escritas/dia para 30 posts) e tolera ~3 execuções perdidas. Visitas nunca
-// regravam por idade.
-const DURABLE_RENEW_MS = 20 * 3600_000;
-// Cartões recentes (news:recent-cards:v1): regravados se mudam ou a cada 24 h (~1 escrita/dia).
+// O cron (de 3 em 3 h) renova as cópias com mais de 17,5 h, mesmo sem mudança: regrava na 6ª execução,
+// a cada ~18 h (a margem de 30 min absorve a variação do horário; ~40 escritas/dia para 30 posts).
+// Uma execução perdida renova com 21 h; duas chegam ao limite das 24 h. Visitas nunca regravam por idade.
+const DURABLE_RENEW_MS = 17.5 * 3600_000;
+// Cartões recentes (news:recent-cards:v1): regravados se mudam ou com 24 h, na primeira execução
+// do cron depois disso (24–27 h, ~1 escrita/dia).
 const DURABLE_REWRITE_MS = 24 * 3600_000;
 const revalidating = new Map<string, Promise<void>>();
 const durableKey = (key: string) => `news:cache:v1:${key}`;
@@ -529,12 +530,12 @@ const RECENT_LIMIT = 60;
 // O cron não usa contador nem lease.
 const REFRESH_WRITES = 6;
 export const NEWS_INDEX_CHECK = 'news:index:checked:v1';
-// Índice inalterado: checked só é regravado a cada ~6 h (a 6ª execução do cron horário;
+// Índice inalterado: checked só é regravado a cada ~6 h (a 2ª execução do cron de 3 em 3 h;
 // a margem de 30 min absorve a variação do horário de cada execução). Cerca de 4 escritas/dia.
 export const NEWS_INDEX_CHECK_REWRITE_MS = 5.5 * 3600_000;
-// O cron (de hora em hora) é a fonte regular; visitantes só disparam refresh se o cron falhar.
-// checkedAt chega a ~6 h com o cron saudável: 9 h tolera ~3 execuções perdidas.
-export const NEWS_INDEX_REFRESH_MS = 9 * 3600_000;
+// O cron (de 3 em 3 h) é a fonte regular; visitantes só disparam refresh se o cron falhar.
+// checkedAt chega a ~6 h com o cron saudável: 15 h (6 h + 3 × 3 h) tolera ~3 execuções perdidas.
+export const NEWS_INDEX_REFRESH_MS = 15 * 3600_000;
 const REFRESH_MS = NEWS_INDEX_REFRESH_MS;
 const LEASE_MS = 120_000;
 // Após falha, o lease vira um intervalo curto: sem 503 por 2 min com o KV vazio e sem martelar a origem.
@@ -638,7 +639,7 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
     return value;
   };
   const task = (async () => {
-    // Cron: execução única por hora, sem contador nem lease no KV (2 escritas a menos).
+    // Cron: execução única a cada 3 h, sem contador nem lease no KV (2 escritas a menos).
     if (scheduled) return commit(await buildNewsIndex(background(context)));
     const quotaKey = NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10);
     const used = (await kv.get<number>(quotaKey, 'json')) ?? 0;
@@ -735,7 +736,7 @@ export const WARM_POSTS = 30;
 /**
  * Pré-aquece no KV o detalhe das notícias mais recentes (cron). Uma consulta `include`
  * cobre todos os posts; é o único caminho que cria cópias de posts no KV, e cada uma só é
- * gravada quando não existe, quando o conteúdo mudou ou quando tem mais de ~20 h.
+ * gravada quando não existe, quando o conteúdo mudou ou quando tem mais de ~18 h.
  */
 export async function warmNewsPosts(
   context: NewsContext,

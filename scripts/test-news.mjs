@@ -224,7 +224,9 @@ try {
   }
   // checked: o cron só o regrava quando envelhece; o visitante não dispara refresh antes disso.
   {
-    assert.ok(NEWS_INDEX_REFRESH_MS > NEWS_INDEX_CHECK_REWRITE_MS + 3600_000, 'Refresh de visitante tolera o intervalo do checked');
+    const cronIntervalMs = 3 * 3600_000;
+    assert.match(await readFile(new URL('../workers/news-index-cron/wrangler.toml', import.meta.url), 'utf8'), /crons = \["0 \*\/3 \* \* \*"\]/, 'Limiares assumem o cron de 3 em 3 h');
+    assert.ok(NEWS_INDEX_REFRESH_MS >= NEWS_INDEX_CHECK_REWRITE_MS + 3 * cronIntervalMs, 'Refresh de visitante tolera ~3 execuções perdidas');
     const count = key => writes.filter(row => row.key === key).length;
     const cron = async () => { clearNewsIndexMemo(kv); await refreshNewsIndex(context, true); await Promise.all(pending.splice(0)); };
     await cron(); // Sincroniza o índice gravado com a origem atual.
@@ -235,21 +237,21 @@ try {
       values.set(NEWS_INDEX_CHECK, JSON.stringify({ hash: entry.hash, checkedAt: Date.now() - checkedMs }));
       clearNewsIndexMemo(kv); values.delete(NEWS_INDEX_LOCK);
     };
-    age(3600_000);
+    age(cronIntervalMs);
     let index = count(NEWS_INDEX_KEY); let checked = count(NEWS_INDEX_CHECK);
     await cron();
     assert.equal(count(NEWS_INDEX_CHECK) - checked, 0, 'Cron sem mudança não regrava checked recente');
     assert.equal(count(NEWS_INDEX_KEY) - index, 0);
     age(6 * 3600_000 - 60_000);
     await cron();
-    assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'checked regravado na 6ª execução horária');
+    assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'checked regravado na 2ª execução, com ~6 h');
     assert.ok(Date.now() - JSON.parse(values.get(NEWS_INDEX_CHECK)).checkedAt < 60_000);
     await cron();
     assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'Execução seguinte não regrava');
-    // Com o cron saudável o checked chega a ~6–7 h: o visitante não agenda refresh.
-    age(7 * 3600_000);
+    // Com o cron saudável o checked chega a ~6 h (até 8,5 h se gravado fora da grade do cron): o visitante não agenda refresh.
+    age(NEWS_INDEX_CHECK_REWRITE_MS + cronIntervalMs);
     await newsIndex(context);
-    assert.equal(pending.length, 0, 'Visitante não agenda refresh com checked de 7 h');
+    assert.equal(pending.length, 0, 'Visitante não agenda refresh com checked de 8,5 h');
     age(NEWS_INDEX_REFRESH_MS + 60_000);
     await newsIndex(context);
     assert.equal(pending.length, 1, 'Cron parado: visitante agenda refresh');
@@ -261,7 +263,7 @@ try {
     await newsIndex(context);
     assert.equal(pending.length, 0, 'checkedAt usa o mais recente entre índice e checked');
     // Índice alterado grava só o índice (que já leva checkedAt).
-    age(3600_000);
+    age(cronIntervalMs);
     const changedPost = posts.find(p => p.id === cold[0].id);
     const originalModified = changedPost.modified;
     changedPost.modified = '2021-01-02T00:00:00';
@@ -380,7 +382,7 @@ try {
     writes.length = 0;
     assert.equal(await warmNewsPosts(context), recent.length);
     assert.equal(writes.length, 0, 'Pré-aquecimento sem mudanças não escreve no KV');
-    // Cron renova a cópia sem mudança depois de ~20 h, antes de vencer a janela de 24 h.
+    // Cron renova a cópia sem mudança depois de ~18 h, antes de vencer a janela de 24 h.
     {
       const hour = 3600_000;
       const target = recent[0]; const warmKey = `news:cache:v1:post/${encodeURIComponent(target.slug)}`;
@@ -390,14 +392,15 @@ try {
         values.set(warmKey, JSON.stringify(copy));
         return copy;
       };
-      const young = age(19.5 * hour); writes.length = 0;
+      const young = age(17 * hour); writes.length = 0;
       await warmNewsPosts(context);
-      assert.equal(writes.length, 0, 'Cópia com menos de 20 h não é regravada');
+      assert.equal(writes.length, 0, 'Cópia com menos de 17,5 h não é regravada');
       assert.equal(JSON.parse(values.get(warmKey)).storedAt, young.storedAt);
-      const old = age(20 * hour + 1); writes.length = 0;
+      // A 6ª execução pode começar um pouco antes de completar 18 h da gravação anterior.
+      const old = age(18 * hour - 60_000); writes.length = 0;
       const startedAt = Date.now();
       await warmNewsPosts(context);
-      assert.deepEqual(writes.map(row => row.key), [warmKey], 'Só a cópia com mais de 20 h é regravada');
+      assert.deepEqual(writes.map(row => row.key), [warmKey], 'Só a cópia com ~18 h é regravada');
       assert.equal(writes[0].options.expirationTtl, 30 * 24 * 3600);
       const renewed = JSON.parse(values.get(warmKey));
       assert.ok(renewed.storedAt >= startedAt, 'Regravação renova a idade');
@@ -411,7 +414,7 @@ try {
       source.content = { rendered: '<p>Conteúdo editado</p>' };
       try {
         await warmNewsPosts(context);
-        assert.deepEqual(writes.map(row => row.key), [warmKey], 'Cron grava a mudança de conteúdo antes de 20 h');
+        assert.deepEqual(writes.map(row => row.key), [warmKey], 'Cron grava a mudança de conteúdo antes de 17,5 h');
         assert.equal(JSON.parse(values.get(warmKey)).value.content.rendered, '<p>Conteúdo editado</p>');
       } finally { source.content = content; }
       await warmNewsPosts(context);
@@ -433,6 +436,11 @@ try {
         local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * hour }));
         fail = true;
         assert.equal((await newsPost(target.slug, context)).id, target.id, 'Entrada local vencida usa a cópia renovada do KV');
+        await Promise.all(pending.splice(0));
+        // Uma execução perdida: a cópia, com 21 h, ainda é servida sem a origem.
+        age(21 * hour);
+        local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * hour }));
+        assert.equal((await newsPost(target.slug, context)).id, target.id, 'Cópia de 21 h dispensa a origem');
         await Promise.all(pending.splice(0));
         fail = false;
         // Sem renovação (mais de 24 h) a visita volta a depender da origem.
