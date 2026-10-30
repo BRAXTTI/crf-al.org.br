@@ -5,8 +5,9 @@ workers_dev = false
 preview_urls = false
 
 [triggers]
-# Volume baixo (0–2 posts/dia): de hora em hora basta.
-crons = ["0 * * * *"]
+# Volume baixo (0–2 posts/dia): de 3 em 3 horas basta. Limiares que dependem deste intervalo:
+# DURABLE_RENEW_MS, NEWS_INDEX_CHECK_REWRITE_MS e NEWS_INDEX_REFRESH_MS (functions/_news.ts).
+crons = ["0 */3 * * *"]
 
 [[kv_namespaces]]
 binding = "NEWS_INDEX"

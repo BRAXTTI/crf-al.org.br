@@ -224,7 +224,9 @@ try {
   }
   // checked: o cron só o regrava quando envelhece; o visitante não dispara refresh antes disso.
   {
-    assert.ok(NEWS_INDEX_REFRESH_MS > NEWS_INDEX_CHECK_REWRITE_MS + 3600_000, 'Refresh de visitante tolera o intervalo do checked');
+    const cronIntervalMs = 3 * 3600_000;
+    assert.match(await readFile(new URL('../workers/news-index-cron/wrangler.toml', import.meta.url), 'utf8'), /crons = \["0 \*\/3 \* \* \*"\]/, 'Limiares assumem o cron de 3 em 3 h');
+    assert.ok(NEWS_INDEX_REFRESH_MS >= NEWS_INDEX_CHECK_REWRITE_MS + 3 * cronIntervalMs, 'Refresh de visitante tolera ~3 execuções perdidas');
     const count = key => writes.filter(row => row.key === key).length;
     const cron = async () => { clearNewsIndexMemo(kv); await refreshNewsIndex(context, true); await Promise.all(pending.splice(0)); };
     await cron(); // Sincroniza o índice gravado com a origem atual.
@@ -235,21 +237,21 @@ try {
       values.set(NEWS_INDEX_CHECK, JSON.stringify({ hash: entry.hash, checkedAt: Date.now() - checkedMs }));
       clearNewsIndexMemo(kv); values.delete(NEWS_INDEX_LOCK);
     };
-    age(3600_000);
+    age(cronIntervalMs);
     let index = count(NEWS_INDEX_KEY); let checked = count(NEWS_INDEX_CHECK);
     await cron();
     assert.equal(count(NEWS_INDEX_CHECK) - checked, 0, 'Cron sem mudança não regrava checked recente');
     assert.equal(count(NEWS_INDEX_KEY) - index, 0);
     age(6 * 3600_000 - 60_000);
     await cron();
-    assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'checked regravado na 6ª execução horária');
+    assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'checked regravado na 2ª execução, com ~6 h');
     assert.ok(Date.now() - JSON.parse(values.get(NEWS_INDEX_CHECK)).checkedAt < 60_000);
     await cron();
     assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'Execução seguinte não regrava');
-    // Com o cron saudável o checked chega a ~6–7 h: o visitante não agenda refresh.
-    age(7 * 3600_000);
+    // Com o cron saudável o checked chega a ~6 h (até 8,5 h se gravado fora da grade do cron): o visitante não agenda refresh.
+    age(NEWS_INDEX_CHECK_REWRITE_MS + cronIntervalMs);
     await newsIndex(context);
-    assert.equal(pending.length, 0, 'Visitante não agenda refresh com checked de 7 h');
+    assert.equal(pending.length, 0, 'Visitante não agenda refresh com checked de 8,5 h');
     age(NEWS_INDEX_REFRESH_MS + 60_000);
     await newsIndex(context);
     assert.equal(pending.length, 1, 'Cron parado: visitante agenda refresh');
@@ -261,7 +263,7 @@ try {
     await newsIndex(context);
     assert.equal(pending.length, 0, 'checkedAt usa o mais recente entre índice e checked');
     // Índice alterado grava só o índice (que já leva checkedAt).
-    age(3600_000);
+    age(cronIntervalMs);
     const changedPost = posts.find(p => p.id === cold[0].id);
     const originalModified = changedPost.modified;
     changedPost.modified = '2021-01-02T00:00:00';
@@ -380,6 +382,75 @@ try {
     writes.length = 0;
     assert.equal(await warmNewsPosts(context), recent.length);
     assert.equal(writes.length, 0, 'Pré-aquecimento sem mudanças não escreve no KV');
+    // Cron renova a cópia sem mudança depois de ~18 h, antes de vencer a janela de 24 h.
+    {
+      const hour = 3600_000;
+      const target = recent[0]; const warmKey = `news:cache:v1:post/${encodeURIComponent(target.slug)}`;
+      const age = ms => {
+        const copy = JSON.parse(values.get(warmKey));
+        copy.storedAt = Date.now() - ms;
+        values.set(warmKey, JSON.stringify(copy));
+        return copy;
+      };
+      const young = age(17 * hour); writes.length = 0;
+      await warmNewsPosts(context);
+      assert.equal(writes.length, 0, 'Cópia com menos de 17,5 h não é regravada');
+      assert.equal(JSON.parse(values.get(warmKey)).storedAt, young.storedAt);
+      // A 6ª execução pode começar um pouco antes de completar 18 h da gravação anterior.
+      const old = age(18 * hour - 60_000); writes.length = 0;
+      const startedAt = Date.now();
+      await warmNewsPosts(context);
+      assert.deepEqual(writes.map(row => row.key), [warmKey], 'Só a cópia com ~18 h é regravada');
+      assert.equal(writes[0].options.expirationTtl, 30 * 24 * 3600);
+      const renewed = JSON.parse(values.get(warmKey));
+      assert.ok(renewed.storedAt >= startedAt, 'Regravação renova a idade');
+      assert.deepEqual(renewed.value, old.value, 'Regravação mantém o conteúdo');
+      writes.length = 0;
+      await warmNewsPosts(context);
+      assert.equal(writes.length, 0, 'Cópia recém-renovada não é regravada de novo');
+      // Mudança de conteúdo continua gravando, em qualquer idade.
+      age(hour);
+      const source = posts.find(post => post.id === target.id); const content = source.content;
+      source.content = { rendered: '<p>Conteúdo editado</p>' };
+      try {
+        await warmNewsPosts(context);
+        assert.deepEqual(writes.map(row => row.key), [warmKey], 'Cron grava a mudança de conteúdo antes de 17,5 h');
+        assert.equal(JSON.parse(values.get(warmKey)).value.content.rendered, '<p>Conteúdo editado</p>');
+      } finally { source.content = content; }
+      await warmNewsPosts(context);
+      // Visita nunca regrava por idade.
+      age(21 * hour); writes.length = 0;
+      await newsPost(target.slug, context); await Promise.all(pending.splice(0));
+      assert.equal(writes.length, 0, 'Visita não renova a cópia');
+      // Cópia renovada é servida sem a origem, mesmo com entrada local já vencida no data center.
+      const local = new Map(); const previousCaches = globalThis.caches;
+      globalThis.caches = { default: {
+        async match(req) { return local.get(req.url)?.clone(); },
+        async put(req, response) { local.set(req.url, response); },
+      } };
+      try {
+        age(hour);
+        await newsPost(target.slug, context); await Promise.all(pending.splice(0));
+        const entry = [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(target.slug)}`));
+        const saved = await local.get(entry).clone().json();
+        local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * hour }));
+        fail = true;
+        assert.equal((await newsPost(target.slug, context)).id, target.id, 'Entrada local vencida usa a cópia renovada do KV');
+        await Promise.all(pending.splice(0));
+        // Uma execução perdida: a cópia, com 21 h, ainda é servida sem a origem.
+        age(21 * hour);
+        local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * hour }));
+        assert.equal((await newsPost(target.slug, context)).id, target.id, 'Cópia de 21 h dispensa a origem');
+        await Promise.all(pending.splice(0));
+        fail = false;
+        // Sem renovação (mais de 24 h) a visita volta a depender da origem.
+        age(25 * hour);
+        local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * hour }));
+        fail = true;
+        await assert.rejects(newsPost(target.slug, context), /503/);
+      } finally { fail = false; globalThis.caches = previousCaches; }
+      await warmNewsPosts(context);
+    }
     fail = true;
     assert.equal((await newsPost(selected[1].slug, context)).id, selected[1].newId, 'Post pré-aquecido servido do KV');
     await Promise.all(pending.splice(0));
@@ -549,6 +620,125 @@ try {
       assert.equal(requests.find(url => url.searchParams.has('search')).searchParams.get('search'), 'farmácia crf');
       for (const term of ['ab', '   a ', 'x'.repeat(121), 'abc\u0007']) assert.equal((await newsApi(new Request(`https://example.test/api/news?search=${encodeURIComponent(term)}`), ctx)).status, 400, JSON.stringify(term));
     } finally { globalThis.caches = previousCaches; }
+  }
+  // Falha do KV nunca vira erro para o visitante se o WordPress estiver no ar.
+  {
+    const slug = find(16028).slug; const copyKey = `news:cache:v1:post/${encodeURIComponent(slug)}`;
+    const local = new Map(); const previousCaches = globalThis.caches; const tasks = [];
+    globalThis.caches = { default: {
+      async match(req) { return local.get(req.url)?.clone(); },
+      async put(req, response) { local.set(req.url, response); },
+    } };
+    const fails = () => { throw new Error('KV down'); };
+    const asyncFails = async () => fails();
+    const memoryKV = (seed = {}, overrides = {}) => {
+      const store = new Map(Object.entries(seed)); const puts = [];
+      return { store, puts, async get(key) { return store.has(key) ? JSON.parse(store.get(key)) : null; }, async put(key, value) { puts.push(key); store.set(key, value); }, async delete(key) { store.delete(key); }, ...overrides };
+    };
+    const ctx = kv => ({ env: { NEWS_INDEX: kv }, waitUntil: task => tasks.push(task) });
+    const api = (query, kv) => newsApi(new Request(`https://example.test/api/news${query}`), ctx(kv));
+    const settle = async () => { while (tasks.length) await Promise.all(tasks.splice(0)); };
+    const askedPost = () => requests.some(url => url.searchParams.get('rest_route').startsWith('/wp/v2/posts/'));
+    try {
+      for (const [name, get] of [['rejeitando', asyncFails], ['lançando de imediato', fails]]) {
+        const down = { get, put: fails, delete: fails };
+        local.clear(); requests = [];
+        // Sem cache local.
+        let response = await api(`?slug=${encodeURIComponent(slug)}`, down);
+        assert.equal(response.status, 200, `KV ${name}, cache vazio`);
+        assert.equal((await response.json()).id, find(16028).newId);
+        assert.ok(askedPost());
+        await settle();
+        // Cache local vencido (mais de 24 h): a origem responde e o local é renovado.
+        const entry = [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(slug)}`));
+        const saved = await local.get(entry).clone().json();
+        local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * 3600_000 }));
+        requests = [];
+        response = await api(`?slug=${encodeURIComponent(slug)}`, down);
+        assert.equal(response.status, 200, `KV ${name}, cache vencido`);
+        assert.equal((await response.json()).id, find(16028).newId);
+        assert.ok(askedPost(), 'Cache vencido com KV fora consulta o WordPress');
+        assert.ok(Date.now() - (await local.get(entry).clone().json()).storedAt < 60_000);
+        // Listagem: índice e cartões indisponíveis.
+        local.clear(); requests = [];
+        response = await api('?page=1&per_page=5', down);
+        assert.equal(response.status, 200, `KV ${name}, listagem`);
+        const list = await response.json();
+        assert.ok(list.total > 0); assert.equal(list.posts.length, 5);
+        assert.ok(requests.some(url => url.searchParams.has('include')));
+        await settle();
+        requests = [];
+        await api('?page=1&per_page=5', down);
+        assert.equal(requests.length, 0, 'KV fora não repete a coleta: Cache API segura a origem');
+      }
+      // Escrita falhando em cópia existente: atualização e exclusão não derrubam a resposta.
+      local.clear();
+      {
+        const old = JSON.stringify({ storedAt: Date.now() - 25 * 3600_000, value: { id: 1, slug, title: { rendered: 'Antigo' } } });
+        const kv = memoryKV({ [copyKey]: old }, { put: async key => { kv.puts.push(key); fails(); } });
+        const response = await api(`?slug=${encodeURIComponent(slug)}`, kv);
+        assert.equal(response.status, 200, 'put lançando');
+        assert.equal((await response.json()).id, find(16028).newId);
+        assert.deepEqual(kv.puts, [copyKey], 'Falha de escrita não gera novas tentativas');
+        local.clear();
+        const removed = memoryKV({ 'news:cache:v1:post/slug-removido': old }, { delete: asyncFails });
+        assert.equal((await api('?slug=slug-removido', removed)).status, 404, 'delete lançando');
+      }
+      // Namespace vazio com escritas falhando: antes do lease e ao gravar o índice.
+      for (const failing of [() => true, key => key === NEWS_INDEX_KEY]) {
+        local.clear();
+        const kv = memoryKV({}, { put: async (key, value) => { if (failing(key)) fails(); kv.store.set(key, value); } });
+        const response = await api('?page=1&per_page=5', kv);
+        assert.equal(response.status, 200, 'Índice não gravado ainda responde');
+        assert.equal((await response.json()).posts.length, 5);
+        await settle();
+      }
+      // Índice saudável; só o checked ou os cartões falham.
+      local.clear();
+      const healthy = memoryKV(); await refreshNewsIndex(ctx(healthy), true); await settle();
+      const storedIndex = JSON.parse(healthy.store.get(NEWS_INDEX_KEY));
+      const oldIndex = JSON.stringify({ ...storedIndex, storedAt: 1, checkedAt: 1 });
+      {
+        const kv = memoryKV({ [NEWS_INDEX_KEY]: oldIndex, [NEWS_RECENT_CARDS_KEY]: healthy.store.get(NEWS_RECENT_CARDS_KEY) });
+        const read = kv.get;
+        kv.get = key => key === NEWS_INDEX_CHECK ? asyncFails() : read(key);
+        requests = [];
+        assert.equal((await api('?page=1&per_page=5', kv)).status, 200);
+        await settle();
+        assert.equal(requests.length, 0, 'checked ilegível não dispara refresh');
+        assert.deepEqual(kv.puts, [], 'checked ilegível não aumenta escritas');
+      }
+      {
+        const kv = memoryKV({ [NEWS_INDEX_KEY]: healthy.store.get(NEWS_INDEX_KEY) });
+        const read = kv.get;
+        kv.get = key => key === NEWS_RECENT_CARDS_KEY ? asyncFails() : read(key);
+        requests = [];
+        const response = await api('?page=1&per_page=5', kv);
+        assert.equal(response.status, 200, 'Cartões ilegíveis');
+        assert.equal((await response.json()).posts.length, 5);
+        assert.ok(requests.some(url => url.searchParams.has('include')));
+        await settle();
+      }
+      // Índice antigo já é servido: falha no lease do refresh em segundo plano não coleta do WordPress.
+      {
+        local.clear();
+        const kv = memoryKV({ [NEWS_INDEX_KEY]: oldIndex, [NEWS_INDEX_CHECK]: 'null' }, { put: asyncFails });
+        requests = [];
+        assert.equal((await api('?page=1&per_page=5', kv)).status, 200);
+        await settle();
+        assert.equal(requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/posts' && url.searchParams.has('page')).length, 0, 'Sem coleta do índice no WordPress');
+      }
+      // WordPress fora de verdade continua 503, sem repetir a coleta por causa do fallback.
+      {
+        local.clear(); fail = true; requests = [];
+        assert.equal((await api('?page=1&per_page=5', memoryKV())).status, 503);
+        assert.equal(requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/categories').length, 2, 'Só a repetição normal');
+        assert.equal((await api('?page=1&per_page=5', { get: asyncFails, put: asyncFails })).status, 503, 'KV e WordPress fora');
+        fail = false;
+      }
+      // Cron não engole a falha: ela precisa aparecer no histórico dos Cron Triggers.
+      await assert.rejects(refreshNewsIndex(ctx(memoryKV({}, { put: asyncFails })), true), /KV down/);
+    } finally { fail = false; globalThis.caches = previousCaches; }
   }
   const cronUrl = await moduleUrl('../workers/news-index-cron/index.ts', { "'../../functions/_news'": JSON.stringify(await loadNews()) });
   const cron = (await import(cronUrl)).default;
