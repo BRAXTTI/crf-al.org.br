@@ -568,7 +568,8 @@
 /*
   Banner de novidades: chega em 260ms desacelerando, da borda de baixo no celular e de sob o
   cabeçalho no desktop, e sai mais rápido (160ms, igual a SAIDA_MS) acelerando de volta.
-  Só `transform` e `opacity`: fixo e sem efeito no layout. Movimento reduzido: só opacidade.
+  Só `transform` e `opacity`: fixo e sem efeito no layout. Movimento reduzido: só esmaece; a
+  especificidade do seletor vence a regra global que zera `animation-duration`.
 */
 [data-notification-banner] {
   --banner-desde: 16px;
@@ -582,7 +583,11 @@
   [data-notification-banner] { --banner-desde: -12px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-notification-banner] { --banner-desde: 0px; }
+  [data-notification-banner] {
+    --banner-desde: 0px;
+    animation-duration: 200ms !important;
+  }
+  [data-notification-banner][data-state="saindo"] { animation-duration: 160ms !important; }
 }
 @keyframes banner-entrada {
   from { opacity: 0; transform: translateY(var(--banner-desde)); }

@@ -128,6 +128,14 @@ const feed = await readFile(new URL('../src/components/ui/live-notification-feed
 assert.doesNotMatch(feed, /\bhost\b|Endereço:|font-mono/, 'Sem barra de endereço simulada');
 assert.doesNotMatch(feed, /loading="eager"|fetchPriority|fetchpriority/, 'Capas nunca disputam o LCP');
 
+// Movimento reduzido: o banner esmaece, sem deslocamento, mesmo com a regra global que zera as animações.
+const css = await readFile(new URL('../src/index.css', import.meta.url), 'utf8');
+const bannerReduzido = css.match(/@media \(prefers-reduced-motion: reduce\) \{\s*\[data-notification-banner\] \{[\s\S]*?\n\}/)?.[0] ?? '';
+assert.match(bannerReduzido, /--banner-desde: 0px/, 'Banner com movimento reduzido: sem deslocamento');
+assert.match(bannerReduzido, /\[data-notification-banner\] \{[^}]*animation-duration: 200ms !important/, 'Banner com movimento reduzido: entrada esmaece');
+assert.match(bannerReduzido, /\[data-state="saindo"\] \{ animation-duration: 160ms !important/, 'Banner com movimento reduzido: saída igual a SAIDA_MS');
+assert.ok(css.indexOf('animation-duration: 0.01ms !important') > -1, 'A regra global de movimento reduzido continua valendo para o resto do site');
+
 // Painel renderizado de verdade (jsdom + React).
 const { JSDOM } = await import('jsdom');
 const { createRequire } = await import('node:module');
