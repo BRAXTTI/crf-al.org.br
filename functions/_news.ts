@@ -146,10 +146,14 @@ async function request(
 type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
 const MAX_STALE_MS = 24 * 3600_000;
 const FRESH_MS = 60_000;
-// Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
-// 30 dias: a reserva só é regravada quando o conteúdo muda (ou ao expirar).
+// Reserva durável de posts no KV (news:cache:v1:post/<slug>), compartilhada entre data centers.
+// Só o cron cria cópias (os ~30 posts recentes, em warmNewsPosts); visitas apenas leem e,
+// se o conteúdo mudou, atualizam ou apagam uma cópia existente. Nada é regravado por idade:
+// a cópia expira 30 dias após a última mudança. Como storedAt só avança quando o conteúdo
+// muda, a cópia é servida sem esperar a origem apenas nas primeiras 24 h (MAX_STALE_MS);
+// depois disso a visita consulta a origem e a cópia serve só para evitar escritas iguais.
 const DURABLE_TTL_S = 30 * 24 * 3600;
-// KV cobra cada escrita: só regrava quando o conteúdo muda ou a reserva envelhece.
+// Cartões recentes (news:recent-cards:v1): regravados se mudam ou a cada 24 h (~1 escrita/dia).
 const DURABLE_REWRITE_MS = 24 * 3600_000;
 const revalidating = new Map<string, Promise<void>>();
 const durableKey = (key: string) => `news:cache:v1:${key}`;
@@ -516,8 +520,9 @@ export const NEWS_INDEX_LOCK = 'news:index:refresh:v1';
 export const NEWS_RECENT_CARDS_KEY = 'news:recent-cards:v1';
 export const NEWS_REFRESH_QUOTA_PREFIX = 'news:refresh-quota:v1:';
 const RECENT_LIMIT = 60;
-// Reserva 6 escritas por refresh (contador, lease, índice, checked, cartões e falha).
-// A cada 25 min: até 58 refreshes/dia, ou 348 escritas reservadas; teto 500.
+// Refresh de visitante (só quando o cron falha) reserva 6 escritas na cota diária
+// (contador, lease, índice ou checked, cartões e falha), com teto de 500/dia.
+// O cron não usa contador nem lease.
 const REFRESH_WRITES = 6;
 export const NEWS_INDEX_CHECK = 'news:index:checked:v1';
 // Índice inalterado: checked só é regravado a cada ~6 h (a 6ª execução do cron horário;
@@ -725,7 +730,8 @@ export async function newsPost(slug: string, context?: NewsContext): Promise<WPP
 export const WARM_POSTS = 30;
 /**
  * Pré-aquece no KV o detalhe das notícias mais recentes (cron). Uma consulta `include`
- * cobre todos os posts; o KV só é regravado quando o conteúdo mudou.
+ * cobre todos os posts; é o único caminho que cria cópias de posts no KV, e cada uma só é
+ * gravada quando não existe ou quando o conteúdo mudou.
  */
 export async function warmNewsPosts(
   context: NewsContext,
