@@ -7,7 +7,7 @@ import type { Novidade } from '@/config/novidades';
 import { capaDaMidia, capaDoBanner } from './capas';
 import { idEvento, idNoticia, idNovidade, type FontesNotificacoes } from './fontes';
 
-/* Cards das notificações montados a partir das fontes: usados pelo painel do sino e pelos toasts. */
+/* Cards das notificações montados a partir das fontes: usados pelo painel do sino. */
 
 /** Cores por origem, todas tokens do site (dourado de texto em #8A6A12 para contraste AA). */
 const ACCENT = {

@@ -1,10 +1,10 @@
-import { lazy, Suspense, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEstadoNotificacoes } from '@/features/notificacoes/estado';
+import { contarNaoLidas, useEstadoNotificacoes } from '@/features/notificacoes/estado';
 import { useFontesNotificacoes } from '@/features/notificacoes/fontes';
-import { EVENTO_CHEGADA, definirPainelAberto, useSinalNotificacoes } from '@/features/notificacoes/sinal';
+import { EVENTO_ABRIR_PAINEL, EVENTO_NOVIDADE, definirPainelAberto } from '@/features/notificacoes/sinal';
 
 // O feed (e as animações de cada tipo) só é baixado quando o painel abre ou o sino recebe ponteiro/foco.
 const carregarPainel = () => import('@/features/notificacoes/NotificationPanel');
@@ -12,10 +12,6 @@ const NotificationPanel = lazy(carregarPainel);
 
 /** Respiro entre a borda inferior do <header> e o painel, igual em todas as larguras. */
 const RESPIRO_PX = 8;
-
-/** Pulso do contador (escala 1→1,08) com halo dourado por trás; nada com movimento reduzido. */
-const PULSO =
-  "motion-safe:animate-notif-pulse motion-safe:before:absolute motion-safe:before:inset-0 motion-safe:before:-z-10 motion-safe:before:rounded-full motion-safe:before:bg-crfal-gold motion-safe:before:content-[''] motion-safe:before:animate-notif-halo";
 
 /** Notícias entram depois da primeira abertura (ou já em cache, como na home): o sino não pesa nas outras páginas. */
 let painelJaAberto = false;
@@ -43,7 +39,6 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
   const [comNoticias, setComNoticias] = useState(painelJaAberto);
   const fontes = useFontesNotificacoes(comNoticias);
   const estado = useEstadoNotificacoes();
-  const { emTransito } = useSinalNotificacoes();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [lastPathname, setLastPathname] = useState(pathname);
@@ -60,19 +55,15 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
     setOpen(false);
   }
 
-  const lidas = new Set(estado.lidas);
-  const dispensadas = new Set(estado.dispensadas);
-  // Toasts ainda na tela ou voando não contam: o contador sobe quando eles chegam ao sino.
-  const voando = new Set(emTransito);
-  const naoLidas = fontes.ids.filter((id) => !lidas.has(id) && !dispensadas.has(id) && !voando.has(id)).length;
+  const naoLidas = contarNaoLidas(fontes.ids, estado);
 
-  const abrir = () => {
+  const abrir = useCallback(() => {
     void queryClient.refetchQueries({ queryKey: ['wp', 'events'], stale: true });
     void queryClient.refetchQueries({ queryKey: ['wp', 'posts', 1, 5], stale: true });
     painelJaAberto = true;
     setComNoticias(true);
     setOpen(true);
-  };
+  }, [queryClient]);
 
   const fechar = () => {
     setOpen(false);
@@ -104,32 +95,41 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
     };
   }, [open]);
 
-  // Os toasts só aparecem (e somem, se já estiverem na tela) com o painel fechado.
+  // O banner só aparece (e some, se já estiver na tela) com o painel fechado.
   useEffect(() => {
     if (!open) return;
     definirPainelAberto(true);
     return () => definirPainelAberto(false);
   }, [open]);
 
-  // "Bump" de recebimento quando os toasts chegam ao sino (o contador atualiza junto).
+  // Quando o banner avisa de novidades, o sino balança uma vez e amortece, como um sino de verdade.
   useEffect(() => {
-    const onChegada = () => {
+    const onNovidade = () => {
       const icon = iconRef.current;
       if (!icon || icon.getBoundingClientRect().width === 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       icon.animate(
         [
-          { transform: 'scale(1) rotate(0deg)' },
-          { transform: 'scale(1.22) rotate(-10deg)', offset: 0.3 },
-          { transform: 'scale(0.94) rotate(7deg)', offset: 0.55 },
-          { transform: 'scale(1.04) rotate(-3deg)', offset: 0.78 },
-          { transform: 'scale(1) rotate(0deg)' },
+          { transform: 'rotate(0deg)' },
+          { transform: 'rotate(-9deg)', offset: 0.25 },
+          { transform: 'rotate(6deg)', offset: 0.55 },
+          { transform: 'rotate(-2deg)', offset: 0.8 },
+          { transform: 'rotate(0deg)' },
         ],
-        { duration: 520, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' },
+        { duration: 500, easing: 'ease-out' },
       );
     };
-    window.addEventListener(EVENTO_CHEGADA, onChegada);
-    return () => window.removeEventListener(EVENTO_CHEGADA, onChegada);
+    window.addEventListener(EVENTO_NOVIDADE, onNovidade);
+    return () => window.removeEventListener(EVENTO_NOVIDADE, onNovidade);
   }, []);
+
+  // O clique no banner abre o painel do sino visível (o outro está oculto por CSS).
+  useEffect(() => {
+    const onAbrir = () => {
+      if (buttonRef.current && buttonRef.current.getBoundingClientRect().width > 0) abrir();
+    };
+    window.addEventListener(EVENTO_ABRIR_PAINEL, onAbrir);
+    return () => window.removeEventListener(EVENTO_ABRIR_PAINEL, onAbrir);
+  }, [abrir]);
 
   // Desktop: o sino fica no meio da barra; o painel desce até o fim do <header> + 8px. A distância
   // sino→fim do header não muda quando a barra utilitária recolhe (os dois sobem juntos), então
@@ -168,14 +168,8 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
           <Bell className={styles.icon} aria-hidden="true" />
         </span>
         {naoLidas > 0 && (
-          // Pulso leve e contínuo (escala + halo dourado) enquanto há não lidas e o painel está fechado.
-          <span
-            aria-hidden
-            data-bell-count={naoLidas}
-            data-pulsing={open ? undefined : ''}
-            className={`absolute right-1 top-1 isolate rounded-full ${open ? '' : PULSO}`}
-          >
-            {/* A chave refaz o "pop" a cada mudança do número (ex.: quando os toasts chegam). */}
+          <span aria-hidden data-bell-count={naoLidas} className="absolute right-1 top-1 rounded-full">
+            {/* A chave refaz o "pop" a cada mudança do número. */}
             <span
               key={naoLidas}
               className={`relative block min-w-[18px] rounded-full bg-crfal-gold px-1 text-center text-[10.5px] font-bold leading-[18px] text-crfal-blue-dark tabular-nums ring-2 motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:duration-300 ${styles.badge}`}

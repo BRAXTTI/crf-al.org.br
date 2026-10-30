@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
-import { EVENTO_TOASTS_FIM } from '@/features/notificacoes/sinal';
+import { EVENTO_BANNER_FIM } from '@/features/notificacoes/sinal';
 
 const DEFAULT_DELAY_MS = 3000;
 const DEFAULT_DISMISS_DAYS = 1;
@@ -21,7 +21,7 @@ const QUIET_MS = 1500;
 const EXPIRY_CHECK_MS = 60_000;
 const INTERACTION_EVENTS = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'touchmove'] as const;
 // Nenhuma interação aqui conta (nem rolagem): cabeçalho, menu, diálogos e sino.
-const CHROME_SELECTOR = 'header, [role="dialog"], #mobile-navigation, [data-notification-bell], [data-notification-panel], [data-notification-toasts]';
+const CHROME_SELECTOR = 'header, [role="dialog"], #mobile-navigation, [data-notification-bell], [data-notification-panel], [data-notification-banner]';
 // Toque, clique ou tecla aqui é o começo de uma ação do usuário: não abre o popup por cima.
 const CONTROL_SELECTOR = `a, button, input, select, textarea, summary, [role="button"], [role="menuitem"], ${CHROME_SELECTOR}`;
 // Menu mobile, megamenu, sino ou qualquer outro diálogo aberto agora.
@@ -95,8 +95,8 @@ export default function Popup({ popup }: PopupProps) {
     let lastInteraction = 0;
     let quietTimer = 0;
     const busy = () => Boolean(document.querySelector(BUSY_SELECTOR));
-    // Toasts das notificações na tela: o pop-up espera eles voarem para o sino.
-    const toastsOnScreen = () => Boolean(document.querySelector('[data-notification-toasts]'));
+    // Banner de novidades na tela: o pop-up espera ele sair.
+    const bannerOnScreen = () => Boolean(document.querySelector('[data-notification-banner]'));
     const tryOpen = () => {
       window.clearTimeout(quietTimer);
       if (!delayDone || !interacted) return;
@@ -107,7 +107,7 @@ export default function Popup({ popup }: PopupProps) {
         return;
       }
       // Menu, sino ou diálogo aberto: espera a próxima interação (ex.: fechar o menu).
-      if (busy() || toastsOnScreen()) return;
+      if (busy() || bannerOnScreen()) return;
       removeListeners();
       if (popupNoAr(active)) setOpen(true);
     };
@@ -128,18 +128,18 @@ export default function Popup({ popup }: PopupProps) {
       interacted = true;
       tryOpen();
     };
-    let afterToasts = 0;
-    const onToastsEnd = () => {
-      window.clearTimeout(afterToasts);
-      // Depois do evento, o React ainda desmonta os toasts: tenta no quadro seguinte.
-      afterToasts = window.setTimeout(tryOpen, 200);
+    let afterBanner = 0;
+    const onBannerEnd = () => {
+      window.clearTimeout(afterBanner);
+      // Depois do evento, o React ainda desmonta o banner: tenta no quadro seguinte.
+      afterBanner = window.setTimeout(tryOpen, 200);
     };
     const removeListeners = () => {
       INTERACTION_EVENTS.forEach((type) => window.removeEventListener(type, onInteract, true));
-      window.removeEventListener(EVENTO_TOASTS_FIM, onToastsEnd);
+      window.removeEventListener(EVENTO_BANNER_FIM, onBannerEnd);
     };
     INTERACTION_EVENTS.forEach((type) => window.addEventListener(type, onInteract, { passive: true, capture: true }));
-    window.addEventListener(EVENTO_TOASTS_FIM, onToastsEnd);
+    window.addEventListener(EVENTO_BANNER_FIM, onBannerEnd);
     const timer = window.setTimeout(() => {
       delayDone = true;
       tryOpen();
@@ -147,7 +147,7 @@ export default function Popup({ popup }: PopupProps) {
     return () => {
       window.clearTimeout(timer);
       window.clearTimeout(quietTimer);
-      window.clearTimeout(afterToasts);
+      window.clearTimeout(afterBanner);
       removeListeners();
     };
   }, [active]);
