@@ -254,8 +254,9 @@ try {
     assert.equal(requests.filter(url => url.searchParams.get('rest_route').startsWith('/wp/v2/posts/')).length, 1);
     await Promise.all(pending.splice(0));
     assert.equal(first.content.rendered.length > 0, true, 'Detalhe completo (com conteúdo) também serve os metadados');
-    assert.equal(writes.filter(row => row.key === postKey).length, 1);
-    assert.equal(writes.find(row => row.key === postKey).options.expirationTtl, 30 * 24 * 3600);
+    assert.equal(writes.filter(row => row.key === postKey).length, 0, 'Visita a post fora do KV não grava');
+    // Cópia criada pelo cron (warmNewsPosts): visitas a leem e só a regravam quando muda.
+    await kv.put(postKey, JSON.stringify({ storedAt: Date.now(), value: first }), { expirationTtl: 30 * 24 * 3600 });
     fail = true;
     assert.deepEqual(await newsPost(slug, context), first, 'Reserva do KV servida mesmo com a origem fora');
     await Promise.all(pending.splice(0));
@@ -271,7 +272,7 @@ try {
       await Promise.all(pending.splice(0));
       assert.equal((await newsPost(slug, context)).title.rendered, 'Título editado', 'Edição aparece após a revalidação');
       await Promise.all(pending.splice(0));
-      assert.equal(writes.filter(row => row.key === postKey).length, 2);
+      assert.equal(writes.filter(row => row.key === postKey).length, 2, 'Edição atualiza a cópia existente');
     } finally { original.title = title; }
     // Middleware e API usam a mesma chave local: a API reaproveita o post buscado no SSR.
     const local = new Map();
@@ -295,7 +296,8 @@ try {
       await Promise.all([newsPost(slug, context), newsPost(slug, context)]);
       assert.equal(pending.length, 1, 'Revalidação single-flight');
       await Promise.all(pending.splice(0));
-      assert.ok(values.has(postKey), 'Revalidação recompõe a reserva do KV');
+      assert.ok(!values.has(postKey), 'Revalidação não cria cópia no KV');
+      assert.equal(writes.filter(row => row.key === postKey).length, 0, 'Visitas sem cópia no KV não gravam');
       const saved = await local.get(entry).clone().json();
       const old = Date.now() - 120_000;
       local.set(entry, Response.json({ ...saved, storedAt: old }));
@@ -319,6 +321,7 @@ try {
     assert.equal(requests.filter(url => url.searchParams.get('rest_route') === '/wp/v2/posts').length, 1);
     assert.ok(requests.find(url => url.searchParams.get('rest_route') === '/wp/v2/posts').searchParams.get('_fields').includes('content'));
     for (const row of recent) assert.ok(values.has(`news:cache:v1:post/${encodeURIComponent(row.slug)}`), row.slug);
+    for (const row of writes.filter(row => row.key.startsWith('news:cache:v1:post/'))) assert.equal(row.options.expirationTtl, 30 * 24 * 3600);
     writes.length = 0;
     assert.equal(await warmNewsPosts(context), recent.length);
     assert.equal(writes.length, 0, 'Pré-aquecimento sem mudanças não escreve no KV');
@@ -445,7 +448,9 @@ try {
       const tasks = [];
       const store = new Map(); const kvStore = { async get(key) { return store.has(key) ? JSON.parse(store.get(key)) : null; }, async put(key, value) { store.set(key, value); }, async delete(key) { store.delete(key); } };
       const slug = find(16028).slug;
-      await newsPost(slug, { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task) }); await Promise.all(tasks.splice(0));
+      const warm = await newsPost(slug, { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task) }); await Promise.all(tasks.splice(0));
+      assert.equal(store.size, 0, 'Visita não cria cópia no KV');
+      store.set(`news:cache:v1:post/${encodeURIComponent(slug)}`, JSON.stringify({ storedAt: Date.now(), value: warm }));
       requests = [];
       const served = await newsPost(slug, { env: { NEWS_INDEX: kvStore }, waitUntil: task => tasks.push(task), budget: { deadline: Date.now() - 1, retry: false } });
       assert.equal(served.slug, slug);

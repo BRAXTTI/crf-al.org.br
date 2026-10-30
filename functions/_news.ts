@@ -161,23 +161,22 @@ async function storeDurable<T>(
   key: string,
   value: T,
   previous?: Stored<T> | null,
+  create = false,
 ): Promise<void> {
   const now = Date.now();
   const stored =
     previous === undefined ? await kv.get<Stored<T>>(durableKey(key), 'json') : previous;
-  if (
-    stored &&
-    JSON.stringify(stored.value) === JSON.stringify(value)
-  )
-    return;
+  // Só o cron cria cópias; visitas apenas atualizam as que já existem.
+  if (!stored && !create) return;
+  if (stored && JSON.stringify(stored.value) === JSON.stringify(value)) return;
   await kv.put(durableKey(key), JSON.stringify({ storedAt: now, value }), {
     expirationTtl: DURABLE_TTL_S,
   });
 }
 /**
- * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, o KV
- * NEWS_INDEX guarda uma reserva compartilhada entre data centers, servida de imediato quando
- * o cache local está vazio. Recargas em segundo plano são single-flight por isolate e marcam
+ * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, a reserva
+ * do KV NEWS_INDEX (criada só pelo cron em warmNewsPosts) é servida de imediato quando o cache
+ * local está vazio; visitas a atualizam se o conteúdo mudar, mas nunca a criam. Recargas em segundo plano são single-flight por isolate e marcam
  * apenas a tentativa com checkedAt, sem renovar a idade do conteúdo. Resultados `null` (não encontrado)
  * ficam 5 min só no cache local, para que slugs inexistentes não cheguem sempre à origem.
  */
@@ -261,8 +260,9 @@ async function cachedLoad<T>(
     return stale.value;
   }
   const value = await load(context);
+  // Entrada local vencida não diz se há cópia no KV: storeDurable confere.
   if (cache || (kv && value !== null))
-    await persist(value, kv ? (entry ?? null) : undefined).catch(() => undefined);
+    await persist(value, fromDurable ? entry : entry ? undefined : null).catch(() => undefined);
   return value;
 }
 // Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
@@ -741,7 +741,7 @@ export async function warmNewsPosts(
     acceptable(post, taxonomy.category, taxonomy.spam),
   );
   const posts = (await enrich(rows, taxonomy, context, true)).filter(hasTitle);
-  await Promise.all(posts.map((post) => storeDurable(kv, postKey(post.slug), post)));
+  await Promise.all(posts.map((post) => storeDurable(kv, postKey(post.slug), post, undefined, true)));
   return posts.length;
 }
 export async function newsPage(
