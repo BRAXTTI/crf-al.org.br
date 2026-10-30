@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { moduleUrl } from './load-typescript.mjs';
 import { loadNews } from './load-news.mjs';
 const { NEWS_MAP, BLOCKED_NEWS_SLUGS, OCCUPIED_HISTORICAL_IDS } = await import(await moduleUrl('../functions/_news-map.ts'));
-const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, legacyCover, NEWS_INDEX_MAX_PAGES, NEWS_INDEX_RETRY_MS, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK, NEWS_RECENT_CARDS_KEY, NEWS_REFRESH_QUOTA_PREFIX } = await import(await loadNews());
+const { newsIndex, newsPage, newsPost, newsApi, newsSitemapIndex, searchNews, refreshNewsIndex, warmNewsPosts, withNewsBudget, normalizeSearch, clearNewsIndexMemo, legacyCover, NEWS_INDEX_MAX_PAGES, NEWS_INDEX_RETRY_MS, PAGE_BUDGET_MS, API_BUDGET_MS, NEWS_INDEX_KEY, NEWS_INDEX_LOCK, NEWS_RECENT_CARDS_KEY, NEWS_REFRESH_QUOTA_PREFIX, NEWS_INDEX_CHECK, NEWS_INDEX_CHECK_REWRITE_MS, NEWS_INDEX_REFRESH_MS } = await import(await loadNews());
 const find = id => NEWS_MAP.find(row => row.oldId === id);
 const selected = [16028, 16193, 16150, 16108, 7108].map(find);
 const post = row => ({ id: row.newId, slug: row.newSlug, date: '2020-01-01T00:00:00', date_gmt: '2020-01-01T03:00:00', modified: '2020-01-01T03:00:00', title: { rendered: row.title ? '' : 'Título' }, excerpt: { rendered: '<p>Resumo</p>' }, content: { rendered: '<img src="https://www.crf-al.org.br/app/uploads/2020/a.jpg" srcset="https://crf-al.org.br/wp-content/uploads/a.jpg 2x">' }, categories: [1], featured_media: 55, author: 7, _embedded: { 'wp:featuredmedia': [{ source_url: 'https://www.crf-al.org.br/app/uploads/2020/a.jpg' }] } });
@@ -221,6 +221,61 @@ try {
     assert.equal(await refreshNewsIndex(context), null);
     assert.equal(requests.length, 0, 'Cota impede refresh');
     values.delete(quotaKey);
+  }
+  // checked: o cron só o regrava quando envelhece; o visitante não dispara refresh antes disso.
+  {
+    assert.ok(NEWS_INDEX_REFRESH_MS > NEWS_INDEX_CHECK_REWRITE_MS + 3600_000, 'Refresh de visitante tolera o intervalo do checked');
+    const count = key => writes.filter(row => row.key === key).length;
+    const cron = async () => { clearNewsIndexMemo(kv); await refreshNewsIndex(context, true); await Promise.all(pending.splice(0)); };
+    await cron(); // Sincroniza o índice gravado com a origem atual.
+    const savedIndex = values.get(NEWS_INDEX_KEY);
+    const age = (ms, checkedMs = ms) => {
+      const entry = JSON.parse(savedIndex);
+      values.set(NEWS_INDEX_KEY, JSON.stringify({ ...entry, storedAt: Date.now() - ms, checkedAt: Date.now() - ms }));
+      values.set(NEWS_INDEX_CHECK, JSON.stringify({ hash: entry.hash, checkedAt: Date.now() - checkedMs }));
+      clearNewsIndexMemo(kv); values.delete(NEWS_INDEX_LOCK);
+    };
+    age(3600_000);
+    let index = count(NEWS_INDEX_KEY); let checked = count(NEWS_INDEX_CHECK);
+    await cron();
+    assert.equal(count(NEWS_INDEX_CHECK) - checked, 0, 'Cron sem mudança não regrava checked recente');
+    assert.equal(count(NEWS_INDEX_KEY) - index, 0);
+    age(6 * 3600_000 - 60_000);
+    await cron();
+    assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'checked regravado na 6ª execução horária');
+    assert.ok(Date.now() - JSON.parse(values.get(NEWS_INDEX_CHECK)).checkedAt < 60_000);
+    await cron();
+    assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'Execução seguinte não regrava');
+    // Com o cron saudável o checked chega a ~6–7 h: o visitante não agenda refresh.
+    age(7 * 3600_000);
+    await newsIndex(context);
+    assert.equal(pending.length, 0, 'Visitante não agenda refresh com checked de 7 h');
+    age(NEWS_INDEX_REFRESH_MS + 60_000);
+    await newsIndex(context);
+    assert.equal(pending.length, 1, 'Cron parado: visitante agenda refresh');
+    checked = count(NEWS_INDEX_CHECK);
+    while (pending.length) await Promise.all(pending.splice(0)); // Inclui os cartões agendados pelo refresh.
+    assert.equal(count(NEWS_INDEX_CHECK) - checked, 1, 'Refresh do visitante renova checked');
+    // checked antigo com o mesmo hash não envelhece um índice recém-gravado.
+    age(0, NEWS_INDEX_REFRESH_MS + 60_000);
+    await newsIndex(context);
+    assert.equal(pending.length, 0, 'checkedAt usa o mais recente entre índice e checked');
+    // Índice alterado grava só o índice (que já leva checkedAt).
+    age(3600_000);
+    const changedPost = posts.find(p => p.id === cold[0].id);
+    const originalModified = changedPost.modified;
+    changedPost.modified = '2021-01-02T00:00:00';
+    try {
+      index = count(NEWS_INDEX_KEY); checked = count(NEWS_INDEX_CHECK);
+      await cron();
+      assert.equal(count(NEWS_INDEX_KEY) - index, 1);
+      assert.equal(count(NEWS_INDEX_CHECK) - checked, 0, 'Índice novo não grava checked');
+      clearNewsIndexMemo(kv);
+      await newsIndex(context);
+      assert.equal(pending.length, 0, 'Índice novo é considerado verificado');
+    } finally { changedPost.modified = originalModified; }
+    values.set(NEWS_INDEX_KEY, savedIndex); values.delete(NEWS_INDEX_CHECK);
+    clearNewsIndexMemo(kv); values.delete(NEWS_INDEX_LOCK);
   }
   {
     const quotaValues = new Map([[NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10), '500']]);

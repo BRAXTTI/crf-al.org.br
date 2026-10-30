@@ -519,9 +519,14 @@ const RECENT_LIMIT = 60;
 // Reserva 6 escritas por refresh (contador, lease, índice, checked, cartões e falha).
 // A cada 25 min: até 58 refreshes/dia, ou 348 escritas reservadas; teto 500.
 const REFRESH_WRITES = 6;
+export const NEWS_INDEX_CHECK = 'news:index:checked:v1';
+// Índice inalterado: checked só é regravado a cada ~6 h (a 6ª execução do cron horário;
+// a margem de 30 min absorve a variação do horário de cada execução). Cerca de 4 escritas/dia.
+export const NEWS_INDEX_CHECK_REWRITE_MS = 5.5 * 3600_000;
 // O cron (de hora em hora) é a fonte regular; visitantes só disparam refresh se o cron falhar.
-const REFRESH_MS = 3 * 3600_000;
-const NEWS_INDEX_CHECK = 'news:index:checked:v1';
+// checkedAt chega a ~6 h com o cron saudável: 9 h tolera ~3 execuções perdidas.
+export const NEWS_INDEX_REFRESH_MS = 9 * 3600_000;
+const REFRESH_MS = NEWS_INDEX_REFRESH_MS;
 const LEASE_MS = 120_000;
 // Após falha, o lease vira um intervalo curto: sem 503 por 2 min com o KV vazio e sem martelar a origem.
 export const NEWS_INDEX_RETRY_MS = 15_000;
@@ -590,7 +595,9 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
       type: 'json',
       cacheTtl: 60,
     });
-    if (checked?.hash === entry.hash) entry.checkedAt = checked?.checkedAt;
+    // checked pode ser anterior ao próprio índice (só é gravado quando o índice não muda).
+    if (checked?.hash && checked.hash === entry.hash)
+      entry.checkedAt = Math.max(entry.checkedAt ?? entry.storedAt, checked.checkedAt);
     memo.set(kv, { readAt: Date.now(), entry });
   }
   return entry;
@@ -607,10 +614,13 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
       byte.toString(16).padStart(2, '0'),
     ).join('');
     const previous = await readNewsIndex(kv);
-    const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
-    if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
-    await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
-    // (checked: 1 escrita/execução = 24/dia com cron horário)
+    const now = Date.now();
+    // Índice novo já leva checkedAt; inalterado, só renova checked quando envelhece.
+    if (previous?.hash !== hash)
+      await kv.put(NEWS_INDEX_KEY, JSON.stringify({ storedAt: now, value, hash, checkedAt: now }));
+    else if (now - (previous.checkedAt ?? previous.storedAt) >= NEWS_INDEX_CHECK_REWRITE_MS)
+      await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: now }));
+    const entry = { storedAt: previous?.hash === hash ? previous.storedAt : now, value, hash, checkedAt: now };
     memo.set(kv, { readAt: Date.now(), entry });
     context.waitUntil(refreshRecentCards(kv, value, background(context)!).catch((error) => {
       console.error(JSON.stringify({ event: 'news_recent_cards_refresh_failed', message: String(error) }));
