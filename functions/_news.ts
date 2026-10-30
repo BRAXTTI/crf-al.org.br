@@ -146,10 +146,14 @@ async function request(
 type Stored<T> = { storedAt: number; checkedAt?: number; value: T };
 const MAX_STALE_MS = 24 * 3600_000;
 const FRESH_MS = 60_000;
-// Reserva durável no KV: sobrevive à expiração do cache local e às falhas do WordPress.
-// 30 dias: a reserva só é regravada quando o conteúdo muda (ou ao expirar).
+// Reserva durável de posts no KV (news:cache:v1:post/<slug>), compartilhada entre data centers.
+// Só o cron cria cópias (os ~30 posts recentes, em warmNewsPosts); visitas apenas leem e,
+// se o conteúdo mudou, atualizam ou apagam uma cópia existente. Nada é regravado por idade:
+// a cópia expira 30 dias após a última mudança. Como storedAt só avança quando o conteúdo
+// muda, a cópia é servida sem esperar a origem apenas nas primeiras 24 h (MAX_STALE_MS);
+// depois disso a visita consulta a origem e a cópia serve só para evitar escritas iguais.
 const DURABLE_TTL_S = 30 * 24 * 3600;
-// KV cobra cada escrita: só regrava quando o conteúdo muda ou a reserva envelhece.
+// Cartões recentes (news:recent-cards:v1): regravados se mudam ou a cada 24 h (~1 escrita/dia).
 const DURABLE_REWRITE_MS = 24 * 3600_000;
 const revalidating = new Map<string, Promise<void>>();
 const durableKey = (key: string) => `news:cache:v1:${key}`;
@@ -161,23 +165,22 @@ async function storeDurable<T>(
   key: string,
   value: T,
   previous?: Stored<T> | null,
+  create = false,
 ): Promise<void> {
   const now = Date.now();
   const stored =
     previous === undefined ? await kv.get<Stored<T>>(durableKey(key), 'json') : previous;
-  if (
-    stored &&
-    JSON.stringify(stored.value) === JSON.stringify(value)
-  )
-    return;
+  // Só o cron cria cópias; visitas apenas atualizam as que já existem.
+  if (!stored && !create) return;
+  if (stored && JSON.stringify(stored.value) === JSON.stringify(value)) return;
   await kv.put(durableKey(key), JSON.stringify({ storedAt: now, value }), {
     expirationTtl: DURABLE_TTL_S,
   });
 }
 /**
- * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, o KV
- * NEWS_INDEX guarda uma reserva compartilhada entre data centers, servida de imediato quando
- * o cache local está vazio. Recargas em segundo plano são single-flight por isolate e marcam
+ * Cache API por data center (fresco por 60 s) + stale-while-revalidate. Com `durable`, a reserva
+ * do KV NEWS_INDEX (criada só pelo cron em warmNewsPosts) é servida de imediato quando o cache
+ * local está vazio; visitas a atualizam se o conteúdo mudar, mas nunca a criam. Recargas em segundo plano são single-flight por isolate e marcam
  * apenas a tentativa com checkedAt, sem renovar a idade do conteúdo. Resultados `null` (não encontrado)
  * ficam 5 min só no cache local, para que slugs inexistentes não cheguem sempre à origem.
  */
@@ -261,8 +264,9 @@ async function cachedLoad<T>(
     return stale.value;
   }
   const value = await load(context);
+  // Entrada local vencida não diz se há cópia no KV: storeDurable confere.
   if (cache || (kv && value !== null))
-    await persist(value, kv ? (entry ?? null) : undefined).catch(() => undefined);
+    await persist(value, fromDurable ? entry : entry ? undefined : null).catch(() => undefined);
   return value;
 }
 // Compartilha inclusive a leitura inicial do KV e a persistência em rajadas frias.
@@ -516,12 +520,18 @@ export const NEWS_INDEX_LOCK = 'news:index:refresh:v1';
 export const NEWS_RECENT_CARDS_KEY = 'news:recent-cards:v1';
 export const NEWS_REFRESH_QUOTA_PREFIX = 'news:refresh-quota:v1:';
 const RECENT_LIMIT = 60;
-// Reserva 6 escritas por refresh (contador, lease, índice, checked, cartões e falha).
-// A cada 25 min: até 58 refreshes/dia, ou 348 escritas reservadas; teto 500.
+// Refresh de visitante (só quando o cron falha) reserva 6 escritas na cota diária
+// (contador, lease, índice ou checked, cartões e falha), com teto de 500/dia.
+// O cron não usa contador nem lease.
 const REFRESH_WRITES = 6;
+export const NEWS_INDEX_CHECK = 'news:index:checked:v1';
+// Índice inalterado: checked só é regravado a cada ~6 h (a 6ª execução do cron horário;
+// a margem de 30 min absorve a variação do horário de cada execução). Cerca de 4 escritas/dia.
+export const NEWS_INDEX_CHECK_REWRITE_MS = 5.5 * 3600_000;
 // O cron (de hora em hora) é a fonte regular; visitantes só disparam refresh se o cron falhar.
-const REFRESH_MS = 3 * 3600_000;
-const NEWS_INDEX_CHECK = 'news:index:checked:v1';
+// checkedAt chega a ~6 h com o cron saudável: 9 h tolera ~3 execuções perdidas.
+export const NEWS_INDEX_REFRESH_MS = 9 * 3600_000;
+const REFRESH_MS = NEWS_INDEX_REFRESH_MS;
 const LEASE_MS = 120_000;
 // Após falha, o lease vira um intervalo curto: sem 503 por 2 min com o KV vazio e sem martelar a origem.
 export const NEWS_INDEX_RETRY_MS = 15_000;
@@ -590,7 +600,9 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
       type: 'json',
       cacheTtl: 60,
     });
-    if (checked?.hash === entry.hash) entry.checkedAt = checked?.checkedAt;
+    // checked pode ser anterior ao próprio índice (só é gravado quando o índice não muda).
+    if (checked?.hash && checked.hash === entry.hash)
+      entry.checkedAt = Math.max(entry.checkedAt ?? entry.storedAt, checked.checkedAt);
     memo.set(kv, { readAt: Date.now(), entry });
   }
   return entry;
@@ -607,10 +619,13 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
       byte.toString(16).padStart(2, '0'),
     ).join('');
     const previous = await readNewsIndex(kv);
-    const entry = { storedAt: Date.now(), value, hash, checkedAt: Date.now() };
-    if (previous?.hash !== hash) await kv.put(NEWS_INDEX_KEY, JSON.stringify(entry));
-    await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: entry.checkedAt }));
-    // (checked: 1 escrita/execução = 24/dia com cron horário)
+    const now = Date.now();
+    // Índice novo já leva checkedAt; inalterado, só renova checked quando envelhece.
+    if (previous?.hash !== hash)
+      await kv.put(NEWS_INDEX_KEY, JSON.stringify({ storedAt: now, value, hash, checkedAt: now }));
+    else if (now - (previous.checkedAt ?? previous.storedAt) >= NEWS_INDEX_CHECK_REWRITE_MS)
+      await kv.put(NEWS_INDEX_CHECK, JSON.stringify({ hash, checkedAt: now }));
+    const entry = { storedAt: previous?.hash === hash ? previous.storedAt : now, value, hash, checkedAt: now };
     memo.set(kv, { readAt: Date.now(), entry });
     context.waitUntil(refreshRecentCards(kv, value, background(context)!).catch((error) => {
       console.error(JSON.stringify({ event: 'news_recent_cards_refresh_failed', message: String(error) }));
@@ -715,7 +730,8 @@ export async function newsPost(slug: string, context?: NewsContext): Promise<WPP
 export const WARM_POSTS = 30;
 /**
  * Pré-aquece no KV o detalhe das notícias mais recentes (cron). Uma consulta `include`
- * cobre todos os posts; o KV só é regravado quando o conteúdo mudou.
+ * cobre todos os posts; é o único caminho que cria cópias de posts no KV, e cada uma só é
+ * gravada quando não existe ou quando o conteúdo mudou.
  */
 export async function warmNewsPosts(
   context: NewsContext,
@@ -741,7 +757,7 @@ export async function warmNewsPosts(
     acceptable(post, taxonomy.category, taxonomy.spam),
   );
   const posts = (await enrich(rows, taxonomy, context, true)).filter(hasTitle);
-  await Promise.all(posts.map((post) => storeDurable(kv, postKey(post.slug), post)));
+  await Promise.all(posts.map((post) => storeDurable(kv, postKey(post.slug), post, undefined, true)));
   return posts.length;
 }
 export async function newsPage(
