@@ -460,14 +460,16 @@ function NovidadeDetail({ item, play, delay, reduced }: StoryProps & { item: Nov
   }, [play, animate, delay]);
 
   return (
-    <div data-detail="novidade" className="relative isolate flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-white" style={{ background: "var(--notif-grad-pill)" }}>
+    <div className="@container">
+    {/* Faixa estreita: sem os ícones repetidos, a seção e o selo ficam legíveis. */}
+    <div data-detail="novidade" className="relative isolate flex items-center gap-2 overflow-hidden rounded-xl px-2.5 py-2.5 text-white @xs:gap-3 @xs:px-3" style={{ background: "var(--notif-grad-pill)" }}>
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 opacity-70 [background-image:radial-gradient(circle_at_85%_-20%,rgb(232_203_118/0.28),transparent_55%),linear-gradient(to_right,rgb(255_255_255/0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgb(255_255_255/0.05)_1px,transparent_1px)] [background-size:100%_100%,14px_14px,14px_14px]"
       />
       <span aria-hidden className="pointer-events-none absolute inset-x-4 top-0 h-px bg-linear-to-r/srgb from-crfal-gold/0 via-crfal-gold/80 to-crfal-gold/0" />
       <span ref={sheenRef} aria-hidden className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-1/3 bg-linear-to-r/srgb from-white/0 via-white/15 to-white/0 opacity-0" />
-      <span ref={tileRef} aria-hidden className="grid size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-crfal-gold ring-1 ring-inset ring-white/15 backdrop-blur-sm">
+      <span ref={tileRef} aria-hidden className="hidden size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-crfal-gold ring-1 ring-inset ring-white/15 backdrop-blur-sm @3xs:grid">
         <Icon d={ICONS.novidade} className="size-4" />
       </span>
       <span ref={textRef} className="min-w-0 flex-1 leading-tight">
@@ -477,9 +479,10 @@ function NovidadeDetail({ item, play, delay, reduced }: StoryProps & { item: Nov
       <span ref={badgeRef} className="shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-crfal-blue-dark" style={{ background: "var(--notif-grad-badge)" }}>
         Nova
       </span>
-      <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15">
+      <span aria-hidden className="hidden size-6 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15 @3xs:grid">
         <Icon d={ARROW} className="size-3" />
       </span>
+    </div>
     </div>
   );
 }
@@ -1053,7 +1056,8 @@ export function LiveNotificationFeed({
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-24 opacity-60 [background-image:linear-gradient(to_right,rgb(0_51_102/0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgb(0_51_102/0.06)_1px,transparent_1px)] [background-size:16px_16px] [mask-image:linear-gradient(to_bottom,black,transparent)]"
       />
-      <div className="flex items-center gap-2 pb-2 pl-3 pr-1.5 pt-2.5">
+      {/* Sem espaço para tudo numa linha, as ações descem para a de baixo e o título fica inteiro. */}
+      <div className="flex flex-wrap items-center gap-x-2 pb-2 pl-3 pr-1.5 pt-2.5">
         <span className="grid size-7 shrink-0 place-items-center rounded-full bg-crfal-blue text-white ring-1 ring-crfal-gold/50">
           <svg
             ref={bellRef}
