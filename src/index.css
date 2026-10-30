@@ -379,6 +379,7 @@
     --notif-grad-novidade: linear-gradient(135deg, #fafdff, #e8f2fa);
     --notif-grad-servico: linear-gradient(135deg, #fbfefa, #e9f5ef);
     --notif-grad-noticia: linear-gradient(135deg, #fcfcff, #edf0f8);
+    --notif-grad-pill: linear-gradient(135deg, #0b192c, #003366);
     --notif-grad-badge: linear-gradient(135deg, #e8cb76, #c59b27);
 
     --crfal-gray: #f8fafc;

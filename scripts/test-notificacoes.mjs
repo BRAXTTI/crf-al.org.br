@@ -136,6 +136,9 @@ assert.match(bannerReduzido, /\[data-notification-banner\] \{[^}]*animation-dura
 assert.match(bannerReduzido, /\[data-state="saindo"\] \{ animation-duration: 160ms !important/, 'Banner com movimento reduzido: saída igual a SAIDA_MS');
 assert.ok(css.indexOf('animation-duration: 0.01ms !important') > -1, 'A regra global de movimento reduzido continua valendo para o resto do site');
 
+// Gradientes das notificações: todo token usado existe (sem ele, a faixa "Agora no site" fica transparente).
+for (const [, token] of feed.matchAll(/var\((--notif-[a-z-]+)\)/g)) assert.match(css, new RegExp(`${token}:`), `Token definido: ${token}`);
+
 // Painel renderizado de verdade (jsdom + React).
 const { JSDOM } = await import('jsdom');
 const { createRequire } = await import('node:module');
