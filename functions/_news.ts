@@ -164,6 +164,27 @@ const durableKey = (key: string) => `news:cache:v1:${key}`;
 function localCache() {
   return (globalThis as typeof globalThis & { caches?: { default?: PublicCache } }).caches?.default;
 }
+function logKVFailure(error: unknown) {
+  console.error(JSON.stringify({ event: 'news_kv_failed', message: String(error) }));
+}
+/** Leitura opcional do KV: falha vira `undefined` (ausência é `null`) e a visita segue para a origem. */
+async function tryKV<T>(read: () => Promise<T>): Promise<T | undefined> {
+  try {
+    return await read();
+  } catch (error) {
+    logKVFailure(error);
+    return undefined;
+  }
+}
+/** Falha no KV durante o refresh de visitante, distinta de uma falha do WordPress. */
+class NewsKVError extends Error {}
+async function leaseStep<T>(step: () => Promise<T>): Promise<T> {
+  try {
+    return await step();
+  } catch (error) {
+    throw new NewsKVError(String(error));
+  }
+}
 async function storeDurable<T>(
   kv: KVNamespace,
   key: string,
@@ -247,8 +268,12 @@ async function cachedLoad<T>(
   let fromDurable = false;
   // Entrada local vencida também confere o KV: o cron pode ter renovado a cópia depois dela.
   if (kv && (!entry || Date.now() - entry.storedAt > MAX_STALE_MS)) {
-    entry = (await kv.get<Stored<T>>(durableKey(key), 'json')) ?? undefined;
-    fromDurable = Boolean(entry);
+    const copy = await tryKV(() => kv.get<Stored<T>>(durableKey(key), 'json'));
+    // KV indisponível: mantém a entrada local (se vencida, a visita vai à origem, sem escritas).
+    if (copy !== undefined) {
+      entry = copy ?? undefined;
+      fromDurable = Boolean(entry);
+    }
   }
   if (entry && Date.now() - entry.storedAt <= MAX_STALE_MS) {
     const stale = entry;
@@ -601,10 +626,14 @@ async function readNewsIndex(kv: KVNamespace): Promise<StoredIndex | null> {
   if (hit && Date.now() - hit.readAt < NEWS_INDEX_MEMO_MS) return hit.entry;
   const entry = await kv.get<StoredIndex>(NEWS_INDEX_KEY, { type: 'json', cacheTtl: 60 });
   if (entry) {
-    const checked = await kv.get<{ hash: string; checkedAt: number }>(NEWS_INDEX_CHECK, {
-      type: 'json',
-      cacheTtl: 60,
-    });
+    const checked = await tryKV(() =>
+      kv.get<{ hash: string; checkedAt: number }>(NEWS_INDEX_CHECK, {
+        type: 'json',
+        cacheTtl: 60,
+      }),
+    );
+    // checked ilegível não prova que o índice envelheceu: não dispara refresh nem escritas.
+    if (checked === undefined) entry.checkedAt = Date.now();
     // checked pode ser anterior ao próprio índice (só é gravado quando o índice não muda).
     if (checked?.hash && checked.hash === entry.hash)
       entry.checkedAt = Math.max(entry.checkedAt ?? entry.storedAt, checked.checkedAt);
@@ -642,17 +671,21 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
     // Cron: execução única a cada 3 h, sem contador nem lease no KV (2 escritas a menos).
     if (scheduled) return commit(await buildNewsIndex(background(context)));
     const quotaKey = NEWS_REFRESH_QUOTA_PREFIX + new Date().toISOString().slice(0, 10);
-    const used = (await kv.get<number>(quotaKey, 'json')) ?? 0;
+    const used = (await leaseStep(() => kv.get<number>(quotaKey, 'json'))) ?? 0;
     if (used + REFRESH_WRITES > 500) {
       console.error(JSON.stringify({ event: 'news_refresh_quota_exceeded', used }));
-      if (await readNewsIndex(kv)) return null;
+      if (await leaseStep(() => readNewsIndex(kv))) return null;
       return cached('index', context, () => buildNewsIndex(background(context)));
     }
-    const lock = await kv.get<number>(NEWS_INDEX_LOCK, 'json');
+    const lock = await leaseStep(() => kv.get<number>(NEWS_INDEX_LOCK, 'json'));
     if (lock && Date.now() - lock < LEASE_MS) return null;
-    await kv.put(quotaKey, JSON.stringify(used + REFRESH_WRITES), { expirationTtl: DURABLE_TTL_S });
+    await leaseStep(() =>
+      kv.put(quotaKey, JSON.stringify(used + REFRESH_WRITES), { expirationTtl: DURABLE_TTL_S }),
+    );
     // KV não oferece compare-and-swap: lease distribuído best-effort + single-flight local.
-    await kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: LEASE_MS / 1000 });
+    await leaseStep(() =>
+      kv.put(NEWS_INDEX_LOCK, JSON.stringify(Date.now()), { expirationTtl: LEASE_MS / 1000 }),
+    );
     let value: Entry[];
     try {
       value = await buildNewsIndex(background(context));
@@ -665,15 +698,22 @@ export function refreshNewsIndex(context: NewsContext, scheduled = false): Promi
         .catch(() => undefined);
       throw error;
     }
-    return commit(value);
+    // O índice já veio do WordPress: falha ao gravar não o descarta. O cron, acima, propaga a falha.
+    return await commit(value).catch((error) => {
+      logKVFailure(error);
+      return value;
+    });
   })().finally(() => refreshing.delete(kv));
   refreshing.set(kv, task);
   return task;
 }
 export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
   const kv = newsKV(context);
-  if (!kv) return cached('index', context, () => buildNewsIndex(background(context)));
-  const entry = await readNewsIndex(kv);
+  const live = () => cached('index', context, () => buildNewsIndex(background(context)));
+  if (!kv) return live();
+  // Falha do KV (leitura ou lease) cai na construção ao vivo + Cache API, sem repetir falhas do WordPress.
+  const entry = await tryKV(() => readNewsIndex(kv));
+  if (entry === undefined) return live();
   if (entry) {
     if (Date.now() - (entry.checkedAt ?? entry.storedAt) > REFRESH_MS)
       context!.waitUntil(
@@ -685,7 +725,11 @@ export async function newsIndex(context?: NewsContext): Promise<Entry[]> {
       );
     return entry.value;
   }
-  const value = await refreshNewsIndex(context!);
+  const value = await refreshNewsIndex(context!).catch((error) => {
+    if (!(error instanceof NewsKVError)) throw error;
+    logKVFailure(error);
+    return live();
+  });
   if (value) return value;
   throw new Error('News index warming up');
 }
@@ -784,7 +828,7 @@ export async function newsPage(
     return { posts: [], total: index.length, totalPages: Math.ceil(index.length / perPage) };
   const ids = entries.map((entry) => entry.id);
   const kv = newsKV(context);
-  const cards = kv && (await readRecentCards(kv));
+  const cards = kv && (await tryKV(() => readRecentCards(kv)));
   if (cards) {
     const lookup = new Map(cards.value.map((card) => [card.id, card]));
     if (entries.every((entry) => {
