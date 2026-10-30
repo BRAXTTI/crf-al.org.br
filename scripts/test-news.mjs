@@ -380,6 +380,69 @@ try {
     writes.length = 0;
     assert.equal(await warmNewsPosts(context), recent.length);
     assert.equal(writes.length, 0, 'Pré-aquecimento sem mudanças não escreve no KV');
+    // Cron renova a cópia sem mudança depois de ~20 h, antes de vencer a janela de 24 h.
+    {
+      const hour = 3600_000;
+      const target = recent[0]; const warmKey = `news:cache:v1:post/${encodeURIComponent(target.slug)}`;
+      const age = ms => {
+        const copy = JSON.parse(values.get(warmKey));
+        copy.storedAt = Date.now() - ms;
+        values.set(warmKey, JSON.stringify(copy));
+        return copy;
+      };
+      const young = age(19.5 * hour); writes.length = 0;
+      await warmNewsPosts(context);
+      assert.equal(writes.length, 0, 'Cópia com menos de 20 h não é regravada');
+      assert.equal(JSON.parse(values.get(warmKey)).storedAt, young.storedAt);
+      const old = age(20 * hour + 1); writes.length = 0;
+      const startedAt = Date.now();
+      await warmNewsPosts(context);
+      assert.deepEqual(writes.map(row => row.key), [warmKey], 'Só a cópia com mais de 20 h é regravada');
+      assert.equal(writes[0].options.expirationTtl, 30 * 24 * 3600);
+      const renewed = JSON.parse(values.get(warmKey));
+      assert.ok(renewed.storedAt >= startedAt, 'Regravação renova a idade');
+      assert.deepEqual(renewed.value, old.value, 'Regravação mantém o conteúdo');
+      writes.length = 0;
+      await warmNewsPosts(context);
+      assert.equal(writes.length, 0, 'Cópia recém-renovada não é regravada de novo');
+      // Mudança de conteúdo continua gravando, em qualquer idade.
+      age(hour);
+      const source = posts.find(post => post.id === target.id); const content = source.content;
+      source.content = { rendered: '<p>Conteúdo editado</p>' };
+      try {
+        await warmNewsPosts(context);
+        assert.deepEqual(writes.map(row => row.key), [warmKey], 'Cron grava a mudança de conteúdo antes de 20 h');
+        assert.equal(JSON.parse(values.get(warmKey)).value.content.rendered, '<p>Conteúdo editado</p>');
+      } finally { source.content = content; }
+      await warmNewsPosts(context);
+      // Visita nunca regrava por idade.
+      age(21 * hour); writes.length = 0;
+      await newsPost(target.slug, context); await Promise.all(pending.splice(0));
+      assert.equal(writes.length, 0, 'Visita não renova a cópia');
+      // Cópia renovada é servida sem a origem, mesmo com entrada local já vencida no data center.
+      const local = new Map(); const previousCaches = globalThis.caches;
+      globalThis.caches = { default: {
+        async match(req) { return local.get(req.url)?.clone(); },
+        async put(req, response) { local.set(req.url, response); },
+      } };
+      try {
+        age(hour);
+        await newsPost(target.slug, context); await Promise.all(pending.splice(0));
+        const entry = [...local.keys()].find(key => key.endsWith(`/post/${encodeURIComponent(target.slug)}`));
+        const saved = await local.get(entry).clone().json();
+        local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * hour }));
+        fail = true;
+        assert.equal((await newsPost(target.slug, context)).id, target.id, 'Entrada local vencida usa a cópia renovada do KV');
+        await Promise.all(pending.splice(0));
+        fail = false;
+        // Sem renovação (mais de 24 h) a visita volta a depender da origem.
+        age(25 * hour);
+        local.set(entry, Response.json({ ...saved, storedAt: Date.now() - 25 * hour }));
+        fail = true;
+        await assert.rejects(newsPost(target.slug, context), /503/);
+      } finally { fail = false; globalThis.caches = previousCaches; }
+      await warmNewsPosts(context);
+    }
     fail = true;
     assert.equal((await newsPost(selected[1].slug, context)).id, selected[1].newId, 'Post pré-aquecido servido do KV');
     await Promise.all(pending.splice(0));
