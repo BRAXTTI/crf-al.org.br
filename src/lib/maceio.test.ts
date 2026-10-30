@@ -19,21 +19,30 @@ describe('statusAtendimento', () => {
     });
   });
 
-  describe('sexta fechada (30/10/2026)', () => {
-    it('fica fechado o dia todo, com o motivo, e abre na segunda', () => {
+  describe('sexta e segunda fechadas (30/10 e 2/11/2026)', () => {
+    it('fica fechado a sexta toda, com o motivo, e abre na terça', () => {
       for (const hora of ['08:00', '10:00', '18:00']) {
-        expect(statusAtendimento(em(`2026-10-30T${hora}`))).toEqual({ aberto: false, texto: 'Fechado hoje · sem expediente · abre segunda às 9h' });
+        expect(statusAtendimento(em(`2026-10-30T${hora}`))).toEqual({ aberto: false, texto: 'Fechado hoje · Dia do Servidor Público · abre terça às 9h' });
       }
     });
 
     it('a véspera não diz "abre amanhã"', () => {
       expect(statusAtendimento(em('2026-10-29T10:00')).aberto).toBe(true);
-      expect(statusAtendimento(em('2026-10-29T17:30')).texto).toBe('Fechado · abre segunda às 9h');
+      expect(statusAtendimento(em('2026-10-29T17:30')).texto).toBe('Fechado · abre terça às 9h');
+    });
+
+    it('o fim de semana abre na terça', () => {
+      expect(statusAtendimento(em('2026-10-31T10:00')).texto).toBe('Fechado · abre terça às 9h');
+      expect(statusAtendimento(em('2026-11-01T10:00')).texto).toBe('Fechado · abre terça às 9h');
+    });
+
+    it('a segunda de Finados fica fechada e abre amanhã', () => {
+      expect(statusAtendimento(em('2026-11-02T10:00'))).toEqual({ aberto: false, texto: 'Fechado hoje · Finados · abre amanhã às 9h' });
     });
 
     it('usa a data de Maceió, não a de UTC', () => {
-      expect(statusAtendimento(new Date('2026-10-30T02:00:00Z')).texto).toBe('Fechado · abre segunda às 9h'); // 23h de quinta em Maceió
-      expect(statusAtendimento(new Date('2026-10-31T02:00:00Z')).texto).toBe('Fechado hoje · sem expediente · abre segunda às 9h'); // 23h de sexta em Maceió
+      expect(statusAtendimento(new Date('2026-10-30T02:00:00Z')).texto).toBe('Fechado · abre terça às 9h'); // 23h de quinta em Maceió
+      expect(statusAtendimento(new Date('2026-10-31T02:00:00Z')).texto).toBe('Fechado hoje · Dia do Servidor Público · abre terça às 9h'); // 23h de sexta em Maceió
     });
   });
 
