@@ -78,6 +78,8 @@ export interface LiveNotificationFeedProps extends React.ComponentProps<"div"> {
   /** Notificações na ordem em que chegaram. A mais nova fica no topo; itens acrescentados depois chegam com a sua animação. */
   items: LiveNotification[];
   title?: string;
+  /** Não lidas no contador do cabeçalho, para incluir itens que ainda vão chegar. Sem ela, conta os itens já no feed. */
+  unreadCount?: number;
   /** Reproduz os itens um a um como se chegassem agora. Desligado por padrão: notificações reais aparecem como vieram. */
   autoplay?: boolean;
   /** Com autoplay, quantos itens já estão no feed ao começar. */
@@ -797,6 +799,7 @@ const HEADER_BUTTON = cx(
 export function LiveNotificationFeed({
   items,
   title = "Notificações",
+  unreadCount,
   autoplay = false,
   initial = 2,
   interval = 1500,
@@ -987,7 +990,7 @@ export function LiveNotificationFeed({
   const markRead = (id: string) => setReadIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
 
   const live = entries.filter((e) => !e.leaving);
-  const unread = live.filter((e) => !readIds.has(e.id)).length;
+  const unread = unreadCount ?? live.filter((e) => !readIds.has(e.id)).length;
   const itemOrder = new Map(items.map((item, index) => [item.id, index]));
   const ordered = autoplay ? [...entries].reverse() : [...entries].sort((a, b) => (itemOrder.get(b.id) ?? -1) - (itemOrder.get(a.id) ?? -1));
   const pause = (value: boolean) => {

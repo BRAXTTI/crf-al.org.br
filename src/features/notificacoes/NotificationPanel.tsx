@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { LiveNotificationFeed } from '@/components/ui/live-notification-feed';
-import { dispensar, marcarLidas, marcarVistas, type EstadoNotificacoes } from './estado';
+import { contarNaoLidas, dispensar, marcarLidas, marcarVistas, type EstadoNotificacoes } from './estado';
 import type { FontesNotificacoes } from './fontes';
 import { montarNotificacoes } from './montar';
 
@@ -55,8 +55,11 @@ export default function NotificationPanel({ fontes, estado, onNavigate }: Notifi
   return (
     <LiveNotificationFeed
       items={items}
+      // Mesmo número do sino e do banner desde a abertura, mesmo com cards ainda na fila de chegada.
+      unreadCount={contarNaoLidas(fontes.ids, estado)}
       onOpen={(id) => marcarLidas([id])}
-      onReadAll={marcarLidas}
+      // "Todas" inclui as que ainda estão na fila: o contador já as conta.
+      onReadAll={() => marcarLidas(ids)}
       onDismiss={(id) => dispensar([id])}
       onClear={dispensar}
       onNavigate={(href) => onNavigate(href)}
