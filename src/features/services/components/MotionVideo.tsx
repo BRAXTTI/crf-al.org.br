@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Play } from 'lucide-react';
 import { type TutorialMotion } from '@/data/servicos';
+import { medidorDeVideo } from '@/lib/medir';
 import { useIsDesktop } from '../use-is-desktop';
 
 const motion = 'transition duration-200 motion-reduce:transition-none';
@@ -11,10 +12,11 @@ type VideoComFullscreenWebkit = HTMLVideoElement & { webkitEnterFullscreen?: () 
  * Vídeo vertical em motion. No desktop toca dentro de uma moldura de iPhone;
  * no celular o toque já abre o vídeo em tela cheia.
  */
-export default function MotionVideo({ motion: video, titulo }: { motion: TutorialMotion; titulo: string }) {
+export default function MotionVideo({ motion: video, titulo, tarefa }: { motion: TutorialMotion; titulo: string; tarefa: string }) {
   const ref = useRef<VideoComFullscreenWebkit>(null);
   const isDesktop = useIsDesktop();
   const [tocando, setTocando] = useState(false);
+  const [medidor] = useState(() => medidorDeVideo(tarefa));
 
   useEffect(() => {
     const el = ref.current;
@@ -62,6 +64,8 @@ export default function MotionVideo({ motion: video, titulo }: { motion: Tutoria
       playsInline
       controls={tocando}
       onEnded={() => setTocando(false)}
+      onPlay={medidor.aoTocar}
+      onTimeUpdate={(e) => medidor.aoAvancar(e.currentTarget)}
       aria-label={legenda}
       className={className}
     />

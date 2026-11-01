@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, ListChecks, Pause, Play, Volume2, VolumeX, X } from 'lucide-react';
 import { REELS_DESTAQUE, type ReelDestaque } from '@/data/tutoriais-destaque';
+import { medidorDeVideo } from '@/lib/medir';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const motion = 'transition duration-200 motion-reduce:transition-none';
@@ -146,6 +147,7 @@ function ReelsViewer({
   const fecharRef = useRef<HTMLButtonElement>(null);
   const reel = REELS_DESTAQUE[atual];
   const total = REELS_DESTAQUE.length;
+  const medidor = useMemo(() => medidorDeVideo(reel.id), [reel.id]);
 
   const irPara = useCallback(
     (index: number) => {
@@ -212,7 +214,8 @@ function ReelsViewer({
           autoPlay
           playsInline
           muted={mudo}
-          onTimeUpdate={(e) => setProgresso(e.currentTarget.currentTime / (e.currentTarget.duration || 1))}
+          onPlay={medidor.aoTocar}
+          onTimeUpdate={(e) => { setProgresso(e.currentTarget.currentTime / (e.currentTarget.duration || 1)); medidor.aoAvancar(e.currentTarget); }}
           onEnded={() => irPara(atual + 1)}
           className="absolute inset-0 h-full w-full object-contain lg:object-cover"
         />

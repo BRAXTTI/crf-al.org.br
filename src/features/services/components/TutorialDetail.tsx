@@ -5,6 +5,7 @@ import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import { CRF_EM_CASA_URL } from '@/config/site';
 import { getRequerimento } from '@/data/requerimentos';
 import { type Tutorial } from '@/data/servicos';
+import { medir } from '@/lib/medir';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import { PERFIS } from '../tutorial-profiles';
 import MotionVideo from './MotionVideo';
@@ -33,8 +34,10 @@ export default function TutorialDetail({ tutorial, embutido = false }: { tutoria
     return () => window.clearTimeout(timer);
   }, [linkCopiado]);
 
-  const alternarPasso = (index: number) =>
+  const alternarPasso = (index: number) => {
+    if (!feitos.includes(index)) medir('passo', { tarefa: tutorial.id, passo: index + 1 });
     setFeitos((atual) => (atual.includes(index) ? atual.filter((i) => i !== index) : [...atual, index]));
+  };
 
   const copiarLink = async () => {
     const url = new URL(window.location.href);
@@ -95,7 +98,7 @@ export default function TutorialDetail({ tutorial, embutido = false }: { tutoria
         </div>
       </header>
 
-      {tutorial.motion && <MotionVideo motion={tutorial.motion} titulo={tutorial.title} />}
+      {tutorial.motion && <MotionVideo motion={tutorial.motion} titulo={tutorial.title} tarefa={tutorial.id} />}
 
       {/* Vídeo: o YouTube só carrega depois do clique */}
       {!tutorial.motion && videoEmbedUrl && (
@@ -111,7 +114,7 @@ export default function TutorialDetail({ tutorial, embutido = false }: { tutoria
           ) : (
             <button
               type="button"
-              onClick={() => setTocando(true)}
+              onClick={() => { setTocando(true); medir('video_inicio', { tarefa: tutorial.id }); }}
               className="group relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden bg-[radial-gradient(ellipse_at_top_right,rgba(0,102,204,0.35),transparent_60%),radial-gradient(ellipse_at_bottom_left,rgba(197,155,39,0.14),transparent_55%)] text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-gold"
             >
               <span
@@ -206,7 +209,7 @@ export default function TutorialDetail({ tutorial, embutido = false }: { tutoria
       </div>
 
       <div className="flex flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:p-5">
-        <ArrowFillButton href={tutorial.acesso?.url ?? CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer">
+        <ArrowFillButton href={tutorial.acesso?.url ?? CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" onClick={() => medir('acao', { tarefa: tutorial.id })}>
           {tutorial.acesso?.label ?? 'Acessar CRF AL em Casa'}
           <span className="sr-only"> (abre em uma nova aba)</span>
         </ArrowFillButton>

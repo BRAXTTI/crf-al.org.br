@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowRight,
@@ -15,6 +15,7 @@ import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { CRF_EM_CASA_URL } from '@/config/site';
 import { tutoriais, type Tutorial, type TutorialPerfil } from '@/data/servicos';
 import TopDestaques from '@/features/services/components/TopDestaques';
+import { medir, medirBuscaVazia } from '@/lib/medir';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import TutorialDetail from '../components/TutorialDetail';
 import { PERFIS } from '../tutorial-profiles';
@@ -62,6 +63,23 @@ export default function TutorialsPage() {
       ),
     [filtro, termo]
   );
+
+  // Só abertura explícita (clique ou link direto): o tutorial que o desktop mostra por padrão não conta.
+  const abertoMedido = useRef<string | null>(null);
+  useEffect(() => {
+    const aberto = visiveis.some((t) => t.id === selecionadoId) ? selecionadoId : null;
+    if (aberto && aberto !== abertoMedido.current) medir('abrir', { tarefa: aberto });
+    abertoMedido.current = aberto;
+  }, [selecionadoId, visiveis]);
+
+  // Espera a pessoa parar de digitar, para não contar cada letra como busca.
+  const semResultado = termo !== '' && visiveis.length === 0;
+  const textoBusca = busca.trim();
+  useEffect(() => {
+    if (!semResultado) return;
+    const timer = window.setTimeout(() => medirBuscaVazia(textoBusca), 1500);
+    return () => window.clearTimeout(timer);
+  }, [semResultado, textoBusca]);
 
   const grupos = useMemo(() => {
     const mapa = new Map<string, Tutorial[]>();
@@ -276,7 +294,7 @@ export default function TutorialsPage() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Não encontrou seu serviço?</p>
               <p className="mt-1 text-lg font-bold">Documentos e formulários de todos os pedidos estão na Central de Requerimentos.</p>
               <p className="mt-1 text-sm text-white/75">
-                Dúvidas sobre o sistema: <a href="mailto:tecnologia@crf-al.org.br" className="rounded font-semibold text-white underline underline-offset-4 hover:text-crfal-gold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">tecnologia@crf-al.org.br</a>
+                Dúvidas sobre o sistema: <a href="mailto:tecnologia@crf-al.org.br" onClick={() => medir('contato')} className="rounded font-semibold text-white underline underline-offset-4 hover:text-crfal-gold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">tecnologia@crf-al.org.br</a>
               </p>
             </div>
             <Link to="/servicos/requerimentos" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/30 px-5 py-3 text-sm font-bold transition-colors hover:border-white hover:bg-white hover:text-crfal-blue focus-visible:outline-white">
