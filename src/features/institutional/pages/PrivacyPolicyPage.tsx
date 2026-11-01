@@ -10,6 +10,7 @@ import {
   Copy,
   FileSearch,
   HardDrive,
+  ListChecks,
   Lock,
   Mail,
   MonitorSmartphone,
@@ -21,7 +22,7 @@ import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { CRF_EM_CASA_URL, TRANSPARENCIA_URL } from '@/config/site';
 
 const PATH = '/politica-de-privacidade';
-const ATUALIZACAO = '19 de outubro de 2026';
+const ATUALIZACAO = '1º de novembro de 2026';
 /** Encarregado pelo tratamento de dados pessoais (art. 41 da LGPD). */
 const ENCARREGADO = { nome: 'Thailanderson Rocha', email: 'tecnologia@crf-al.org.br' };
 const OUVIDORIA_EMAIL = 'ouvidoria@crf-al.org.br';
@@ -70,6 +71,12 @@ const COOKIES: { icon: ComponentType<{ className?: string }>; tipo: string; fina
     tipo: 'Estatísticas de navegação',
     finalidade: 'Contar visitas, páginas mais acessadas, tipo de aparelho e país de origem, sempre de forma agregada e anônima (Cloudflare Web Analytics), sem perfis individuais.',
     duracao: 'Não grava identificador no aparelho',
+  },
+  {
+    icon: ListChecks,
+    tipo: 'Contagem de uso dos tutoriais',
+    finalidade: 'Contar, de forma anônima, quantas vezes cada tutorial foi aberto, quantas vezes o vídeo começou ou chegou a 75%, quais passos foram usados, os cliques nos botões de ação e de contato, as respostas a “deu certo?” e as buscas sem resultado. Não usa cookie e não guarda endereço IP, navegador ou qualquer identificador; os registros não permitem saber quem fez o quê.',
+    duracao: 'Não grava nada no aparelho',
   },
   {
     icon: HardDrive,
@@ -170,6 +177,7 @@ const SECOES: Secao[] = [
         <Lista
           items={[
             <><strong className="font-semibold text-crfal-blue-dark">Dados técnicos de navegação</strong>, como página visitada, navegador, tipo de aparelho e país, usados de forma agregada para estatísticas. Não usamos esses dados para identificar quem você é.</>,
+            <><strong className="font-semibold text-crfal-blue-dark">Contagem anônima de uso dos tutoriais</strong>: evento (por exemplo, “abriu o tutorial”), tutorial e número do passo, para saber quais orientações ajudam e quais precisam melhorar. Das buscas sem resultado, guardamos no máximo a palavra pesquisada, e descartamos o termo quando ele tem números, símbolos ou mais de 40 caracteres. Por isso, não digite dados pessoais na busca.</>,
             <><strong className="font-semibold text-crfal-blue-dark">Registros de acesso</strong> (endereço IP, data e hora), mantidos pela hospedagem por questões de segurança e pelo prazo exigido no Marco Civil da Internet (Lei nº 12.965/2014).</>,
             <><strong className="font-semibold text-crfal-blue-dark">Dados que você nos envia</strong> ao escrever para o CRF-AL por e-mail, telefone ou WhatsApp, como nome, contato, número de inscrição e o conteúdo da mensagem.</>,
           ]}
@@ -226,7 +234,7 @@ const SECOES: Secao[] = [
             'Responder a pedidos, dúvidas e solicitações enviados ao CRF-AL',
             'Executar as atribuições legais do Conselho, como registro, fiscalização e orientação profissional (Lei nº 3.820/1960)',
             'Manter o site funcionando com segurança e prevenir fraudes e ataques',
-            'Entender, de forma agregada, quais conteúdos são mais procurados, para melhorar o site',
+            'Entender, de forma agregada, quais conteúdos são mais procurados e onde os tutoriais precisam melhorar',
           ]}
         />
         <Paragrafo>
