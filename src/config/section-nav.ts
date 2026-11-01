@@ -29,7 +29,7 @@ export const SECTION_NAV = {
     href: '/servicos/requerimentos',
     links: [
       { label: 'Requerimentos', href: '/servicos/requerimentos' },
-      { label: 'Tutoriais', href: '/servicos/tutoriais' },
+      { label: 'Tutoriais', href: '/servicos/tutoriais', matchPrefix: true },
       { label: 'Manual do CRF AL em Casa', href: '/servicos/manual-crf-em-casa' },
       { label: 'Ouvidoria', href: '/servicos/ouvidoria' },
     ],

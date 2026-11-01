@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUp, ArrowUpRight, ImagePlay, PlayCircle } from 'lucide-react';
 import SEO from '@/components/SEO';
@@ -7,6 +7,8 @@ import { Reveal } from '@/components/ui/reveal';
 import { PAGE_METADATA } from '@/config/page-metadata';
 import { CRF_EM_CASA_URL } from '@/config/site';
 import { MANUAL_CRF_EM_CASA, type ManualSecao } from '@/data/manual-crf-em-casa';
+import VideoTela from '../components/VideoTela';
+import { TELA } from '../tela';
 
 const PATH = '/servicos/manual-crf-em-casa';
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
@@ -14,8 +16,6 @@ const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visib
 const motion = 'transition duration-200 motion-reduce:transition-none';
 // Rawline tem itálico real até 600; em 700 o navegador sintetizaria a inclinação.
 const destaque = 'font-semibold italic text-crfal-blue-light';
-// As gravações são 4:3: a tela segue essa proporção e nada da gravação é cortado.
-const tela = 'aspect-4/3 overflow-hidden rounded-[18px] border border-crfal-gray-200 bg-crfal-gray-100 shadow-[0_16px_40px_-16px_rgba(0,51,102,0.28)] lg:shadow-[0_24px_60px_-16px_rgba(0,51,102,0.28)]';
 // Deslocamento curto: o padrão de 100px do Reveal pesa em blocos altos como estes.
 const entradaCurta = { '--reveal-shift': '24px' } as CSSProperties;
 
@@ -23,72 +23,11 @@ function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-/**
- * Vídeo da demonstração, sem moldura além da tela. Só baixa o arquivo quando
- * chega perto da tela e só toca enquanto está visível; fora dela, pausa. Até
- * lá, mostra a capa. Com movimento reduzido, não toca sozinho e exibe controles.
- */
-function VideoDemonstracao({ secao }: { secao: ManualSecao }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  // Navegadores sem IntersectionObserver carregam direto.
-  const [carregar, setCarregar] = useState(() => typeof window !== 'undefined' && !('IntersectionObserver' in window));
-  const [reduzido] = useState(prefersReducedMotion);
-
-  useEffect(() => {
-    const video = ref.current;
-    if (!video || !('IntersectionObserver' in window)) return;
-    // Entradas podem chegar em lote; vale a mais recente.
-    const perto = new IntersectionObserver((entries) => {
-      if (entries[entries.length - 1].isIntersecting) {
-        setCarregar(true);
-        perto.disconnect();
-      }
-    }, { rootMargin: '300px 0px' });
-    const visivel = new IntersectionObserver((entries) => {
-      if (reduzido) return;
-      if (entries[entries.length - 1].isIntersecting) video.play().catch(() => {});
-      else video.pause();
-    }, { threshold: 0.25 });
-    perto.observe(video);
-    visivel.observe(video);
-    return () => {
-      perto.disconnect();
-      visivel.disconnect();
-    };
-  }, [reduzido]);
-
-  // Ao receber o src, começa a tocar se já estiver na tela.
-  useEffect(() => {
-    const video = ref.current;
-    if (!carregar || reduzido || !video) return;
-    const r = video.getBoundingClientRect();
-    if (r.top < window.innerHeight && r.bottom > 0) video.play().catch(() => {});
-  }, [carregar, reduzido]);
-
-  return (
-    <video
-      ref={ref}
-      src={carregar ? secao.video : undefined}
-      poster={secao.poster}
-      aria-label={secao.videoAlt}
-      muted
-      loop
-      playsInline
-      // Só metadados: o download completo (até ~5 MB por vídeo) começa ao tocar.
-      preload="metadata"
-      controls={reduzido}
-      width={960}
-      height={720}
-      className="block h-full w-full object-contain"
-    />
-  );
-}
-
 /** Demonstração do tópico; sem vídeo, mostra o espaço reservado. */
 function Demonstracao({ secao }: { secao: ManualSecao }) {
-  if (secao.video) return <div className={tela}><VideoDemonstracao secao={secao} /></div>;
+  if (secao.video) return <div className={TELA}><VideoTela src={secao.video} poster={secao.poster} alt={secao.videoAlt} /></div>;
   return (
-    <div className={`${tela} flex flex-col items-center justify-center gap-3 px-6 text-center`}>
+    <div className={`${TELA} flex flex-col items-center justify-center gap-3 px-6 text-center`}>
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-crfal-blue ring-1 ring-crfal-blue/10"><ImagePlay className="h-6 w-6" aria-hidden /></span>
       <p className="text-sm font-semibold text-crfal-blue-dark">Demonstração em breve</p>
       <p className="sr-only">{secao.videoAlt}</p>

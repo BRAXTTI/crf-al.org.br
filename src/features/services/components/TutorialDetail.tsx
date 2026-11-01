@@ -1,220 +1,248 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check, Clock, Link2, ListChecks, Play, RotateCcw } from 'lucide-react';
-import { ArrowFillButton } from '@/components/block/arrow-fill-button';
+import { ArrowRight, ArrowUpRight, ChevronDown, ListChecks, Mail, MessageCircle, Phone, Play } from 'lucide-react';
+import { ATENDIMENTO, HORARIO_ATENDIMENTO, SETOR_CONTATOS, telefoneHref } from '@/config/contact';
 import { CRF_EM_CASA_URL } from '@/config/site';
 import { getRequerimento } from '@/data/requerimentos';
-import { type Tutorial } from '@/data/servicos';
+import { tutoriais, type Tutorial } from '@/data/servicos';
+import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias';
 import { medir } from '@/lib/medir';
-import { getYouTubeEmbedUrl } from '@/lib/youtube';
-import { PERFIS } from '../tutorial-profiles';
-import MotionVideo from './MotionVideo';
+import PassosComVideo from './PassosComVideo';
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
+const tituloBloco = 'text-lg font-bold text-crfal-blue';
 
-function linkDoRequerimento(tutorial: Tutorial) {
-  return `/servicos/requerimentos?perfil=${tutorial.perfil}&item=${tutorial.requerimentoId}`;
+function temVideo(guia: GuiaTutorial): guia is GuiaTutorial & { video: VideoGuia } {
+  return Boolean(guia.video);
 }
 
-export default function TutorialDetail({ tutorial, embutido = false }: { tutorial: Tutorial; embutido?: boolean }) {
-  const Icon = tutorial.icon;
-  const PerfilIcon = PERFIS[tutorial.perfil].icon;
-  const videoEmbedUrl = getYouTubeEmbedUrl(tutorial.videoUrl);
-  const requerimento = tutorial.requerimentoId ? getRequerimento(tutorial.requerimentoId) : undefined;
-
-  const [tocando, setTocando] = useState(false);
-  const [feitos, setFeitos] = useState<number[]>([]);
-  const [linkCopiado, setLinkCopiado] = useState(false);
-
-  useEffect(() => {
-    if (!linkCopiado) return;
-    const timer = window.setTimeout(() => setLinkCopiado(false), 2500);
-    return () => window.clearTimeout(timer);
-  }, [linkCopiado]);
-
-  const alternarPasso = (index: number) => {
-    if (!feitos.includes(index)) medir('passo', { tarefa: tutorial.id, passo: index + 1 });
-    setFeitos((atual) => (atual.includes(index) ? atual.filter((i) => i !== index) : [...atual, index]));
-  };
-
-  const copiarLink = async () => {
-    const url = new URL(window.location.href);
-    url.search = '';
-    url.searchParams.set('tutorial', tutorial.id);
-    try {
-      await navigator.clipboard.writeText(url.toString());
-      setLinkCopiado(true);
-    } catch {
-      window.prompt('Copie o link do tutorial:', url.toString());
-    }
-  };
-
-  const total = tutorial.steps.length;
-  const progresso = total ? Math.round((feitos.length / total) * 100) : 0;
-  const titleId = `tutorial-titulo-${tutorial.id}`;
-
+/** Único botão de ação da página. */
+function BotaoAcao({ tutorial, destaque, className = '' }: { tutorial: Tutorial; destaque: boolean; className?: string }) {
   return (
-    <article
-      aria-labelledby={titleId}
-      className={`overflow-hidden bg-white motion-safe:animate-fade-in ${embutido ? '' : 'rounded-2xl border border-crfal-gray-200 shadow-[0_24px_48px_-28px_rgba(11,25,44,0.45)]'}`}
+    <a
+      href={tutorial.acesso?.url ?? CRF_EM_CASA_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => medir('acao', { tarefa: tutorial.id })}
+      className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-5 text-[15px] font-bold text-white shadow-xs hover:bg-crfal-blue-dark ${motion} ${focusRing} ${destaque ? 'ring-4 ring-crfal-gold' : ''} ${className}`}
     >
-      {/* Cabeçalho */}
-      <header className="relative isolate overflow-hidden border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-4 sm:p-6">
-        <Icon className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 text-white opacity-[0.06]" strokeWidth={1} aria-hidden="true" />
-        <button
-          type="button"
-          onClick={copiarLink}
-          aria-label={linkCopiado ? 'Link copiado' : 'Copiar link deste tutorial'}
-          title="Copiar link"
-          className="absolute right-2 top-2 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full p-2 text-xs font-semibold sm:right-3 sm:top-3 text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60"
-        >
-          {linkCopiado ? <Check className="h-5 w-5 text-crfal-gold" aria-hidden="true" /> : <Link2 className="h-5 w-5" aria-hidden="true" />}
-          <span className="hidden sm:inline" aria-hidden="true">{linkCopiado ? 'Copiado' : 'Copiar link'}</span>
-        </button>
-        <span role="status" className="sr-only">{linkCopiado ? 'Link do tutorial copiado.' : ''}</span>
-
-        <div className="flex items-start gap-4 pr-12 sm:pr-32">
-          <span className="hidden h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40 sm:flex">
-            <Icon className="h-6 w-6 text-white sm:h-7 sm:w-7" strokeWidth={1.5} aria-hidden="true" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Tutorial · {tutorial.category}</p>
-            <h2 id={titleId} className="mt-0.5 text-lg font-bold leading-snug tracking-tight text-white sm:text-[22px]">{tutorial.title}</h2>
-          </div>
-        </div>
-        <p className="mt-2 text-sm leading-relaxed text-white/80 sm:mt-3">{tutorial.description}</p>
-
-        <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
-            <PerfilIcon className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" /> {PERFIS[tutorial.perfil].label}
-          </span>
-          {tutorial.prazo && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
-              <Clock className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" /> Prazo: {tutorial.prazo}
-            </span>
-          )}
-        </div>
-      </header>
-
-      {tutorial.motion && <MotionVideo motion={tutorial.motion} titulo={tutorial.title} tarefa={tutorial.id} />}
-
-      {/* Vídeo: o YouTube só carrega depois do clique */}
-      {!tutorial.motion && videoEmbedUrl && (
-        <div className="aspect-video bg-crfal-blue-dark">
-          {tocando ? (
-            <iframe
-              src={`${videoEmbedUrl}&autoplay=1`}
-              title={`Vídeo tutorial: ${tutorial.title}`}
-              className="h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => { setTocando(true); medir('video_inicio', { tarefa: tutorial.id }); }}
-              className="group relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden bg-[radial-gradient(ellipse_at_top_right,rgba(0,102,204,0.35),transparent_60%),radial-gradient(ellipse_at_bottom_left,rgba(197,155,39,0.14),transparent_55%)] text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-gold"
-            >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 opacity-[0.07] bg-[linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] bg-size-[48px_48px] mask-[radial-gradient(ellipse_at_center,black,transparent_75%)]"
-              />
-              <span className={`relative flex h-16 w-16 items-center justify-center rounded-full bg-white text-crfal-blue shadow-xl ring-4 ring-crfal-gold/40 group-hover:scale-105 group-hover:ring-crfal-gold/70 sm:h-20 sm:w-20 ${motion}`}>
-                <Play className="ml-1 h-7 w-7 fill-current sm:h-8 sm:w-8" aria-hidden="true" />
-              </span>
-              <span className="relative text-center">
-                <span className="block text-sm font-bold sm:text-base">Assistir ao tutorial em vídeo</span>
-                <span className="mt-0.5 block text-xs text-white/65">O vídeo do YouTube carrega ao clicar</span>
-              </span>
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Passo a passo */}
-      <div className="p-5 sm:p-6">
-        {requerimento && (
-          <div className="mb-6 flex flex-col gap-3 rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <ListChecks className="mt-0.5 h-5 w-5 shrink-0 text-[#8A6A12]" aria-hidden="true" />
-              <p className="text-sm leading-relaxed text-crfal-gray-700">
-                <strong className="text-crfal-blue-dark">Antes de começar,</strong> reúna os {requerimento.documentos.length}{' '}
-                {requerimento.documentos.length === 1 ? 'documento exigido' : 'documentos exigidos'} no requerimento.
-              </p>
-            </div>
-            <Link to={linkDoRequerimento(tutorial)} className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 self-start rounded-full px-1 text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline sm:self-auto ${focusRing}`}>
-              Ver documentos <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-        )}
-
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div className="min-w-0">
-            <p className={goldLabel}>Passo a passo</p>
-            <p className="mt-1 text-sm font-semibold text-crfal-blue-dark">
-              {feitos.length > 0
-                ? `${feitos.length} de ${total} ${total === 1 ? 'passo concluído' : 'passos concluídos'}`
-                : `${total} ${total === 1 ? 'passo' : 'passos'} · marque conforme avança`}
-            </p>
-            <div
-              className="mt-1.5 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-crfal-gray-100"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={total}
-              aria-valuenow={feitos.length}
-              aria-valuetext={`${feitos.length} de ${total}`}
-              aria-label="Passos concluídos"
-            >
-              <div className="h-full rounded-full bg-crfal-gold transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${progresso}%` }} />
-            </div>
-          </div>
-          {feitos.length > 0 && (
-            <button type="button" onClick={() => setFeitos([])} className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue sm:min-h-9 ${focusRing}`}>
-              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Recomeçar
-            </button>
-          )}
-        </div>
-
-        <ol>
-          {tutorial.steps.map((passo, index) => {
-            const feito = feitos.includes(index);
-            const ultimo = index === total - 1;
-            return (
-              <li key={index}>
-                <label className="group/passo flex cursor-pointer gap-4">
-                  <input type="checkbox" checked={feito} onChange={() => alternarPasso(index)} className="peer sr-only" />
-                  <span className="flex flex-col items-center [&>span:first-child]:peer-focus-visible:ring-crfal-blue">
-                    <span
-                      aria-hidden="true"
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-2 ${motion} ${
-                        feito ? 'bg-crfal-gold text-crfal-blue-dark ring-crfal-gold/40' : 'bg-crfal-blue text-white ring-crfal-gold/30 group-hover/passo:ring-crfal-gold/70'
-                      }`}
-                    >
-                      {feito ? <Check className="h-4 w-4" strokeWidth={3} aria-hidden="true" /> : index + 1}
-                    </span>
-                    {!ultimo && <span aria-hidden="true" className={`mt-1 block h-full w-px ${feito ? 'bg-crfal-gold/60' : 'bg-crfal-gray-200'}`} />}
-                  </span>
-                  <span className={`block pt-1 text-sm leading-relaxed ${ultimo ? '' : 'pb-5'} ${feito ? 'text-crfal-gray-500 line-through decoration-crfal-gray-300' : 'text-crfal-gray-700'}`}>
-                    <span className="sr-only">Passo {index + 1}: </span>
-                    {passo}
-                  </span>
-                </label>
-              </li>
-            );
-          })}
-        </ol>
-        <p className="mt-4 text-xs text-crfal-gray-600">As marcações servem para acompanhar e não ficam salvas ao sair da página.</p>
-      </div>
-
-      <div className="flex flex-wrap gap-3 border-t border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:p-5">
-        <ArrowFillButton href={tutorial.acesso?.url ?? CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" onClick={() => medir('acao', { tarefa: tutorial.id })}>
-          {tutorial.acesso?.label ?? 'Acessar CRF AL em Casa'}
-          <span className="sr-only"> (abre em uma nova aba)</span>
-        </ArrowFillButton>
-      </div>
-    </article>
+      {tutorial.acesso?.label ?? 'Abrir o CRF AL em Casa'}
+      <ArrowUpRight className="h-4 w-4" aria-hidden />
+      <span className="sr-only">(abre em uma nova aba)</span>
+    </a>
   );
 }
 
+function Antes({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial }) {
+  const requerimento = tutorial.requerimentoId ? getRequerimento(tutorial.requerimentoId) : undefined;
+  const lista = (
+    <>
+      <ul className="space-y-1.5">
+        {guia.antes.map((item) => (
+          <li key={item} className="flex items-start gap-2.5 text-[15px] leading-snug text-crfal-gray-700">
+            <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-crfal-gold" />
+            {item}
+          </li>
+        ))}
+      </ul>
+      {requerimento && (
+        <Link to={`/servicos/requerimentos?perfil=${tutorial.perfil}&item=${tutorial.requerimentoId}`} className={`mt-1.5 inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+          <ListChecks className="h-4 w-4 text-[#8A6A12]" aria-hidden />
+          Ver documentos ({requerimento.documentos.length})
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </Link>
+      )}
+    </>
+  );
+  return (
+    <>
+      <div className="hidden lg:block">
+        <h2 className={`${tituloBloco} mb-3`}>Antes de começar</h2>
+        {lista}
+      </div>
+      {/* No celular com vídeo fixo, recolhe para os passos ficarem à vista; sem vídeo, há espaço. */}
+      <details open={!guia.video || undefined} className="group rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 lg:hidden">
+        <summary className={`flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-3.5 py-2 text-sm font-semibold text-crfal-blue-dark [&::-webkit-details-marker]:hidden ${focusRing}`}>
+          <span className="min-w-0 truncate">Antes de começar{guia.video && `: ${guia.antes.join(' · ')}`}</span>
+          <ChevronDown className={`h-4 w-4 shrink-0 group-open:rotate-180 ${motion}`} aria-hidden />
+        </summary>
+        <div className="px-3.5 pb-3">{lista}</div>
+      </details>
+    </>
+  );
+}
+
+function PassosSemVideo({ guia }: { guia: GuiaTutorial }) {
+  return (
+    <>
+      <h2 className={`${tituloBloco} mt-8`}>Passos</h2>
+      <ol className="mt-3">
+        {guia.passos.map((passo, indice) => (
+          <li key={passo.titulo} className="flex gap-3 px-1.5">
+            <span className="flex flex-col items-center">
+              <span aria-hidden className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-sm font-bold text-crfal-blue">{indice + 1}</span>
+              {indice < guia.passos.length - 1 && <span aria-hidden className="mt-1 block w-px flex-1 bg-crfal-gray-200" />}
+            </span>
+            <span className="block min-w-0 pb-4 pt-1.5">
+              <span className="block text-[15px] font-semibold leading-snug text-crfal-blue-dark">{passo.titulo}</span>
+              {passo.detalhe && <span className="mt-1 block text-sm leading-snug text-crfal-gray-600">{passo.detalhe}</span>}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </>
+  );
+}
+
+function Canal({ href, tarefa, icon, children }: { href: string; tarefa: string; icon: ReactNode; children: ReactNode }) {
+  const externo = href.startsWith('http');
+  return (
+    <a
+      href={href}
+      onClick={() => medir('contato', { tarefa })}
+      {...(externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+      className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
+    >
+      {icon}{children}
+      {externo && <span className="sr-only">(abre em uma nova aba)</span>}
+    </a>
+  );
+}
+
+function Retorno({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial }) {
+  const [resposta, setResposta] = useState<'sim' | 'nao' | null>(null);
+  const [ajudaAberta, setAjudaAberta] = useState(false);
+
+  const abrirAjuda = () => {
+    if (!ajudaAberta) medir('ajuda', { tarefa: tutorial.id });
+    setAjudaAberta(!ajudaAberta);
+  };
+  const responder = (valor: 'sim' | 'nao') => {
+    setResposta(valor);
+    medir(valor === 'sim' ? 'util_sim' : 'util_nao', { tarefa: tutorial.id });
+    if (valor === 'nao' && !ajudaAberta) abrirAjuda();
+  };
+  const botao = `inline-flex min-h-11 min-w-20 items-center justify-center rounded-full border border-crfal-gray-300 bg-white px-5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`;
+
+  return (
+    <section aria-label="Avaliação e ajuda" className="mt-8 border-t border-crfal-gray-200 pt-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className={tituloBloco}>Deu certo?</h2>
+        {resposta === null && (
+          <div className="flex gap-2">
+            <button type="button" className={botao} onClick={() => responder('sim')}>Sim</button>
+            <button type="button" className={botao} onClick={() => responder('nao')}>Não</button>
+          </div>
+        )}
+        <p role="status" className="text-sm font-medium text-crfal-gray-700">
+          {resposta === 'sim' && 'Que bom. Obrigado por responder.'}
+          {resposta === 'nao' && 'Obrigado por avisar. Veja abaixo como resolver.'}
+        </p>
+      </div>
+
+      <button type="button" onClick={abrirAjuda} aria-expanded={ajudaAberta} aria-controls="nao-deu-certo" className={`mt-3 inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+        Não deu certo?
+        <ChevronDown className={`h-4 w-4 ${motion} ${ajudaAberta ? 'rotate-180' : ''}`} aria-hidden />
+      </button>
+      <div id="nao-deu-certo" hidden={!ajudaAberta} className="mt-2 rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-4">
+        <dl className="space-y-3">
+          {guia.problemas.map((problema) => (
+            <div key={problema.sintoma}>
+              <dt className="text-[15px] font-semibold text-crfal-blue-dark">{problema.sintoma}</dt>
+              <dd className="mt-0.5 text-sm leading-snug text-crfal-gray-700">{problema.solucao}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-4 text-sm font-semibold text-crfal-blue-dark">Fale com o CRF-AL <span className="font-normal text-crfal-gray-600">({HORARIO_ATENDIMENTO.toLowerCase()})</span></p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Canal href={`https://wa.me/55${ATENDIMENTO.whatsapp.replace(/\D/g, '')}`} tarefa={tutorial.id} icon={<MessageCircle className="h-4 w-4" aria-hidden />}>WhatsApp</Canal>
+          <Canal href={telefoneHref(ATENDIMENTO.telefone)} tarefa={tutorial.id} icon={<Phone className="h-4 w-4" aria-hidden />}>{ATENDIMENTO.telefone}</Canal>
+          <Canal href={`mailto:${ATENDIMENTO.email}`} tarefa={tutorial.id} icon={<Mail className="h-4 w-4" aria-hidden />}>{ATENDIMENTO.email}</Canal>
+          <Canal href={`mailto:${SETOR_CONTATOS.tecnologia.email}`} tarefa={tutorial.id} icon={<Mail className="h-4 w-4" aria-hidden />}>Problema no sistema</Canal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** Depois da lista de passos: o que acontece a seguir, retorno e continuação. */
+function Fechamento({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial }) {
+  const proxima = guia.proxima ? tutoriais.find((t) => t.id === guia.proxima) : undefined;
+  return (
+    <>
+      {guia.depois && (
+        <section aria-labelledby="depois-title" className="mt-6">
+          <h2 id="depois-title" className={tituloBloco}>{tutorial.id === 'emitir-boletos' ? 'Depois de emitir' : 'O que acontece depois'}</h2>
+          <ul className="mt-3 space-y-2">
+            {guia.depois.map((item) => (
+              <li key={item} className="flex items-start gap-2.5 text-[15px] leading-snug text-crfal-gray-700">
+                <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-crfal-gold" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <Retorno tutorial={tutorial} guia={guia} />
+      {proxima && (
+        <p className="mt-6 border-t border-crfal-gray-200 pt-5 text-sm text-crfal-gray-600">
+          Próxima tarefa:{' '}
+          <Link to={`/servicos/tutoriais/${proxima.id}`} className={`inline-flex min-h-11 items-center gap-1.5 rounded font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+            {proxima.titulo} <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </p>
+      )}
+    </>
+  );
+}
+
+/** Conteúdo da tarefa; com vídeo, duas colunas; sem vídeo, coluna única. */
+export default function TutorialDetail({ tutorial }: { tutorial: Tutorial }) {
+  const guia = GUIAS[tutorial.id];
+  const [concluiu, setConcluiu] = useState(false);
+
+  // A barra fixa do celular não pode cobrir o fim do rodapé.
+  useEffect(() => {
+    document.body.classList.add('max-lg:pb-20');
+    return () => document.body.classList.remove('max-lg:pb-20');
+  }, []);
+
+  return (
+    <>
+      <section className="section-panel overflow-visible! py-5 sm:py-6 lg:py-8">
+        {temVideo(guia) ? (
+          <PassosComVideo
+            tarefa={tutorial.id}
+            guia={guia}
+            onConcluir={() => setConcluiu(true)}
+            acao={<div className="mb-4 hidden lg:block"><BotaoAcao tutorial={tutorial} destaque={concluiu} /></div>}
+            antes={<Antes tutorial={tutorial} guia={guia} />}
+          >
+            <Fechamento tutorial={tutorial} guia={guia} />
+          </PassosComVideo>
+        ) : (
+          <div className="mx-auto max-w-3xl">
+            <div className="sticky top-(--header-offset) z-20 -mx-1 hidden items-center gap-5 bg-white px-1 py-3 lg:flex">
+              <BotaoAcao tutorial={tutorial} destaque={false} className="max-w-sm" />
+            </div>
+            <div className="lg:mt-4"><Antes tutorial={tutorial} guia={guia} /></div>
+            {guia.videoCompleto && tutorial.videoUrl && (
+              <a href={tutorial.videoUrl} target="_blank" rel="noopener noreferrer" onClick={() => medir('video_inicio', { tarefa: tutorial.id })} className={`mt-4 inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+                <Play className="h-4 w-4 text-[#8A6A12]" aria-hidden />
+                Ver vídeo completo ({guia.videoCompleto})
+                <span className="sr-only">no YouTube (abre em uma nova aba)</span>
+              </a>
+            )}
+            <PassosSemVideo guia={guia} />
+            <Fechamento tutorial={tutorial} guia={guia} />
+          </div>
+        )}
+      </section>
+
+      <div className="glass-light fixed inset-x-0 bottom-0 z-30 border-t border-crfal-gray-200 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 lg:hidden">
+        <BotaoAcao tutorial={tutorial} destaque={concluiu} />
+      </div>
+    </>
+  );
+}
