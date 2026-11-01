@@ -13,6 +13,8 @@ export interface ManualSecao {
   /** Âncora da seção (`#<id>`). */
   id: string;
   title: string;
+  /** Trecho do próprio `title` exibido em destaque no título do tópico. */
+  highlight?: string;
   /** Parágrafos de explicação. */
   text: string[];
   /** Passos curtos, na ordem em que aparecem no sistema. */
@@ -29,6 +31,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
   {
     id: 'acesso',
     title: 'Acessar o sistema',
+    highlight: 'o sistema',
     text: [
       'O CRF AL em Casa é o atendimento online do Conselho. Farmacêuticos entram como Pessoa Física e estabelecimentos como Pessoa Jurídica, cada um com o próprio login.',
     ],
@@ -44,6 +47,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
   {
     id: 'enviar-documentos',
     title: 'Enviar documentos e requerimentos',
+    highlight: 'documentos e requerimentos',
     text: [
       'A maior parte dos serviços começa com um formulário baixado no próprio sistema e enviado de volta com os documentos. Cada envio gera um protocolo.',
     ],
@@ -61,6 +65,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
   {
     id: 'protocolos',
     title: 'Acompanhar seus protocolos',
+    highlight: 'seus protocolos',
     text: [
       'Depois de enviar uma solicitação, acompanhe o andamento pelo número de protocolo. É por lá que aparecem pendências e o resultado da análise.',
     ],
@@ -76,6 +81,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
   {
     id: 'boletos',
     title: 'Emitir boletos e anuidades',
+    highlight: 'boletos e anuidades',
     text: [
       'A emissão de boletos não precisa de login: é feita direto pelo Painel de Controle, na tela de acesso do CRF AL em Casa, informando sua inscrição e CPF ou CNPJ.',
     ],
@@ -92,6 +98,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
   {
     id: 'baixa-responsabilidade-tecnica',
     title: 'Solicitar baixa de responsabilidade técnica',
+    highlight: 'responsabilidade técnica',
     text: [
       'Ao deixar de ser responsável técnico por um estabelecimento, o farmacêutico encerra o vínculo pelo próprio sistema, sem precisar anexar requerimento.',
     ],
@@ -109,6 +116,7 @@ export const MANUAL_CRF_EM_CASA: ManualSecao[] = [
   {
     id: 'certidao-regularidade',
     title: 'Imprimir a certidão de regularidade técnica',
+    highlight: 'regularidade técnica',
     text: [
       'A Certidão de Regularidade Técnica (CRT) comprova que o estabelecimento está regular no CRF-AL. Quando liberada, ela fica disponível para impressão no próprio sistema. Após a emissão da CRT definitiva, a provisória é invalidada automaticamente.',
     ],
