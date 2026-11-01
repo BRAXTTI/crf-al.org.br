@@ -67,7 +67,10 @@ export function useInView<T extends Element = HTMLDivElement>({
       // para disparar na mesma posição de layout do AOS.
       const margem = deslocamento(el) - offset;
       observer = new IntersectionObserver(
-        ([entry]) => {
+        (entries) => {
+          // Com a página ocupada, o estado inicial e o salto por âncora chegam no mesmo lote:
+          // vale o mais recente, senão o bloco fica oculto (nada mais muda para avisar de novo).
+          const entry = entries[entries.length - 1];
           const { bottom, height } = entry.boundingClientRect;
           // Também revela o que ficou para trás num salto (âncora), para não achar vazio na volta.
           if (entry.isIntersecting || (height > 0 && bottom < 0)) {
