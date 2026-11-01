@@ -34,7 +34,55 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
   },
   "/servicos/tutoriais": {
     "title": "Tutoriais",
-    "description": "Tutoriais e guias passo a passo para os serviços do CRFAL — aprenda como realizar seus registros, renovações e demais serviços online de forma simples."
+    "description": "Veja em vídeo e siga os passos das tarefas do CRF AL em Casa: inscrição, responsabilidade técnica, boletos, certidão de regularidade técnica (CRT) e mais."
+  },
+  "/servicos/tutoriais/primeira-inscricao": {
+    "title": "Fazer a primeira inscrição",
+    "description": "Veja como fazer a primeira inscrição (provisória) de farmacêutico no CRF-AL pelo CRF AL em Casa: documentos, passos e o que acontece depois."
+  },
+  "/servicos/tutoriais/inscricao-definitiva": {
+    "title": "Pedir a inscrição definitiva",
+    "description": "Veja como pedir a inscrição definitiva e a carteira profissional pelo CRF AL em Casa: documentos e passo a passo."
+  },
+  "/servicos/tutoriais/alteracao-de-dados": {
+    "title": "Alterar meus dados",
+    "description": "Veja como atualizar os dados do seu cadastro profissional pelo CRF AL em Casa, em poucos passos."
+  },
+  "/servicos/tutoriais/contratacao-rt": {
+    "title": "Contratar responsável técnico (RT)",
+    "description": "Veja como a empresa vincula um farmacêutico como responsável técnico pelo CRF AL em Casa."
+  },
+  "/servicos/tutoriais/baixa-rt": {
+    "title": "Dar baixa de RT",
+    "description": "Veja em vídeo como dar baixa de responsabilidade técnica pelo CRF AL em Casa ao encerrar o vínculo com o estabelecimento."
+  },
+  "/servicos/tutoriais/consulta-rt": {
+    "title": "Consultar meus vínculos de RT",
+    "description": "Veja como consultar seus vínculos de responsabilidade técnica ativos pelo CRF AL em Casa."
+  },
+  "/servicos/tutoriais/afastamento-provisorio": {
+    "title": "Comunicar afastamento",
+    "description": "Veja como comunicar o afastamento provisório pelo CRF AL em Casa: dados, comprovante e passo a passo."
+  },
+  "/servicos/tutoriais/justificativa-de-ausencia": {
+    "title": "Justificar ausência",
+    "description": "Veja como justificar pelo CRF AL em Casa uma ausência identificada em inspeção da fiscalização."
+  },
+  "/servicos/tutoriais/defesa-auto-infracao": {
+    "title": "Defender auto de infração",
+    "description": "Veja como a empresa apresenta a defesa de um auto de infração pelo CRF AL em Casa."
+  },
+  "/servicos/tutoriais/situacao-protocolos": {
+    "title": "Acompanhar meu pedido",
+    "description": "Veja em vídeo como acompanhar seu pedido pelo número de protocolo e responder a pendências no CRF AL em Casa."
+  },
+  "/servicos/tutoriais/emitir-boletos": {
+    "title": "Emitir boleto",
+    "description": "Veja em vídeo como emitir o boleto da anuidade do ano no CRF AL em Casa, sem login, e onde encontrar parcelamentos e acordos."
+  },
+  "/servicos/tutoriais/imprimir-crt": {
+    "title": "Imprimir a certidão (CRT)",
+    "description": "Veja em vídeo como imprimir a Certidão de Regularidade Técnica (CRT) pelo CRF AL em Casa."
   },
   "/servicos/manual-crf-em-casa": {
     "title": "Manual do CRF AL em Casa",

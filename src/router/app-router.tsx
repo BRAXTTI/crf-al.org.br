@@ -23,6 +23,7 @@ const router = createBrowserRouter([
       { path: 'termos-de-uso', lazy: page(() => import('@/features/institutional/pages/TermsOfUsePage')) },
       { path: 'servicos/requerimentos', lazy: page(() => import('@/features/services/pages/RequirementsPage')) },
       { path: 'servicos/tutoriais', lazy: page(() => import('@/features/services/pages/TutorialsPage')) },
+      { path: 'servicos/tutoriais/:id', lazy: page(() => import('@/features/services/pages/TutorialDetailPage')) },
       { path: 'servicos/manual-crf-em-casa', lazy: page(() => import('@/features/services/pages/ManualCrfEmCasaPage')) },
       { path: 'servicos/ouvidoria', lazy: page(() => import('@/features/services/pages/OmbudsmanPage')) },
       { path: 'imprensa/noticias', lazy: page(() => import('@/features/press/pages/NewsPage')) },

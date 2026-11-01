@@ -65,7 +65,7 @@ assert.deepEqual(pontos.pop().blobs, ['abrir', 'baixa-rt', ''], 'Termo só em bu
 
 // Lista de tarefas igual às fontes de dados; servicos.ts depende de lucide-react, então lê o código-fonte.
 const servicos = await readFile(new URL('../src/data/servicos.ts', import.meta.url), 'utf8');
-const ids = [...servicos.matchAll(/\bid: '([a-z-]+)',\s*\n\s*icon:/g)].map(match => match[1]);
+const ids = [...servicos.matchAll(/\bid: '([a-z-]+)',\s*\n\s*(?:icon|titulo):/g)].map(match => match[1]);
 assert.deepEqual([...TAREFAS].filter(id => !['sncr', 'crf-em-casa'].includes(id)).sort(), ids.sort(), 'TAREFAS sincronizada com servicos.ts');
 
 console.log(`Evento: ${EVENTOS.length} eventos e ${TAREFAS.length} tarefas aceitos; sem binding responde 204; nada além de evento, tarefa, passo e termo limpo é gravado.`);

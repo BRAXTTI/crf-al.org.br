@@ -19,6 +19,7 @@ export const TAREFAS = [
   'defesa-auto-infracao',
   'situacao-protocolos',
   'emitir-boletos',
+  'imprimir-crt',
   // Vídeos de orientação, sem passo a passo.
   'sncr',
   'crf-em-casa',

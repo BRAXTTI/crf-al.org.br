@@ -3,6 +3,7 @@ import {
   BadgeCheck,
   CalendarOff,
   Edit3,
+  FileCheck,
   FileClock,
   FileSearch,
   Gavel,
@@ -26,8 +27,12 @@ export interface TutorialMotion {
 }
 
 interface TutorialBase {
-  /** Slug usado no link direto (`?tutorial=<id>`). */
+  /** Slug da página (`/servicos/tutoriais/<id>`); o `?tutorial=<id>` antigo redireciona para ela. */
   id: string;
+  /** Nome da tarefa, começando com verbo. */
+  titulo: string;
+  /** Palavras de quem usa, sem acento, para a busca do hub. */
+  sinonimos: string[];
   icon: ElementType;
   title: string;
   description: string;
@@ -71,6 +76,8 @@ const fontes: TutorialSource[] = [
   // Inscrição
   {
     id: 'primeira-inscricao',
+    titulo: 'Fazer a primeira inscrição',
+    sinonimos: ['inscricao provisoria', 'pre-inscricao', 'pre inscricao', 'registro', 'recem formado', 'novo farmaceutico'],
     icon: UserPlus,
     title: 'Primeira Inscrição (Provisória)',
     description: 'Para farmacêuticos que nunca estiveram inscritos em um Conselho Regional de Farmácia.',
@@ -79,6 +86,8 @@ const fontes: TutorialSource[] = [
   },
   {
     id: 'inscricao-definitiva',
+    titulo: 'Pedir a inscrição definitiva',
+    sinonimos: ['carteira definitiva', 'carteira profissional', 'diploma', 'cedula de identidade'],
     icon: BadgeCheck,
     title: 'Inscrição Definitiva',
     description: 'Solicite a inscrição definitiva e a carteira profissional com o diploma.',
@@ -88,6 +97,8 @@ const fontes: TutorialSource[] = [
   // Cadastro
   {
     id: 'alteracao-de-dados',
+    titulo: 'Alterar meus dados',
+    sinonimos: ['mudar endereco', 'atualizar cadastro', 'trocar telefone', 'trocar email', 'cadastro'],
     icon: Edit3,
     title: 'Alteração de Dados',
     description: 'Atualize os dados do seu cadastro profissional pelo CRF AL em Casa.',
@@ -106,6 +117,8 @@ const fontes: TutorialSource[] = [
   // Responsabilidade técnica
   {
     id: 'contratacao-rt',
+    titulo: 'Contratar responsável técnico (RT)',
+    sinonimos: ['assumir rt', 'vincular farmaceutico', 'solicitacao de rt', 'contratar farmaceutico'],
     icon: Stamp,
     title: 'Contratação de Responsável Técnico',
     description: 'Vincule um farmacêutico como responsável técnico do estabelecimento.',
@@ -114,6 +127,8 @@ const fontes: TutorialSource[] = [
   },
   {
     id: 'baixa-rt',
+    titulo: 'Dar baixa de RT',
+    sinonimos: ['sair da farmacia', 'sair da empresa', 'desligamento', 'encerrar vinculo', 'rescisao', 'baixa de contrato', 'demissao'],
     icon: UserMinus,
     title: 'Baixa de Responsabilidade Técnica',
     description: 'Encerre o vínculo de responsabilidade técnica sem precisar anexar requerimento.',
@@ -134,6 +149,8 @@ const fontes: TutorialSource[] = [
   },
   {
     id: 'consulta-rt',
+    titulo: 'Consultar meus vínculos de RT',
+    sinonimos: ['empresas vinculadas', 'responsabilidades tecnicas', 'ver vinculo'],
     icon: FileSearch,
     title: 'Consulta de Responsabilidade Técnica',
     description: 'Consulte seus vínculos de responsabilidade técnica ativos.',
@@ -150,6 +167,8 @@ const fontes: TutorialSource[] = [
   // Fiscalização
   {
     id: 'afastamento-provisorio',
+    titulo: 'Comunicar afastamento',
+    sinonimos: ['ferias', 'licenca', 'atestado', 'ausencia programada', 'comunicado'],
     icon: CalendarOff,
     title: 'Comunicado de Afastamento Provisório',
     description: 'Comunique o afastamento provisório pelo CRF AL em Casa e evite ser autuado durante a ausência.',
@@ -170,6 +189,8 @@ const fontes: TutorialSource[] = [
   },
   {
     id: 'justificativa-de-ausencia',
+    titulo: 'Justificar ausência',
+    sinonimos: ['fiscalizacao', 'inspecao', 'faltei', 'ausente'],
     icon: MessageSquareText,
     title: 'Justificativa de Ausência',
     description: 'Justifique uma ausência identificada em inspeção da fiscalização.',
@@ -185,6 +206,8 @@ const fontes: TutorialSource[] = [
   },
   {
     id: 'defesa-auto-infracao',
+    titulo: 'Defender auto de infração',
+    sinonimos: ['multa', 'autuacao', 'notificacao', 'fiscalizacao', 'recurso'],
     icon: Gavel,
     title: 'Defesa de Auto de Infração',
     description: 'Apresente a defesa do estabelecimento contra um auto de infração, pelo CRF AL em Casa.',
@@ -194,10 +217,12 @@ const fontes: TutorialSource[] = [
   // Protocolos e boletos
   {
     id: 'situacao-protocolos',
+    titulo: 'Acompanhar meu pedido',
+    sinonimos: ['protocolo', 'situacao', 'andamento', 'pendencia', 'status'],
     icon: FileClock,
     title: 'Situação dos Protocolos',
     description: 'Acompanhe o andamento das suas solicitações pelo número de protocolo.',
-    category: 'Protocolos e Boletos',
+    category: 'Protocolos, boletos e certidões',
     perfil: 'ambos',
     prazo: 'Imediato',
     motion: { src: `${VIDEOS_URL}/tutoriais/protocolos.mp4`, poster: '/images/tutoriais/protocolos-poster.webp', duracao: '0:30' },
@@ -210,10 +235,12 @@ const fontes: TutorialSource[] = [
   },
   {
     id: 'emitir-boletos',
+    titulo: 'Emitir boleto',
+    sinonimos: ['anuidade', 'segunda via', 'pagar', 'parcelamento', 'acordo', 'debito', 'taxa'],
     icon: ReceiptText,
     title: 'Emitir Boletos e Anuidades',
     description: 'Emita o boleto da anuidade do ano, sem precisar fazer login. Parcelamentos e acordos têm um caminho próprio.',
-    category: 'Protocolos e Boletos',
+    category: 'Protocolos, boletos e certidões',
     perfil: 'ambos',
     prazo: 'Imediato',
     motion: { src: `${VIDEOS_URL}/tutoriais/boletos.mp4`, poster: '/images/tutoriais/boletos-poster.webp', duracao: '0:30' },
@@ -224,6 +251,22 @@ const fontes: TutorialSource[] = [
       'Clique em "Consultar" para ver as anuidades do ano em aberto.',
       'Selecione a anuidade e imprima o boleto.',
       'Essa consulta mostra só anuidades do ano ainda não vencidas. Para parcelamentos e acordos, abra a tela de acesso do CRF AL em Casa e clique em "Impressão Parcelamentos/Acordo" no Painel de Controle; para débitos vencidos, entre na área restrita ou fale com o CRF-AL.',
+    ],
+  },
+  {
+    id: 'imprimir-crt',
+    titulo: 'Imprimir a certidão (CRT)',
+    sinonimos: ['certidao', 'crt', 'regularidade tecnica', 'certidao de regularidade'],
+    icon: FileCheck,
+    title: 'Certidão de Regularidade Técnica (CRT)',
+    description: 'Imprima a certidão de regularidade técnica liberada no CRF AL em Casa.',
+    category: 'Protocolos, boletos e certidões',
+    perfil: 'pessoa-fisica',
+    steps: [
+      'Acesse o CRF AL em Casa e abra "Impressão Certidão Regularidade Técnica".',
+      'Na linha "CRT Disponível para Impressão", clique no ícone de impressão.',
+      'Leia as informações e clique em "Confirmar Leitura".',
+      'A certidão abre em PDF: imprima ou salve o arquivo.',
     ],
   },
 ];
@@ -243,3 +286,8 @@ function resolver(fonte: TutorialSource): Tutorial {
 }
 
 export const tutoriais: Tutorial[] = fontes.map(resolver);
+
+export const CATEGORIAS_TUTORIAIS = ['Inscrição', 'Cadastro', 'Protocolos, boletos e certidões', 'Responsabilidade Técnica', 'Fiscalização'];
+
+/** Escolha editorial até haver dados da medição; confirmar com o atendimento. */
+export const MAIS_PROCURADOS = ['emitir-boletos', 'situacao-protocolos', 'baixa-rt', 'afastamento-provisorio', 'primeira-inscricao', 'imprimir-crt'];

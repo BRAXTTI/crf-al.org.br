@@ -73,6 +73,23 @@ async function expectMissing(path, plainText = false) {
 }
 
 try {
+  // Links antigos dos tutoriais: 301 permanente, sem abrir caminho arbitrário.
+  for (const [antigo, novo] of [
+    ['/servicos/tutoriais?tutorial=baixa-rt', '/servicos/tutoriais/baixa-rt'],
+    ['/servicos/tutoriais/?tutorial=baixa-rt&perfil=pessoa-fisica', '/servicos/tutoriais/baixa-rt'],
+    ['/servicos/tutoriais?tutorial=emitir-boletos&utm_source=x', '/servicos/tutoriais/emitir-boletos?utm_source=x'],
+    ['/servicos/tutoriais?tutorial=inexistente', '/servicos/tutoriais'],
+    ['/servicos/tutoriais?tutorial=../../contato', '/servicos/tutoriais'],
+    ['/servicos/tutoriais?tutorial=', '/servicos/tutoriais'],
+  ]) {
+    const response = await request(antigo);
+    assert.equal(response.status, 301, antigo);
+    assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br${novo}`, antigo);
+  }
+  assert.equal((await request('/servicos/tutoriais?perfil=pessoa-juridica')).status, 200, 'perfil continua no hub');
+  assert.equal((await request('/servicos/tutoriais/baixa-rt')).status, 200, 'Tarefa com metadados');
+  await expectMissing('/servicos/tutoriais/inexistente');
+
   const headers = await readFile(new URL('../public/_headers', import.meta.url), 'utf8');
   const csp = headers.match(/Content-Security-Policy: (.+)/)[1];
   for (const directive of ['img-src', 'media-src']) {

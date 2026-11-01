@@ -8,6 +8,7 @@ import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, 
 import { SITE_URL } from '../src/config/site';
 
 const NEWS_PREFIX = '/imprensa/noticias/';
+const TUTORIAIS_PATH = '/servicos/tutoriais';
 
 // Eventos: WordPress novo (rota customizada crfal/v1).
 const EVENTS_WP = 'https://wordpress.crf-al.org.br';
@@ -321,6 +322,15 @@ async function handle(context: PagesContext): Promise<Response> {
   if (pathname === '/imprensa/noticias-cff') return Response.redirect(`${SITE_URL}/imprensa/publicacoes-cff`, 301);
   if (pathname.startsWith('/publicacao/') && pathname.slice('/publicacao/'.length) && !pathname.slice('/publicacao/'.length).includes('/')) {
     return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${pathname.slice('/publicacao/'.length)}`, 301);
+  }
+  if (pathname === TUTORIAIS_PATH && url.searchParams.has('tutorial')) {
+    // Link antigo: fica permanente. Mantém a origem (previews) e outros parâmetros, como utm.
+    const destino = `${TUTORIAIS_PATH}/${url.searchParams.get('tutorial')}`;
+    const params = new URLSearchParams(url.search);
+    params.delete('tutorial');
+    params.delete('perfil');
+    const query = params.size ? `?${params}` : '';
+    return Response.redirect(`${url.origin}${Object.hasOwn(PAGE_METADATA, destino) ? destino : TUTORIAIS_PATH}${query}`, 301);
   }
   const staticData = Object.hasOwn(PAGE_METADATA, pathname) ? PAGE_METADATA[pathname] : undefined;
   const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));
