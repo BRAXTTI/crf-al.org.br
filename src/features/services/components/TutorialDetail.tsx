@@ -246,9 +246,9 @@ export default function TutorialDetail({ tutorial }: { tutorial: Tutorial }) {
             <Fechamento tutorial={tutorial} guia={guia} />
           </PassosComVideo>
         ) : capa ? (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
             {/* Mesma coluna do vídeo; no celular não fica fixa, pois a imagem não acompanha os passos. */}
-            <div className="z-20 -mx-1 self-start bg-white px-1 pb-2 pt-2 lg:pb-0 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
+            <div className="z-20 -mx-1 min-w-0 self-start bg-white px-1 pb-2 pt-2 lg:pb-0 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
               <div className="mb-4 hidden lg:block"><BotaoAcao tutorial={tutorial} destaque={false} /></div>
               <div className={telaDe('16:9')}>
                 <img src={capa.src} alt={capa.alt} width={960} height={540} loading="eager" decoding="async" className="block h-full w-full object-cover" />

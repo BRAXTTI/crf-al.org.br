@@ -44,6 +44,12 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
     expect(host.querySelector('video')).toBeNull();
     expect(host.textContent).not.toMatch(/Passo \d+ de \d+/);
     for (const passo of GUIAS[id].passos) expect(host.textContent).toContain(passo.titulo);
+
+    const grid = host.querySelector('.section-panel > div')!;
+    expect(grid.className).toContain('grid-cols-[minmax(0,1fr)]');
+    for (const coluna of grid.children) {
+      expect(coluna.className).toContain('min-w-0');
+    }
   });
 
   it('afastamento-provisorio usa vídeo 16:9 narrado no R2, details antes do vídeo e orienta acompanhar em Protocolos Web', () => {
@@ -63,6 +69,12 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
     expect(host.textContent).toContain('Acompanhe o status do protocolo no menu "Protocolos Web".');
     expect(host.textContent).not.toContain('10 dias');
     expect(host.textContent).not.toContain('Ver vídeo completo');
+
+    const grid = host.querySelector('.section-panel > div')!;
+    expect(grid.className).toContain('grid-cols-[minmax(0,1fr)]');
+    for (const coluna of grid.children) {
+      expect(coluna.className).toContain('min-w-0');
+    }
   });
 
   it('baixa-rt mantém moldura 4:3 e vídeo mudo', () => {

@@ -84,10 +84,10 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antesCe
   const botaoNav = `inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border border-crfal-gray-300 bg-white px-3 text-sm font-semibold text-crfal-blue hover:border-crfal-blue disabled:cursor-not-allowed disabled:opacity-40 ${motion} ${focusRing}`;
 
   return (
-    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
-      {antesCelular && <div className="lg:hidden">{antesCelular}</div>}
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
+      {antesCelular && <div className="min-w-0 lg:hidden">{antesCelular}</div>}
       {/* Em telas baixas o vídeo deixa de ser fixo, para não ocupar a tela toda. */}
-      <div className="z-20 self-start bg-white pb-2 pt-1 max-lg:-mx-4 max-lg:border-b max-lg:border-crfal-gray-200 sm:max-lg:-mx-6 max-lg:[@media(min-height:640px)]:sticky max-lg:[@media(min-height:640px)]:top-(--header-offset) lg:-mx-1 lg:px-1 lg:pb-0 lg:pt-2 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
+      <div className="z-20 min-w-0 self-start bg-white pb-2 pt-1 max-lg:-mx-4 max-lg:border-b max-lg:border-crfal-gray-200 sm:max-lg:-mx-6 md:max-lg:-mx-8 max-lg:[@media(min-height:640px)]:sticky max-lg:[@media(min-height:640px)]:top-(--header-offset) lg:-mx-1 lg:px-1 lg:pb-0 lg:pt-2 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
         {acao}
         <div className={`${telaDe(video.proporcao)} max-lg:rounded-none max-lg:border-x-0`}>
           <VideoTela
@@ -108,8 +108,8 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antesCe
             }}
           />
         </div>
-        {narrado && <ControlesSom videoRef={videoRef} duracao={video.duracao} className="max-lg:px-4 sm:max-lg:px-6" />}
-        <div className="mt-2 flex min-h-11 items-center justify-between gap-3 max-lg:px-4 sm:max-lg:px-6 lg:mt-4">
+        {narrado && <ControlesSom videoRef={videoRef} duracao={video.duracao} className="max-lg:px-4 sm:max-lg:px-6 md:max-lg:px-8" />}
+        <div className="mt-2 flex min-h-11 items-center justify-between gap-3 max-lg:px-4 sm:max-lg:px-6 md:max-lg:px-8 lg:mt-4">
           <p className="line-clamp-2 min-w-0 text-sm font-semibold leading-snug text-crfal-blue-dark">
             Passo {ativo + 1} de {total}
             <span className="lg:hidden">: {passos[ativo].titulo}</span>
