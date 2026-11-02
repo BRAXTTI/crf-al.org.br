@@ -6,6 +6,7 @@ import { CATEGORIAS_TUTORIAIS, MAIS_PROCURADOS, tutoriais } from '@/data/servico
 import { combinaBusca } from '@/features/services/tutorial-busca';
 import { GUIAS } from './tutoriais-guias';
 
+const IMAGENS_PUBLICAS = Object.keys(import.meta.glob('/public/images/tutoriais/*'));
 const buscar = (termo: string) => tutoriais.filter((t) => combinaBusca(t, termo)).map((t) => t.id);
 
 describe('tutoriais', () => {
@@ -44,6 +45,16 @@ describe('tutoriais', () => {
         expect(passo.fim!, id).toBeGreaterThan(passo.inicio!);
         if (i > 0) expect(passo.inicio, id).toBe(guia.passos[i - 1].fim);
       });
+    }
+  });
+
+  it('tem capa provisória só nas tarefas sem vídeo curto, com arquivo e alt', () => {
+    const comCapa = Object.entries(GUIAS).filter(([, guia]) => guia.capaProvisoria);
+    expect(comCapa.map(([id]) => id).sort()).toEqual(['afastamento-provisorio', 'primeira-inscricao']);
+    for (const [id, guia] of comCapa) {
+      expect(guia.video, id).toBeUndefined();
+      expect(IMAGENS_PUBLICAS, id).toContain(`/public${guia.capaProvisoria!.src}`);
+      expect(guia.capaProvisoria!.alt, id).toMatch(/^Ilustração /);
     }
   });
 
