@@ -3,12 +3,15 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias';
+import { telaDe } from '../tela';
 import PassosComVideo from './PassosComVideo';
 
 const guia = GUIAS['baixa-rt'] as GuiaTutorial & { video: VideoGuia };
+const guiaNarrado = GUIAS['afastamento-provisorio'] as GuiaTutorial & { video: VideoGuia };
 let root: Root;
 let host: HTMLElement;
 let beacon: ReturnType<typeof vi.fn>;
+let playSpy: ReturnType<typeof vi.spyOn>;
 const concluir = vi.fn();
 
 const video = () => host.querySelector('video')!;
@@ -28,7 +31,7 @@ beforeEach(() => {
   beacon = vi.fn(() => true);
   Object.defineProperty(navigator, 'sendBeacon', { value: beacon, configurable: true });
   window.matchMedia = vi.fn(() => ({ matches: false })) as unknown as typeof window.matchMedia;
-  vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
+  playSpy = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
   vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {});
   vi.spyOn(HTMLMediaElement.prototype, 'readyState', 'get').mockReturnValue(4);
   host = document.body.appendChild(document.createElement('div'));
@@ -43,6 +46,12 @@ afterEach(() => {
 });
 
 describe('PassosComVideo', () => {
+  it('telaDe devolve aspect-video para 16:9 e aspect-4/3 por padrão', () => {
+    expect(telaDe('16:9')).toContain('aspect-video');
+    expect(telaDe('16:9')).not.toContain('aspect-4/3');
+    expect(telaDe()).toContain('aspect-4/3');
+  });
+
   it('o passo ativo acompanha o vídeo', () => {
     expect(ativos()[0]).toContain(guia.passos[0].titulo);
     tempo(12);
@@ -80,5 +89,42 @@ describe('PassosComVideo', () => {
 
   it('o botão de pausa fica visível', () => {
     expect(host.querySelector('[aria-label="Tocar vídeo"]')).not.toBeNull();
+  });
+
+  describe('narrado', () => {
+    beforeEach(() => {
+      playSpy.mockClear();
+      concluir.mockClear();
+      act(() => root.render(<PassosComVideo tarefa="afastamento-provisorio" guia={guiaNarrado} onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
+    });
+
+    it('na montagem, play não é chamado e a linha do passo exibe o título', () => {
+      expect(playSpy).not.toHaveBeenCalled();
+      expect(host.textContent).toContain(`Passo 1 de 6: ${guiaNarrado.passos[0].titulo}`);
+    });
+
+    it('clicar em um passo com o vídeo pausado posiciona sem chamar play, mantém na folga e avança sem loop', () => {
+      clicar(/Marque a responsabilidade técnica \(RT\)/);
+      expect(video().currentTime).toBe(21.1);
+      expect(ativos()[0]).toContain('Marque a responsabilidade técnica (RT)');
+      expect(playSpy).not.toHaveBeenCalled();
+
+      tempo(21.08);
+      expect(ativos()[0]).toContain('Marque a responsabilidade técnica (RT)');
+
+      Object.defineProperty(video(), 'paused', { value: false, configurable: true });
+      tempo(25.5);
+      expect(ativos()[0]).toContain('Selecione o motivo da ausência');
+      expect(video().currentTime).toBe(25.5);
+      expect(host.textContent).toContain('Passo 3 de 6: Selecione o motivo da ausência');
+    });
+
+    it('disparar ended chama onConcluir e não chama play', () => {
+      act(() => {
+        video().dispatchEvent(new Event('ended', { bubbles: true }));
+      });
+      expect(concluir).toHaveBeenCalledTimes(1);
+      expect(playSpy).not.toHaveBeenCalled();
+    });
   });
 });

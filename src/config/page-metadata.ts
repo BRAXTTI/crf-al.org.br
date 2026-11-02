@@ -73,8 +73,8 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "description": "Veja como a empresa apresenta a defesa de um auto de infração pelo CRF AL em Casa."
   },
   "/servicos/tutoriais/situacao-protocolos": {
-    "title": "Acompanhar meu pedido",
-    "description": "Veja em vídeo como acompanhar seu pedido pelo número de protocolo e responder a pendências no CRF AL em Casa."
+    "title": "Acompanhar meu protocolo",
+    "description": "Veja em vídeo como acompanhar seu protocolo e responder a pendências no CRF AL em Casa."
   },
   "/servicos/tutoriais/emitir-boletos": {
     "title": "Emitir boleto",

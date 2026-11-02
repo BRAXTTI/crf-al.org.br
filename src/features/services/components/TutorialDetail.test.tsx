@@ -37,25 +37,39 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
     render(id);
     const img = capa(id)!;
     expect(img.alt).toBe(GUIAS[id].capaProvisoria!.alt);
-    expect(img.getAttribute('width')).toBe('540');
-    expect(img.getAttribute('height')).toBe('960');
+    expect(img.getAttribute('width')).toBe('960');
+    expect(img.getAttribute('height')).toBe('540');
     expect(img.getAttribute('decoding')).toBe('async');
-    expect(img.parentElement!.className).toContain('aspect-4/3');
+    expect(img.parentElement!.className).toContain('aspect-video');
     expect(host.querySelector('video')).toBeNull();
     expect(host.textContent).not.toMatch(/Passo \d+ de \d+/);
     for (const passo of GUIAS[id].passos) expect(host.textContent).toContain(passo.titulo);
   });
 
-  it('afastamento-provisorio usa o vídeo no R2 e orienta acompanhar em Protocolos Web', () => {
+  it('afastamento-provisorio usa vídeo 16:9 narrado no R2, details antes do vídeo e orienta acompanhar em Protocolos Web', () => {
     render('afastamento-provisorio');
+    const details = host.querySelectorAll('details');
     const video = host.querySelector('video')!;
+    expect(details.length).toBe(1);
     expect(video).not.toBeNull();
-    expect(video.getAttribute('poster')).toBe('/images/tutoriais/afastamento-provisorio-poster.webp');
+    expect(Boolean(details[0].compareDocumentPosition(video) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+    expect(video.parentElement!.parentElement!.className).toContain('aspect-video');
+    expect(video.hasAttribute('muted')).toBe(false);
+    expect(video.muted).toBe(false);
+    expect(host.querySelector('button[aria-label="Tocar vídeo com narração (0:55)"]')).not.toBeNull();
+    expect(video.getAttribute('poster')).toBe('/images/tutoriais/afastamento-provisorio-foto-poster.webp');
     expect(host.textContent).toContain('Passo 1 de 6');
     expect(host.textContent).toContain('No painel, em "Atalhos de Menus Mais Usados" > Fiscalização.');
     expect(host.textContent).toContain('Acompanhe o status do protocolo no menu "Protocolos Web".');
     expect(host.textContent).not.toContain('10 dias');
     expect(host.textContent).not.toContain('Ver vídeo completo');
+  });
+
+  it('baixa-rt mantém moldura 4:3 e vídeo mudo', () => {
+    render('baixa-rt');
+    const video = host.querySelector('video')!;
+    expect(video.parentElement!.parentElement!.className).toContain('aspect-4/3');
+    expect(video.muted).toBe(true);
   });
 
   it('mantém o link do vídeo completo nas tarefas sem vídeo curto', () => {

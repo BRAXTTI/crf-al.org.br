@@ -29,7 +29,7 @@ function doTutorial(tutorialId: string, subtitle: string): ReelDestaque {
 
 export const REELS_DESTAQUE: ReelDestaque[] = [
   doTutorial('baixa-rt', 'Encerre o vínculo online'),
-  doTutorial('situacao-protocolos', 'Acompanhe seus pedidos'),
+  doTutorial('situacao-protocolos', 'Acompanhe seus protocolos'),
   doTutorial('emitir-boletos', 'Sem precisar de login'),
   {
     id: 'sncr',
