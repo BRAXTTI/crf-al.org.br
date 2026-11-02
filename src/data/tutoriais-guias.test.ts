@@ -54,7 +54,8 @@ describe('tutoriais', () => {
     for (const [id, guia] of comCapa) {
       expect(guia.video, id).toBeUndefined();
       expect(IMAGENS_PUBLICAS, id).toContain(`/public${guia.capaProvisoria!.src}`);
-      expect(guia.capaProvisoria!.alt, id).toMatch(/^Ilustração /);
+      expect(guia.capaProvisoria!.alt.length, id).toBeGreaterThan(20);
+      expect(guia.capaProvisoria!.alt, id).not.toMatch(/Ilustração|formulário|sistema/i);
     }
   });
 

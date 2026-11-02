@@ -18,9 +18,15 @@ const tutoriais = [];
 for (const file of ['src/data/servicos.ts', 'src/data/tutoriais-destaque.ts', 'src/data/tutoriais-guias.ts']) {
   const source = await readFile(file, 'utf8');
   for (const [, nome] of source.matchAll(/src: `\$\{VIDEOS_URL\}\/tutoriais\/([a-z-]+)\.mp4`/g)) tutoriais.push(nome);
-  for (const [, poster] of source.matchAll(/poster: '(\/images\/tutoriais\/[a-z-]+-poster\.webp)'/g)) await access(`public${poster}`);
+  for (const [, poster] of source.matchAll(/(?:poster|src): '(\/images\/tutoriais\/[a-z-]+-poster\.webp)'/g)) await access(`public${poster}`);
 }
 assert.deepEqual(tutoriais.sort(), ['afastamento-provisorio', 'baixa-rt', 'boletos', 'crf-em-casa', 'protocolos', 'sncr'], 'Vídeos dos tutoriais no R2');
+
+const guiasSource = await readFile('src/data/tutoriais-guias.ts', 'utf8');
+const totalNarrados = [...guiasSource.matchAll(/narrado:\s*true/g)].length;
+const narradosMp4 = [...guiasSource.matchAll(/video:\s*\{[^}]*src:\s*`\$\{VIDEOS_URL\}\/tutoriais\/([a-z-]+)\.mp4`[^}]*narrado:\s*true[^}]*\}/g)].map(([, nome]) => nome);
+assert.equal(totalNarrados, narradosMp4.length, 'narrado: true só em vídeos MP4 de tutoriais no R2');
+assert.deepEqual(narradosMp4, ['afastamento-provisorio'], 'Lista de vídeos narrados em tutoriais-guias.ts');
 
 for (const file of (await readdir('src', { recursive: true })).filter(file => /\.(tsx?)$/.test(file))) {
   const source = await readFile(`src/${file}`, 'utf8');

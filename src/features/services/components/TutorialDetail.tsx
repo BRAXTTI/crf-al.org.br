@@ -7,7 +7,7 @@ import { getRequerimento } from '@/data/requerimentos';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias';
 import { medir } from '@/lib/medir';
-import { TELA } from '../tela';
+import { telaDe } from '../tela';
 import PassosComVideo from './PassosComVideo';
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -35,7 +35,7 @@ function BotaoAcao({ tutorial, destaque, className = '' }: { tutorial: Tutorial;
   );
 }
 
-function Antes({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial }) {
+function Antes({ tutorial, guia, onde }: { tutorial: Tutorial; guia: GuiaTutorial; onde?: 'celular' | 'desktop' }) {
   const requerimento = tutorial.requerimentoId ? getRequerimento(tutorial.requerimentoId) : undefined;
   const lista = (
     <>
@@ -58,18 +58,22 @@ function Antes({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial }) {
   );
   return (
     <>
-      <div className="hidden lg:block">
-        <h2 className={`${tituloBloco} mb-3`}>Antes de começar</h2>
-        {lista}
-      </div>
-      {/* No celular com vídeo fixo, recolhe para os passos ficarem à vista; sem vídeo, há espaço. */}
-      <details open={!guia.video || undefined} className="group rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 lg:hidden">
-        <summary className={`flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-3.5 py-2 text-sm font-semibold text-crfal-blue-dark [&::-webkit-details-marker]:hidden ${focusRing}`}>
-          <span className="min-w-0 truncate">Antes de começar{guia.video && `: ${guia.antes.join(' · ')}`}</span>
-          <ChevronDown className={`h-4 w-4 shrink-0 group-open:rotate-180 ${motion}`} aria-hidden />
-        </summary>
-        <div className="px-3.5 pb-3">{lista}</div>
-      </details>
+      {onde !== 'celular' && (
+        <div className="hidden lg:block">
+          <h2 className={`${tituloBloco} mb-3`}>Antes de começar</h2>
+          {lista}
+        </div>
+      )}
+      {onde !== 'desktop' && (
+        /* No celular com vídeo fixo, recolhe para os passos ficarem à vista; sem vídeo, há espaço. */
+        <details open={!guia.video || undefined} className="group rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 lg:hidden">
+          <summary className={`flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-3.5 py-2 text-sm font-semibold text-crfal-blue-dark [&::-webkit-details-marker]:hidden ${focusRing}`}>
+            <span className="min-w-0 truncate">Antes de começar{guia.video && `: ${guia.antes.join(' · ')}`}</span>
+            <ChevronDown className={`h-4 w-4 shrink-0 group-open:rotate-180 ${motion}`} aria-hidden />
+          </summary>
+          <div className="px-3.5 pb-3">{lista}</div>
+        </details>
+      )}
     </>
   );
 }
@@ -236,7 +240,8 @@ export default function TutorialDetail({ tutorial }: { tutorial: Tutorial }) {
             guia={guia}
             onConcluir={() => setConcluiu(true)}
             acao={<div className="mb-4 hidden lg:block"><BotaoAcao tutorial={tutorial} destaque={concluiu} /></div>}
-            antes={<Antes tutorial={tutorial} guia={guia} />}
+            antesCelular={<Antes tutorial={tutorial} guia={guia} onde="celular" />}
+            antes={<Antes tutorial={tutorial} guia={guia} onde="desktop" />}
           >
             <Fechamento tutorial={tutorial} guia={guia} />
           </PassosComVideo>
@@ -245,8 +250,8 @@ export default function TutorialDetail({ tutorial }: { tutorial: Tutorial }) {
             {/* Mesma coluna do vídeo; no celular não fica fixa, pois a imagem não acompanha os passos. */}
             <div className="z-20 -mx-1 self-start bg-white px-1 pb-2 pt-2 lg:pb-0 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
               <div className="mb-4 hidden lg:block"><BotaoAcao tutorial={tutorial} destaque={false} /></div>
-              <div className={TELA}>
-                <img src={capa.src} alt={capa.alt} width={540} height={960} loading="eager" decoding="async" className="block h-full w-full object-contain" />
+              <div className={telaDe('16:9')}>
+                <img src={capa.src} alt={capa.alt} width={960} height={540} loading="eager" decoding="async" className="block h-full w-full object-cover" />
               </div>
             </div>
             <div className="min-w-0">

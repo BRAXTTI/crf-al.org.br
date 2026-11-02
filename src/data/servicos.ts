@@ -217,8 +217,8 @@ const fontes: TutorialSource[] = [
   // Protocolos e boletos
   {
     id: 'situacao-protocolos',
-    titulo: 'Acompanhar meu pedido',
-    sinonimos: ['protocolo', 'situacao', 'andamento', 'pendencia', 'status'],
+    titulo: 'Acompanhar meu protocolo',
+    sinonimos: ['protocolo', 'pedido', 'situacao', 'andamento', 'pendencia', 'status'],
     icon: FileClock,
     title: 'Situação dos Protocolos',
     description: 'Acompanhe o andamento das suas solicitações pelo número de protocolo.',

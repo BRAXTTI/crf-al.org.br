@@ -2,8 +2,8 @@ import { useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { GuiaTutorial, VideoGuia } from '@/data/tutoriais-guias';
 import { medidorDeVideo, medir } from '@/lib/medir';
-import { TELA } from '../tela';
-import VideoTela from './VideoTela';
+import { telaDe } from '../tela';
+import VideoTela, { ControlesSom } from './VideoTela';
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
@@ -16,6 +16,8 @@ interface PassosComVideoProps {
   onConcluir: () => void;
   /** Coluna do vídeo: botão de ação no desktop, acima do vídeo para aparecer sem rolar. */
   acao: ReactNode;
+  /** Acima do vídeo no celular (ex.: "Antes de começar" recolhido). */
+  antesCelular?: ReactNode;
   /** Coluna dos passos, antes da lista. */
   antes: ReactNode;
   /** Coluna dos passos, depois da lista. */
@@ -24,11 +26,13 @@ interface PassosComVideoProps {
 
 /**
  * Um arquivo por tarefa, com um trecho por passo. Tocando livre, o passo em
- * destaque acompanha o vídeo; ao escolher um passo, o vídeo vai ao trecho e fica
- * em loop nele. A página nunca rola sozinha.
+ * destaque acompanha o vídeo. No modo ambiente (sem som), escolher um passo vai ao
+ * trecho e fica em loop nele; no modo narrado, escolher um passo só posiciona o
+ * vídeo sem mudar play/pausa e sem repetir o trecho em loop. A página nunca rola sozinha.
  */
-export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antes, children }: PassosComVideoProps) {
+export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antesCelular, antes, children }: PassosComVideoProps) {
   const { passos, video } = guia;
+  const narrado = Boolean(video.narrado);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ativo, setAtivo] = useState(0);
   const [anuncio, setAnuncio] = useState('');
@@ -45,7 +49,7 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antes, 
   };
 
   const escolher = (indice: number) => {
-    emTrecho.current = true;
+    emTrecho.current = !narrado;
     setAtivo(indice);
     setAnuncio(`Passo ${indice + 1} de ${total}: ${passos[indice].titulo}`);
     saltar(passos[indice].inicio ?? 0);
@@ -58,7 +62,7 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antes, 
   const aoAvancar = (el: HTMLVideoElement) => {
     medidor.aoAvancar(el);
     const t = el.currentTime;
-    if (emTrecho.current) {
+    if (!narrado && emTrecho.current) {
       const passo = passos[ativo];
       if (t >= (passo.fim ?? Infinity) - FOLGA) {
         if (ativo === total - 1) onConcluir();
@@ -66,29 +70,33 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antes, 
       }
       return;
     }
-    const atual = passos.findIndex((p) => t >= (p.inicio ?? 0) && t < (p.fim ?? Infinity));
+    const atual = passos.findIndex((p) => t + FOLGA >= (p.inicio ?? 0) && t + FOLGA < (p.fim ?? Infinity));
     if (atual >= 0 && atual !== ativo) setAtivo(atual);
   };
 
   const aoTerminar = (el: HTMLVideoElement) => {
     onConcluir();
+    if (narrado) return;
     el.currentTime = emTrecho.current ? passos[ativo].inicio ?? 0 : 0;
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) el.play().catch(() => {});
   };
 
-  const botaoNav = `inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded-full border border-crfal-gray-300 bg-white px-3 text-sm font-semibold text-crfal-blue hover:border-crfal-blue disabled:cursor-not-allowed disabled:opacity-40 ${motion} ${focusRing}`;
+  const botaoNav = `inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border border-crfal-gray-300 bg-white px-3 text-sm font-semibold text-crfal-blue hover:border-crfal-blue disabled:cursor-not-allowed disabled:opacity-40 ${motion} ${focusRing}`;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
+    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
+      {antesCelular && <div className="lg:hidden">{antesCelular}</div>}
       {/* Em telas baixas o vídeo deixa de ser fixo, para não ocupar a tela toda. */}
-      <div className="z-20 -mx-1 self-start bg-white px-1 pb-2 pt-2 [@media(min-height:700px)]:sticky [@media(min-height:700px)]:top-(--header-offset) lg:pb-0 lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
+      <div className="z-20 self-start bg-white pb-2 pt-1 max-lg:-mx-4 max-lg:border-b max-lg:border-crfal-gray-200 sm:max-lg:-mx-6 max-lg:[@media(min-height:640px)]:sticky max-lg:[@media(min-height:640px)]:top-(--header-offset) lg:-mx-1 lg:px-1 lg:pb-0 lg:pt-2 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
         {acao}
-        <div className={TELA}>
+        <div className={`${telaDe(video.proporcao)} max-lg:rounded-none max-lg:border-x-0`}>
           <VideoTela
             videoRef={videoRef}
             src={video.src}
             poster={video.poster}
             alt={video.alt}
+            duracao={video.duracao}
+            narrado={narrado}
             loop={false}
             onPlaying={medidor.aoTocar}
             onTimeUpdate={(e) => aoAvancar(e.currentTarget)}
@@ -100,9 +108,13 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antes, 
             }}
           />
         </div>
-        <div className="mt-2 flex items-center justify-between gap-3 lg:mt-4">
-          <p className="text-sm font-semibold text-crfal-blue-dark">Passo {ativo + 1} de {total}</p>
-          <div className="flex gap-2">
+        {narrado && <ControlesSom videoRef={videoRef} duracao={video.duracao} className="max-lg:px-4 sm:max-lg:px-6" />}
+        <div className="mt-2 flex min-h-11 items-center justify-between gap-3 max-lg:px-4 sm:max-lg:px-6 lg:mt-4">
+          <p className="line-clamp-2 min-w-0 text-sm font-semibold leading-snug text-crfal-blue-dark">
+            Passo {ativo + 1} de {total}
+            <span className="lg:hidden">: {passos[ativo].titulo}</span>
+          </p>
+          <div className="flex shrink-0 gap-2">
             <button type="button" className={botaoNav} disabled={ativo === 0} onClick={() => escolher(ativo - 1)} aria-label="Passo anterior">
               <ChevronLeft className="h-4 w-4" aria-hidden /><span className="hidden lg:inline">Anterior</span>
             </button>
@@ -116,7 +128,7 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antes, 
       <div className="min-w-0">
         {antes}
         {video.aviso && <p className="mt-4 rounded-lg border border-crfal-gold/40 bg-[#FBF7EC] px-3.5 py-2.5 text-[13.5px] leading-snug text-crfal-gray-700">{video.aviso}</p>}
-        <h2 className="mt-6 text-lg font-bold text-crfal-blue first:mt-0">Passos</h2>
+        <h2 className="mt-4 text-lg font-bold text-crfal-blue first:mt-0 lg:mt-6">Passos</h2>
         <ol className="mt-3">
           {passos.map((passo, indice) => {
             const atual = indice === ativo;

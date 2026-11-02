@@ -21,13 +21,16 @@ export interface VideoGuia {
   poster: string;
   alt: string;
   duracao: string;
+  /** Tem narração: não toca sozinho; toca no clique, com som e controles de volume. */
+  narrado?: boolean;
+  /** Proporção do arquivo; padrão '4:3' (gravações do Manual). */
+  proporcao?: '4:3' | '16:9';
   /** Diferença entre o que o vídeo mostra e o caminho do botão de ação. */
   aviso?: string;
 }
 
 /**
- * Ilustração provisória (540x960), não é print real do sistema. Trocar pela capa
- * do vídeo quando ele existir: com `video`, o vídeo tem prioridade e ela é ignorada.
+ * Foto 16:9 (960x540) até haver vídeo; não é print do sistema. Com `video`, o vídeo tem prioridade.
  */
 export interface CapaProvisoria {
   src: string;
@@ -65,8 +68,8 @@ export const GUIAS: Record<string, GuiaTutorial> = {
   'primeira-inscricao': {
     tempoEstimado: 'cerca de 10 min',
     capaProvisoria: {
-      src: '/images/tutoriais/primeira-inscricao-poster.webp',
-      alt: 'Ilustração do formulário "Pré Inscrição Pessoa Física", com campos de nome completo, CPF, data de nascimento e e-mail, área para anexar documentos e botão "Imprimir protocolo".',
+      src: '/images/tutoriais/primeira-inscricao-foto-poster.webp',
+      alt: 'Mesa de estudo com jaleco branco dobrado, pasta azul-marinho fechada com documentos, caneta dourada e notebook de costas.',
     },
     antes: ['Não precisa de login', 'Documentos prontos para anexar'],
     passos: [
@@ -77,7 +80,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     ],
     depois: [
       'Leve a documentação original à sede ou à seccional do CRF-AL.',
-      'O CRF-AL analisa os documentos e o pedido vai à plenária.',
+      'O CRF-AL analisa os documentos e o protocolo vai à plenária.',
       'Aprovada a inscrição, você recebe um e-mail com o boleto da taxa.',
       'Pague o boleto e aguarde a compensação para receber a confirmação.',
     ],
@@ -99,7 +102,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
       { titulo: 'Anexe o formulário e o diploma' },
       { titulo: 'Salve o protocolo' },
     ],
-    depois: ['Leve os documentos originais à sede ou à seccional para conferência.', 'O CRF-AL analisa o pedido.'],
+    depois: ['Leve os documentos originais à sede ou à seccional para conferência.', 'O CRF-AL analisa o protocolo.'],
     problemas: [SENHA, LOGIN_PF, ANEXO],
     proxima: 'situacao-protocolos',
   },
@@ -125,7 +128,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
       { titulo: 'Preencha os campos' },
       { titulo: 'Anexe o comprovante do vínculo' },
     ],
-    depois: ['O CRF-AL analisa o pedido.'],
+    depois: ['O CRF-AL analisa o protocolo.'],
     problemas: [SENHA, LOGIN_PJ, ANEXO],
     proxima: 'situacao-protocolos',
   },
@@ -158,9 +161,11 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 3 min',
     video: {
       src: `${VIDEOS_URL}/tutoriais/afastamento-provisorio.mp4`,
-      poster: '/images/tutoriais/afastamento-provisorio-poster.webp',
+      poster: '/images/tutoriais/afastamento-provisorio-foto-poster.webp',
       alt: 'Comunicado de afastamento provisório no CRF AL em Casa, do acesso pelo painel até salvar o protocolo.',
       duracao: '0:55',
+      narrado: true,
+      proporcao: '16:9',
     },
     antes: ['Login de Pessoa Física', 'Datas do afastamento', 'Comprovante do motivo'],
     passos: [
@@ -212,7 +217,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
       { titulo: 'Escreva a resposta e anexe o que foi pedido', inicio: 15, fim: 21 },
       { titulo: 'Clique em "Salvar"', detalhe: 'O sistema mostra o comprovante da resposta.', inicio: 21, fim: 27 },
     ],
-    problemas: [SENHA, { sintoma: 'O protocolo não aparece', solucao: 'Confira se entrou com o mesmo login usado no pedido e veja também "Protocolos CRF".' }],
+    problemas: [SENHA, { sintoma: 'O protocolo não aparece', solucao: 'Confira se entrou com o mesmo login usado para abrir o protocolo e veja também "Protocolos CRF".' }],
   },
   'emitir-boletos': {
     tempoEstimado: 'cerca de 2 min',
