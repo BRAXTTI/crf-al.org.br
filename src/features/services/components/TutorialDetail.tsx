@@ -7,6 +7,7 @@ import { getRequerimento } from '@/data/requerimentos';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias';
 import { medir } from '@/lib/medir';
+import { TELA } from '../tela';
 import PassosComVideo from './PassosComVideo';
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -197,10 +198,28 @@ function Fechamento({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial
   );
 }
 
-/** Conteúdo da tarefa; com vídeo, duas colunas; sem vídeo, coluna única. */
+/** Sem vídeo curto: link para o vídeo completo, passos e fechamento. */
+function CorpoSemVideo({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial }) {
+  return (
+    <>
+      {guia.videoCompleto && tutorial.videoUrl && (
+        <a href={tutorial.videoUrl} target="_blank" rel="noopener noreferrer" onClick={() => medir('video_inicio', { tarefa: tutorial.id })} className={`mt-4 inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+          <Play className="h-4 w-4 text-[#8A6A12]" aria-hidden />
+          Ver vídeo completo ({guia.videoCompleto})
+          <span className="sr-only">no YouTube (abre em uma nova aba)</span>
+        </a>
+      )}
+      <PassosSemVideo guia={guia} />
+      <Fechamento tutorial={tutorial} guia={guia} />
+    </>
+  );
+}
+
+/** Conteúdo da tarefa; com vídeo ou capa provisória, duas colunas; sem nenhum dos dois, coluna única. */
 export default function TutorialDetail({ tutorial }: { tutorial: Tutorial }) {
   const guia = GUIAS[tutorial.id];
   const [concluiu, setConcluiu] = useState(false);
+  const capa = guia.capaProvisoria;
 
   // A barra fixa do celular não pode cobrir o fim do rodapé.
   useEffect(() => {
@@ -221,21 +240,27 @@ export default function TutorialDetail({ tutorial }: { tutorial: Tutorial }) {
           >
             <Fechamento tutorial={tutorial} guia={guia} />
           </PassosComVideo>
+        ) : capa ? (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
+            {/* Mesma coluna do vídeo; no celular não fica fixa, pois a imagem não acompanha os passos. */}
+            <div className="z-20 -mx-1 self-start bg-white px-1 pb-2 pt-2 lg:pb-0 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
+              <div className="mb-4 hidden lg:block"><BotaoAcao tutorial={tutorial} destaque={false} /></div>
+              <div className={TELA}>
+                <img src={capa.src} alt={capa.alt} width={540} height={960} loading="eager" decoding="async" className="block h-full w-full object-contain" />
+              </div>
+            </div>
+            <div className="min-w-0">
+              <Antes tutorial={tutorial} guia={guia} />
+              <CorpoSemVideo tutorial={tutorial} guia={guia} />
+            </div>
+          </div>
         ) : (
           <div className="mx-auto max-w-3xl">
             <div className="sticky top-(--header-offset) z-20 -mx-1 hidden items-center gap-5 bg-white px-1 py-3 lg:flex">
               <BotaoAcao tutorial={tutorial} destaque={false} className="max-w-sm" />
             </div>
             <div className="lg:mt-4"><Antes tutorial={tutorial} guia={guia} /></div>
-            {guia.videoCompleto && tutorial.videoUrl && (
-              <a href={tutorial.videoUrl} target="_blank" rel="noopener noreferrer" onClick={() => medir('video_inicio', { tarefa: tutorial.id })} className={`mt-4 inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
-                <Play className="h-4 w-4 text-[#8A6A12]" aria-hidden />
-                Ver vídeo completo ({guia.videoCompleto})
-                <span className="sr-only">no YouTube (abre em uma nova aba)</span>
-              </a>
-            )}
-            <PassosSemVideo guia={guia} />
-            <Fechamento tutorial={tutorial} guia={guia} />
+            <CorpoSemVideo tutorial={tutorial} guia={guia} />
           </div>
         )}
       </section>

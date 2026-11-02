@@ -24,6 +24,15 @@ export interface VideoGuia {
   aviso?: string;
 }
 
+/**
+ * Ilustração provisória (540x960), não é print real do sistema. Trocar pela capa
+ * do vídeo quando ele existir: com `video`, o vídeo tem prioridade e ela é ignorada.
+ */
+export interface CapaProvisoria {
+  src: string;
+  alt: string;
+}
+
 export interface GuiaTutorial {
   tempoEstimado: string;
   /** No máximo 3. */
@@ -32,6 +41,7 @@ export interface GuiaTutorial {
   /** Esperas e entregas presenciais: não contam como passo. */
   depois?: string[];
   video?: VideoGuia;
+  capaProvisoria?: CapaProvisoria;
   /** Enquanto não há vídeo curto, link discreto para o YouTube (duração exibida). */
   videoCompleto?: string;
   problemas: { sintoma: string; solucao: string }[];
@@ -53,6 +63,10 @@ const ANEXO = { sintoma: 'O arquivo não anexa', solucao: 'Use JPG, PNG, TIFF ou
 export const GUIAS: Record<string, GuiaTutorial> = {
   'primeira-inscricao': {
     tempoEstimado: 'cerca de 10 min',
+    capaProvisoria: {
+      src: '/images/tutoriais/primeira-inscricao-poster.webp',
+      alt: 'Ilustração do formulário "Pré Inscrição Pessoa Física", com campos de nome completo, CPF, data de nascimento e e-mail, área para anexar documentos e botão "Imprimir protocolo".',
+    },
     antes: ['Não precisa de login', 'Documentos prontos para anexar'],
     passos: [
       { titulo: 'Clique em "Fazer pré-inscrição"', detalhe: 'No sistema, a opção é "Pré Inscrição Pessoa Física".' },
@@ -142,6 +156,10 @@ export const GUIAS: Record<string, GuiaTutorial> = {
   'afastamento-provisorio': {
     tempoEstimado: 'cerca de 3 min',
     videoCompleto: '2:13',
+    capaProvisoria: {
+      src: '/images/tutoriais/afastamento-provisorio-poster.webp',
+      alt: 'Ilustração do formulário "Comunicado de Afastamento Provisório", com responsabilidade técnica, motivo da ausência, datas de início e término, área para anexar o comprovante e botão "Salvar Protocolo".',
+    },
     antes: ['Login de Pessoa Física', 'Datas do afastamento', 'Comprovante do motivo'],
     passos: [
       { titulo: 'Clique em "Comunicado de Afastamento Provisório"' },
