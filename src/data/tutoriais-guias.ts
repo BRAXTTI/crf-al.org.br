@@ -4,6 +4,7 @@
  * os dois textos. Os tempos (`inicio`/`fim`, em segundos) foram marcados assistindo
  * cada gravação: ao trocar o arquivo, marque de novo.
  */
+import { VIDEOS_URL } from '@/config/site';
 import { MANUAL_CRF_EM_CASA } from '@/data/manual-crf-em-casa';
 
 export interface PassoGuia {
@@ -155,21 +156,22 @@ export const GUIAS: Record<string, GuiaTutorial> = {
   },
   'afastamento-provisorio': {
     tempoEstimado: 'cerca de 3 min',
-    videoCompleto: '2:13',
-    capaProvisoria: {
-      src: '/images/tutoriais/afastamento-provisorio-poster.webp',
-      alt: 'Ilustração do formulário "Comunicado de Afastamento Provisório", com responsabilidade técnica, motivo da ausência, datas de início e término, área para anexar o comprovante e botão "Salvar Protocolo".',
+    video: {
+      src: `${VIDEOS_URL}/tutoriais/afastamento-provisorio.mp4`,
+      poster: '/images/tutoriais/afastamento-provisorio-poster.webp',
+      alt: 'Comunicado de afastamento provisório no CRF AL em Casa, do acesso pelo painel até salvar o protocolo.',
+      duracao: '0:55',
     },
     antes: ['Login de Pessoa Física', 'Datas do afastamento', 'Comprovante do motivo'],
     passos: [
-      { titulo: 'Clique em "Comunicado de Afastamento Provisório"' },
-      { titulo: 'Selecione a responsabilidade técnica (RT)' },
-      { titulo: 'Selecione o motivo da ausência' },
-      { titulo: 'Informe as datas de início e término', detalhe: 'Informe também os horários, quando o motivo permitir.' },
-      { titulo: 'Anexe o comprovante do motivo' },
-      { titulo: 'Clique em "Salvar Protocolo"' },
+      { titulo: 'Clique em "Comunicado de Ausência (Afastamento Provisório)"', detalhe: 'No painel, em "Atalhos de Menus Mais Usados" > Fiscalização.', inicio: 0, fim: 21.1 },
+      { titulo: 'Marque a responsabilidade técnica (RT)', inicio: 21.1, fim: 25 },
+      { titulo: 'Selecione o motivo da ausência', detalhe: 'O sistema mostra o máximo de dias permitido para o motivo.', inicio: 25, fim: 32 },
+      { titulo: 'Informe as datas de início e fim', detalhe: 'Informe também os horários, quando o motivo permitir.', inicio: 32, fim: 39.3 },
+      { titulo: 'Anexe o comprovante em "Selecione"', inicio: 39.3, fim: 43.8 },
+      { titulo: 'Clique em "Salvar Protocolo"', inicio: 43.8, fim: 55.2 },
     ],
-    depois: ['Atestado médico: apresente presencialmente no CRF-AL em até 10 dias.'],
+    depois: ['Acompanhe o status do protocolo no menu "Protocolos Web".'],
     problemas: [SENHA, LOGIN_PF, ANEXO],
     proxima: 'situacao-protocolos',
   },

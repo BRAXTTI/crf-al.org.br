@@ -15,12 +15,12 @@ for (const secao of MANUAL_CRF_EM_CASA) await access(`public${secao.poster}`);
 
 // servicos.ts depende de lucide-react; confere as URLs pelo código-fonte.
 const tutoriais = [];
-for (const file of ['src/data/servicos.ts', 'src/data/tutoriais-destaque.ts']) {
+for (const file of ['src/data/servicos.ts', 'src/data/tutoriais-destaque.ts', 'src/data/tutoriais-guias.ts']) {
   const source = await readFile(file, 'utf8');
   for (const [, nome] of source.matchAll(/src: `\$\{VIDEOS_URL\}\/tutoriais\/([a-z-]+)\.mp4`/g)) tutoriais.push(nome);
   for (const [, poster] of source.matchAll(/poster: '(\/images\/tutoriais\/[a-z-]+-poster\.webp)'/g)) await access(`public${poster}`);
 }
-assert.deepEqual(tutoriais.sort(), ['baixa-rt', 'boletos', 'crf-em-casa', 'protocolos', 'sncr'], 'Vídeos dos tutoriais no R2');
+assert.deepEqual(tutoriais.sort(), ['afastamento-provisorio', 'baixa-rt', 'boletos', 'crf-em-casa', 'protocolos', 'sncr'], 'Vídeos dos tutoriais no R2');
 
 for (const file of (await readdir('src', { recursive: true })).filter(file => /\.(tsx?)$/.test(file))) {
   const source = await readFile(`src/${file}`, 'utf8');
