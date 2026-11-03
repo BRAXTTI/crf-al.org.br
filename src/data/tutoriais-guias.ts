@@ -5,7 +5,6 @@
  * cada gravação: ao trocar o arquivo, marque de novo.
  */
 import { VIDEOS_URL } from '@/config/site';
-import { MANUAL_CRF_EM_CASA } from '@/data/manual-crf-em-casa';
 
 export interface PassoGuia {
   /** Até ~8 palavras, com o nome do botão entre aspas. */
@@ -54,12 +53,6 @@ export interface GuiaTutorial {
   problemas: { sintoma: string; solucao: string }[];
   /** Id de outra tarefa, só quando há continuação real. */
   proxima?: string;
-}
-
-function doManual(id: string, duracao: string, aviso?: string): VideoGuia {
-  const secao = MANUAL_CRF_EM_CASA.find((s) => s.id === id);
-  if (!secao?.video || !secao.poster) throw new Error(`Manual sem vídeo: ${id}`);
-  return { src: secao.video, poster: secao.poster, alt: secao.videoAlt, duracao, aviso };
 }
 
 const SENHA = { sintoma: 'Esqueci a senha', solucao: 'Na tela de login, use "Recuperar Senha", no Painel de Controle.' };
@@ -173,7 +166,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 3 min',
     video: {
       src: `${VIDEOS_URL}/tutoriais/afastamento-provisorio.mp4`,
-      poster: '/images/tutoriais/afastamento-provisorio-foto-poster.webp',
+      poster: '/images/tutoriais/afastamento-provisorio-poster.webp',
       alt: 'Comunicado de afastamento provisório no CRF AL em Casa, do acesso pelo painel até salvar o protocolo.',
       duracao: '0:55',
       narrado: true,
@@ -251,14 +244,22 @@ export const GUIAS: Record<string, GuiaTutorial> = {
   },
   'emitir-boletos': {
     tempoEstimado: 'cerca de 2 min',
-    video: doManual('boletos', '0:28', 'O vídeo mostra a tela de parcelamentos. A de anuidades do ano, aberta pelo botão, pede os mesmos dados.'),
+    video: {
+      src: `${VIDEOS_URL}/tutoriais/emitir-boletos.mp4`,
+      webm: `${VIDEOS_URL}/tutoriais/emitir-boletos.webm`,
+      poster: '/images/tutoriais/emitir-boletos-poster.webp',
+      alt: 'Emissão do boleto da anuidade no CRF AL em Casa, do acesso sem login até selecionar a anuidade e imprimir.',
+      duracao: '0:48',
+      narrado: true,
+      proporcao: '16:9',
+    },
     antes: ['Não precisa de login', 'Número de inscrição e CPF ou CNPJ', 'Data de nascimento, se a tela pedir'],
     passos: [
-      { titulo: 'Clique em "Emitir boleto"', detalhe: 'Abre a "Impressão de Anuidades do Ano Corrente".', inicio: 0, fim: 5 },
-      { titulo: 'Selecione o tipo', detalhe: 'Por exemplo, Farmacêutico.', inicio: 5, fim: 8 },
-      { titulo: 'Preencha os dados pedidos na tela', inicio: 8, fim: 14 },
-      { titulo: 'Clique em "Consultar"', inicio: 14, fim: 21 },
-      { titulo: 'Selecione o débito e imprima o boleto', inicio: 21, fim: 28.4 },
+      { titulo: 'Clique em "Impressão Anuidade Ano Corrente"', detalhe: 'No "Painel de Controle", sem precisar de login, ou pelo botão "Emitir boleto".', inicio: 0, fim: 14.5 },
+      { titulo: 'Selecione o tipo de cadastro', detalhe: 'Por exemplo, Farmacêutico.', inicio: 14.5, fim: 18.1 },
+      { titulo: 'Preencha os dados solicitados', detalhe: 'Inscrição, CPF e data de nascimento.', inicio: 18.1, fim: 23.2 },
+      { titulo: 'Clique em "Consultar"', detalhe: 'Se precisar corrigir algum dado depois, clique em "Nova Consulta".', inicio: 23.2, fim: 25.5 },
+      { titulo: 'Marque a anuidade e clique em "Imprimir Boleto"', detalhe: 'As anuidades disponíveis aparecem destacadas em verde.', inicio: 25.5, fim: 47.6 },
     ],
     depois: [
       'Essa tela mostra só anuidades do ano ainda não vencidas.',
