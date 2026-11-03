@@ -6,7 +6,11 @@ import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias
 import { telaDe } from '../tela';
 import PassosComVideo from './PassosComVideo';
 
-const guia = GUIAS['emitir-boletos'] as GuiaTutorial & { video: VideoGuia };
+const guiaBase = GUIAS['emitir-boletos'] as GuiaTutorial & { video: VideoGuia };
+const guia: GuiaTutorial & { video: VideoGuia } = {
+  ...guiaBase,
+  video: { ...guiaBase.video, narrado: false, proporcao: '4:3' },
+};
 const guiaNarrado = GUIAS['afastamento-provisorio'] as GuiaTutorial & { video: VideoGuia };
 let root: Root;
 let host: HTMLElement;
@@ -54,7 +58,7 @@ describe('PassosComVideo', () => {
 
   it('o passo ativo acompanha o vídeo', () => {
     expect(ativos()[0]).toContain(guia.passos[0].titulo);
-    tempo(12);
+    tempo(19);
     expect(ativos()[0]).toContain(guia.passos[2].titulo);
     expect(host.textContent).toContain('Passo 3 de 5');
   });
@@ -67,10 +71,10 @@ describe('PassosComVideo', () => {
 
   it('clicar em um passo salta ao trecho e fica em loop nele, medindo uma vez', async () => {
     clicar(/Clique em "Consultar"/);
-    expect(video().currentTime).toBe(14);
+    expect(video().currentTime).toBe(23.2);
     expect(ativos()[0]).toContain('Clique em "Consultar"');
-    tempo(21);
-    expect(video().currentTime).toBe(14);
+    tempo(25.5);
+    expect(video().currentTime).toBe(23.2);
     expect(ativos()[0]).toContain('Clique em "Consultar"');
     clicar(/Clique em "Consultar"/);
     expect(beacon).toHaveBeenCalledTimes(1);
@@ -83,7 +87,7 @@ describe('PassosComVideo', () => {
     for (let i = 0; i < 4; i++) clicar('Próximo passo');
     expect(host.querySelector<HTMLButtonElement>('[aria-label="Próximo passo"]')!.disabled).toBe(true);
     expect(concluir).not.toHaveBeenCalled();
-    tempo(28.4);
+    tempo(47.6);
     expect(concluir).toHaveBeenCalled();
   });
 
