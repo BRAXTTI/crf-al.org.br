@@ -6,7 +6,7 @@ import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias
 import { telaDe } from '../tela';
 import PassosComVideo from './PassosComVideo';
 
-const guia = GUIAS['baixa-rt'] as GuiaTutorial & { video: VideoGuia };
+const guia = GUIAS['emitir-boletos'] as GuiaTutorial & { video: VideoGuia };
 const guiaNarrado = GUIAS['afastamento-provisorio'] as GuiaTutorial & { video: VideoGuia };
 let root: Root;
 let host: HTMLElement;
@@ -36,7 +36,7 @@ beforeEach(() => {
   vi.spyOn(HTMLMediaElement.prototype, 'readyState', 'get').mockReturnValue(4);
   host = document.body.appendChild(document.createElement('div'));
   root = createRoot(host);
-  act(() => root.render(<PassosComVideo tarefa="baixa-rt" guia={guia} onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
+  act(() => root.render(<PassosComVideo tarefa="emitir-boletos" guia={guia} onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
 });
 
 afterEach(() => {
@@ -56,34 +56,34 @@ describe('PassosComVideo', () => {
     expect(ativos()[0]).toContain(guia.passos[0].titulo);
     tempo(12);
     expect(ativos()[0]).toContain(guia.passos[2].titulo);
-    expect(host.textContent).toContain('Passo 3 de 6');
+    expect(host.textContent).toContain('Passo 3 de 5');
   });
 
   it('todos os títulos ficam visíveis; o detalhe só no passo ativo', () => {
     for (const passo of guia.passos) expect(host.textContent).toContain(passo.titulo);
     expect(host.textContent).toContain(guia.passos[0].detalhe);
-    expect(host.textContent).not.toContain(guia.passos[3].detalhe);
+    expect(host.textContent).not.toContain(guia.passos[1].detalhe);
   });
 
   it('clicar em um passo salta ao trecho e fica em loop nele, medindo uma vez', async () => {
-    clicar(/Informe a data de desligamento/);
-    expect(video().currentTime).toBe(15);
-    expect(ativos()[0]).toContain('Informe a data de desligamento');
-    tempo(19);
-    expect(video().currentTime).toBe(15);
-    expect(ativos()[0]).toContain('Informe a data de desligamento');
-    clicar(/Informe a data de desligamento/);
+    clicar(/Clique em "Consultar"/);
+    expect(video().currentTime).toBe(14);
+    expect(ativos()[0]).toContain('Clique em "Consultar"');
+    tempo(21);
+    expect(video().currentTime).toBe(14);
+    expect(ativos()[0]).toContain('Clique em "Consultar"');
+    clicar(/Clique em "Consultar"/);
     expect(beacon).toHaveBeenCalledTimes(1);
-    expect(await (beacon.mock.calls[0][1] as Blob).text()).toBe('{"evento":"passo","tarefa":"baixa-rt","passo":4}');
+    expect(await (beacon.mock.calls[0][1] as Blob).text()).toBe('{"evento":"passo","tarefa":"emitir-boletos","passo":4}');
   });
 
   it('anterior e próximo param nas pontas; o fim do último passo destaca a ação', () => {
     const anterior = host.querySelector<HTMLButtonElement>('[aria-label="Passo anterior"]')!;
     expect(anterior.disabled).toBe(true);
-    for (let i = 0; i < 5; i++) clicar('Próximo passo');
+    for (let i = 0; i < 4; i++) clicar('Próximo passo');
     expect(host.querySelector<HTMLButtonElement>('[aria-label="Próximo passo"]')!.disabled).toBe(true);
     expect(concluir).not.toHaveBeenCalled();
-    tempo(32.4);
+    tempo(28.4);
     expect(concluir).toHaveBeenCalled();
   });
 
