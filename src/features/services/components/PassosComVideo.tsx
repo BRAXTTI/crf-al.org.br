@@ -93,6 +93,7 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antesCe
           <VideoTela
             videoRef={videoRef}
             src={video.src}
+            webm={video.webm}
             poster={video.poster}
             alt={video.alt}
             duracao={video.duracao}

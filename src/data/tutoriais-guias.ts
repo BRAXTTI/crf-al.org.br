@@ -17,7 +17,10 @@ export interface PassoGuia {
 }
 
 export interface VideoGuia {
+  /** MP4 (H.264 + AAC): fallback que toca em qualquer aparelho. */
   src: string;
+  /** WebM (VP9 + Opus) menor, oferecido antes do MP4 quando existir. */
+  webm?: string;
   poster: string;
   alt: string;
   duracao: string;
@@ -136,6 +139,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 2 min',
     video: {
       src: `${VIDEOS_URL}/tutoriais/baixa-responsabilidade-tecnica.mp4`,
+      webm: `${VIDEOS_URL}/tutoriais/baixa-responsabilidade-tecnica.webm`,
       poster: '/images/tutoriais/baixa-responsabilidade-tecnica-poster.webp',
       alt: 'Baixa de responsabilidade técnica no CRF AL em Casa, do acesso pelo painel até salvar o protocolo.',
       duracao: '0:53',
@@ -203,6 +207,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 5 min',
     video: {
       src: `${VIDEOS_URL}/tutoriais/defesa-auto-infracao.mp4`,
+      webm: `${VIDEOS_URL}/tutoriais/defesa-auto-infracao.webm`,
       poster: '/images/tutoriais/defesa-auto-infracao-poster.webp',
       alt: 'Defesa de auto de infração no CRF AL em Casa, do acesso pelo painel até salvar a defesa e acompanhar o protocolo.',
       duracao: '1:02',
@@ -226,6 +231,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 1 min',
     video: {
       src: `${VIDEOS_URL}/tutoriais/situacao-protocolos.mp4`,
+      webm: `${VIDEOS_URL}/tutoriais/situacao-protocolos.webm`,
       poster: '/images/tutoriais/situacao-protocolos-poster.webp',
       alt: 'Acompanhamento de protocolos no CRF AL em Casa, da lista em "Protocolos Web" até "Protocolos Aguardando Resposta".',
       duracao: '0:54',
@@ -265,6 +271,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 1 min',
     video: {
       src: `${VIDEOS_URL}/tutoriais/imprimir-crt.mp4`,
+      webm: `${VIDEOS_URL}/tutoriais/imprimir-crt.webm`,
       poster: '/images/tutoriais/imprimir-crt-poster.webp',
       alt: 'Impressão da Certidão de Regularidade Técnica no CRF AL em Casa, do acesso pelo painel até o ícone da certidão disponível.',
       duracao: '0:47',

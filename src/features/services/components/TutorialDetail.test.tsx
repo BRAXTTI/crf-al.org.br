@@ -85,7 +85,11 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
   ])('%s usa o vídeo v3 16:9 narrado no R2', (id, arquivo, duracao) => {
     render(id);
     const video = host.querySelector('video')!;
-    expect(video.getAttribute('src')).toBe(`https://midias.crf-al.org.br/site/videos/tutoriais/${arquivo}.mp4`);
+    const fontes = [...video.querySelectorAll('source')].map((s) => [s.getAttribute('type'), s.getAttribute('src')]);
+    expect(fontes).toEqual([
+      ['video/webm', `https://midias.crf-al.org.br/site/videos/tutoriais/${arquivo}.webm`],
+      ['video/mp4', `https://midias.crf-al.org.br/site/videos/tutoriais/${arquivo}.mp4`],
+    ]);
     expect(video.getAttribute('poster')).toBe(`/images/tutoriais/${arquivo}-poster.webp`);
     expect(video.parentElement!.parentElement!.className).toContain('aspect-video');
     expect(video.muted).toBe(false);

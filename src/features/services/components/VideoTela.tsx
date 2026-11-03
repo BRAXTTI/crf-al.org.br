@@ -171,6 +171,8 @@ export function ControlesSom({ videoRef, duracao, className = '' }: ControlesSom
 
 interface VideoTelaProps {
   src: string;
+  /** WebM oferecido antes de `src` (MP4), em dois `<source>`. */
+  webm?: string;
   poster?: string;
   alt: string;
   duracao?: string;
@@ -196,6 +198,7 @@ interface VideoTelaProps {
  */
 export default function VideoTela({
   src,
+  webm,
   poster,
   alt,
   duracao,
@@ -297,7 +300,7 @@ export default function VideoTela({
     <div className="relative h-full w-full">
       <video
         ref={ref}
-        src={narrado || carregar ? src : undefined}
+        src={!webm && (narrado || carregar) ? src : undefined}
         poster={poster}
         aria-label={alt}
         muted={narrado ? undefined : true}
@@ -323,7 +326,15 @@ export default function VideoTela({
         onLoadedMetadata={onLoadedMetadata}
         onError={() => setErro(true)}
         className={`block h-full w-full object-contain ${narrado && jaTocou ? 'cursor-pointer' : ''}`}
-      />
+      >
+        {/* Com <source>, a falha chega no último deles, não no <video>. */}
+        {webm && (narrado || carregar) && (
+          <>
+            <source src={webm} type="video/webm" />
+            <source src={src} type="video/mp4" onError={() => setErro(true)} />
+          </>
+        )}
+      </video>
       {narrado ? (
         !jaTocou && (
           <button

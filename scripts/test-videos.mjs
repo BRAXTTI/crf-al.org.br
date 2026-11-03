@@ -23,8 +23,13 @@ for (const file of ['src/data/servicos.ts', 'src/data/tutoriais-destaque.ts', 's
 assert.deepEqual(tutoriais.sort(), ['afastamento-provisorio', 'baixa-responsabilidade-tecnica', 'baixa-rt', 'boletos', 'crf-em-casa', 'defesa-auto-infracao', 'imprimir-crt', 'protocolos', 'situacao-protocolos', 'sncr'], 'Vídeos dos tutoriais no R2');
 
 const guiasSource = await readFile('src/data/tutoriais-guias.ts', 'utf8');
+// WebM opcional ao lado do MP4 (mesmo nome), oferecido antes dele no player.
+const webms = [...guiasSource.matchAll(/src: `\$\{VIDEOS_URL\}\/tutoriais\/([a-z-]+)\.mp4`,\s*webm: `\$\{VIDEOS_URL\}\/tutoriais\/([a-z-]+)\.webm`/g)];
+for (const [, mp4, webm] of webms) assert.equal(webm, mp4, `WebM com o mesmo nome do MP4: ${mp4}`);
+assert.equal(webms.length, [...guiasSource.matchAll(/webm:/g)].length, 'webm sempre logo depois do src MP4');
+assert.deepEqual(webms.map(([, nome]) => nome).sort(), ['baixa-responsabilidade-tecnica', 'defesa-auto-infracao', 'imprimir-crt', 'situacao-protocolos'], 'WebM dos tutoriais no R2');
 const totalNarrados = [...guiasSource.matchAll(/narrado:\s*true/g)].length;
-const narradosMp4 = [...guiasSource.matchAll(/video:\s*\{[^}]*src:\s*`\$\{VIDEOS_URL\}\/tutoriais\/([a-z-]+)\.mp4`[^}]*narrado:\s*true[^}]*\}/g)].map(([, nome]) => nome);
+const narradosMp4 = [...guiasSource.matchAll(/video:\s*\{[^}]*src:\s*`\$\{VIDEOS_URL\}\/tutoriais\/([a-z-]+)\.mp4`(?:\$\{VIDEOS_URL\}|[^}])*narrado:\s*true[^}]*\}/g)].map(([, nome]) => nome);
 assert.equal(totalNarrados, narradosMp4.length, 'narrado: true só em vídeos MP4 de tutoriais no R2');
 assert.deepEqual(narradosMp4, ['baixa-responsabilidade-tecnica', 'afastamento-provisorio', 'defesa-auto-infracao', 'situacao-protocolos', 'imprimir-crt'], 'Lista de vídeos narrados em tutoriais-guias.ts');
 
@@ -43,4 +48,4 @@ for (const [origem, csp] of [['public/_headers', headers.match(/Content-Security
 }
 assert.doesNotMatch(headers, /\/images\/\*\.(?:mp4|webm)/, 'Sem regra de cache para vídeos locais');
 
-console.log(`Vídeos: ${manual.length + tutoriais.length} servidos de ${VIDEOS_URL}; nenhum em public/.`);
+console.log(`Vídeos: ${manual.length + tutoriais.length + webms.length} servidos de ${VIDEOS_URL}; nenhum em public/.`);
