@@ -163,6 +163,19 @@ describe('VideoTela', () => {
     ]);
   });
 
+  it('com webm: se o webm falhar, não mostra o aviso (o navegador tenta o mp4)', () => {
+    act(() => root.render(<PlayerTeste webm="https://midias.crf-al.org.br/site/videos/tutoriais/teste.webm" />));
+    act(() => { video().querySelector('source[type="video/webm"]')!.dispatchEvent(new Event('error')); });
+    expect(host.querySelector('video')).not.toBeNull();
+    expect(host.textContent).not.toContain('Não foi possível tocar o vídeo neste aparelho.');
+  });
+
+  it('sem webm: erro no <video> mostra o aviso', () => {
+    act(() => root.render(<PlayerTeste />));
+    act(() => { video().dispatchEvent(new Event('error')); });
+    expect(host.textContent).toContain('Não foi possível tocar o vídeo neste aparelho.');
+  });
+
   it('com webm: se o mp4 (último <source>) falhar, mostra o aviso', () => {
     act(() => root.render(<PlayerTeste webm="https://midias.crf-al.org.br/site/videos/tutoriais/teste.webm" />));
     act(() => { video().querySelector('source[type="video/mp4"]')!.dispatchEvent(new Event('error')); });

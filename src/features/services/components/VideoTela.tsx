@@ -324,10 +324,13 @@ export default function VideoTela({
           onEnded?.(e);
         }}
         onLoadedMetadata={onLoadedMetadata}
-        onError={() => setErro(true)}
+        // O React repassa ao <video> o erro de cada <source>; aqui só vale o erro do próprio src.
+        onError={(e) => {
+          if (e.target === e.currentTarget) setErro(true);
+        }}
         className={`block h-full w-full object-contain ${narrado && jaTocou ? 'cursor-pointer' : ''}`}
       >
-        {/* Com <source>, a falha chega no último deles, não no <video>. */}
+        {/* Com <source>, o navegador tenta o próximo; só a falha do último (MP4) mostra o aviso. */}
         {webm && (narrado || carregar) && (
           <>
             <source src={webm} type="video/webm" />
