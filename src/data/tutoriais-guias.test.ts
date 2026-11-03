@@ -35,9 +35,9 @@ describe('tutoriais', () => {
     }
   });
 
-  it('tem os 5 vídeos curtos no R2, com tempos contíguos e crescentes por passo', () => {
+  it('tem os 6 vídeos curtos no R2, com tempos contíguos e crescentes por passo', () => {
     const comVideo = Object.entries(GUIAS).filter(([, guia]) => guia.video);
-    expect(comVideo.map(([id]) => id).sort()).toEqual(['afastamento-provisorio', 'baixa-rt', 'emitir-boletos', 'imprimir-crt', 'situacao-protocolos']);
+    expect(comVideo.map(([id]) => id).sort()).toEqual(['afastamento-provisorio', 'baixa-rt', 'defesa-auto-infracao', 'emitir-boletos', 'imprimir-crt', 'situacao-protocolos']);
     for (const [id, guia] of comVideo) {
       expect(guia.video!.src.startsWith(`${VIDEOS_URL}/`), id).toBe(true);
       expect(guia.passos[0].inicio, id).toBe(0);

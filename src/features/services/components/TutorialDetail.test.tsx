@@ -77,8 +77,31 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
     }
   });
 
-  it('baixa-rt mantém moldura 4:3 e vídeo mudo', () => {
-    render('baixa-rt');
+  it.each([
+    ['defesa-auto-infracao', 'defesa-auto-infracao', '1:02'],
+    ['baixa-rt', 'baixa-responsabilidade-tecnica', '0:53'],
+    ['situacao-protocolos', 'situacao-protocolos', '0:54'],
+    ['imprimir-crt', 'imprimir-crt', '0:47'],
+  ])('%s usa o vídeo v3 16:9 narrado no R2', (id, arquivo, duracao) => {
+    render(id);
+    const video = host.querySelector('video')!;
+    const fontes = [...video.querySelectorAll('source')].map((s) => [s.getAttribute('type'), s.getAttribute('src')]);
+    expect(fontes).toEqual([
+      ['video/webm', `https://midias.crf-al.org.br/site/videos/tutoriais/${arquivo}.webm`],
+      ['video/mp4', `https://midias.crf-al.org.br/site/videos/tutoriais/${arquivo}.mp4`],
+    ]);
+    expect(video.getAttribute('poster')).toBe(`/images/tutoriais/${arquivo}-poster.webp`);
+    expect(video.parentElement!.parentElement!.className).toContain('aspect-video');
+    expect(video.muted).toBe(false);
+    expect(host.querySelector(`button[aria-label="Tocar vídeo com narração (${duracao})"]`)).not.toBeNull();
+    expect(host.textContent).toContain(`Passo 1 de ${GUIAS[id].passos.length}`);
+    expect(host.textContent).toContain('"Atalhos de Menus Mais Usados"');
+    expect(host.textContent).not.toContain('Ver vídeo completo');
+    expect(host.textContent).not.toMatch(/pedido/i);
+  });
+
+  it('emitir-boletos mantém moldura 4:3 e vídeo mudo', () => {
+    render('emitir-boletos');
     const video = host.querySelector('video')!;
     expect(video.parentElement!.parentElement!.className).toContain('aspect-4/3');
     expect(video.muted).toBe(true);

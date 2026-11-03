@@ -83,6 +83,8 @@ npx wrangler r2 object put crf-al-midias/site/videos/tutoriais/boletos-v2.mp4 \
 # WebM do manual: --content-type video/webm e caminho site/videos/manual-crf-em-casa/<nome>.webm
 ```
 
+Nos tutoriais narrados, `video.webm` em `src/data/tutoriais-guias.ts` aponta para um WebM (VP9 + Opus) com o mesmo nome do MP4 (`--content-type video/webm`). O player oferece o WebM primeiro e o MP4 como fallback, em dois `<source>`.
+
 Sem `--remote`, o Wrangler grava apenas no armazenamento local de desenvolvimento.
 
 ## Conteúdo, segurança e pendências

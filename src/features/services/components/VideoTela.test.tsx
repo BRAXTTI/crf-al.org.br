@@ -10,13 +10,14 @@ let playSpy: ReturnType<typeof vi.spyOn>;
 let callbacksObserver: IntersectionObserverCallback[];
 const descriptorVolumeOriginal = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume');
 
-function PlayerTeste({ narrado = true }: { narrado?: boolean }) {
+function PlayerTeste({ narrado = true, webm }: { narrado?: boolean; webm?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   return (
     <div>
       <VideoTela
         videoRef={ref}
         src="https://midias.crf-al.org.br/site/videos/tutoriais/afastamento-provisorio.mp4"
+        webm={webm}
         poster="/images/tutoriais/afastamento-provisorio-foto-poster.webp"
         alt="Vídeo de teste"
         duracao="0:55"
@@ -150,6 +151,42 @@ describe('VideoTela', () => {
       expect(b.className).toContain('h-11');
       expect(b.className).toContain('w-11');
     }
+  });
+
+  it('com webm: dois <source>, webm antes do mp4, sem src no <video>', () => {
+    act(() => root.render(<PlayerTeste webm="https://midias.crf-al.org.br/site/videos/tutoriais/teste.webm" />));
+    expect(video().hasAttribute('src')).toBe(false);
+    const fontes = [...video().querySelectorAll('source')].map((s) => [s.getAttribute('type'), s.getAttribute('src')]);
+    expect(fontes).toEqual([
+      ['video/webm', 'https://midias.crf-al.org.br/site/videos/tutoriais/teste.webm'],
+      ['video/mp4', 'https://midias.crf-al.org.br/site/videos/tutoriais/afastamento-provisorio.mp4'],
+    ]);
+  });
+
+  it('com webm: se o webm falhar, não mostra o aviso (o navegador tenta o mp4)', () => {
+    act(() => root.render(<PlayerTeste webm="https://midias.crf-al.org.br/site/videos/tutoriais/teste.webm" />));
+    act(() => { video().querySelector('source[type="video/webm"]')!.dispatchEvent(new Event('error')); });
+    expect(host.querySelector('video')).not.toBeNull();
+    expect(host.textContent).not.toContain('Não foi possível tocar o vídeo neste aparelho.');
+  });
+
+  it('sem webm: erro no <video> mostra o aviso', () => {
+    act(() => root.render(<PlayerTeste />));
+    act(() => { video().dispatchEvent(new Event('error')); });
+    expect(host.textContent).toContain('Não foi possível tocar o vídeo neste aparelho.');
+  });
+
+  it('com webm: se o mp4 (último <source>) falhar, mostra o aviso', () => {
+    act(() => root.render(<PlayerTeste webm="https://midias.crf-al.org.br/site/videos/tutoriais/teste.webm" />));
+    act(() => { video().querySelector('source[type="video/mp4"]')!.dispatchEvent(new Event('error')); });
+    expect(host.querySelector('video')).toBeNull();
+    expect(host.textContent).toContain('Não foi possível tocar o vídeo neste aparelho.');
+  });
+
+  it('sem webm: mantém src no <video>, sem <source>', () => {
+    act(() => root.render(<PlayerTeste />));
+    expect(video().getAttribute('src')).toBe('https://midias.crf-al.org.br/site/videos/tutoriais/afastamento-provisorio.mp4');
+    expect(video().querySelector('source')).toBeNull();
   });
 
   it('ambiente (sem narrado): continua com muted e chama play quando visível', () => {
