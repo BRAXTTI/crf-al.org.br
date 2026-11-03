@@ -166,7 +166,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 3 min',
     video: {
       src: `${VIDEOS_URL}/tutoriais/afastamento-provisorio.mp4`,
-      poster: '/images/tutoriais/afastamento-provisorio-poster.webp',
+      poster: '/images/tutoriais/afastamento-provisorio-comunicado-poster.webp',
       alt: 'Comunicado de afastamento provisório no CRF AL em Casa, do acesso pelo painel até salvar o protocolo.',
       duracao: '0:55',
       narrado: true,

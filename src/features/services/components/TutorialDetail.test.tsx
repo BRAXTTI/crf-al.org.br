@@ -63,7 +63,7 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
     expect(video.hasAttribute('muted')).toBe(false);
     expect(video.muted).toBe(false);
     expect(host.querySelector('button[aria-label="Tocar vídeo com narração (0:55)"]')).not.toBeNull();
-    expect(video.getAttribute('poster')).toBe('/images/tutoriais/afastamento-provisorio-poster.webp');
+    expect(video.getAttribute('poster')).toBe('/images/tutoriais/afastamento-provisorio-comunicado-poster.webp');
     expect(host.textContent).toContain('Passo 1 de 6');
     expect(host.textContent).toContain('No painel, em "Atalhos de Menus Mais Usados" > Fiscalização.');
     expect(host.textContent).toContain('Acompanhe o status do protocolo no menu "Protocolos Web".');
