@@ -42,6 +42,17 @@ export interface RequirementItem {
   acesso?: { url: string; label: string };
   fluxogramaUrl?: string;
   videoUrl?: string;
+  /** Id em GUIAS/servicos.ts quando há tutorial (ex.: 'defesa-auto-infracao'). */
+  tutorialId?: string;
+  /** Aba "Para que serve": parágrafos aprovados pelo CRF-AL. */
+  paraQueServe?: string[];
+  quemPodeSolicitar?: string;
+  /** Base legal, só com link oficial. */
+  baseLegal?: { label: string; url: string };
+  /** Palavras de quem usa, sem acento, para a busca (como nos tutoriais). */
+  sinonimos?: string[];
+  /** Ids de outras páginas (requerimento ou tutorial) para "Relacionados". */
+  relacionados?: string[];
 }
 
 export interface MenuCategory {
@@ -90,6 +101,7 @@ export const individualMenu: MenuCategory[] = [
         prazo: 'Conforme análise do CRF-AL',
         acesso: { url: PRE_INSCRICAO_PF_URL, label: 'Fazer pré-inscrição' },
         fluxogramaUrl: '/images/fluxograma-primeira-inscricao-crfal.webp',
+        tutorialId: 'primeira-inscricao',
       },
       {
         id: 'inscricao-profissional-definitiva',
@@ -123,6 +135,7 @@ export const individualMenu: MenuCategory[] = [
         ],
         prazo: 'Conforme análise do CRF-AL',
         videoUrl: 'https://youtu.be/P6TfpvT-pqk?t=13',
+        tutorialId: 'inscricao-definitiva',
       },
       {
         id: 'inscricao-secundaria-transferencia-reativacao',
@@ -272,7 +285,6 @@ export const corporateMenu: MenuCategory[] = [
           'Se a contratação for 12x36, use o requerimento específico de plantonista.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2026/04/Contratacao-de-RT-e-Declaracao-de-outras-atividades_ATUALIZADO.docx`,
         acesso: { url: PRE_INSCRICAO_PJ_URL, label: 'Fazer pré-inscrição' },
       },
       {
@@ -302,7 +314,7 @@ export const corporateMenu: MenuCategory[] = [
         'Não será permitido o registro de mais de 01 (um) Posto de Medicamentos por localidade.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: `${WP_UPLOADS_URL}/2024/08/Contratacao-de-RT-plantonista-12x36-DOA.docx`,
+        // downloadUrl pendente: escondido até o CRF-AL enviar o formulário correto.
       },
       {
         id: 'registro-posto-medicamentos',
@@ -351,6 +363,7 @@ export const corporateMenu: MenuCategory[] = [
         prazo: 'Conforme análise do CRF-AL',
         downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2025/02/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx`,
         videoUrl: 'https://www.youtube.com/watch?v=S8V5i6fDQ9M',
+        tutorialId: 'contratacao-rt',
       },
       {
         id: 'contratacao-rt-servico-publico',
@@ -367,7 +380,7 @@ export const corporateMenu: MenuCategory[] = [
           'Anexe a documentação que comprove o vínculo empregatício.',
         ],
         prazo: 'Conforme análise do CRF-AL',
-        downloadUrl: `${LEGACY_WP_UPLOADS_URL}/2024/08/Contratacao-de-RT-e-Declaracao-de-outras-atividades.docx`,
+        // downloadUrl pendente: escondido até o CRF-AL enviar o link correto (anterior respondia 404).
         videoUrl: 'https://www.youtube.com/watch?v=S8V5i6fDQ9M',
       },
       {
@@ -498,6 +511,7 @@ export const corporateMenu: MenuCategory[] = [
         prazo: 'Conforme prazo processual',
         downloadUrl: `${WP_UPLOADS_URL}/2024/02/Defesa-ao-Auto-de-Infracao.docx`,
         videoUrl: 'https://www.youtube.com/watch?v=_3F3mOfv-1A',
+        tutorialId: 'defesa-auto-infracao',
       },
       {
         id: 'recurso-multa-fiscal',
@@ -541,6 +555,10 @@ export const TODOS_OS_REQUERIMENTOS = [...individualMenu, ...corporateMenu].flat
 
 export function getRequerimento(id: string): RequirementItem | undefined {
   return TODOS_OS_REQUERIMENTOS.find((item) => item.id === id);
+}
+
+export function caminhoDoRequerimento(id: string): string {
+  return `/servicos/requerimentos/${id}`;
 }
 
 export function perfilDoRequerimento(id: string): 'pessoa-fisica' | 'pessoa-juridica' {

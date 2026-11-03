@@ -136,7 +136,7 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
   },
   "/fiscalizacao/afastamento-provisorio": {
     "title": "Afastamento Provisório",
-    "description": "Saiba como comunicar o afastamento provisório do farmacêutico ao CRFAL — procedimentos, requerimento e canais de protocolo em Alagoas."
+    "description": "Saiba como comunicar o afastamento provisório do farmacêutico ao CRF-AL pelo CRF AL em Casa — passo a passo, comprovante e acompanhamento do protocolo."
   },
   "/legislacao": {
     "title": "Legislação",
