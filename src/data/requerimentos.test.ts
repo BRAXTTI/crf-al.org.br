@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PAGE_METADATA } from '@/config/page-metadata';
 import {
   ABA_PASSO_A_PASSO_HASH,
+  caminhoDoTutorial,
   ehIdRequerimentoValido,
   IDS_REQUERIMENTOS,
   REDIRECTS_TUTORIAIS_PARA_REQUERIMENTOS,
@@ -213,6 +214,12 @@ describe('requerimentos: modelo de dados e regras da seção 3', () => {
     expect(resolverRedirectTutorial('inexistente', '?tutorial=inexistente', isTutValido)).toBe(
       TUTORIAIS_PATH,
     );
+
+    // Links internos: os 4 espelho vão para a aba Passo a passo; os demais seguem no tutorial.
+    for (const [tutId, reqId] of Object.entries(TUTORIAIS_ESPELHO_REQUERIMENTO)) {
+      expect(caminhoDoTutorial(tutId)).toBe(`${caminhoDoRequerimento(reqId)}${ABA_PASSO_A_PASSO_HASH}`);
+    }
+    expect(caminhoDoTutorial('baixa-rt')).toBe('/servicos/tutoriais/baixa-rt');
   });
 
   it('exige entrada em PAGE_METADATA para a página de cada requerimento', () => {

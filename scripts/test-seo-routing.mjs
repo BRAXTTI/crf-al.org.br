@@ -83,14 +83,27 @@ try {
     ['/servicos/tutoriais?tutorial=inexistente', '/servicos/tutoriais'],
     ['/servicos/tutoriais?tutorial=../../contato', '/servicos/tutoriais'],
     ['/servicos/tutoriais?tutorial=', '/servicos/tutoriais'],
+    // Os 4 espelho: direto para a aba Passo a passo do requerimento, sem passar pelo tutorial.
+    ['/servicos/tutoriais?tutorial=defesa-auto-infracao', '/servicos/requerimentos/defesa-auto-infracao#passo-a-passo'],
+    ['/servicos/tutoriais?tutorial=primeira-inscricao&perfil=pessoa-fisica&utm_source=insta', '/servicos/requerimentos/primeira-inscricao-profissional-provisoria?utm_source=insta#passo-a-passo'],
+    ['/servicos/tutoriais/primeira-inscricao', '/servicos/requerimentos/primeira-inscricao-profissional-provisoria#passo-a-passo'],
+    ['/servicos/tutoriais/inscricao-definitiva', '/servicos/requerimentos/inscricao-profissional-definitiva#passo-a-passo'],
+    ['/servicos/tutoriais/contratacao-rt', '/servicos/requerimentos/contratacao-rt-pj#passo-a-passo'],
+    ['/servicos/tutoriais/defesa-auto-infracao', '/servicos/requerimentos/defesa-auto-infracao#passo-a-passo'],
+    ['/servicos/tutoriais/defesa-auto-infracao/', '/servicos/requerimentos/defesa-auto-infracao#passo-a-passo'],
+    ['/servicos/tutoriais/contratacao-rt?utm_source=email&utm_campaign=rt', '/servicos/requerimentos/contratacao-rt-pj?utm_source=email&utm_campaign=rt#passo-a-passo'],
   ]) {
     const response = await request(antigo);
     assert.equal(response.status, 301, antigo);
     assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br${novo}`, antigo);
+    // Um salto só: o destino responde 200, sem novo redirect.
+    const { pathname, search } = new URL(response.headers.get('Location'));
+    assert.equal((await request(`${pathname}${search}`)).status, 200, `${antigo}: destino`);
   }
   assert.equal((await request('/servicos/tutoriais?perfil=pessoa-juridica')).status, 200, 'perfil continua no hub');
   assert.equal((await request('/servicos/tutoriais/baixa-rt')).status, 200, 'Tarefa com metadados');
   await expectMissing('/servicos/tutoriais/inexistente');
+  await expectMissing('/servicos/tutoriais/defesa-auto-infracao/extra');
 
   // Links antigos do modal de requerimentos (`?item=`): 301 para a página própria, um salto só.
   for (const [antigo, novo] of [

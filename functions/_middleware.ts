@@ -2,14 +2,13 @@
 import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
-import { REQUERIMENTOS_PATH, resolverRedirectRequerimentoItem } from '../src/config/redirects-servicos';
+import { REQUERIMENTOS_PATH, TUTORIAIS_PATH, ehTutorialEspelho, resolverRedirectRequerimentoItem, resolverRedirectTutorial } from '../src/config/redirects-servicos';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
 
 import { SITE_URL } from '../src/config/site';
 
 const NEWS_PREFIX = '/imprensa/noticias/';
-const TUTORIAIS_PATH = '/servicos/tutoriais';
 
 // Eventos: WordPress novo (rota customizada crfal/v1).
 const EVENTS_WP = 'https://wordpress.crf-al.org.br';
@@ -324,14 +323,16 @@ async function handle(context: PagesContext): Promise<Response> {
   if (pathname.startsWith('/publicacao/') && pathname.slice('/publicacao/'.length) && !pathname.slice('/publicacao/'.length).includes('/')) {
     return Response.redirect(`${SITE_URL}${NEWS_PREFIX}${pathname.slice('/publicacao/'.length)}`, 301);
   }
+  // Antes do PAGE_METADATA: os 4 tutoriais espelho saíram de lá e dariam 404.
   if (pathname === TUTORIAIS_PATH && url.searchParams.has('tutorial')) {
-    // Link antigo: fica permanente. Mantém a origem (previews) e outros parâmetros, como utm.
-    const destino = `${TUTORIAIS_PATH}/${url.searchParams.get('tutorial')}`;
-    const params = new URLSearchParams(url.search);
-    params.delete('tutorial');
-    params.delete('perfil');
-    const query = params.size ? `?${params}` : '';
-    return Response.redirect(`${url.origin}${Object.hasOwn(PAGE_METADATA, destino) ? destino : TUTORIAIS_PATH}${query}`, 301);
+    // Link antigo: fica permanente, um salto só. Mantém a origem (previews) e outros parâmetros, como utm.
+    const destino = resolverRedirectTutorial(url.searchParams.get('tutorial'), url.search, id => Object.hasOwn(PAGE_METADATA, `${TUTORIAIS_PATH}/${id}`));
+    return Response.redirect(`${url.origin}${destino}`, 301);
+  }
+  const tutorialId = pathname.startsWith(`${TUTORIAIS_PATH}/`) ? pathname.slice(TUTORIAIS_PATH.length + 1) : '';
+  if (ehTutorialEspelho(tutorialId)) {
+    // Tutorial espelho mora na aba "Passo a passo" da página do requerimento.
+    return Response.redirect(`${url.origin}${resolverRedirectTutorial(tutorialId, url.search)}`, 301);
   }
   if (pathname === REQUERIMENTOS_PATH && url.searchParams.has('item')) {
     // Link antigo do modal: cada requerimento tem página própria. Id inexistente volta à lista; utm segue.
