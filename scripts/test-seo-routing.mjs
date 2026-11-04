@@ -9,6 +9,7 @@ const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(ts.transp
   module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022,
 })).toString('base64')}`;
 const metadataUrl = moduleUrl(await readFile(new URL('../src/config/page-metadata.ts', import.meta.url), 'utf8'));
+const redirectsUrl = moduleUrl(await readFile(new URL('../src/config/redirects-servicos.ts', import.meta.url), 'utf8'));
 const imageSetUrl = moduleUrl(await readFile(new URL('../src/services/wordpress/image-set.ts', import.meta.url), 'utf8'));
 const siteUrl = moduleUrl(await readFile(new URL('../src/config/site.ts', import.meta.url), 'utf8'));
 const bannersUrl = moduleUrl((await readFile(new URL('../src/data/banners.ts', import.meta.url), 'utf8')).replace("'../config/site'", JSON.stringify(siteUrl)));
@@ -16,6 +17,7 @@ const source = (await readFile(new URL('../functions/_middleware.ts', import.met
   .replace("'../src/config/site'", JSON.stringify(siteUrl))
   .replace("'../src/data/banners'", JSON.stringify(bannersUrl))
   .replace("'../src/config/page-metadata'", JSON.stringify(metadataUrl))
+  .replace("'../src/config/redirects-servicos'", JSON.stringify(redirectsUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
   .replace("'./_news'", JSON.stringify(await loadNews()));
 const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders } = await import(moduleUrl(source));
@@ -89,6 +91,25 @@ try {
   assert.equal((await request('/servicos/tutoriais?perfil=pessoa-juridica')).status, 200, 'perfil continua no hub');
   assert.equal((await request('/servicos/tutoriais/baixa-rt')).status, 200, 'Tarefa com metadados');
   await expectMissing('/servicos/tutoriais/inexistente');
+
+  // Links antigos do modal de requerimentos (`?item=`): 301 para a página própria, um salto só.
+  for (const [antigo, novo] of [
+    ['/servicos/requerimentos?perfil=pessoa-juridica&item=defesa-auto-infracao', '/servicos/requerimentos/defesa-auto-infracao'],
+    ['/servicos/requerimentos/?item=certidao-regularidade-pf', '/servicos/requerimentos/certidao-regularidade-pf'],
+    ['/servicos/requerimentos?perfil=pessoa-juridica&categoria=fiscalizacao-recursos&q=multa&item=recurso-multa-fiscal', '/servicos/requerimentos/recurso-multa-fiscal'],
+    ['/servicos/requerimentos?item=defesa-auto-infracao&utm_source=email&utm_campaign=fiscalizacao', '/servicos/requerimentos/defesa-auto-infracao?utm_source=email&utm_campaign=fiscalizacao'],
+    ['/servicos/requerimentos?perfil=pessoa-fisica&item=inexistente', '/servicos/requerimentos'],
+    ['/servicos/requerimentos?item=inexistente&utm_source=x', '/servicos/requerimentos?utm_source=x'],
+    ['/servicos/requerimentos?item=../../contato', '/servicos/requerimentos'],
+    ['/servicos/requerimentos?item=..%2F..%2Fcontato', '/servicos/requerimentos'],
+    ['/servicos/requerimentos?item=', '/servicos/requerimentos'],
+  ]) {
+    const response = await request(antigo);
+    assert.equal(response.status, 301, antigo);
+    assert.equal(response.headers.get('Location'), `https://institucional.crf-al.org.br${novo}`, antigo);
+  }
+  assert.equal((await request('/servicos/requerimentos?perfil=pessoa-juridica&categoria=fiscalizacao-recursos')).status, 200, 'filtros da lista continuam');
+  assert.equal((await request('/servicos/requerimentos/defesa-auto-infracao')).status, 200, 'página do requerimento');
 
   const headers = await readFile(new URL('../public/_headers', import.meta.url), 'utf8');
   const csp = headers.match(/Content-Security-Policy: (.+)/)[1];

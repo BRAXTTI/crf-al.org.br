@@ -10,6 +10,7 @@ import {
   Megaphone,
   ShieldCheck,
 } from 'lucide-react';
+import { caminhoDoRequerimento } from '@/data/requerimentos';
 import FiscalizacaoPageShell from './FiscalizacaoPageShell';
 
 const requerimentosPJ = '/servicos/requerimentos?perfil=pessoa-juridica';
@@ -83,8 +84,8 @@ const infracoes = [
 ];
 
 const defesa = [
-  { title: 'Defesa ao Auto de Infração', desc: 'Documentos e passo a passo no CRF AL em Casa.', href: `${requerimentosPJ}&item=defesa-auto-infracao` },
-  { title: 'Recurso de Multa Fiscal', desc: 'Contra multa fiscal homologada.', href: `${requerimentosPJ}&item=recurso-multa-fiscal` },
+  { title: 'Defesa ao Auto de Infração', desc: 'Documentos e passo a passo no CRF AL em Casa.', href: caminhoDoRequerimento('defesa-auto-infracao') },
+  { title: 'Recurso de Multa Fiscal', desc: 'Contra multa fiscal homologada.', href: caminhoDoRequerimento('recurso-multa-fiscal') },
 ];
 
 const motion = 'transition-transform motion-reduce:transition-none';
