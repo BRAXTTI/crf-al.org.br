@@ -215,7 +215,7 @@ describe('requerimentos: modelo de dados e regras da seção 3', () => {
     );
   });
 
-  it('garante que toda página individual de requerimento estará em PAGE_METADATA quando a rota existir', () => {
+  it('exige entrada em PAGE_METADATA para a página de cada requerimento', () => {
     const entradasRequerimento = Object.keys(PAGE_METADATA).filter((path) =>
       path.startsWith(`${REQUERIMENTOS_PATH}/`),
     );
@@ -228,16 +228,14 @@ describe('requerimentos: modelo de dados e regras da seção 3', () => {
       expect(PAGE_METADATA[path].description.trim().length, path).toBeGreaterThan(0);
     }
 
-    const rotaDetalhePublicada =
-      /servicos\/requerimentos\/:/.test(routerSource) || entradasRequerimento.length > 0;
-
-    if (rotaDetalhePublicada) {
-      for (const item of TODOS_OS_REQUERIMENTOS) {
-        const path = caminhoDoRequerimento(item.id);
-        expect(PAGE_METADATA[path], `Falta ${path} em PAGE_METADATA`).toBeDefined();
-        expect(PAGE_METADATA[path].title, path).toBe(item.title);
-        expect(PAGE_METADATA[path].description.trim().length, path).toBeGreaterThan(0);
-      }
+    // A rota existe desde a Fase 2: sem entrada, o middleware devolve 404 em produção.
+    expect(routerSource).toMatch(/path: 'servicos\/requerimentos\/:slug'/);
+    expect(entradasRequerimento).toHaveLength(TODOS_OS_REQUERIMENTOS.length);
+    for (const item of TODOS_OS_REQUERIMENTOS) {
+      const path = caminhoDoRequerimento(item.id);
+      expect(PAGE_METADATA[path], `Falta ${path} em PAGE_METADATA`).toBeDefined();
+      expect(PAGE_METADATA[path].title, path).toBe(item.title);
+      expect(PAGE_METADATA[path].description.trim().length, path).toBeGreaterThan(0);
     }
   });
 });
