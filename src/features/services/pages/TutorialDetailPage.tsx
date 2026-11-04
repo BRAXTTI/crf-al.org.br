@@ -4,10 +4,11 @@ import { Check, Link2 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { PAGE_METADATA } from '@/config/page-metadata';
+import { CRF_EM_CASA_URL } from '@/config/site';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS } from '@/data/tutoriais-guias';
 import { medir } from '@/lib/medir';
-import TutorialDetail from '../components/TutorialDetail';
+import TutorialDetail, { BotaoAcao } from '../components/TutorialDetail';
 import { PERFIS } from '../tutorial-profiles';
 
 function CopiarLink({ path }: { path: string }) {
@@ -39,6 +40,17 @@ function CopiarLink({ path }: { path: string }) {
 
 function Conteudo({ tutorial }: { tutorial: Tutorial }) {
   const path = `/servicos/tutoriais/${tutorial.id}`;
+  const [concluiu, setConcluiu] = useState(false);
+  const acao = (destaque: boolean) => (
+    <BotaoAcao href={tutorial.acesso?.url ?? CRF_EM_CASA_URL} rotulo={tutorial.acesso?.label ?? 'Abrir o CRF AL em Casa'} tarefa={tutorial.id} destaque={destaque} />
+  );
+
+  // A barra fixa do celular não pode cobrir o fim do rodapé.
+  useEffect(() => {
+    document.body.classList.add('max-lg:pb-20');
+    return () => document.body.classList.remove('max-lg:pb-20');
+  }, []);
+
   return (
     <div className="min-h-screen">
       <SEO {...PAGE_METADATA[path]} path={path} />
@@ -54,7 +66,16 @@ function Conteudo({ tutorial }: { tutorial: Tutorial }) {
         actions={<CopiarLink path={path} />}
       />
       <div className="container-crfal py-4 md:py-8">
-        <TutorialDetail key={tutorial.id} tutorial={tutorial} />
+        <TutorialDetail
+          tutorial={tutorial}
+          acao={acao}
+          linkDocumentos={tutorial.requerimentoId ? { to: `/servicos/requerimentos?perfil=${tutorial.perfil}&item=${tutorial.requerimentoId}` } : undefined}
+          onConcluir={() => setConcluiu(true)}
+        />
+      </div>
+
+      <div className="glass-light fixed inset-x-0 bottom-0 z-30 border-t border-crfal-gray-200 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 lg:hidden">
+        {acao(concluiu)}
       </div>
     </div>
   );
@@ -72,5 +93,6 @@ export default function TutorialDetailPage() {
   }, [tutorial]);
 
   if (!tutorial) return <Navigate to="/servicos/tutoriais" replace />;
-  return <Conteudo tutorial={tutorial} />;
+  // `key`: ao ir para a próxima tarefa, o estado (vídeo, destaque) recomeça.
+  return <Conteudo key={tutorial.id} tutorial={tutorial} />;
 }

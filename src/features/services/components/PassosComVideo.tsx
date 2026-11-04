@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { GuiaTutorial, VideoGuia } from '@/data/tutoriais-guias';
 import { medidorDeVideo, medir } from '@/lib/medir';
@@ -12,6 +12,10 @@ const FOLGA = 0.05;
 interface PassosComVideoProps {
   tarefa: string;
   guia: GuiaTutorial & { video: VideoGuia };
+  /** Falso quando o vídeo está numa aba escondida: pausa. */
+  visivel?: boolean;
+  /** `none` dentro de aba: só baixa ao tocar (a capa fica no lugar). */
+  preload?: 'none' | 'metadata';
   /** Último passo terminou: o botão de ação recebe destaque. */
   onConcluir: () => void;
   /** Coluna do vídeo: botão de ação no desktop, acima do vídeo para aparecer sem rolar. */
@@ -30,7 +34,7 @@ interface PassosComVideoProps {
  * trecho e fica em loop nele; no modo narrado, escolher um passo só posiciona o
  * vídeo sem mudar play/pausa e sem repetir o trecho em loop. A página nunca rola sozinha.
  */
-export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antesCelular, antes, children }: PassosComVideoProps) {
+export default function PassosComVideo({ tarefa, guia, visivel = true, preload, onConcluir, acao, antesCelular, antes, children }: PassosComVideoProps) {
   const { passos, video } = guia;
   const narrado = Boolean(video.narrado);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -41,6 +45,11 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antesCe
   const passosMedidos = useRef(new Set<number>());
   const [medidor] = useState(() => medidorDeVideo(tarefa));
   const total = passos.length;
+
+  // Aba escondida não pode seguir tocando com som.
+  useEffect(() => {
+    if (!visivel) videoRef.current?.pause();
+  }, [visivel]);
 
   const saltar = (segundo: number) => {
     const el = videoRef.current;
@@ -99,6 +108,7 @@ export default function PassosComVideo({ tarefa, guia, onConcluir, acao, antesCe
             duracao={video.duracao}
             narrado={narrado}
             loop={false}
+            preload={preload}
             onPlaying={medidor.aoTocar}
             onTimeUpdate={(e) => aoAvancar(e.currentTarget)}
             onEnded={(e) => aoTerminar(e.currentTarget)}
