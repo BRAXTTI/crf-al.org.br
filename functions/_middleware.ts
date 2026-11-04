@@ -2,6 +2,7 @@
 import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
+import { REQUERIMENTOS_PATH, resolverRedirectRequerimentoItem } from '../src/config/redirects-servicos';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
 
@@ -331,6 +332,10 @@ async function handle(context: PagesContext): Promise<Response> {
     params.delete('perfil');
     const query = params.size ? `?${params}` : '';
     return Response.redirect(`${url.origin}${Object.hasOwn(PAGE_METADATA, destino) ? destino : TUTORIAIS_PATH}${query}`, 301);
+  }
+  if (pathname === REQUERIMENTOS_PATH && url.searchParams.has('item')) {
+    // Link antigo do modal: cada requerimento tem página própria. Id inexistente volta à lista; utm segue.
+    return Response.redirect(`${url.origin}${resolverRedirectRequerimentoItem(url.searchParams.get('item'), url.search)}`, 301);
   }
   const staticData = Object.hasOwn(PAGE_METADATA, pathname) ? PAGE_METADATA[pathname] : undefined;
   const prefix = [NEWS_PREFIX, EVENTS_PREFIX, GALLERY_PREFIX].find(p => pathname.startsWith(p));

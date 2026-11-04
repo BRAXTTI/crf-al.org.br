@@ -14,6 +14,7 @@ const { onRequest, SECURITY_HEADERS } = await import(await moduleUrl('../functio
   "'../src/config/site'": JSON.stringify(siteUrl),
   "'../src/data/banners'": JSON.stringify(await moduleUrl('../src/data/banners.ts', { "'../config/site'": JSON.stringify(siteUrl) })),
   "'../src/config/page-metadata'": JSON.stringify(metadataUrl),
+  "'../src/config/redirects-servicos'": JSON.stringify(await moduleUrl('../src/config/redirects-servicos.ts')),
   "'../src/services/wordpress/image-set'": JSON.stringify(await moduleUrl('../src/services/wordpress/image-set.ts')),
   "'./_news'": JSON.stringify(await loadNews()),
 }));

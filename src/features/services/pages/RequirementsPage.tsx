@@ -1,27 +1,31 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
 import { SETOR_CONTATOS } from '@/config/contact';
+import { resolverRedirectRequerimentoItem } from '@/config/redirects-servicos';
 import { CRF_EM_CASA_URL } from '@/config/site';
 import {
-  TODOS_OS_REQUERIMENTOS,
+  caminhoDoRequerimento,
   corporateMenu,
   individualMenu,
   type MenuCategory,
   type RequirementItem,
 } from '@/data/requerimentos';
+import { tutoriais } from '@/data/servicos';
+import { GUIAS } from '@/data/tutoriais-guias';
 import {
   ArrowRight,
   ArrowUpRight,
   Building2,
   ChevronRight,
   Clock,
+  FileText,
   PillBottle,
+  Play,
   Search,
   X,
 } from 'lucide-react';
-import RequirementDialog from '../components/RequirementDialog';
 
 function normalizar(texto: string): string {
   return texto
@@ -29,8 +33,6 @@ function normalizar(texto: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
 }
-
-const TODOS_OS_ITENS = TODOS_OS_REQUERIMENTOS;
 
 type ProfileType = 'individual' | 'corporate';
 
@@ -43,16 +45,37 @@ const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
-function buscarItens(menu: readonly MenuCategory[], termo: string) {
-  return menu.flatMap((cat) => cat.items).filter(
-    (item) => termo === '' || normalizar(`${item.title} ${item.description}`).includes(termo)
-  );
+// Sinônimos do item e, enquanto o CRF-AL não aprova os próprios, os do tutorial vinculado.
+const TEXTO_BUSCA = new Map(
+  [...individualMenu, ...corporateMenu].flatMap((cat) => cat.items).map((item) => {
+    const tutorial = item.tutorialId ? tutoriais.find((t) => t.id === item.tutorialId) : undefined;
+    const sinonimos = [...(item.sinonimos ?? []), ...(tutorial?.sinonimos ?? [])];
+    return [item.id, normalizar(`${item.title} ${item.description} ${sinonimos.join(' ')}`)];
+  })
+);
+
+/** Como na busca dos tutoriais: todas as palavras do termo (já normalizado) precisam aparecer. */
+function combinaBusca(item: RequirementItem, termo: string) {
+  const texto = TEXTO_BUSCA.get(item.id) ?? '';
+  return termo.split(/\s+/).filter(Boolean).every((palavra) => texto.includes(palavra));
 }
+
+function buscarItens(menu: readonly MenuCategory[], termo: string) {
+  return menu.flatMap((cat) => cat.items).filter((item) => combinaBusca(item, termo));
+}
+
+// Vídeo: YouTube do requerimento ou vídeo do tutorial embutido na aba "Passo a passo".
+const temVideo = (item: RequirementItem) => Boolean(item.videoUrl || (item.tutorialId && GUIAS[item.tutorialId]?.video));
+
+const selo = 'inline-flex items-center gap-1 rounded-full bg-crfal-gray-100 px-2 py-0.5 text-[11px] font-semibold text-crfal-gray-700';
 
 /* ---------- Página ---------- */
 
 export default function RequirementsPage() {
   const [searchParams] = useSearchParams();
+  const { search } = useLocation();
+  // Link antigo do modal (`?item=`): cada requerimento tem página própria (o middleware já responde 301).
+  if (searchParams.has('item')) return <Navigate to={resolverRedirectRequerimentoItem(searchParams.get('item'), search)} replace />;
   return <RequirementsContent key={`${searchParams.get('perfil') ?? 'pessoa-fisica'}|${searchParams.get('categoria') ?? 'todas'}`} />;
 }
 
@@ -68,9 +91,6 @@ function RequirementsContent() {
     const requested = searchParams.get('categoria');
     return currentMenu.some((category) => category.id === requested) ? requested! : 'todas';
   });
-  const [selectedItem, setSelectedItem] = useState<RequirementItem | null>(
-    () => TODOS_OS_ITENS.find((item) => item.id === searchParams.get('item')) ?? null
-  );
   const termo = normalizar(busca.trim());
 
   const itensFiltrados = useMemo(() => {
@@ -78,7 +98,7 @@ function RequirementsContent() {
       .filter((cat) => categoria === 'todas' || cat.id === categoria)
       .map((cat) => ({
         ...cat,
-        items: cat.items.filter((item) => termo === '' || normalizar(`${item.title} ${item.description}`).includes(termo)),
+        items: cat.items.filter((item) => combinaBusca(item, termo)),
       }))
       .filter((cat) => cat.items.length > 0);
   }, [currentMenu, categoria, termo]);
@@ -90,38 +110,16 @@ function RequirementsContent() {
   );
   const totalPerfil = currentMenu.reduce((soma, cat) => soma + cat.items.length, 0);
 
-  const setItemParam = useCallback((id: string | null) => {
-    setSearchParams((previous) => {
-      const next = new URLSearchParams(previous);
-      if (id) next.set('item', id);
-      else next.delete('item');
-      return next;
-    }, { replace: true, preventScrollReset: true });
-  }, [setSearchParams]);
-
   const handleTypeChange = useCallback((type: ProfileType, manterBusca = false) => {
     setSearchParams((previous) => {
       const next = new URLSearchParams(previous);
       next.set('perfil', type === 'corporate' ? 'pessoa-juridica' : 'pessoa-fisica');
       next.delete('categoria');
-      next.delete('item');
       if (manterBusca && busca.trim()) next.set('q', busca.trim());
       else next.delete('q');
       return next;
     }, { preventScrollReset: true });
   }, [setSearchParams, busca]);
-
-  const handleSelectItem = useCallback((item: RequirementItem) => {
-    setSelectedItem(item);
-    setItemParam(item.id);
-  }, [setItemParam]);
-
-  const handleOpenChange = useCallback((aberto: boolean) => {
-    if (!aberto) {
-      setSelectedItem(null);
-          setItemParam(null);
-    }
-  }, [setItemParam]);
 
   const limparFiltros = () => {
     setBusca('');
@@ -286,11 +284,11 @@ function RequirementsContent() {
                   <ul className="grid gap-px overflow-hidden rounded-xl border border-crfal-gray-200 bg-crfal-gray-200 shadow-xs lg:grid-cols-2">
                     {cat.items.map((item) => {
                       const Icon = item.icon;
+                      const video = temVideo(item);
                       return (
                         <li key={item.id} className="bg-white lg:[&:last-child:nth-child(odd)]:col-span-2">
-                          <button
-                            type="button"
-                            onClick={() => handleSelectItem(item)}
+                          <Link
+                            to={caminhoDoRequerimento(item.id)}
                             className={`group flex h-full w-full items-center gap-4 p-4 text-left hover:bg-crfal-blue-lighter/50 sm:p-5 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}
                           >
                             <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10 group-hover:bg-crfal-blue group-hover:text-white group-hover:ring-crfal-gold/50 ${motion}`}>
@@ -299,15 +297,35 @@ function RequirementsContent() {
                             <span className="min-w-0 flex-1">
                               <span className="block text-[15px] font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue sm:text-base">{item.title}</span>
                               <span className="mt-1 line-clamp-2 block text-[13px] leading-relaxed text-crfal-gray-600 sm:line-clamp-1">{item.description}</span>
-                              {item.prazo && (
-                                <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-crfal-gray-600">
-                                  <Clock className="h-3.5 w-3.5 text-[#8A6A12]" aria-hidden="true" />
-                                  {item.prazo}
+                              {(item.prazo || video || item.downloadUrl) && (
+                                <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                                  {item.prazo && (
+                                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-crfal-gray-600">
+                                      <Clock className="h-3.5 w-3.5 text-[#8A6A12]" aria-hidden="true" />
+                                      {item.prazo}
+                                    </span>
+                                  )}
+                                  {(video || item.downloadUrl) && (
+                                    <span className="inline-flex gap-1.5">
+                                      {video && (
+                                        <span className={selo}>
+                                          <Play className="h-3 w-3 text-crfal-blue" aria-hidden="true" />
+                                          Vídeo
+                                        </span>
+                                      )}
+                                      {item.downloadUrl && (
+                                        <span className={selo}>
+                                          <FileText className="h-3 w-3 text-crfal-blue" aria-hidden="true" />
+                                          Formulário
+                                        </span>
+                                      )}
+                                    </span>
+                                  )}
                                 </span>
                               )}
                             </span>
                             <ChevronRight className={`h-5 w-5 shrink-0 text-crfal-gray-400 group-hover:translate-x-1 group-hover:text-[#8A6A12] ${motion}`} aria-hidden="true" />
-                          </button>
+                          </Link>
                         </li>
                       );
                     })}
@@ -332,8 +350,6 @@ function RequirementsContent() {
           </aside>
         </div>
       </div>
-
-      {selectedItem && <RequirementDialog key={selectedItem.id} selectedItem={selectedItem} onClose={() => handleOpenChange(false)} />}
     </div>
   );
 }
