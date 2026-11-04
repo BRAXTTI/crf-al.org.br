@@ -557,6 +557,13 @@ export function getRequerimento(id: string): RequirementItem | undefined {
   return TODOS_OS_REQUERIMENTOS.find((item) => item.id === id);
 }
 
+/** Observações do item ("Leia antes de começar") ou, sem elas, o aviso padrão de dúvidas. */
+export function observacoesDoRequerimento(item: RequirementItem): string[] {
+  const obs = item.observacoesImportantes;
+  const lista = Array.isArray(obs) ? obs.filter((o) => o.trim().length > 0) : obs?.trim() ? [obs.trim()] : [];
+  return lista.length > 0 ? lista : [DEFAULT_IMPORTANT_OBSERVATION];
+}
+
 export function caminhoDoRequerimento(id: string): string {
   return `/servicos/requerimentos/${id}`;
 }

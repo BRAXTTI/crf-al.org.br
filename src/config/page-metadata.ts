@@ -32,6 +32,90 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "title": "Requerimentos",
     "description": "Acesse todos os requerimentos do CRFAL para pessoa física e jurídica — registro, renovação, certidões e muito mais para profissionais farmacêuticos em Alagoas."
   },
+  "/servicos/requerimentos/primeira-inscricao-profissional-provisoria": {
+    "title": "Primeira Inscrição Profissional (Provisória)",
+    "description": "Serviço realizado pelo CRF AL em Casa para primeira inscrição profissional provisória — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/inscricao-profissional-definitiva": {
+    "title": "Inscrição Definitiva",
+    "description": "Serviço realizado pelo CRF AL em Casa para inscrição profissional definitiva — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/inscricao-secundaria-transferencia-reativacao": {
+    "title": "Inscrição Secundária, Transferência e Reativação",
+    "description": "Requerimento profissional para serviços de inscrição secundária, transferência e reativação — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/prorrogacao-inscricao-provisoria": {
+    "title": "Prorrogação de Inscrição Provisória",
+    "description": "Solicitação de prorrogação da inscrição provisória — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/carteira-definitiva-segunda-via": {
+    "title": "Carteira Profissional Definitiva ou Segunda Via",
+    "description": "Requerimento para carteira definitiva e emissão de segunda via — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/certidao-regularidade-pf": {
+    "title": "Certidão de Regularidade",
+    "description": "Emissão de certidão de regularidade do profissional — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/transferencia-outro-regional": {
+    "title": "Transferência para Outro Regional",
+    "description": "Solicitação de transferência do registro para outro CRF — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/cancelamento-inscricao": {
+    "title": "Cancelamento de Inscrição",
+    "description": "Solicitação de cancelamento de inscrição profissional — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/registro-novo-pj": {
+    "title": "Registro Inicial - Pessoa Jurídica",
+    "description": "Solicitação de registro inicial para pessoa jurídica no CRF-AL — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/registro-inicial-servico-publico": {
+    "title": "Registro Inicial - Serviço Público",
+    "description": "Solicitação de registro inicial para estabelecimento público — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/registro-posto-medicamentos": {
+    "title": "Registro de Postos de Medicamentos",
+    "description": "Registro específico para posto de medicamentos — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/contratacao-rt-pj": {
+    "title": "Contratação de Responsável Técnico - Pessoa Jurídica",
+    "description": "Contratação de farmacêutico responsável técnico para empresa privada — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/contratacao-rt-servico-publico": {
+    "title": "Contratação de Responsável Técnico - Serviço Público",
+    "description": "Contratação de responsável técnico para estabelecimento público — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/contratacao-rt-plantonista": {
+    "title": "Contratação de RT Plantonista 12x36 + DOA",
+    "description": "Contratação de RT no regime de plantão 12x36 — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/alteracao-horarios": {
+    "title": "Alteração de Horários de Funcionamento e Assistência Farmacêutica",
+    "description": "Atualização de horários do estabelecimento e assistência farmacêutica — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/transferencia-matriz-filiais": {
+    "title": "Transferência entre Matriz e Filiais",
+    "description": "Transferência de farmacêutico entre matriz e filiais — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/alteracao-contratual-firma": {
+    "title": "Alteração Contratual de Firma",
+    "description": "Atualização de dados contratuais da empresa perante o CRF-AL — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/dap": {
+    "title": "Declaração de Atividade Profissional (DAP)",
+    "description": "Solicitação de DAP para fins de comprovação de atividade profissional — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/defesa-auto-infracao": {
+    "title": "Defesa ao Auto de Infração",
+    "description": "Protocolo de defesa administrativa para auto de infração — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/recurso-multa-fiscal": {
+    "title": "Recurso de Multa Fiscal",
+    "description": "Recurso administrativo contra multa fiscal homologada — veja o passo a passo e os documentos no site do CRF-AL."
+  },
+  "/servicos/requerimentos/reconsideracao-indeferimento": {
+    "title": "Reconsideração de Indeferimento",
+    "description": "Pedido de revisão de decisão de indeferimento — veja o passo a passo e os documentos no site do CRF-AL."
+  },
   "/servicos/tutoriais": {
     "title": "Tutoriais",
     "description": "Veja em vídeo e siga os passos das tarefas do CRF AL em Casa: inscrição, responsabilidade técnica, boletos, certidão de regularidade técnica (CRT) e mais."
