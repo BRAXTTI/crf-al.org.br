@@ -80,6 +80,20 @@ export function ehIdRequerimentoValido(id: string | null | undefined): id is str
   return Boolean(id && CONJUNTO_IDS_REQUERIMENTOS.has(id));
 }
 
+export function ehTutorialEspelho(id: string | null | undefined): id is string {
+  return Boolean(id && Object.hasOwn(TUTORIAIS_ESPELHO_REQUERIMENTO, id));
+}
+
+/**
+ * Endereço do tutorial para links internos: os 4 espelho moram na aba "Passo a passo"
+ * da página do requerimento; os demais seguem em `/servicos/tutoriais/<id>`.
+ */
+export function caminhoDoTutorial(id: string): string {
+  return ehTutorialEspelho(id)
+    ? `${REQUERIMENTOS_PATH}/${TUTORIAIS_ESPELHO_REQUERIMENTO[id]}${ABA_PASSO_A_PASSO_HASH}`
+    : `${TUTORIAIS_PATH}/${id}`;
+}
+
 /**
  * Resolve `/servicos/requerimentos?item=<id>` para `/servicos/requerimentos/<id>`
  * (ou `/servicos/requerimentos` quando o id não existe), preservando parâmetros como `utm_*`.
@@ -108,7 +122,7 @@ export function resolverRedirectTutorial(
   isTutorialValido?: (id: string) => boolean,
 ): string {
   const query = limparQuery(search, PARAMS_FILTRO_TUTORIAIS);
-  if (tutorialId && Object.hasOwn(TUTORIAIS_ESPELHO_REQUERIMENTO, tutorialId)) {
+  if (ehTutorialEspelho(tutorialId)) {
     const reqId = TUTORIAIS_ESPELHO_REQUERIMENTO[tutorialId];
     return `${REQUERIMENTOS_PATH}/${reqId}${query}${ABA_PASSO_A_PASSO_HASH}`;
   }

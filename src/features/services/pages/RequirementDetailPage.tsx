@@ -26,6 +26,7 @@ import PageHero from '@/components/block/page-hero';
 import Abas, { type ItemAba } from '@/components/ui/abas';
 import { ATENDIMENTO, HORARIO_ATENDIMENTO, telefoneHref } from '@/config/contact';
 import { PAGE_METADATA } from '@/config/page-metadata';
+import { caminhoDoTutorial } from '@/config/redirects-servicos';
 import { CRF_EM_CASA_URL } from '@/config/site';
 import {
   caminhoDoRequerimento,
@@ -103,7 +104,7 @@ function obterRelacionados(item: RequirementItem, categoria?: MenuCategory): Lin
         id: tut.id,
         titulo: tut.titulo,
         descricao: tut.description,
-        href: `/servicos/tutoriais/${tut.id}`,
+        href: caminhoDoTutorial(tut.id),
         tipo: 'Tutorial',
       });
     }

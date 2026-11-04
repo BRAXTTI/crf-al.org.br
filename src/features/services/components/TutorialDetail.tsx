@@ -2,6 +2,7 @@ import { useState, type MouseEvent, type ReactNode } from 'react';
 import { Link, type To } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronDown, ListChecks, Mail, MessageCircle, Phone, Play } from 'lucide-react';
 import { ATENDIMENTO, HORARIO_ATENDIMENTO, SETOR_CONTATOS, telefoneHref } from '@/config/contact';
+import { caminhoDoTutorial } from '@/config/redirects-servicos';
 import { getRequerimento } from '@/data/requerimentos';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias';
@@ -198,7 +199,7 @@ function Fechamento({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial
       {proxima && (
         <p className="mt-6 border-t border-crfal-gray-200 pt-5 text-sm text-crfal-gray-600">
           Próxima tarefa:{' '}
-          <Link to={`/servicos/tutoriais/${proxima.id}`} className={`inline-flex min-h-11 items-center gap-1.5 rounded font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+          <Link to={caminhoDoTutorial(proxima.id)} className={`inline-flex min-h-11 items-center gap-1.5 rounded font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
             {proxima.titulo} <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </p>

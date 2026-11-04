@@ -4,6 +4,7 @@ import { ArrowRight, ChevronDown, ChevronRight, Layers, Play, Search, X, type Lu
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { PAGE_METADATA } from '@/config/page-metadata';
+import { caminhoDoTutorial, resolverRedirectTutorial } from '@/config/redirects-servicos';
 import { CATEGORIAS_TUTORIAIS, MAIS_PROCURADOS, tutoriais, type Tutorial } from '@/data/servicos';
 import { REELS_DESTAQUE } from '@/data/tutoriais-destaque';
 import { GUIAS } from '@/data/tutoriais-guias';
@@ -29,7 +30,7 @@ function CardProcurado({ tutorial }: { tutorial: Tutorial }) {
   const video = GUIAS[tutorial.id].video;
   const Icon = tutorial.icon;
   return (
-    <Link to={`${PATH}/${tutorial.id}`} className={`group flex h-full items-center gap-3 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white p-2.5 shadow-xs hover:border-crfal-blue/40 sm:block sm:p-0 ${motion} ${focusRing}`}>
+    <Link to={caminhoDoTutorial(tutorial.id)} className={`group flex h-full items-center gap-3 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white p-2.5 shadow-xs hover:border-crfal-blue/40 sm:block sm:p-0 ${motion} ${focusRing}`}>
       <span className="relative block aspect-4/3 w-24 shrink-0 overflow-hidden rounded-lg bg-crfal-blue-lighter sm:w-full sm:rounded-none">
         {video ? (
           <>
@@ -53,7 +54,7 @@ function CardProcurado({ tutorial }: { tutorial: Tutorial }) {
 
 function LinhaTarefa({ tutorial }: { tutorial: Tutorial }) {
   return (
-    <Link to={`${PATH}/${tutorial.id}`} className={`group flex min-h-12 items-center gap-3 px-4 py-2.5 hover:bg-crfal-blue-lighter/40 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}>
+    <Link to={caminhoDoTutorial(tutorial.id)} className={`group flex min-h-12 items-center gap-3 px-4 py-2.5 hover:bg-crfal-blue-lighter/40 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}>
       <span className="min-w-0 flex-1 text-[15px] font-semibold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">{tutorial.titulo}</span>
       {GUIAS[tutorial.id].video && (
         <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-crfal-gray-600">
@@ -209,12 +210,15 @@ function Hub() {
   );
 }
 
-/** `?tutorial=<id>` é o link antigo: o middleware responde 301; aqui cobre a navegação dentro do site. */
+/**
+ * `?tutorial=<id>` é o link antigo: o middleware responde 301; aqui cobre a navegação dentro do site.
+ * Os 4 espelho vão direto para a página do requerimento (#passo-a-passo).
+ */
 export default function TutorialsPage() {
   const [searchParams] = useSearchParams();
   const legado = searchParams.get('tutorial');
   if (legado !== null) {
-    return <Navigate to={tutoriais.some((t) => t.id === legado) ? `${PATH}/${legado}` : PATH} replace />;
+    return <Navigate to={resolverRedirectTutorial(legado, `?${searchParams}`, (id) => tutoriais.some((t) => t.id === id))} replace />;
   }
   return <Hub />;
 }

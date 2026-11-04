@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { Check, Link2 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { PAGE_METADATA } from '@/config/page-metadata';
-import { ABA_FORMULARIO_HASH } from '@/config/redirects-servicos';
+import { ehTutorialEspelho, resolverRedirectTutorial } from '@/config/redirects-servicos';
 import { CRF_EM_CASA_URL } from '@/config/site';
-import { caminhoDoRequerimento } from '@/data/requerimentos';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS } from '@/data/tutoriais-guias';
 import { medir } from '@/lib/medir';
@@ -71,7 +70,6 @@ function Conteudo({ tutorial }: { tutorial: Tutorial }) {
         <TutorialDetail
           tutorial={tutorial}
           acao={acao}
-          linkDocumentos={tutorial.requerimentoId ? { to: `${caminhoDoRequerimento(tutorial.requerimentoId)}${ABA_FORMULARIO_HASH}` } : undefined}
           onConcluir={() => setConcluiu(true)}
         />
       </div>
@@ -85,7 +83,10 @@ function Conteudo({ tutorial }: { tutorial: Tutorial }) {
 
 export default function TutorialDetailPage() {
   const { id } = useParams();
-  const tutorial = tutoriais.find((t) => t.id === id);
+  const { search } = useLocation();
+  // Os 4 espelho moram na página do requerimento: lá a aba Passo a passo mede o `abrir`.
+  const espelho = ehTutorialEspelho(id);
+  const tutorial = espelho ? undefined : tutoriais.find((t) => t.id === id);
 
   const medido = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function TutorialDetailPage() {
     medir('abrir', { tarefa: tutorial.id });
   }, [tutorial]);
 
+  if (espelho) return <Navigate to={resolverRedirectTutorial(id, search)} replace />;
   if (!tutorial) return <Navigate to="/servicos/tutoriais" replace />;
   // `key`: ao ir para a próxima tarefa, o estado (vídeo, destaque) recomeça.
   return <Conteudo key={tutorial.id} tutorial={tutorial} />;

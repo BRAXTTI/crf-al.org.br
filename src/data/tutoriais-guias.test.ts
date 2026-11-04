@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PAGE_METADATA } from '@/config/page-metadata';
+import { TUTORIAIS_ESPELHO_REQUERIMENTO } from '@/config/redirects-servicos';
 import { VIDEOS_URL } from '@/config/site';
 import { TAREFAS } from '@/config/tutoriais-medicao';
 import { CATEGORIAS_TUTORIAIS, MAIS_PROCURADOS, tutoriais } from '@/data/servicos';
@@ -14,11 +15,14 @@ describe('tutoriais', () => {
     expect(tutoriais).toHaveLength(12);
     for (const { id, titulo, category } of tutoriais) {
       expect(GUIAS[id], id).toBeDefined();
-      expect(PAGE_METADATA[`/servicos/tutoriais/${id}`]?.title, id).toBe(titulo);
+      // Os 4 espelho moram na página do requerimento (301): saem do PAGE_METADATA e do sitemap.
+      if (Object.hasOwn(TUTORIAIS_ESPELHO_REQUERIMENTO, id)) expect(PAGE_METADATA[`/servicos/tutoriais/${id}`], id).toBeUndefined();
+      else expect(PAGE_METADATA[`/servicos/tutoriais/${id}`]?.title, id).toBe(titulo);
       expect(TAREFAS as readonly string[], id).toContain(id);
       expect(CATEGORIAS_TUTORIAIS, id).toContain(category);
     }
     expect(Object.keys(GUIAS).sort()).toEqual(tutoriais.map((t) => t.id).sort());
+    expect(Object.keys(PAGE_METADATA).filter((path) => path.startsWith('/servicos/tutoriais/'))).toHaveLength(8);
     expect(MAIS_PROCURADOS).toHaveLength(6);
     for (const id of MAIS_PROCURADOS) expect(GUIAS[id], id).toBeDefined();
   });
