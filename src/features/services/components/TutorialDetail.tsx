@@ -1,8 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, type MouseEvent, type ReactNode } from 'react';
+import { Link, type To } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronDown, ListChecks, Mail, MessageCircle, Phone, Play } from 'lucide-react';
 import { ATENDIMENTO, HORARIO_ATENDIMENTO, SETOR_CONTATOS, telefoneHref } from '@/config/contact';
-import { CRF_EM_CASA_URL } from '@/config/site';
 import { getRequerimento } from '@/data/requerimentos';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS, type GuiaTutorial, type VideoGuia } from '@/data/tutoriais-guias';
@@ -18,24 +17,30 @@ function temVideo(guia: GuiaTutorial): guia is GuiaTutorial & { video: VideoGuia
   return Boolean(guia.video);
 }
 
-/** Único botão de ação da página. */
-function BotaoAcao({ tutorial, destaque, className = '' }: { tutorial: Tutorial; destaque: boolean; className?: string }) {
+/** Botão de ação do tutorial; com `tarefa`, o clique conta na medição. */
+export function BotaoAcao({ href, rotulo, tarefa, destaque, className = '' }: { href: string; rotulo: string; tarefa?: string; destaque: boolean; className?: string }) {
   return (
     <a
-      href={tutorial.acesso?.url ?? CRF_EM_CASA_URL}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => medir('acao', { tarefa: tutorial.id })}
+      onClick={() => tarefa && medir('acao', { tarefa })}
       className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-5 text-[15px] font-bold text-white shadow-xs hover:bg-crfal-blue-dark ${motion} ${focusRing} ${destaque ? 'ring-4 ring-crfal-gold' : ''} ${className}`}
     >
-      {tutorial.acesso?.label ?? 'Abrir o CRF AL em Casa'}
+      {rotulo}
       <ArrowUpRight className="h-4 w-4" aria-hidden />
       <span className="sr-only">(abre em uma nova aba)</span>
     </a>
   );
 }
 
-function Antes({ tutorial, guia, onde }: { tutorial: Tutorial; guia: GuiaTutorial; onde?: 'celular' | 'desktop' }) {
+/** Destino do "Ver documentos (N)": a página decide (modal da lista ou aba do requerimento). */
+export interface LinkDocumentos {
+  to: To;
+  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+}
+
+function Antes({ tutorial, guia, linkDocumentos, onde }: { tutorial: Tutorial; guia: GuiaTutorial; linkDocumentos?: LinkDocumentos; onde?: 'celular' | 'desktop' }) {
   const requerimento = tutorial.requerimentoId ? getRequerimento(tutorial.requerimentoId) : undefined;
   const lista = (
     <>
@@ -47,8 +52,8 @@ function Antes({ tutorial, guia, onde }: { tutorial: Tutorial; guia: GuiaTutoria
           </li>
         ))}
       </ul>
-      {requerimento && (
-        <Link to={`/servicos/requerimentos?perfil=${tutorial.perfil}&item=${tutorial.requerimentoId}`} className={`mt-1.5 inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+      {requerimento && linkDocumentos && (
+        <Link to={linkDocumentos.to} onClick={linkDocumentos.onClick} className={`mt-1.5 inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
           <ListChecks className="h-4 w-4 text-[#8A6A12]" aria-hidden />
           Ver documentos ({requerimento.documentos.length})
           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -219,60 +224,66 @@ function CorpoSemVideo({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutor
   );
 }
 
+interface TutorialDetailProps {
+  tutorial: Tutorial;
+  /** Botão de ação no desktop; `destaque` quando o último passo do vídeo termina. A barra fixa do celular é da página. */
+  acao: (destaque: boolean) => ReactNode;
+  linkDocumentos?: LinkDocumentos;
+  /** Avisa a página quando o último passo termina (destaque da barra do celular). */
+  onConcluir?: () => void;
+  /** Falso quando a aba que contém o tutorial está escondida: o vídeo pausa. */
+  visivel?: boolean;
+  /** Dentro de um painel que já é cartão: sem `section-panel` e o vídeo só baixa ao tocar. */
+  embutido?: boolean;
+}
+
 /** Conteúdo da tarefa; com vídeo ou capa provisória, duas colunas; sem nenhum dos dois, coluna única. */
-export default function TutorialDetail({ tutorial }: { tutorial: Tutorial }) {
+export default function TutorialDetail({ tutorial, acao, linkDocumentos, onConcluir, visivel = true, embutido = false }: TutorialDetailProps) {
   const guia = GUIAS[tutorial.id];
   const [concluiu, setConcluiu] = useState(false);
   const capa = guia.capaProvisoria;
 
-  // A barra fixa do celular não pode cobrir o fim do rodapé.
-  useEffect(() => {
-    document.body.classList.add('max-lg:pb-20');
-    return () => document.body.classList.remove('max-lg:pb-20');
-  }, []);
-
   return (
-    <>
-      <section className="section-panel overflow-visible! py-5 sm:py-6 lg:py-8">
-        {temVideo(guia) ? (
-          <PassosComVideo
-            tarefa={tutorial.id}
-            guia={guia}
-            onConcluir={() => setConcluiu(true)}
-            acao={<div className="mb-4 hidden lg:block"><BotaoAcao tutorial={tutorial} destaque={concluiu} /></div>}
-            antesCelular={<Antes tutorial={tutorial} guia={guia} onde="celular" />}
-            antes={<Antes tutorial={tutorial} guia={guia} onde="desktop" />}
-          >
-            <Fechamento tutorial={tutorial} guia={guia} />
-          </PassosComVideo>
-        ) : capa ? (
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
-            {/* Mesma coluna do vídeo; no celular não fica fixa, pois a imagem não acompanha os passos. */}
-            <div className="z-20 -mx-1 min-w-0 self-start bg-white px-1 pb-2 pt-2 lg:pb-0 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
-              <div className="mb-4 hidden lg:block"><BotaoAcao tutorial={tutorial} destaque={false} /></div>
-              <div className={telaDe('16:9')}>
-                <img src={capa.src} alt={capa.alt} width={960} height={540} loading="eager" decoding="async" className="block h-full w-full object-cover" />
-              </div>
-            </div>
-            <div className="min-w-0">
-              <Antes tutorial={tutorial} guia={guia} />
-              <CorpoSemVideo tutorial={tutorial} guia={guia} />
+    <section className={embutido ? undefined : 'section-panel overflow-visible! py-5 sm:py-6 lg:py-8'}>
+      {temVideo(guia) ? (
+        <PassosComVideo
+          tarefa={tutorial.id}
+          guia={guia}
+          visivel={visivel}
+          preload={embutido ? 'none' : 'metadata'}
+          onConcluir={() => {
+            setConcluiu(true);
+            onConcluir?.();
+          }}
+          acao={<div className="mb-4 hidden lg:block">{acao(concluiu)}</div>}
+          antesCelular={<Antes tutorial={tutorial} guia={guia} linkDocumentos={linkDocumentos} onde="celular" />}
+          antes={<Antes tutorial={tutorial} guia={guia} linkDocumentos={linkDocumentos} onde="desktop" />}
+        >
+          <Fechamento tutorial={tutorial} guia={guia} />
+        </PassosComVideo>
+      ) : capa ? (
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
+          {/* Mesma coluna do vídeo; no celular não fica fixa, pois a imagem não acompanha os passos. */}
+          <div className="z-20 -mx-1 min-w-0 self-start bg-white px-1 pb-2 pt-2 lg:pb-0 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
+            <div className="mb-4 hidden lg:block">{acao(false)}</div>
+            <div className={telaDe('16:9')}>
+              <img src={capa.src} alt={capa.alt} width={960} height={540} loading="eager" decoding="async" className="block h-full w-full object-cover" />
             </div>
           </div>
-        ) : (
-          <div className="mx-auto max-w-3xl">
-            <div className="sticky top-(--header-offset) z-20 -mx-1 hidden items-center gap-5 bg-white px-1 py-3 lg:flex">
-              <BotaoAcao tutorial={tutorial} destaque={false} className="max-w-sm" />
-            </div>
-            <div className="lg:mt-4"><Antes tutorial={tutorial} guia={guia} /></div>
+          <div className="min-w-0">
+            <Antes tutorial={tutorial} guia={guia} linkDocumentos={linkDocumentos} />
             <CorpoSemVideo tutorial={tutorial} guia={guia} />
           </div>
-        )}
-      </section>
-
-      <div className="glass-light fixed inset-x-0 bottom-0 z-30 border-t border-crfal-gray-200 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 lg:hidden">
-        <BotaoAcao tutorial={tutorial} destaque={concluiu} />
-      </div>
-    </>
+        </div>
+      ) : (
+        <div className="mx-auto max-w-3xl">
+          <div className="sticky top-(--header-offset) z-20 -mx-1 hidden items-center gap-5 bg-white px-1 py-3 lg:flex">
+            <div className="w-full max-w-sm">{acao(false)}</div>
+          </div>
+          <div className="lg:mt-4"><Antes tutorial={tutorial} guia={guia} linkDocumentos={linkDocumentos} /></div>
+          <CorpoSemVideo tutorial={tutorial} guia={guia} />
+        </div>
+      )}
+    </section>
   );
 }

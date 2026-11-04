@@ -5,14 +5,15 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { tutoriais } from '@/data/servicos';
 import { GUIAS } from '@/data/tutoriais-guias';
-import TutorialDetail from './TutorialDetail';
+import TutorialDetail, { BotaoAcao, type LinkDocumentos } from './TutorialDetail';
 
 let root: Root;
 let host: HTMLElement;
 
-const render = (id: string) => {
+const acao = (destaque: boolean) => <BotaoAcao href="https://exemplo.test/acao" rotulo="Ação de teste" destaque={destaque} />;
+const render = (id: string, extras: { linkDocumentos?: LinkDocumentos; visivel?: boolean; embutido?: boolean } = {}) => {
   const tutorial = tutoriais.find((t) => t.id === id)!;
-  act(() => root.render(<MemoryRouter><TutorialDetail tutorial={tutorial} /></MemoryRouter>));
+  act(() => root.render(<MemoryRouter><TutorialDetail tutorial={tutorial} acao={acao} {...extras} /></MemoryRouter>));
 };
 const capa = (id: string) => host.querySelector<HTMLImageElement>(`img[src="${GUIAS[id].capaProvisoria?.src}"]`);
 
@@ -125,3 +126,50 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
     expect(host.querySelector('.max-w-3xl')).not.toBeNull();
   });
 });
+
+describe('TutorialDetail: ação, documentos e aba', () => {
+  it('usa a ação recebida e não tem barra fixa nem mexe no body (a página cuida disso)', () => {
+    render('defesa-auto-infracao');
+    expect(host.querySelector('a[href="https://exemplo.test/acao"]')?.textContent).toContain('Ação de teste');
+    expect(host.querySelector('.fixed')).toBeNull();
+    expect(document.body.classList.contains('max-lg:pb-20')).toBe(false);
+  });
+
+  it('"Ver documentos" leva aonde a página mandar; sem link, não aparece', () => {
+    const onClick = vi.fn();
+    render('defesa-auto-infracao', { linkDocumentos: { to: '#formulario', onClick } });
+    const links = [...host.querySelectorAll('a')].filter((a) => a.textContent?.startsWith('Ver documentos'));
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) expect(link.getAttribute('href')).toBe('/#formulario');
+    act(() => links[0].click());
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    render('baixa-rt');
+    expect(host.textContent).not.toContain('Ver documentos');
+    render('defesa-auto-infracao');
+    expect(host.textContent).not.toContain('Ver documentos');
+  });
+
+  it('embutido: sem cartão próprio e vídeo com preload="none" e capa', () => {
+    render('defesa-auto-infracao', { embutido: true });
+    expect(host.querySelector('.section-panel')).toBeNull();
+    const video = host.querySelector('video')!;
+    expect(video.getAttribute('preload')).toBe('none');
+    expect(video.getAttribute('poster')).toBe('/images/tutoriais/defesa-auto-infracao-poster.webp');
+  });
+
+  it('fora do embutido o vídeo segue com preload="metadata"', () => {
+    render('defesa-auto-infracao');
+    expect(host.querySelector('.section-panel')).not.toBeNull();
+    expect(host.querySelector('video')!.getAttribute('preload')).toBe('metadata');
+  });
+
+  it('ao ficar invisível (aba escondida), pausa o vídeo', () => {
+    render('defesa-auto-infracao', { visivel: true });
+    const pause = vi.mocked(HTMLMediaElement.prototype.pause);
+    pause.mockClear();
+    render('defesa-auto-infracao', { visivel: false });
+    expect(pause).toHaveBeenCalled();
+  });
+});
+

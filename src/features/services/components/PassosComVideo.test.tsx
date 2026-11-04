@@ -131,4 +131,28 @@ describe('PassosComVideo', () => {
       expect(playSpy).not.toHaveBeenCalled();
     });
   });
+
+  describe('dentro de aba', () => {
+    const pausar = () => vi.mocked(HTMLMediaElement.prototype.pause);
+
+    it('pausa quando deixa de estar visível, e só então', () => {
+      pausar().mockClear();
+      act(() => root.render(<PassosComVideo tarefa="afastamento-provisorio" guia={guiaNarrado} visivel onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
+      expect(pausar()).not.toHaveBeenCalled();
+      act(() => root.render(<PassosComVideo tarefa="afastamento-provisorio" guia={guiaNarrado} visivel={false} onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
+      expect(pausar()).toHaveBeenCalledTimes(1);
+    });
+
+    it('preload="none" mantém a capa; escolher um passo antes de carregar guarda o salto', () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'readyState', 'get').mockReturnValue(0);
+      act(() => root.render(<PassosComVideo tarefa="afastamento-provisorio" guia={guiaNarrado} preload="none" onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
+      expect(video().getAttribute('preload')).toBe('none');
+      expect(video().getAttribute('poster')).toBe(guiaNarrado.video.poster);
+      clicar(/Marque a responsabilidade técnica \(RT\)/);
+      act(() => {
+        video().dispatchEvent(new Event('loadedmetadata'));
+      });
+      expect(video().currentTime).toBe(21.1);
+    });
+  });
 });

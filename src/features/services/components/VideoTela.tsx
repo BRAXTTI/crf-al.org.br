@@ -178,6 +178,8 @@ interface VideoTelaProps {
   duracao?: string;
   narrado?: boolean;
   loop?: boolean;
+  /** Padrão `metadata`; `none` quando o vídeo pode nem ser visto (aba escondida). */
+  preload?: 'none' | 'metadata';
   videoRef?: RefObject<HTMLVideoElement | null>;
   onPlaying?: ReactEventHandler<HTMLVideoElement>;
   onTimeUpdate?: ReactEventHandler<HTMLVideoElement>;
@@ -204,6 +206,7 @@ export default function VideoTela({
   duracao,
   narrado = false,
   loop = true,
+  preload = 'metadata',
   videoRef,
   onPlaying,
   onTimeUpdate,
@@ -306,8 +309,8 @@ export default function VideoTela({
         muted={narrado ? undefined : true}
         loop={narrado ? undefined : loop}
         playsInline
-        // Só metadados: o download completo começa ao tocar.
-        preload="metadata"
+        // No máximo metadados: o download completo começa ao tocar.
+        preload={preload}
         controls={narrado ? false : reduzido}
         width={960}
         height={narrado ? 540 : 720}

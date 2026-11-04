@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   AlertCircle,
   ArrowRight,
@@ -38,8 +38,11 @@ import {
   type RequirementItem,
 } from '@/data/requerimentos';
 import { tutoriais } from '@/data/servicos';
+import { GUIAS } from '@/data/tutoriais-guias';
+import { medir } from '@/lib/medir';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import ChecklistDocumentos from '../components/ChecklistDocumentos';
+import TutorialDetail, { BotaoAcao } from '../components/TutorialDetail';
 
 const focusRing =
   'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -478,6 +481,11 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
 
   const navigate = useNavigate();
   const abasRef = useRef<HTMLDivElement>(null);
+  // As abas mantêm o `#` em dia; daqui só se lê se o passo a passo está à vista.
+  const { hash } = useLocation();
+  const passoAPassoAberto = hash === '#passo-a-passo';
+  const tutorial = item.tutorialId ? tutoriais.find((t) => t.id === item.tutorialId) : undefined;
+  const [concluiu, setConcluiu] = useState(false);
 
   // Chips do hero: troca a aba pelo `#` (sem nova entrada no histórico) e rola até as abas.
   const irParaAba = (event: MouseEvent<HTMLAnchorElement>, aba: AbaRequerimentoId) => {
@@ -485,6 +493,14 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
     navigate({ hash: `#${aba}` }, { replace: true, preventScrollReset: true });
     abasRef.current?.scrollIntoView({ block: 'start' });
   };
+
+  // Medição com o id do tutorial (mesma série da página de tutorial); `abrir` uma vez, ao ver a aba.
+  const abriuTutorial = useRef(false);
+  useEffect(() => {
+    if (!tutorial || !passoAPassoAberto || abriuTutorial.current) return;
+    abriuTutorial.current = true;
+    medir('abrir', { tarefa: tutorial.id });
+  }, [tutorial, passoAPassoAberto]);
 
   // Barra fixa no celular não pode cobrir o rodapé.
   useEffect(() => {
@@ -511,8 +527,24 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
       id: 'passo-a-passo',
       rotulo: 'Passo a passo',
       icone: <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />,
-      contador: item.instrucoes.length,
-      conteudo: <AbaPassoAPasso item={item} videoEmbedUrl={videoEmbedUrl} />,
+      contador: tutorial ? GUIAS[tutorial.id].passos.length : item.instrucoes.length,
+      conteudo: tutorial ? (
+        // Compensa o padding do painel (20/28 px) para o vídeo fixo do celular sangrar até a borda, como no section-panel (16/24/32 px).
+        <div className="-mx-1 md:mx-1 lg:mx-0">
+          <TutorialDetail
+            tutorial={tutorial}
+            embutido
+            visivel={passoAPassoAberto}
+            onConcluir={() => setConcluiu(true)}
+            acao={(destaque) => (
+              <BotaoAcao href={acessoUrl} rotulo={acessoLabel} tarefa={tutorial.id} destaque={destaque} />
+            )}
+            linkDocumentos={{ to: '#formulario', onClick: (e) => irParaAba(e, 'formulario') }}
+          />
+        </div>
+      ) : (
+        <AbaPassoAPasso item={item} videoEmbedUrl={videoEmbedUrl} />
+      ),
     },
     {
       id: 'formulario',
@@ -663,18 +695,14 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
         )}
       </div>
 
-      {/* Barra de ação fixa no celular */}
+      {/* Barra de ação fixa no celular (vale para as 3 abas); no passo a passo, mede e destaca como no tutorial. */}
       <div className="glass-light fixed inset-x-0 bottom-0 z-30 border-t border-crfal-gray-200 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 lg:hidden">
-        <a
+        <BotaoAcao
           href={acessoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-5 text-[15px] font-bold text-white shadow-xs hover:bg-crfal-blue-dark ${motion} ${focusRing}`}
-        >
-          {acessoLabel}
-          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-          <span className="sr-only"> (abre em nova aba)</span>
-        </a>
+          rotulo={acessoLabel}
+          tarefa={passoAPassoAberto ? tutorial?.id : undefined}
+          destaque={passoAPassoAberto && concluiu}
+        />
       </div>
     </div>
   );
