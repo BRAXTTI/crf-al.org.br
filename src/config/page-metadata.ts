@@ -128,10 +128,6 @@ export const PAGE_METADATA: Record<string, { title: string; description: string 
     "title": "Dar baixa de RT",
     "description": "Veja em vídeo como dar baixa de responsabilidade técnica pelo CRF AL em Casa ao encerrar o vínculo com o estabelecimento."
   },
-  "/servicos/tutoriais/consulta-rt": {
-    "title": "Consultar meus vínculos de RT",
-    "description": "Veja como consultar seus vínculos de responsabilidade técnica ativos pelo CRF AL em Casa."
-  },
   "/servicos/tutoriais/afastamento-provisorio": {
     "title": "Comunicar afastamento",
     "description": "Veja como comunicar o afastamento provisório pelo CRF AL em Casa: dados, comprovante e passo a passo."

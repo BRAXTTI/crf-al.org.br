@@ -4,7 +4,7 @@ import { Check, Link2 } from 'lucide-react';
 import SEO from '@/components/SEO';
 import PageHero from '@/components/block/page-hero';
 import { PAGE_METADATA } from '@/config/page-metadata';
-import { ehTutorialEspelho, resolverRedirectTutorial } from '@/config/redirects-servicos';
+import { ehTutorialEspelho, ehTutorialRemovido, resolverRedirectTutorial } from '@/config/redirects-servicos';
 import { CRF_EM_CASA_URL } from '@/config/site';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS } from '@/data/tutoriais-guias';
@@ -95,7 +95,7 @@ export default function TutorialDetailPage() {
     medir('abrir', { tarefa: tutorial.id });
   }, [tutorial]);
 
-  if (espelho) return <Navigate to={resolverRedirectTutorial(id, search)} replace />;
+  if (espelho || ehTutorialRemovido(id)) return <Navigate to={resolverRedirectTutorial(id, search)} replace />;
   if (!tutorial) return <Navigate to="/servicos/tutoriais" replace />;
   // `key`: ao ir para a próxima tarefa, o estado (vídeo, destaque) recomeça.
   return <Conteudo key={tutorial.id} tutorial={tutorial} />;

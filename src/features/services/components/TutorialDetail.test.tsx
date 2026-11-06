@@ -121,7 +121,7 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
   });
 
   it('tarefa sem vídeo nem capa segue em coluna única, sem imagem', () => {
-    render('consulta-rt');
+    render('justificativa-de-ausencia');
     expect(host.querySelector('img')).toBeNull();
     expect(host.querySelector('.max-w-3xl')).not.toBeNull();
   });

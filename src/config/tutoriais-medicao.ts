@@ -13,7 +13,6 @@ export const TAREFAS = [
   'alteracao-de-dados',
   'contratacao-rt',
   'baixa-rt',
-  'consulta-rt',
   'afastamento-provisorio',
   'justificativa-de-ausencia',
   'defesa-auto-infracao',
