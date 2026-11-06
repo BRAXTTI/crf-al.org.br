@@ -33,24 +33,61 @@ afterEach(() => {
 });
 
 describe('TutorialDetail: capa provisória e vídeo', () => {
-  it('primeira-inscricao mostra a capa na tela do vídeo, sem player', () => {
-    const id = 'primeira-inscricao';
-    render(id);
-    const img = capa(id)!;
-    expect(img.alt).toBe(GUIAS[id].capaProvisoria!.alt);
-    expect(img.getAttribute('width')).toBe('960');
-    expect(img.getAttribute('height')).toBe('540');
-    expect(img.getAttribute('decoding')).toBe('async');
-    expect(img.parentElement!.className).toContain('aspect-video');
-    expect(host.querySelector('video')).toBeNull();
-    expect(host.textContent).not.toMatch(/Passo \d+ de \d+/);
-    for (const passo of GUIAS[id].passos) expect(host.textContent).toContain(passo.titulo);
+  it('sem vídeo, a capa provisória fica na tela do vídeo, sem player', () => {
+    const id = 'consulta-rt';
+    const guia = GUIAS[id];
+    guia.capaProvisoria = { src: '/images/tutoriais/capa-de-teste.webp', alt: 'Capa de teste' };
+    try {
+      render(id);
+      const img = capa(id)!;
+      expect(img.alt).toBe('Capa de teste');
+      expect(img.getAttribute('width')).toBe('960');
+      expect(img.getAttribute('height')).toBe('540');
+      expect(img.getAttribute('decoding')).toBe('async');
+      expect(img.parentElement!.className).toContain('aspect-video');
+      expect(host.querySelector('video')).toBeNull();
+      expect(host.textContent).not.toMatch(/Passo \d+ de \d+/);
+      for (const passo of guia.passos) expect(host.textContent).toContain(passo.titulo);
 
-    const grid = host.querySelector('.section-panel > div')!;
-    expect(grid.className).toContain('grid-cols-[minmax(0,1fr)]');
-    for (const coluna of grid.children) {
-      expect(coluna.className).toContain('min-w-0');
+      const grid = host.querySelector('.section-panel > div')!;
+      expect(grid.className).toContain('grid-cols-[minmax(0,1fr)]');
+      for (const coluna of grid.children) {
+        expect(coluna.className).toContain('min-w-0');
+      }
+    } finally {
+      delete guia.capaProvisoria;
     }
+  });
+
+  it.each([
+    ['primeira-inscricao', '/images/tutoriais/primeira-inscricao-foto-poster.webp', '0:48', 6],
+    ['contratacao-rt', '/images/tutoriais/contratacao-rt-poster.webp', '0:59', 9],
+  ])('%s usa o vídeo 9:16 narrado no R2, só MP4, sem esmagar', (id, poster, duracao, passos) => {
+    render(id);
+    const video = host.querySelector('video')!;
+    expect(video.getAttribute('src')).toBe(`https://midias.crf-al.org.br/site/videos/tutoriais/${id}.mp4`);
+    expect(video.querySelector('source')).toBeNull();
+    expect(video.getAttribute('poster')).toBe(poster);
+    expect(video.getAttribute('width')).toBe('540');
+    expect(video.getAttribute('height')).toBe('960');
+    expect(video.className).toContain('object-contain');
+    const moldura = video.parentElement!.parentElement!;
+    expect(moldura.className).toContain('aspect-[9/16]');
+    expect(moldura.className).not.toMatch(/aspect-video|aspect-4\/3/);
+    expect(video.muted).toBe(false);
+    expect(host.querySelector(`button[aria-label="Tocar vídeo com narração (${duracao})"]`)).not.toBeNull();
+    expect(host.textContent).toContain(`Passo 1 de ${passos}`);
+    expect(host.textContent).toContain(GUIAS[id].passos[0].detalhe!);
+    expect(host.textContent).not.toContain('Ver vídeo completo');
+    expect(host.textContent).not.toMatch(/pedido|fictíci|dados de exemplo/i);
+    expect(host.querySelector('img[src="/images/tutoriais/primeira-inscricao-foto-poster.webp"]')).toBeNull();
+  });
+
+  it('primeira-inscricao não manda mais levar original à sede nem fala em plenária', () => {
+    render('primeira-inscricao');
+    expect(host.textContent).not.toMatch(/sede|seccional|plenária|original/i);
+    expect(host.textContent).toContain('Preencha o formulário de pré-inscrição');
+    expect(host.textContent).toContain('Tudo que tiver asterisco (*) é obrigatório.');
   });
 
   it('afastamento-provisorio usa vídeo 16:9 narrado no R2, details antes do vídeo e orienta acompanhar em Protocolos Web', () => {

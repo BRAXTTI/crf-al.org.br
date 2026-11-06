@@ -39,9 +39,9 @@ describe('tutoriais', () => {
     }
   });
 
-  it('tem os 6 vídeos curtos no R2, com tempos contíguos e crescentes por passo', () => {
+  it('tem os 8 vídeos curtos no R2, com tempos contíguos e crescentes por passo', () => {
     const comVideo = Object.entries(GUIAS).filter(([, guia]) => guia.video);
-    expect(comVideo.map(([id]) => id).sort()).toEqual(['afastamento-provisorio', 'baixa-rt', 'defesa-auto-infracao', 'emitir-boletos', 'imprimir-crt', 'situacao-protocolos']);
+    expect(comVideo.map(([id]) => id).sort()).toEqual(['afastamento-provisorio', 'baixa-rt', 'contratacao-rt', 'defesa-auto-infracao', 'emitir-boletos', 'imprimir-crt', 'primeira-inscricao', 'situacao-protocolos']);
     for (const [id, guia] of comVideo) {
       expect(guia.video!.src.startsWith(`${VIDEOS_URL}/`), id).toBe(true);
       expect(guia.passos[0].inicio, id).toBe(0);
@@ -52,9 +52,32 @@ describe('tutoriais', () => {
     }
   });
 
-  it('tem capa provisória só nas tarefas sem vídeo curto, com arquivo e alt', () => {
+  it('vídeos 9:16 (só MP4): primeira-inscricao e contratacao-rt, com poster publicado e sem passar do fim do arquivo', () => {
+    const verticais = Object.entries(GUIAS).filter(([, guia]) => guia.video?.proporcao === '9:16');
+    expect(verticais.map(([id]) => id).sort()).toEqual(['contratacao-rt', 'primeira-inscricao']);
+    // Duração real (ffprobe) de cada MP4 no CDN.
+    const duracaoReal: Record<string, number> = { 'primeira-inscricao': 47.808, 'contratacao-rt': 59.5 };
+    for (const [id, guia] of verticais) {
+      const video = guia.video!;
+      expect(video.src, id).toBe(`${VIDEOS_URL}/tutoriais/${id}.mp4`);
+      expect(video.webm, id).toBeUndefined();
+      expect(video.narrado, id).toBe(true);
+      expect(IMAGENS_PUBLICAS, id).toContain(`/public${video.poster}`);
+      expect(guia.capaProvisoria, id).toBeUndefined();
+      expect(guia.videoCompleto, id).toBeUndefined();
+      expect(guia.passos.at(-1)!.fim!, id).toBeLessThanOrEqual(duracaoReal[id]);
+      const [m, s] = video.duracao.split(':').map(Number);
+      expect(Math.abs(m * 60 + s - duracaoReal[id]), id).toBeLessThan(1);
+      const texto = JSON.stringify(guia);
+      expect(texto, id).not.toMatch(/pedido|fictíci/i);
+    }
+    expect(JSON.stringify(GUIAS['primeira-inscricao'])).not.toMatch(/sede|seccional|plenária|original/i);
+    expect(GUIAS['contratacao-rt'].passos.map((p) => p.titulo)).toEqual(expect.arrayContaining(['Clique em "Adicionar Horário"', 'Clique em "Salvar Protocolo"']));
+  });
+
+  it('hoje nenhuma tarefa usa capa provisória; se voltar, só sem vídeo curto, com arquivo e alt', () => {
     const comCapa = Object.entries(GUIAS).filter(([, guia]) => guia.capaProvisoria);
-    expect(comCapa.map(([id]) => id).sort()).toEqual(['primeira-inscricao']);
+    expect(comCapa.map(([id]) => id)).toEqual([]);
     for (const [id, guia] of comCapa) {
       expect(guia.video, id).toBeUndefined();
       expect(IMAGENS_PUBLICAS, id).toContain(`/public${guia.capaProvisoria!.src}`);

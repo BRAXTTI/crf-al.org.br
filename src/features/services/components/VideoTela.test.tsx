@@ -10,7 +10,7 @@ let playSpy: ReturnType<typeof vi.spyOn>;
 let callbacksObserver: IntersectionObserverCallback[];
 const descriptorVolumeOriginal = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume');
 
-function PlayerTeste({ narrado = true, webm }: { narrado?: boolean; webm?: string }) {
+function PlayerTeste({ narrado = true, webm, proporcao }: { narrado?: boolean; webm?: string; proporcao?: '4:3' | '16:9' | '9:16' }) {
   const ref = useRef<HTMLVideoElement>(null);
   return (
     <div>
@@ -22,6 +22,7 @@ function PlayerTeste({ narrado = true, webm }: { narrado?: boolean; webm?: strin
         alt="Vídeo de teste"
         duracao="0:55"
         narrado={narrado}
+        proporcao={proporcao}
       />
       {narrado && <ControlesSom videoRef={ref} duracao="0:55" />}
     </div>
@@ -193,5 +194,18 @@ describe('VideoTela', () => {
     act(() => root.render(<PlayerTeste narrado={false} />));
     expect(video().muted).toBe(true);
     expect(playSpy).toHaveBeenCalled();
+  });
+
+  it('dimensões intrínsecas: narrado 960x540, ambiente 960x720 e 9:16 540x960', () => {
+    const medidas = () => [video().getAttribute('width'), video().getAttribute('height')];
+    act(() => root.render(<PlayerTeste narrado />));
+    expect(medidas()).toEqual(['960', '540']);
+    act(() => root.render(<PlayerTeste narrado proporcao="16:9" />));
+    expect(medidas()).toEqual(['960', '540']);
+    act(() => root.render(<PlayerTeste narrado={false} />));
+    expect(medidas()).toEqual(['960', '720']);
+    act(() => root.render(<PlayerTeste narrado proporcao="9:16" />));
+    expect(medidas()).toEqual(['540', '960']);
+    expect(video().className).toContain('object-contain');
   });
 });

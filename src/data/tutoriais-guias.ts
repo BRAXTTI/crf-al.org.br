@@ -15,6 +15,8 @@ export interface PassoGuia {
   fim?: number;
 }
 
+export type ProporcaoVideo = '4:3' | '16:9' | '9:16';
+
 export interface VideoGuia {
   /** MP4 (H.264 + AAC): fallback que toca em qualquer aparelho. */
   src: string;
@@ -25,8 +27,8 @@ export interface VideoGuia {
   duracao: string;
   /** Tem narração: não toca sozinho; toca no clique, com som e controles de volume. */
   narrado?: boolean;
-  /** Proporção do arquivo; padrão '4:3' (gravações do Manual). */
-  proporcao?: '4:3' | '16:9';
+  /** Proporção do arquivo; padrão '4:3' (gravações do Manual). '9:16' nos tutoriais verticais. */
+  proporcao?: ProporcaoVideo;
   /** Diferença entre o que o vídeo mostra e o caminho do botão de ação. */
   aviso?: string;
 }
@@ -63,23 +65,24 @@ const ANEXO = { sintoma: 'O arquivo não anexa', solucao: 'Use JPG, PNG, TIFF ou
 export const GUIAS: Record<string, GuiaTutorial> = {
   'primeira-inscricao': {
     tempoEstimado: 'cerca de 10 min',
-    capaProvisoria: {
-      src: '/images/tutoriais/primeira-inscricao-foto-poster.webp',
-      alt: 'Mesa de estudo com jaleco branco dobrado, pasta azul-marinho fechada com documentos, caneta dourada e notebook de costas.',
+    video: {
+      src: `${VIDEOS_URL}/tutoriais/primeira-inscricao.mp4`,
+      poster: '/images/tutoriais/primeira-inscricao-foto-poster.webp',
+      alt: 'Primeira inscrição no CRF AL em Casa, do formulário de pré-inscrição até o cadastro da senha e os boletos.',
+      duracao: '0:48',
+      narrado: true,
+      proporcao: '9:16',
     },
-    antes: ['Não precisa de login', 'Documentos prontos para anexar'],
+    antes: ['Não precisa de login', 'Documentos prontos para anexar, inclusive as 3 fotos'],
     passos: [
-      { titulo: 'Clique em "Fazer pré-inscrição"', detalhe: 'No sistema, a opção é "Pré Inscrição Pessoa Física".' },
-      { titulo: 'Preencha o formulário' },
-      { titulo: 'Anexe os documentos' },
-      { titulo: 'Imprima o protocolo' },
+      { titulo: 'Preencha o formulário de pré-inscrição', detalhe: 'Tudo que tiver asterisco (*) é obrigatório.', inicio: 0, fim: 10.4 },
+      { titulo: 'Anexe a documentação, inclusive as 3 fotos', detalhe: 'Confira a lista completa no próprio formulário.', inicio: 10.4, fim: 22.1 },
+      { titulo: 'Revise e clique em "Salvar"', detalhe: 'Você recebe um e-mail confirmando a pré-inscrição.', inicio: 22.1, fim: 27.2 },
+      { titulo: 'Siga o e-mail e cadastre sua senha', detalhe: 'Depois, entre no CRF AL em Casa.', inicio: 27.2, fim: 31.8 },
+      { titulo: 'Se faltar documento, envie pelo sistema', detalhe: 'O aviso fica em "Protocolos Aguardando Resposta".', inicio: 31.8, fim: 35.6 },
+      { titulo: 'Emita os boletos no CRF AL em Casa', detalhe: 'Em "Impressão de Anuidades" ou "Impressão de Débitos".', inicio: 35.6, fim: 47.8 },
     ],
-    depois: [
-      'Leve a documentação original à sede ou à seccional do CRF-AL.',
-      'O CRF-AL analisa os documentos e o protocolo vai à plenária.',
-      'Aprovada a inscrição, você recebe um e-mail com o boleto da taxa.',
-      'Pague o boleto e aguarde a compensação para receber a confirmação.',
-    ],
+    depois: ['Acompanhe a pré-inscrição no CRF AL em Casa, com a senha cadastrada.'],
     problemas: [
       { sintoma: 'Não sei quais documentos enviar', solucao: 'A lista completa está no link "Ver documentos", em "Antes de começar".' },
       ANEXO,
@@ -117,12 +120,25 @@ export const GUIAS: Record<string, GuiaTutorial> = {
   },
   'contratacao-rt': {
     tempoEstimado: 'cerca de 5 min',
-    videoCompleto: '0:48',
-    antes: ['Login de Pessoa Jurídica', 'Comprovante do vínculo empregatício'],
+    video: {
+      src: `${VIDEOS_URL}/tutoriais/contratacao-rt.mp4`,
+      poster: '/images/tutoriais/contratacao-rt-poster.webp',
+      alt: 'Contratação de responsável técnico no CRF AL em Casa, do login de Pessoa Jurídica até salvar o protocolo e acompanhar em "Protocolos Web".',
+      duracao: '0:59',
+      narrado: true,
+      proporcao: '9:16',
+    },
+    antes: ['Login de Pessoa Jurídica, com o CPF', 'Número de inscrição do responsável técnico', 'Comprovante do vínculo de trabalho'],
     passos: [
-      { titulo: 'Clique em "Solicitação de RT"' },
-      { titulo: 'Preencha os campos' },
-      { titulo: 'Anexe o comprovante do vínculo' },
+      { titulo: 'Entre como Pessoa Jurídica', detalhe: 'Na tela de login, o campo pede o CPF.', inicio: 0, fim: 9.4 },
+      { titulo: 'Em "Alterações Cadastro", clique em "Solicitação RT"', inicio: 9.4, fim: 14.5 },
+      { titulo: 'Escolha farmacêutico ou técnico e digite a inscrição', detalhe: 'O nome aparece automaticamente.', inicio: 14.5, fim: 21.6 },
+      { titulo: 'Selecione o tipo de RT e a situação', detalhe: 'A situação é a do responsável na empresa.', inicio: 21.6, fim: 26.2 },
+      { titulo: 'Informe a data de início do contrato', detalhe: 'Se houver, informe também a data de vencimento.', inicio: 26.2, fim: 32.1 },
+      { titulo: 'Clique em "Adicionar Horário"', detalhe: 'Coloque o horário em que o farmacêutico estará na farmácia.', inicio: 32.1, fim: 37.8 },
+      { titulo: 'Anexe o comprovante do vínculo de trabalho', detalhe: 'O anexo é obrigatório.', inicio: 37.8, fim: 43.7 },
+      { titulo: 'Clique em "Salvar Protocolo"', inicio: 43.7, fim: 46.4 },
+      { titulo: 'Acompanhe em "Protocolos Web"', detalhe: 'Se faltar documento, o aviso fica em "Protocolos Aguardando Resposta".', inicio: 46.4, fim: 59.5 },
     ],
     depois: ['O CRF-AL analisa o protocolo.'],
     problemas: [SENHA, LOGIN_PJ, ANEXO],
