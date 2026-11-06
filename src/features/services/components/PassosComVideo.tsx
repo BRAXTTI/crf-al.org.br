@@ -8,6 +8,8 @@ import VideoTela, { ControlesSom } from './VideoTela';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 const FOLGA = 0.05;
+/** 9:16 centralizado e com altura limitada pela tela: cabe com ação, controles e navegação, sem esmagar. */
+const VERTICAL = 'mx-auto w-[min(100%,calc(62svh*9/16))] lg:w-[min(100%,calc((100svh_-_var(--header-offset)_-_14rem)*9/16))]';
 
 interface PassosComVideoProps {
   tarefa: string;
@@ -37,6 +39,7 @@ interface PassosComVideoProps {
 export default function PassosComVideo({ tarefa, guia, visivel = true, preload, onConcluir, acao, antesCelular, antes, children }: PassosComVideoProps) {
   const { passos, video } = guia;
   const narrado = Boolean(video.narrado);
+  const vertical = video.proporcao === '9:16';
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ativo, setAtivo] = useState(0);
   const [anuncio, setAnuncio] = useState('');
@@ -95,10 +98,10 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
       {antesCelular && <div className="min-w-0 lg:hidden">{antesCelular}</div>}
-      {/* Em telas baixas o vídeo deixa de ser fixo, para não ocupar a tela toda. */}
-      <div className="z-20 min-w-0 self-start bg-white pb-2 pt-1 max-lg:-mx-4 max-lg:border-b max-lg:border-crfal-gray-200 sm:max-lg:-mx-6 md:max-lg:-mx-8 max-lg:[@media(min-height:640px)]:sticky max-lg:[@media(min-height:640px)]:top-(--header-offset) lg:-mx-1 lg:px-1 lg:pb-0 lg:pt-2 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
+      {/* Em telas baixas o vídeo deixa de ser fixo, para não ocupar a tela toda. O 9:16 nunca fica fixo no celular. */}
+      <div className={`z-20 min-w-0 self-start bg-white pb-2 pt-1 max-lg:-mx-4 max-lg:border-b max-lg:border-crfal-gray-200 sm:max-lg:-mx-6 md:max-lg:-mx-8 ${vertical ? '' : 'max-lg:[@media(min-height:640px)]:sticky max-lg:[@media(min-height:640px)]:top-(--header-offset)'} lg:-mx-1 lg:px-1 lg:pb-0 lg:pt-2 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]`}>
         {acao}
-        <div className={`${telaDe(video.proporcao)} max-lg:rounded-none max-lg:border-x-0`}>
+        <div className={`${telaDe(video.proporcao)} ${vertical ? VERTICAL : 'max-lg:rounded-none max-lg:border-x-0'}`}>
           <VideoTela
             videoRef={videoRef}
             src={video.src}
@@ -107,6 +110,7 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
             alt={video.alt}
             duracao={video.duracao}
             narrado={narrado}
+            proporcao={video.proporcao}
             loop={false}
             preload={preload}
             onPlaying={medidor.aoTocar}

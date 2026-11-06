@@ -50,10 +50,38 @@ afterEach(() => {
 });
 
 describe('PassosComVideo', () => {
-  it('telaDe devolve aspect-video para 16:9 e aspect-4/3 por padrão', () => {
+  it('telaDe devolve aspect-video para 16:9, aspect-[9/16] para 9:16 e aspect-4/3 por padrão', () => {
     expect(telaDe('16:9')).toContain('aspect-video');
     expect(telaDe('16:9')).not.toContain('aspect-4/3');
+    expect(telaDe('9:16')).toContain('aspect-[9/16]');
+    expect(telaDe('9:16')).not.toMatch(/aspect-4\/3|aspect-video/);
     expect(telaDe()).toContain('aspect-4/3');
+    expect(telaDe('4:3')).toBe(telaDe());
+  });
+
+  it('9:16: moldura vertical centralizada, com largura limitada pela altura da tela e sem fixar no celular', () => {
+    const vertical = GUIAS['contratacao-rt'] as GuiaTutorial & { video: VideoGuia };
+    act(() => root.render(<PassosComVideo tarefa="contratacao-rt" guia={vertical} onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
+    const moldura = video().parentElement!.parentElement!;
+    expect(moldura.className).toContain('aspect-[9/16]');
+    expect(moldura.className).toContain('mx-auto');
+    expect(moldura.className).toMatch(/w-\[min\(100%,calc\(62svh\*9\/16\)\)\]/);
+    expect(moldura.className).not.toContain('max-lg:border-x-0');
+    expect(moldura.parentElement!.className).not.toContain('max-lg:[@media(min-height:640px)]:sticky');
+    expect(moldura.parentElement!.className).toContain('lg:[@media(min-height:700px)]:sticky');
+    expect(video().getAttribute('width')).toBe('540');
+    expect(video().getAttribute('height')).toBe('960');
+  });
+
+  it('16:9: moldura de largura cheia, fixa no celular como antes', () => {
+    act(() => root.render(<PassosComVideo tarefa="afastamento-provisorio" guia={guiaNarrado} onConcluir={concluir} acao={null} antes={null}>fim</PassosComVideo>));
+    const moldura = video().parentElement!.parentElement!;
+    expect(moldura.className).toContain('aspect-video');
+    expect(moldura.className).toContain('max-lg:border-x-0');
+    expect(moldura.className).not.toContain('mx-auto');
+    expect(moldura.parentElement!.className).toContain('max-lg:[@media(min-height:640px)]:sticky');
+    expect(video().getAttribute('width')).toBe('960');
+    expect(video().getAttribute('height')).toBe('540');
   });
 
   it('o passo ativo acompanha o vídeo', () => {

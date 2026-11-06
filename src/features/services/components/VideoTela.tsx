@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactEventHandler, type RefObject } from 'react';
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import type { ProporcaoVideo } from '@/data/tutoriais-guias';
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark';
 const focusRingClaro = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -177,6 +178,8 @@ interface VideoTelaProps {
   alt: string;
   duracao?: string;
   narrado?: boolean;
+  /** Só muda as dimensões intrínsecas; a moldura vem de `telaDe`. Sem ela: 16:9 se narrado, senão 4:3. */
+  proporcao?: ProporcaoVideo;
   loop?: boolean;
   /** Padrão `metadata`; `none` quando o vídeo pode nem ser visto (aba escondida). */
   preload?: 'none' | 'metadata';
@@ -193,7 +196,7 @@ interface VideoTelaProps {
  *   o arquivo quando chega perto da tela e só toca enquanto está visível; fora dela,
  *   pausa. O botão de pausa fica sempre visível e a escolha da pessoa é respeitada ao
  *   voltar à tela. Com movimento reduzido, não toca sozinho e usa os controles nativos.
- * - **Narrado** (`narrado` verdadeiro): vídeo com narração em 16:9. Não toca sozinho;
+ * - **Narrado** (`narrado` verdadeiro): vídeo com narração em 16:9 (ou 9:16, com `proporcao`). Não toca sozinho;
  *   toca apenas quando a pessoa clica, já com som, e usa `ControlesSom` fora da moldura.
  *
  * Se o aparelho não tocar o arquivo, fica a capa com um aviso; os passos seguem em texto.
@@ -205,6 +208,7 @@ export default function VideoTela({
   alt,
   duracao,
   narrado = false,
+  proporcao,
   loop = true,
   preload = 'metadata',
   videoRef,
@@ -222,6 +226,7 @@ export default function VideoTela({
   const [jaTocou, setJaTocou] = useState(false);
   const [erro, setErro] = useState(false);
   const pausadoPelaPessoa = useRef(false);
+  const [largura, altura] = proporcao === '9:16' ? [540, 960] : [960, narrado ? 540 : 720];
 
   useEffect(() => {
     const video = ref.current;
@@ -312,8 +317,8 @@ export default function VideoTela({
         // No máximo metadados: o download completo começa ao tocar.
         preload={preload}
         controls={narrado ? false : reduzido}
-        width={960}
-        height={narrado ? 540 : 720}
+        width={largura}
+        height={altura}
         onClick={narrado && jaTocou ? alternar : undefined}
         onPlay={() => {
           setJaTocou(true);
