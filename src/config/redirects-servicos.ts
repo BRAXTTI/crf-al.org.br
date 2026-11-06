@@ -66,6 +66,12 @@ export const REDIRECTS_TUTORIAIS_PARA_REQUERIMENTOS: Readonly<Record<string, str
     '/servicos/requerimentos/defesa-auto-infracao#passo-a-passo',
 };
 
+/**
+ * Tutoriais retirados do site: o endereço antigo responde 301 para o hub
+ * `/servicos/tutoriais`, em vez de cair em 404.
+ */
+export const TUTORIAIS_REMOVIDOS: readonly string[] = ['consulta-rt'];
+
 const PARAMS_FILTRO_REQUERIMENTOS = ['item', 'perfil', 'categoria', 'q'] as const;
 const PARAMS_FILTRO_TUTORIAIS = ['tutorial', 'perfil'] as const;
 
@@ -82,6 +88,10 @@ export function ehIdRequerimentoValido(id: string | null | undefined): id is str
 
 export function ehTutorialEspelho(id: string | null | undefined): id is string {
   return Boolean(id && Object.hasOwn(TUTORIAIS_ESPELHO_REQUERIMENTO, id));
+}
+
+export function ehTutorialRemovido(id: string | null | undefined): id is string {
+  return Boolean(id && TUTORIAIS_REMOVIDOS.includes(id));
 }
 
 /**
@@ -114,7 +124,7 @@ export function resolverRedirectRequerimentoItem(
  * - se for um dos 4 tutoriais espelho, aponta direto em um único salto para
  *   `/servicos/requerimentos/<slug>#passo-a-passo` (com `utm_*` antes do `#`);
  * - se for outro tutorial válido (`isTutorialAutoatendimento`), aponta para `/servicos/tutoriais/<id>`;
- * - caso contrário, aponta para `/servicos/tutoriais`.
+ * - caso contrário (inclusive os `TUTORIAIS_REMOVIDOS`), aponta para `/servicos/tutoriais`.
  */
 export function resolverRedirectTutorial(
   tutorialId: string | null | undefined,
@@ -126,7 +136,7 @@ export function resolverRedirectTutorial(
     const reqId = TUTORIAIS_ESPELHO_REQUERIMENTO[tutorialId];
     return `${REQUERIMENTOS_PATH}/${reqId}${query}${ABA_PASSO_A_PASSO_HASH}`;
   }
-  if (tutorialId && isTutorialValido?.(tutorialId)) {
+  if (tutorialId && !ehTutorialRemovido(tutorialId) && isTutorialValido?.(tutorialId)) {
     return `${TUTORIAIS_PATH}/${tutorialId}${query}`;
   }
   return `${TUTORIAIS_PATH}${query}`;

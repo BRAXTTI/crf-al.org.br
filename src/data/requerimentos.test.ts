@@ -4,6 +4,7 @@ import {
   ABA_PASSO_A_PASSO_HASH,
   caminhoDoTutorial,
   ehIdRequerimentoValido,
+  ehTutorialRemovido,
   IDS_REQUERIMENTOS,
   REDIRECTS_TUTORIAIS_PARA_REQUERIMENTOS,
   REQUERIMENTOS_PATH,
@@ -11,6 +12,7 @@ import {
   resolverRedirectTutorial,
   TUTORIAIS_ESPELHO_REQUERIMENTO,
   TUTORIAIS_PATH,
+  TUTORIAIS_REMOVIDOS,
 } from '@/config/redirects-servicos';
 import { PRE_INSCRICAO_PF_URL, PRE_INSCRICAO_PJ_URL } from '@/config/site';
 import {
@@ -214,6 +216,13 @@ describe('requerimentos: modelo de dados e regras da seção 3', () => {
     expect(resolverRedirectTutorial('inexistente', '?tutorial=inexistente', isTutValido)).toBe(
       TUTORIAIS_PATH,
     );
+    // Tutorial removido: volta ao hub mesmo que alguém o considere válido; utm segue.
+    expect(resolverRedirectTutorial('consulta-rt', '?tutorial=consulta-rt&utm_source=x', () => true)).toBe(
+      `${TUTORIAIS_PATH}?utm_source=x`,
+    );
+    expect(ehTutorialRemovido('consulta-rt')).toBe(true);
+    expect(ehTutorialRemovido('baixa-rt')).toBe(false);
+    for (const id of TUTORIAIS_REMOVIDOS) expect(idsTutoriais.has(id), id).toBe(false);
 
     // Links internos: os 4 espelho vão para a aba Passo a passo; os demais seguem no tutorial.
     for (const [tutId, reqId] of Object.entries(TUTORIAIS_ESPELHO_REQUERIMENTO)) {

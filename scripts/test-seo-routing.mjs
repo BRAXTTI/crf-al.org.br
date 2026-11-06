@@ -92,6 +92,11 @@ try {
     ['/servicos/tutoriais/defesa-auto-infracao', '/servicos/requerimentos/defesa-auto-infracao#passo-a-passo'],
     ['/servicos/tutoriais/defesa-auto-infracao/', '/servicos/requerimentos/defesa-auto-infracao#passo-a-passo'],
     ['/servicos/tutoriais/contratacao-rt?utm_source=email&utm_campaign=rt', '/servicos/requerimentos/contratacao-rt-pj?utm_source=email&utm_campaign=rt#passo-a-passo'],
+    // Tutorial removido: o link antigo volta ao hub, sem 404.
+    ['/servicos/tutoriais/consulta-rt', '/servicos/tutoriais'],
+    ['/servicos/tutoriais/consulta-rt/', '/servicos/tutoriais'],
+    ['/servicos/tutoriais/consulta-rt?utm_source=email', '/servicos/tutoriais?utm_source=email'],
+    ['/servicos/tutoriais?tutorial=consulta-rt', '/servicos/tutoriais'],
   ]) {
     const response = await request(antigo);
     assert.equal(response.status, 301, antigo);

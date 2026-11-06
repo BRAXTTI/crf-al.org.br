@@ -11,8 +11,8 @@ const IMAGENS_PUBLICAS = Object.keys(import.meta.glob('/public/images/tutoriais/
 const buscar = (termo: string) => tutoriais.filter((t) => combinaBusca(t, termo)).map((t) => t.id);
 
 describe('tutoriais', () => {
-  it('tem 12 tarefas, cada uma com guia, metadados e medição', () => {
-    expect(tutoriais).toHaveLength(12);
+  it('tem 11 tarefas, cada uma com guia, metadados e medição', () => {
+    expect(tutoriais).toHaveLength(11);
     for (const { id, titulo, category } of tutoriais) {
       expect(GUIAS[id], id).toBeDefined();
       // Os 4 espelho moram na página do requerimento (301): saem do PAGE_METADATA e do sitemap.
@@ -22,7 +22,7 @@ describe('tutoriais', () => {
       expect(CATEGORIAS_TUTORIAIS, id).toContain(category);
     }
     expect(Object.keys(GUIAS).sort()).toEqual(tutoriais.map((t) => t.id).sort());
-    expect(Object.keys(PAGE_METADATA).filter((path) => path.startsWith('/servicos/tutoriais/'))).toHaveLength(8);
+    expect(Object.keys(PAGE_METADATA).filter((path) => path.startsWith('/servicos/tutoriais/'))).toHaveLength(7);
     expect(MAIS_PROCURADOS).toHaveLength(6);
     for (const id of MAIS_PROCURADOS) expect(GUIAS[id], id).toBeDefined();
   });
@@ -72,6 +72,6 @@ describe('tutoriais', () => {
     expect(buscar('anuidade')).toEqual(['emitir-boletos']);
     expect(buscar('certidão')).toContain('imprimir-crt');
     expect(buscar('zzz')).toEqual([]);
-    expect(buscar('')).toHaveLength(12);
+    expect(buscar('')).toHaveLength(11);
   });
 });

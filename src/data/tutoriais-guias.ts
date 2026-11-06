@@ -152,16 +152,6 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     problemas: [SENHA, LOGIN_PF, { sintoma: 'O vínculo não aparece', solucao: 'Confira seus vínculos em "Resp. Técnicas Ativas/Perfil". Se faltar algum, fale com o atendimento.' }],
     proxima: 'situacao-protocolos',
   },
-  'consulta-rt': {
-    tempoEstimado: 'cerca de 1 min',
-    antes: ['Login de Pessoa Física'],
-    passos: [
-      { titulo: 'Clique em "Resp. Técnicas Ativas/Perfil"' },
-      { titulo: 'Veja as empresas do seu vínculo' },
-      { titulo: 'Confira tipo de vínculo, situação e perfis' },
-    ],
-    problemas: [SENHA, LOGIN_PF, { sintoma: 'Um vínculo está errado ou faltando', solucao: 'Fale com o atendimento e informe o nome da empresa.' }],
-  },
   'afastamento-provisorio': {
     tempoEstimado: 'cerca de 3 min',
     video: {

@@ -48,7 +48,7 @@ afterEach(() => {
 });
 
 describe('TutorialsPage: fusão dos 4 tutoriais espelho', () => {
-  it('o hub segue com as 12 tarefas; os 4 espelho levam à aba Passo a passo do requerimento', () => {
+  it('o hub segue com as 11 tarefas; os 4 espelho levam à aba Passo a passo do requerimento', () => {
     renderizar('/servicos/tutoriais');
     const linhas = [...host.querySelectorAll<HTMLAnchorElement>('#todas-tarefas ~ div a')];
     expect(linhas).toHaveLength(tutoriais.length);
@@ -72,9 +72,27 @@ describe('TutorialsPage: fusão dos 4 tutoriais espelho', () => {
     }
   });
 
-  it('as 8 tarefas que não são requerimento continuam na página de tutorial', () => {
-    renderizar('/servicos/tutoriais/consulta-rt');
+  it('as 7 tarefas que não são requerimento continuam na página de tutorial', () => {
+    renderizar('/servicos/tutoriais/justificativa-de-ausencia');
     expect(destino()).toBeUndefined();
-    expect(host.querySelector('h1')?.textContent).toBe('Consultar meus vínculos de RT');
+    expect(host.querySelector('h1')?.textContent).toBe('Justificar ausência');
+  });
+});
+
+describe('TutorialsPage: tutorial removido (consulta-rt)', () => {
+  it('sai do hub e da busca', () => {
+    renderizar('/servicos/tutoriais');
+    const hrefs = [...host.querySelectorAll<HTMLAnchorElement>('a')].map((a) => a.getAttribute('href'));
+    expect(hrefs).not.toContain('/servicos/tutoriais/consulta-rt');
+    expect(host.textContent).not.toContain('Consultar meus vínculos de RT');
+    expect(tutoriais.some((t) => t.id === 'consulta-rt')).toBe(false);
+  });
+
+  it('/servicos/tutoriais/consulta-rt e ?tutorial=consulta-rt voltam ao hub, sem 404', () => {
+    for (const entrada of ['/servicos/tutoriais/consulta-rt', '/servicos/tutoriais?tutorial=consulta-rt']) {
+      renderizar(entrada);
+      expect(host.querySelector('#todas-tarefas'), entrada).not.toBeNull();
+      expect(host.textContent, entrada).not.toContain('Consultar meus vínculos de RT');
+    }
   });
 });

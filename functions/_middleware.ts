@@ -2,7 +2,7 @@
 import { newsPost, newsSitemapIndex, isBlockedNews, knownHistoricalSlug, withNewsBudget, ORIGIN_CACHE, PAGE_BUDGET_MS } from './_news';
 import type { NewsEnv } from './_news';
 import { PAGE_METADATA } from '../src/config/page-metadata';
-import { REQUERIMENTOS_PATH, TUTORIAIS_PATH, ehTutorialEspelho, resolverRedirectRequerimentoItem, resolverRedirectTutorial } from '../src/config/redirects-servicos';
+import { REQUERIMENTOS_PATH, TUTORIAIS_PATH, ehTutorialEspelho, ehTutorialRemovido, resolverRedirectRequerimentoItem, resolverRedirectTutorial } from '../src/config/redirects-servicos';
 import { mediaImageSet, NEWS_COVER_SIZES } from '../src/services/wordpress/image-set';
 import { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } from '../src/data/banners';
 
@@ -330,8 +330,8 @@ async function handle(context: PagesContext): Promise<Response> {
     return Response.redirect(`${url.origin}${destino}`, 301);
   }
   const tutorialId = pathname.startsWith(`${TUTORIAIS_PATH}/`) ? pathname.slice(TUTORIAIS_PATH.length + 1) : '';
-  if (ehTutorialEspelho(tutorialId)) {
-    // Tutorial espelho mora na aba "Passo a passo" da página do requerimento.
+  if (ehTutorialEspelho(tutorialId) || ehTutorialRemovido(tutorialId)) {
+    // Tutorial espelho mora na aba "Passo a passo" da página do requerimento; removido volta ao hub.
     return Response.redirect(`${url.origin}${resolverRedirectTutorial(tutorialId, url.search)}`, 301);
   }
   if (pathname === REQUERIMENTOS_PATH && url.searchParams.has('item')) {
