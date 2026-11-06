@@ -18,6 +18,9 @@ function temVideo(guia: GuiaTutorial): guia is GuiaTutorial & { video: VideoGuia
   return Boolean(guia.video);
 }
 
+/** Rótulo do botão de ação quando o serviço não define o seu (tutorial e requerimento). */
+export const ROTULO_ACAO_PADRAO = 'Abrir o CRF AL em Casa';
+
 /** Botão de ação do tutorial; com `tarefa`, o clique conta na medição. */
 export function BotaoAcao({ href, rotulo, tarefa, destaque, className = '' }: { href: string; rotulo: string; tarefa?: string; destaque: boolean; className?: string }) {
   return (

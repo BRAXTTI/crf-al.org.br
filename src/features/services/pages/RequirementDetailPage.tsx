@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useNavigationType, useParams } from 'react-router-dom';
 import {
   AlertCircle,
   ArrowRight,
@@ -21,6 +21,7 @@ import {
   Workflow,
 } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { rolarAteAlvo } from '@/components/layout/rolarAteAlvo';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import PageHero from '@/components/block/page-hero';
 import Abas, { type ItemAba } from '@/components/ui/abas';
@@ -43,7 +44,7 @@ import { GUIAS } from '@/data/tutoriais-guias';
 import { medir } from '@/lib/medir';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import ChecklistDocumentos from '../components/ChecklistDocumentos';
-import TutorialDetail, { BotaoAcao } from '../components/TutorialDetail';
+import TutorialDetail, { BotaoAcao, ROTULO_ACAO_PADRAO } from '../components/TutorialDetail';
 
 const focusRing =
   'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -472,7 +473,7 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
   const relacionados = useMemo(() => obterRelacionados(item, categoria), [item, categoria]);
 
   const acessoUrl = item.acesso?.url ?? CRF_EM_CASA_URL;
-  const acessoLabel = item.acesso?.label ?? 'Acessar CRF AL em Casa';
+  const acessoLabel = item.acesso?.label ?? ROTULO_ACAO_PADRAO;
   const PerfilIcon = ehPJ ? Building2 : PillBottle;
   const perfilLabel = ehPJ ? 'Empresas' : 'Farmacêuticos';
   // O prazo genérico não diz nada: só vira chip quando é específico.
@@ -483,7 +484,8 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
   const navigate = useNavigate();
   const abasRef = useRef<HTMLDivElement>(null);
   // As abas mantêm o `#` em dia; daqui só se lê se o passo a passo está à vista.
-  const { hash } = useLocation();
+  const { hash, key } = useLocation();
+  const navigationType = useNavigationType();
   const passoAPassoAberto = hash === '#passo-a-passo';
   const tutorial = item.tutorialId ? tutoriais.find((t) => t.id === item.tutorialId) : undefined;
   const [concluiu, setConcluiu] = useState(false);
@@ -494,6 +496,17 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
     navigate({ hash: `#${aba}` }, { replace: true, preventScrollReset: true });
     abasRef.current?.scrollIntoView({ block: 'start' });
   };
+
+  // Aberta com `#passo-a-passo` ou `#formulario` (link direto, 301 dos tutoriais espelho): o `#` é
+  // id de aba, não de elemento, então o HashScroll não acha alvo. Rola até as abas aqui, uma vez,
+  // descontando o cabeçalho fixo (scroll-mt). No “Voltar” fica a posição do ScrollRestoration.
+  const aberturaRef = useRef({ hash, key, navigationType });
+  useEffect(() => {
+    const abertura = aberturaRef.current;
+    if (abertura.hash !== '#passo-a-passo' && abertura.hash !== '#formulario') return;
+    if (abertura.navigationType === 'POP' && abertura.key !== 'default') return;
+    return rolarAteAlvo(() => abasRef.current, true);
+  }, []);
 
   // Medição com o id do tutorial (mesma série da página de tutorial); `abrir` uma vez, ao ver a aba.
   const abriuTutorial = useRef(false);

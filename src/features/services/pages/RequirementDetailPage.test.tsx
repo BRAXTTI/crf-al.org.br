@@ -12,13 +12,13 @@ let root: Root;
 let host: HTMLElement;
 let beacon: ReturnType<typeof vi.fn>;
 
-function renderizar(entrada: string) {
+function renderizar(entrada: string, { anteriores = [] as string[] } = {}) {
   const url = new URL(entrada, 'https://crf-al.org.br');
   window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
   act(() => {
     root.render(
       <HelmetProvider>
-        <MemoryRouter initialEntries={[entrada]}>
+        <MemoryRouter initialEntries={[...anteriores, entrada]} initialIndex={anteriores.length}>
           <Routes>
             <Route path="/servicos/requerimentos/:slug" element={<RequirementDetailPage />} />
           </Routes>
@@ -30,6 +30,8 @@ function renderizar(entrada: string) {
 
 const aba = (rotulo: RegExp) => [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')].find((b) => rotulo.test(b.textContent ?? ''))!;
 const painelDe = (tab: HTMLButtonElement) => host.querySelector<HTMLElement>(`[id="${tab.getAttribute('aria-controls')}"]`)!;
+const esperar = (ms: number) => act(() => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+const rolouAteAbas = () => vi.mocked(Element.prototype.scrollIntoView).mock.contexts.some((el) => (el as Element).querySelector(':scope > div > div > [role="tablist"]'));
 const eventos = async () => Promise.all(beacon.mock.calls.map(async ([, blob]) => JSON.parse(await (blob as Blob).text())));
 
 beforeEach(() => {
@@ -107,5 +109,52 @@ describe('RequirementDetailPage: tutorial na aba Passo a passo', () => {
     const painel = painelDe(aba(/Passo a passo/));
     expect(painel.textContent).toContain('Acompanhe em Protocolos Web');
     expect(painel.textContent).not.toContain('Deu certo?');
+  });
+});
+
+describe('RequirementDetailPage: botão de ação e abertura com #aba', () => {
+  it('o botão da aba Passo a passo e o da barra fixa usam o rótulo do tutorial', () => {
+    renderizar('/servicos/requerimentos/defesa-auto-infracao#passo-a-passo');
+    const botoes = [...host.querySelectorAll<HTMLAnchorElement>('a[target="_blank"]')].filter((a) => a.textContent?.includes('CRF AL em Casa'));
+    expect(painelDe(aba(/Passo a passo/)).textContent).toContain('Abrir o CRF AL em Casa');
+    expect(host.querySelector('.fixed')!.textContent).toContain('Abrir o CRF AL em Casa');
+    expect(botoes.length).toBeGreaterThan(0);
+    expect(host.textContent).not.toContain('Acessar CRF AL em Casa');
+  });
+
+  it('rótulo próprio do requerimento continua valendo (pré-inscrição)', () => {
+    renderizar('/servicos/requerimentos/primeira-inscricao-profissional-provisoria#passo-a-passo');
+    expect(host.querySelector('.fixed')!.textContent).toContain('Fazer pré-inscrição');
+  });
+
+  it('aberta com #passo-a-passo, rola até as abas', async () => {
+    renderizar('/servicos/requerimentos/defesa-auto-infracao#passo-a-passo');
+    await esperar(20);
+    expect(aba(/Passo a passo/).getAttribute('aria-selected')).toBe('true');
+    expect(rolouAteAbas()).toBe(true);
+  });
+
+  it('sem #, ou no "Voltar" com #passo-a-passo, não mexe na rolagem', async () => {
+    renderizar('/servicos/requerimentos/defesa-auto-infracao');
+    await esperar(20);
+    expect(rolouAteAbas()).toBe(false);
+    act(() => root.unmount());
+    root = createRoot(host);
+    renderizar('/servicos/requerimentos/defesa-auto-infracao#passo-a-passo', { anteriores: ['/servicos/requerimentos'] });
+    await esperar(20);
+    expect(rolouAteAbas()).toBe(false);
+  });
+
+  it('trocar de aba depois da abertura não rola de novo e ainda pausa o vídeo', async () => {
+    renderizar('/servicos/requerimentos/defesa-auto-infracao#passo-a-passo');
+    await esperar(20);
+    const scroll = vi.mocked(Element.prototype.scrollIntoView);
+    scroll.mockClear();
+    const pause = vi.mocked(HTMLMediaElement.prototype.pause);
+    pause.mockClear();
+    act(() => aba(/Formulário/).click());
+    expect(aba(/Formulário/).getAttribute('aria-selected')).toBe('true');
+    expect(pause).toHaveBeenCalled();
+    expect(rolouAteAbas()).toBe(false);
   });
 });

@@ -9,7 +9,7 @@ import { CRF_EM_CASA_URL } from '@/config/site';
 import { tutoriais, type Tutorial } from '@/data/servicos';
 import { GUIAS } from '@/data/tutoriais-guias';
 import { medir } from '@/lib/medir';
-import TutorialDetail, { BotaoAcao } from '../components/TutorialDetail';
+import TutorialDetail, { BotaoAcao, ROTULO_ACAO_PADRAO } from '../components/TutorialDetail';
 import { PERFIS } from '../tutorial-profiles';
 
 function CopiarLink({ path }: { path: string }) {
@@ -43,7 +43,7 @@ function Conteudo({ tutorial }: { tutorial: Tutorial }) {
   const path = `/servicos/tutoriais/${tutorial.id}`;
   const [concluiu, setConcluiu] = useState(false);
   const acao = (destaque: boolean) => (
-    <BotaoAcao href={tutorial.acesso?.url ?? CRF_EM_CASA_URL} rotulo={tutorial.acesso?.label ?? 'Abrir o CRF AL em Casa'} tarefa={tutorial.id} destaque={destaque} />
+    <BotaoAcao href={tutorial.acesso?.url ?? CRF_EM_CASA_URL} rotulo={tutorial.acesso?.label ?? ROTULO_ACAO_PADRAO} tarefa={tutorial.id} destaque={destaque} />
   );
 
   // A barra fixa do celular não pode cobrir o fim do rodapé.
