@@ -1,5 +1,6 @@
 import { DIAS_SEM_EXPEDIENTE, EXPEDIENTE, type DiaSemExpediente } from '@/config/contact';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import { useAgora } from './hydration';
 
 /** Data de hoje em Maceió, no formato YYYY-MM-DD. */
 export function todayInMaceio(agora = new Date()) {
@@ -39,14 +40,15 @@ export function statusAtendimento(agora: Date, diasSemExpediente = DIAS_SEM_EXPE
   return { aberto: false, texto: `Fechado · ${abre}` };
 }
 
-/** Status do expediente, atualizado a cada minuto. */
+/** Status do expediente, atualizado a cada minuto (na hidratação, o do instante do pré-render). */
 export function useStatusAtendimento() {
-  const [status, setStatus] = useState(() => statusAtendimento(new Date()));
-  useEffect(() => {
-    const timer = window.setInterval(() => setStatus(statusAtendimento(new Date())), 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
-  return status;
+  const agora = useAgora();
+  return useMemo(() => statusAtendimento(new Date(agora)), [agora]);
+}
+
+/** Data de hoje em Maceió (YYYY-MM-DD) que acompanha a virada do dia; segura para hidratação. */
+export function useHojeEmMaceio() {
+  return todayInMaceio(new Date(useAgora()));
 }
 
 export function formatDate(date: string, options: Intl.DateTimeFormatOptions) {

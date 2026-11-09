@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Check, Printer, RotateCcw } from 'lucide-react';
 import { observacoesDoRequerimento, type RequirementItem } from '@/data/requerimentos';
+import { useHydrated } from '@/lib/hydration';
 
 const focusRing =
   'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -64,7 +65,11 @@ export default function ChecklistDocumentos({
   item: RequirementItem;
   observacoes?: string[];
 }) {
-  const [marcados, setMarcados] = useState<number[]>(() => lerChecklist(item.id));
+  // A página é pré-renderizada sem nada marcado; o salvo neste navegador entra depois da hidratação.
+  const hydrated = useHydrated();
+  const salvos = useMemo(() => (hydrated ? lerChecklist(item.id) : []), [hydrated, item.id]);
+  const [editados, setMarcados] = useState<number[] | null>(null);
+  const marcados = editados ?? salvos;
   const [impressaoBloqueada, setImpressaoBloqueada] = useState(false);
 
   const observacoesResolvidas = useMemo(
@@ -74,7 +79,8 @@ export default function ChecklistDocumentos({
 
   const toggleDocumento = useCallback(
     (index: number) => {
-      setMarcados((atual) => {
+      setMarcados((editado) => {
+        const atual = editado ?? salvos;
         const next = atual.includes(index)
           ? atual.filter((i) => i !== index)
           : [...atual, index].sort((a, b) => a - b);
@@ -82,7 +88,7 @@ export default function ChecklistDocumentos({
         return next;
       });
     },
-    [item.id],
+    [item.id, salvos],
   );
 
   const limparChecklist = useCallback(() => {

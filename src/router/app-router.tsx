@@ -1,12 +1,13 @@
 import type { ComponentType } from 'react';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { Navigate, type RouteObject } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import NotFoundPage from '@/features/not-found/pages/NotFoundPage';
 
 /** Rota carregada sob demanda: cada página vira um chunk próprio. */
 const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({ Component: (await load()).default });
 
-const router = createBrowserRouter([
+/** Compartilhadas pelo navegador (client.tsx) e pelo pré-render do build (entry-server.tsx). */
+export const routes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
@@ -50,8 +51,4 @@ const router = createBrowserRouter([
       { path: '*', element: <NotFoundPage /> },
     ],
   },
-]);
-
-export default function AppRouter() {
-  return <RouterProvider router={router} />;
-}
+];

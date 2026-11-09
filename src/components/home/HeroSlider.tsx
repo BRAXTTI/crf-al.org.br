@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
+import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/lib/hydration';
 import { banners as defaultBanners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, type Banner } from '@/data/banners';
 
 const AUTOPLAY_MS = 6000;
@@ -28,9 +29,10 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
   const [isHovered, setIsHovered] = useState(false);
   const [hasFocus, setHasFocus] = useState(false);
   // Com movimento reduzido, começa pausado; o botão de reprodução ainda permite iniciar.
-  const [isPaused, setIsPaused] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
+  // Media query segura para hidratação: o HTML do build sai sem pausa e o navegador corrige logo depois.
+  const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
+  const [pausedByUser, setIsPaused] = useState<boolean>();
+  const isPaused = pausedByUser ?? reducedMotion;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const goTo = useCallback(
