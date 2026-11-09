@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactEventHandler, type RefObject } from 'react';
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { REDUCED_MOTION_QUERY, useHydrated, useMediaQuery } from '@/lib/hydration';
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark';
 const focusRingClaro = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -20,10 +21,6 @@ function registrarSincronizador(video: HTMLVideoElement, fn: (tocando: boolean) 
 
 function notificarPlay(video: HTMLVideoElement, ativo: boolean) {
   sincronizadores.get(video)?.forEach((fn) => fn(ativo));
-}
-
-function prefersReducedMotion() {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 /** No iPhone/iPad o volume é do aparelho: `volume` ignora escrita. Lá só há mudo. */
@@ -57,7 +54,10 @@ interface ControlesSomProps {
  * não cobrir botões da gravação. Sincroniza mudo e volume pelo evento `volumechange`.
  */
 export function ControlesSom({ videoRef, duracao, className = '' }: ControlesSomProps) {
-  const [ajustavel] = useState(volumeAjustavel);
+  // Pré-render e hidratação sem o controle de volume; o navegador decide logo depois.
+  const hydrated = useHydrated();
+  const [volumeNoAparelho] = useState(volumeAjustavel);
+  const ajustavel = hydrated && volumeNoAparelho;
   const [tocando, setTocando] = useState(false);
   const [mudo, setMudo] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -217,7 +217,8 @@ export default function VideoTela({
   const ref = videoRef ?? proprioRef;
   // Navegadores sem IntersectionObserver ou vídeos narrados (preload="metadata") definem o src na montagem.
   const [carregar, setCarregar] = useState(() => narrado || (typeof window !== 'undefined' && !('IntersectionObserver' in window)));
-  const [reduzido] = useState(prefersReducedMotion);
+  // Media query segura para hidratação (as páginas de requerimento são pré-renderizadas).
+  const reduzido = useMediaQuery(REDUCED_MOTION_QUERY);
   const [tocando, setTocando] = useState(false);
   const [jaTocou, setJaTocou] = useState(false);
   const [erro, setErro] = useState(false);

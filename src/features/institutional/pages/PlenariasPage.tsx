@@ -5,7 +5,7 @@ import PageHero from '@/components/block/page-hero';
 import { PAGE_METADATA } from '@/config/page-metadata';
 import { plenaryYears, type PlenaryMeeting } from '@/config/plenarias';
 import { SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
-import { countdown, daysUntil, formatDate, todayInMaceio, weekday } from '@/lib/maceio';
+import { countdown, daysUntil, formatDate, useHojeEmMaceio, weekday } from '@/lib/maceio';
 
 const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
@@ -79,7 +79,7 @@ function MeetingGroup({ id, title, meetings, today }: { id: string; title: strin
 
 export default function PlenariasPage() {
   const [params, setParams] = useSearchParams();
-  const today = todayInMaceio();
+  const today = useHojeEmMaceio();
   const years = [...plenaryYears].sort((a, b) => b.year - a.year);
   const selected = years.find(item => String(item.year) === params.get('ano')) ?? years[0];
   const meetings = [...(selected?.meetings ?? [])].sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? '').localeCompare(b.time ?? '') || a.id.localeCompare(b.id));

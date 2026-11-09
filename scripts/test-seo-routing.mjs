@@ -20,7 +20,7 @@ const source = (await readFile(new URL('../functions/_middleware.ts', import.met
   .replace("'../src/config/redirects-servicos'", JSON.stringify(redirectsUrl))
   .replace("'../src/services/wordpress/image-set'", JSON.stringify(imageSetUrl))
   .replace("'./_news'", JSON.stringify(await loadNews()));
-const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders } = await import(moduleUrl(source));
+const { onRequest, buildMeta, buildPreload, newsPreload, homePreload, SECURITY_HEADERS, withSecurityHeaders, prerenderGuard, PRERENDER_SELECTOR } = await import(moduleUrl(source));
 const { banners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, BANNER_DESKTOP_MEDIA } = await import(bannersUrl);
 const { mediaImageSet, NEWS_COVER_SIZES } = await import(imageSetUrl);
 const { PAGE_METADATA } = await import(metadataUrl);
@@ -344,7 +344,47 @@ try {
   } finally {
     banners.unshift(firstBanner);
   }
-  console.log(`SEO: ${Object.keys(PAGE_METADATA).length} static routes, genuine 404s, resources/APIs, redirects, metadata cache and origin failures passed (offline handler tests).`);
+  // Pré-render (scripts/prerender.mjs): o dist/index.html traz a home em #root e também é o
+  // fallback do SPA. Só a própria rota mantém o conteúdo; nas outras, #root volta vazio.
+  const fakeRoot = route => ({
+    attrs: new Map([['data-prerender', route], ['data-prerender-at', '1767225600000']]),
+    inner: '<h1>Home</h1>',
+    getAttribute(name) { return this.attrs.get(name) ?? null; },
+    removeAttribute(name) { this.attrs.delete(name); },
+    setInnerContent(content) { this.inner = content; },
+  });
+  const kept = fakeRoot('/instituicao');
+  prerenderGuard('/instituicao').element(kept);
+  assert.equal(kept.inner, '<h1>Home</h1>', 'Rota pré-renderizada mantém o HTML');
+  assert.equal(kept.getAttribute('data-prerender'), '/instituicao');
+  const foreign = fakeRoot('/');
+  prerenderGuard('/imprensa/noticias/alguma').element(foreign);
+  assert.equal(foreign.inner, '', 'Fallback com a home: #root vazio');
+  assert.equal(foreign.getAttribute('data-prerender'), null, 'Sem a marca, o navegador não tenta hidratar');
+  assert.equal(foreign.getAttribute('data-prerender-at'), null);
+  const recorded = [];
+  globalThis.HTMLRewriter = class {
+    constructor() { this.handlers = []; recorded.push(this.handlers); }
+    on(selector, handler) { this.handlers.push([selector, handler]); return this; }
+    transform(response) { return response; }
+  };
+  try {
+    for (const [path, status, keepsHome] of [['/', 200, true], ['/instituicao', 200, false], ['/rota-que-nao-existe', 404, false], ['/instituicao/estatuto', 404, false]]) {
+      recorded.length = 0;
+      assert.equal((await request(path)).status, status, path);
+      const handlers = recorded.flat();
+      const guard = handlers.find(([selector]) => selector === PRERENDER_SELECTOR)?.[1];
+      assert.ok(guard, `${path}: guarda do pré-render registrada`);
+      const root = fakeRoot('/');
+      guard.element(root);
+      assert.equal(root.inner !== '', keepsHome, `${path}: conteúdo da home ${keepsHome ? 'mantido' : 'removido'}`);
+      // O corpo agora tem SVGs com <title> (ícones): título/metas só no <head>.
+      for (const [selector] of handlers) assert.ok(!/^(title|meta|link)\b/.test(selector), `${path}: seletor sem escopo de <head>: ${selector}`);
+    }
+  } finally {
+    globalThis.HTMLRewriter = class { on() { return this; } transform(response) { return response; } };
+  }
+  console.log(`SEO: ${Object.keys(PAGE_METADATA).length} static routes, genuine 404s, resources/APIs, redirects, metadata cache, origin failures and prerender guard passed (offline handler tests).`);
 } finally {
   globalThis.fetch = saved.fetch;
   globalThis.caches = saved.caches;

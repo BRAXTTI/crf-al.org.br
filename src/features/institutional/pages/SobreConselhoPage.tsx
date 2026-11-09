@@ -1,5 +1,6 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import { useInView } from '@/hooks/useInView';
+import { useHojeEmMaceio } from '@/lib/maceio';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import PageHero, { PageHeroAction } from '@/components/block/page-hero';
@@ -276,7 +277,7 @@ export default function SobreConselhoPage() {
   const { ref: mvvRef, revealProps: mvvReveal } = useInView();
   const { ref: atribRef, revealProps: atribReveal } = useInView();
   const { ref: hinoRef, revealProps: hinoReveal } = useInView();
-  const anos = new Date().getFullYear() - FUNDACAO;
+  const anos = Number(useHojeEmMaceio().slice(0, 4)) - FUNDACAO;
 
   return (
     <div className="min-h-screen">

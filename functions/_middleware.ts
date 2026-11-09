@@ -191,17 +191,37 @@ export function homePreload(): ImagePreload[] {
   ];
 }
 
-function injectOg(asset: Response, og: OgData, preloads = newsPreload(og)): Response {
+/** Marca de scripts/prerender.mjs em #root: a rota cujo HTML o build colocou ali. */
+export const PRERENDER_SELECTOR = 'div#root[data-prerender]';
+
+/**
+ * O dist/index.html (home pré-renderizada) também é o fallback do SPA: em qualquer outra rota
+ * (notícias, eventos, 404...) o conteúdo da home não pode sair no HTML. Esvazia #root, como antes do pré-render.
+ */
+export function prerenderGuard(pathname: string) {
+  return {
+    element(el: Element) {
+      if (el.getAttribute('data-prerender') === pathname) return;
+      el.removeAttribute('data-prerender');
+      el.removeAttribute('data-prerender-at');
+      el.setInnerContent('');
+    },
+  };
+}
+
+function injectOg(asset: Response, og: OgData, pathname: string, preloads = newsPreload(og)): Response {
   const preload = buildPreload(preloads);
   const rewritten = new HTMLRewriter()
-    .on('title', { element(el) { el.setAttribute('data-page-metadata', 'true'); el.setInnerContent(`${og.title} | CRFAL`); } })
-    .on('meta', { element(el) {
+    .on(PRERENDER_SELECTOR, prerenderGuard(pathname))
+    // Só no <head>: com o pré-render o corpo tem SVGs com <title> (ícones sociais).
+    .on('head > title', { element(el) { el.setAttribute('data-page-metadata', 'true'); el.setInnerContent(`${og.title} | CRFAL`); } })
+    .on('head > meta', { element(el) {
       const property = el.getAttribute('property') || '';
       const name = el.getAttribute('name') || '';
       if (property.startsWith('og:') || property.startsWith('article:') || name.startsWith('twitter:') || name === 'description' || name === 'robots') el.remove();
     } })
-    .on('link[rel="canonical"]', { element(el) { el.remove(); } })
-    .on('meta[name="viewport"]', { element(el) {
+    .on('head > link[rel="canonical"]', { element(el) { el.remove(); } })
+    .on('head > meta[name="viewport"]', { element(el) {
       // O viewport deve ser conhecido antes de avaliar media e imagesizes no mobile.
       if (preload) el.after(preload, { html: true });
     } })
@@ -363,7 +383,7 @@ async function handle(context: PagesContext): Promise<Response> {
     }
     return notFound(asset, pathname);
   }
-  if (staticData) return injectOg(asset, { ...staticData, noindex: ['/eventos', '/imprensa/galeria-de-fotos'].includes(pathname), canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` }, pathname === '/' ? homePreload() : []);
+  if (staticData) return injectOg(asset, { ...staticData, noindex: ['/eventos', '/imprensa/galeria-de-fotos'].includes(pathname), canonical: `${SITE_URL}${pathname === '/' ? '' : pathname}` }, pathname, pathname === '/' ? homePreload() : []);
   let slug: string;
   try { slug = decodeURIComponent(pathname.slice(prefix!.length)); } catch { return notFound(asset, pathname); }
   if (!slug || slug.includes('/')) return notFound(asset, pathname);
@@ -374,12 +394,13 @@ async function handle(context: PagesContext): Promise<Response> {
     }
     // Notícias já têm cache próprio (Cache API + KV, SWR) com a mesma chave de /api/news.
     const og = prefix === NEWS_PREFIX ? await resolveNews(slug, context) : await cachedMetadata(context, pathname, () => prefix === EVENTS_PREFIX ? resolveEvent(slug, context) : resolveAlbum(slug, context));
-    if (og?.title) return injectOg(asset, og);
+    if (og?.title) return injectOg(asset, og, pathname);
     return notFound(asset, pathname);
   } catch (error) {
     // Temporary origin failures are neither successful pages nor missing content.
     console.error(JSON.stringify({ event: 'page_metadata_failed', path: pathname, message: error instanceof Error ? error.message : String(error) }));
-    const response = new Response(asset.body, { status: 503, headers: asset.headers });
+    const shell = new HTMLRewriter().on(PRERENDER_SELECTOR, prerenderGuard(pathname)).transform(asset);
+    const response = new Response(shell.body, { status: 503, headers: asset.headers });
     response.headers.set('Cache-Control', 'no-store');
     response.headers.set('Retry-After', '60');
     response.headers.delete('ETag');
@@ -396,5 +417,5 @@ function notFound(asset: Response, pathname: string): Response {
   headers.delete('Last-Modified');
   return injectOg(new Response(asset.body, { status: 404, headers }), {
     title: 'Página não encontrada', description: 'O conteúdo solicitado não foi encontrado.', canonical: `${SITE_URL}${pathname}`, noindex: true,
-  });
+  }, pathname);
 }

@@ -5,7 +5,8 @@ import { BorderBeam } from '@/components/ui/border-beam';
 import { useInView } from '@/hooks/useInView';
 import { plenaryYears } from '@/config/plenarias';
 import { mapEvent, formatarData } from '@/features/events/utils';
-import { countdown, daysUntil, formatDate, todayInMaceio, useStatusAtendimento, weekday } from '@/lib/maceio';
+import { countdown, daysUntil, formatDate, useHojeEmMaceio, useStatusAtendimento, weekday } from '@/lib/maceio';
+import { useHydrated } from '@/lib/hydration';
 import { useEvents } from '@/services/wordpress/event-hooks';
 
 const BEAM_LENGTH = 0.22; // rastro do feixe, em fração do perímetro medido do painel
@@ -168,7 +169,9 @@ function Evento() {
 
 /** Sinais do Conselho em funcionamento: expediente, plenária e evento, só com dados reais. */
 export default function AgoraNoConselho() {
-  const today = todayInMaceio();
+  const today = useHojeEmMaceio();
+  // Feixe só no navegador e depois da hidratação: depende da tela e do movimento reduzido.
+  const hydrated = useHydrated();
   // Feixe de uma volta só, na primeira vez que o painel entra na tela; ao terminar, sai de vez.
   const [isDesktop] = useState(() => typeof window === 'undefined' || window.matchMedia(DESKTOP_QUERY).matches);
   const desktop = useInView<HTMLDivElement>();
@@ -181,7 +184,7 @@ export default function AgoraNoConselho() {
     <section aria-labelledby="agora-title" className="pb-2 sm:pb-3">
       <div className="container-crfal">
         <div ref={ref} className="relative rounded-2xl border border-crfal-gray-200/80 bg-white px-5 py-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-7 md:px-8 lg:grid lg:grid-cols-[11rem_1fr] lg:items-start lg:gap-10 lg:px-12 lg:py-8">
-          {inView && !beamDone && (
+          {hydrated && inView && !beamDone && (
             <BorderBeam
               length={BEAM_LENGTH}
               speed={isDesktop ? BEAM_SPEED : BEAM_SPEED_MOBILE}

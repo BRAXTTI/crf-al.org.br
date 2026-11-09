@@ -1,22 +1,30 @@
 import { Reveal } from '@/components/ui/reveal';
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { useRef, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronRight } from 'lucide-react';
 import { serviceProfiles } from '@/config/service-profiles';
 
 const STORAGE_KEY = 'crfal.perfilServico';
 
-/** Perfil escolhido no celular, lembrado só neste aparelho (site sem SSR: lido já na primeira renderização). */
+const semAssinatura = () => () => {};
+function lerPerfilSalvo() {
+  try {
+    const salvo = window.localStorage.getItem(STORAGE_KEY);
+    if (serviceProfiles.some(profile => profile.id === salvo)) return salvo as string;
+  } catch { /* armazenamento indisponível */ }
+  return serviceProfiles[0].id;
+}
+
+/**
+ * Perfil escolhido no celular, lembrado só neste aparelho. A home é pré-renderizada com o
+ * primeiro perfil; o salvo entra logo depois da hidratação (getServerSnapshot).
+ */
 function usePerfilSalvo() {
-  const [perfil, setPerfil] = useState(() => {
-    try {
-      const salvo = window.localStorage.getItem(STORAGE_KEY);
-      if (serviceProfiles.some(profile => profile.id === salvo)) return salvo as string;
-    } catch { /* armazenamento indisponível */ }
-    return serviceProfiles[0].id;
-  });
+  const salvo = useSyncExternalStore(semAssinatura, lerPerfilSalvo, () => serviceProfiles[0].id);
+  const [escolhido, setEscolhido] = useState<string>();
+  const perfil = escolhido ?? salvo;
   const escolher = (id: string) => {
-    setPerfil(id);
+    setEscolhido(id);
     try { window.localStorage.setItem(STORAGE_KEY, id); } catch { /* armazenamento indisponível */ }
   };
   return [perfil, escolher] as const;

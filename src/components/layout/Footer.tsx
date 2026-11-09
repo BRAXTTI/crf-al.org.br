@@ -7,6 +7,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { SOCIAL_LINKS } from '@/config/site';
+import { useHojeEmMaceio } from '@/lib/maceio';
 import { FacebookIcon, InstagramIcon, XIcon, YouTubeIcon } from '@/components/icons/social';
 
 const quickLinks = [
@@ -40,6 +41,7 @@ const socialLinks = SOCIAL_LINKS.map((social) => ({
 }));
 
 export default function Footer() {
+  const ano = useHojeEmMaceio().slice(0, 4);
   return (
     <footer className="relative mt-6 overflow-hidden rounded-t-2xl bg-[#0B192C] text-white sm:mt-10 sm:rounded-t-3xl">
       <div className="absolute top-0 right-0 w-96 h-96 bg-crfal-blue-light rounded-full translate-x-1/2 -translate-y-1/2 opacity-10" />
@@ -178,7 +180,7 @@ export default function Footer() {
           <div className="container-crfal py-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <p className="text-sm text-white/60 text-center md:text-left">
-                © {new Date().getFullYear()} CRFAL - Conselho Regional de Farmácia
+                © {ano} CRFAL - Conselho Regional de Farmácia
                 do Estado de Alagoas. Todos os direitos reservados.
               </p>
               <div className="flex flex-wrap items-center gap-4 text-sm text-white/60">

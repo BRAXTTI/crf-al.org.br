@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { REDUCED_MOTION_QUERY, useHydrated } from '@/lib/hydration';
 
 interface UseInViewOptions {
   threshold?: number;
@@ -29,6 +30,11 @@ function jaAlcancado(el: Element) {
   return (width > 0 || height > 0) && top - deslocamento(el) < window.innerHeight;
 }
 
+/** Entrada animada só com IntersectionObserver e sem movimento reduzido; senão, já visível. */
+function animavel() {
+  return 'IntersectionObserver' in window && !window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
 /**
  * Revela uma vez, como o AOS do site do CFF (`anchorPlacement` top-bottom, `once`): quando o
  * topo do elemento passa `offset` px acima da borda de baixo da tela. Sem observação ou com
@@ -39,20 +45,21 @@ export function useInView<T extends Element = HTMLDivElement>({
   offset = 100,
 }: UseInViewOptions = {}) {
   const ref = useRef<T>(null);
+  // Pré-render e hidratação: visível (o HTML do build mostra o conteúdo mesmo sem JS).
+  const hydrated = useHydrated();
   const [instant, setInstant] = useState(false);
-  const [inView, setInView] = useState(
-    () =>
-      typeof window === 'undefined' ||
-      !('IntersectionObserver' in window) ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
+  const [inView, setInView] = useState(() => !hydrated || !animavel());
 
   // Antes da primeira pintura (e depois do ScrollRestoration): o que já está acima da dobra
-  // nasce visível, sem animar.
+  // nasce visível, sem animar. Vindo do HTML pré-renderizado (visível), o que ainda está abaixo
+  // da dobra volta a esperar a entrada: some fora da tela, antes de a pessoa rolar até ele.
   useLayoutEffect(() => {
-    if (!inView && ref.current && jaAlcancado(ref.current)) {
+    if (!ref.current) return;
+    if (!inView && jaAlcancado(ref.current)) {
       setInView(true);
       setInstant(true);
+    } else if (inView && !hydrated && animavel() && !jaAlcancado(ref.current)) {
+      setInView(false);
     }
     // Só na montagem; depois, quem decide é o observador.
     // eslint-disable-next-line react-hooks/exhaustive-deps
