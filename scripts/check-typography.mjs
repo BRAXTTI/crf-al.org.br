@@ -53,5 +53,14 @@ for await (const caminho of percorrer(join(RAIZ, 'src'))) {
 const html = await readFile(join(RAIZ, 'index.html'), 'utf8');
 assert.match(html, /<meta\s+name="text-scale"\s+content="scale"\s*\/?>/, 'Falta <meta name="text-scale" content="scale"> no index.html');
 
+/** 4) O head reescrito pela Function preserva a meta: o middleware só remove
+ *  metas de og:/article:/twitter:/description/robots e acrescenta os dele. */
+const middleware = await readFile(join(RAIZ, 'functions/_middleware.ts'), 'utf8');
+assert.doesNotMatch(
+  middleware,
+  /name\s*===\s*'text-scale'/,
+  'O middleware da Function não pode remover a meta text-scale do head',
+);
+
 assert.equal(problemas.length, 0, `Tipografia fora do padrão:\n${problemas.join('\n')}`);
 console.log('Tipografia: fontes em rem/em, raiz sem font-size fixo, meta text-scale presente.');

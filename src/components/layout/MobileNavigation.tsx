@@ -35,7 +35,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
         <div className="relative isolate flex shrink-0 items-center justify-between gap-4 overflow-hidden border-b-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark px-5 py-4 text-white">
           <div aria-hidden className="pointer-events-none absolute -right-10 -top-16 -z-10 h-40 w-40 rounded-full bg-crfal-blue-light/30 blur-3xl" />
           <Link to="/" onClick={close} className="rounded-lg focus-visible:outline-white">
-            <img src="/images/logo-crf-branca.webp" alt="CRF-AL, página inicial" className="h-10 w-auto object-contain" />
+            <img src="/images/logo-crf-branca.webp" alt="CRF-AL, página inicial" width={1944} height={601} className="h-10 w-auto object-contain" />
           </Link>
           <DialogTitle className="sr-only">Menu de navegação</DialogTitle>
           <DialogDescription className="sr-only">Conselho Regional de Farmácia de Alagoas</DialogDescription>

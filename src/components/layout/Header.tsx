@@ -228,6 +228,8 @@ export default function Header() {
                 <img
                   src="/images/logo-crf-azul.webp"
                   alt="CRFAL - Conselho Regional de Farmácia do Estado de Alagoas"
+                  width={1944}
+                  height={601}
                   className="h-auto max-h-9 w-auto max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.03] lg:h-11 lg:max-h-none lg:max-w-none"
                 />
               </picture>
