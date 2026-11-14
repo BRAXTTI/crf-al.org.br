@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Escala de texto do sistema: a fonte da raiz passa a acompanhar a preferência de
+         acessibilidade do celular (Dynamic Type no iOS, tamanho de fonte no Android/ChromeOS).
+         Exige que os tamanhos de fonte fiquem em rem/em e que a raiz não tenha font-size
+         fixo — ver o guia "Respect Operating System Text Scale" do Chrome Modern Web Guidance.
+         Navegadores sem suporte (Firefox, Safari) degradam para o padrão, sem quebrar. -->
+    <meta name="text-scale" content="scale" />
+
     <!-- Arte de fundo do site: é o LCP das rotas estáticas e chega ao navegador só pelo CSS,
          então o Lighthouse a tratava como imagem não descobrível no documento inicial.
          Pré-carregar com o mesmo corte de tela do CSS evita a descoberta tardia. -->

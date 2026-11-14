@@ -387,20 +387,24 @@
     --crfal-gray-dark: #1e293b;
     --crfal-text-gray: #566579;
 
-    /* Altura total do cabeçalho (barra de identidade + barra de menu).
-       Usada para deslocar o conteúdo e elementos fixos/sticky. */
-    --header-offset: 64px;
-    --page-header-offset: 64px;
+    /* Alturas do cabeçalho (barra principal, faixa utilitária e faixa de
+       perfis). Usadas para deslocar o conteúdo e os elementos fixos/sticky.
+       Em rem para acompanharem o texto do sistema escalado (até 200%): com
+       px fixo o cabeçalho invadia o conteúdo. O Header.tsx mede as barras de
+       verdade e publica os valores exatos; estas são a aproximação até a
+       medição rodar (e o fallback sem JavaScript). */
+    --header-offset: 4rem;
+    --page-header-offset: 4rem;
     /* Home: cabeçalho + faixa de acesso por perfil (só no celular). */
-    --home-header-offset: 136px;
+    --home-header-offset: 8.5rem;
   }
 
   @media (min-width: 1024px) {
     :root {
-      /* Barra principal fixa (72px); a faixa utilitária de 32px some ao rolar. */
-      --header-offset: 72px;
-      --page-header-offset: 104px;
-      --home-header-offset: 104px;
+      /* Barra principal (4.5rem); a faixa utilitária (2rem) some ao rolar. */
+      --header-offset: 4.5rem;
+      --page-header-offset: 6.5rem;
+      --home-header-offset: 6.5rem;
     }
   }
 }
@@ -598,4 +602,60 @@
 @keyframes banner-saida {
   from { opacity: 1; transform: none; }
   to { opacity: 0; transform: translateY(var(--banner-desde)); }
+}
+
+/* ---------------------------------------------------------------------------
+   Texto do sistema escalado.
+   O Header.tsx marca <html data-escala-texto="alta"> quando a fonte da raiz
+   passa de ~125% do normal (Chrome aplica a escala do SO quando a página
+   declara <meta name="text-scale">). Nessa situação os rótulos da faixa de
+   atalhos não cabem em três colunas: em vez de cortá-los com reticências,
+   a faixa vira uma lista (ícone + rótulo) e continua legível.
+   Regras fora de @layer para vencerem as utilitárias do Tailwind.
+--------------------------------------------------------------------------- */
+
+html[data-escala-texto="alta"] .header-profiles-grid {
+  grid-template-columns: 1fr;
+}
+html[data-escala-texto="alta"] .header-profiles-grid > * {
+  border-inline-end-width: 0;
+}
+html[data-escala-texto="alta"] .header-profiles-grid > * + * {
+  border-inline-start-width: 1px;
+  border-inline-start-style: solid;
+}
+html[data-escala-texto="alta"] .header-profile-link {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+}
+/* Ícone menor para sobrar espaço ao rótulo. */
+html[data-escala-texto="alta"] .header-profile-link > span:first-child {
+  height: 1.75rem;
+  width: 1.75rem;
+}
+/* O rótulo deixa de ser cortado com reticências: se não couber numa
+   linha, ele quebra em vez de sumir. */
+html[data-escala-texto="alta"] .header-profile-label {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+/* Espaço menor entre os itens da faixa utilitária, para a lista caber. */
+html[data-escala-texto="alta"] .header-utility-links {
+  column-gap: 0.5rem;
+}
+/* Com o texto muito escalado o logo não cabe ao lado dos botões (ele é
+   centralizado e os botões crescem também): no celular ele sai do centro e
+   ocupa o espaço livre entre o menu e o sino. */
+@media (max-width: 1023.98px) {
+  html[data-escala-texto="alta"] [data-site-logo] {
+    position: static;
+    translate: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+  }
 }

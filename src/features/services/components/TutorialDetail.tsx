@@ -26,7 +26,7 @@ export function BotaoAcao({ href, rotulo, tarefa, destaque, className = '' }: { 
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => tarefa && medir('acao', { tarefa })}
-      className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-5 text-[15px] font-bold text-white shadow-xs hover:bg-crfal-blue-dark ${motion} ${focusRing} ${destaque ? 'ring-4 ring-crfal-gold' : ''} ${className}`}
+      className={`inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-crfal-blue px-5 text-[0.9375rem] font-bold text-white shadow-xs hover:bg-crfal-blue-dark ${motion} ${focusRing} ${destaque ? 'ring-4 ring-crfal-gold' : ''} ${className}`}
     >
       {rotulo}
       <ArrowUpRight className="h-4 w-4" aria-hidden />
@@ -47,7 +47,7 @@ function Antes({ tutorial, guia, linkDocumentos, onde }: { tutorial: Tutorial; g
     <>
       <ul className="space-y-1.5">
         {guia.antes.map((item) => (
-          <li key={item} className="flex items-start gap-2.5 text-[15px] leading-snug text-crfal-gray-700">
+          <li key={item} className="flex items-start gap-2.5 text-[0.9375rem] leading-snug text-crfal-gray-700">
             <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-crfal-gold" />
             {item}
           </li>
@@ -96,7 +96,7 @@ function PassosSemVideo({ guia }: { guia: GuiaTutorial }) {
               {indice < guia.passos.length - 1 && <span aria-hidden className="mt-1 block w-px flex-1 bg-crfal-gray-200" />}
             </span>
             <span className="block min-w-0 pb-4 pt-1.5">
-              <span className="block text-[15px] font-semibold leading-snug text-crfal-blue-dark">{passo.titulo}</span>
+              <span className="block text-[0.9375rem] font-semibold leading-snug text-crfal-blue-dark">{passo.titulo}</span>
               {passo.detalhe && <span className="mt-1 block text-sm leading-snug text-crfal-gray-600">{passo.detalhe}</span>}
             </span>
           </li>
@@ -160,7 +160,7 @@ function Retorno({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial })
         <dl className="space-y-3">
           {guia.problemas.map((problema) => (
             <div key={problema.sintoma}>
-              <dt className="text-[15px] font-semibold text-crfal-blue-dark">{problema.sintoma}</dt>
+              <dt className="text-[0.9375rem] font-semibold text-crfal-blue-dark">{problema.sintoma}</dt>
               <dd className="mt-0.5 text-sm leading-snug text-crfal-gray-700">{problema.solucao}</dd>
             </div>
           ))}
@@ -187,7 +187,7 @@ function Fechamento({ tutorial, guia }: { tutorial: Tutorial; guia: GuiaTutorial
           <h2 id="depois-title" className={tituloBloco}>{tutorial.id === 'emitir-boletos' ? 'Depois de emitir' : 'O que acontece depois'}</h2>
           <ul className="mt-3 space-y-2">
             {guia.depois.map((item) => (
-              <li key={item} className="flex items-start gap-2.5 text-[15px] leading-snug text-crfal-gray-700">
+              <li key={item} className="flex items-start gap-2.5 text-[0.9375rem] leading-snug text-crfal-gray-700">
                 <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-crfal-gold" />
                 {item}
               </li>

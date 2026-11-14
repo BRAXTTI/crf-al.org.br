@@ -182,7 +182,7 @@ export default function ChecklistDocumentos({
       {impressaoBloqueada && (
         <p
           role="alert"
-          className="mt-3 rounded-lg border border-amber-200 bg-amber-50/70 px-4 py-3 text-[13px] leading-relaxed text-amber-900"
+          className="mt-3 rounded-lg border border-amber-200 bg-amber-50/70 px-4 py-3 text-[0.8125rem] leading-relaxed text-amber-900"
         >
           O navegador bloqueou a janela de impressão. Permita pop-ups para este site e toque em
           “Imprimir lista” de novo.

@@ -7,7 +7,7 @@ import { plenaryYears, type PlenaryMeeting } from '@/config/plenarias';
 import { SOCIAL_LINKS, TRANSPARENCIA_URL } from '@/config/site';
 import { countdown, daysUntil, formatDate, useHojeEmMaceio, weekday } from '@/lib/maceio';
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const externalLinkClass = `inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-dark hover:underline ${focusRing}`;
 
@@ -40,12 +40,12 @@ function MeetingRow({ meeting, today }: { meeting: PlenaryMeeting; today: string
     <div className="flex items-start gap-4">
       <time dateTime={meeting.date} className={`flex w-16 shrink-0 flex-col items-center rounded-xl border px-2 py-3 ${held ? 'border-crfal-gray-200 bg-crfal-gray-50 text-crfal-gray-700' : 'border-crfal-blue/15 bg-crfal-blue-lighter/60 text-crfal-blue'}`}>
         <span className="text-2xl font-bold leading-none tabular-nums">{meeting.date.slice(8, 10)}</span>
-        <span className="mt-1.5 text-[11px] font-bold uppercase tracking-wide">{formatDate(meeting.date, { month: 'short' }).replace('.', '')}</span>
+        <span className="mt-1.5 text-[0.6875rem] font-bold uppercase tracking-wide">{formatDate(meeting.date, { month: 'short' }).replace('.', '')}</span>
         <span className="sr-only"> de {meeting.date.slice(0, 4)}</span>
       </time>
       <div className="min-w-0 pt-0.5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${status.className}`}>{held && (meeting.noQuorum ? <CircleSlash className="h-3 w-3" aria-hidden /> : <CircleCheck className="h-3 w-3" aria-hidden />)}{status.text}</span>
+          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.6875rem] font-semibold ring-1 ring-inset ${status.className}`}>{held && (meeting.noQuorum ? <CircleSlash className="h-3 w-3" aria-hidden /> : <CircleCheck className="h-3 w-3" aria-hidden />)}{status.text}</span>
           <span className="text-xs text-crfal-gray-600">{weekday(meeting.date)}</span>
         </div>
         <h4 className="mt-2 text-base font-semibold leading-snug text-crfal-gray-900">{meeting.title}</h4>
@@ -122,7 +122,7 @@ export default function PlenariasPage() {
                 <span className="mt-1.5 text-xs font-bold uppercase tracking-wide text-crfal-gold">{formatDate(next.date, { month: 'short' }).replace('.', '')}</span>
               </time>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Próxima reunião · {countdown(daysUntil(next.date, today))}</p>
+                <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Próxima reunião · {countdown(daysUntil(next.date, today))}</p>
                 <h2 id="next-meeting-title" className="mt-1.5 text-xl font-bold sm:text-2xl">{next.title}</h2>
                 <p className="mt-1 text-sm text-white/80">{weekday(next.date)}, {formatDate(next.date, { day: 'numeric', month: 'long', year: 'numeric' })}{next.time && ` · ${next.time}`}{next.location && ` · ${next.location}`}</p>
               </div>

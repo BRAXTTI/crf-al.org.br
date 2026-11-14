@@ -138,7 +138,7 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
 
       <div className="min-w-0">
         {antes}
-        {video.aviso && <p className="mt-4 rounded-lg border border-crfal-gold/40 bg-[#FBF7EC] px-3.5 py-2.5 text-[13.5px] leading-snug text-crfal-gray-700">{video.aviso}</p>}
+        {video.aviso && <p className="mt-4 rounded-lg border border-crfal-gold/40 bg-[#FBF7EC] px-3.5 py-2.5 text-[0.84375rem] leading-snug text-crfal-gray-700">{video.aviso}</p>}
         <h2 className="mt-4 text-lg font-bold text-crfal-blue first:mt-0 lg:mt-6">Passos</h2>
         <ol className="mt-3">
           {passos.map((passo, indice) => {
@@ -151,7 +151,7 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
                     {indice < total - 1 && <span aria-hidden className="mt-1 block w-px flex-1 bg-crfal-gray-200" />}
                   </span>
                   <span className="block min-w-0 pb-4 pt-1.5">
-                    <span className={`block text-[15px] leading-snug ${atual ? 'font-bold text-crfal-blue-dark' : 'font-semibold text-crfal-gray-700 group-hover:text-crfal-blue'}`}>{passo.titulo}</span>
+                    <span className={`block text-[0.9375rem] leading-snug ${atual ? 'font-bold text-crfal-blue-dark' : 'font-semibold text-crfal-gray-700 group-hover:text-crfal-blue'}`}>{passo.titulo}</span>
                     {atual && passo.detalhe && <span className="mt-1 block text-sm leading-snug text-crfal-gray-600">{passo.detalhe}</span>}
                   </span>
                 </button>

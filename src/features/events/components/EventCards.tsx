@@ -112,14 +112,14 @@ export function EventoCard({ evento, index }: { evento: Evento; index: number })
             <span className="font-display text-xl font-bold leading-none text-crfal-blue">
               {badge.dia}
             </span>
-            <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-crfal-gray-600">
+            <span className="mt-0.5 text-[0.625rem] font-bold uppercase tracking-wider text-crfal-gray-600">
               {badge.mes}
             </span>
           </div>
         )}
 
         <span
-          className={`absolute right-4 top-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-xs ${statusConfig.bg} ${statusConfig.text}`}
+          className={`absolute right-4 top-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold shadow-xs ${statusConfig.bg} ${statusConfig.text}`}
         >
           <StatusIcon className="h-3 w-3" />
           {STATUS_LABELS[evento.status]}
@@ -218,7 +218,7 @@ export function LinhaArquivo({ evento }: { evento: Evento }) {
           }`}
         >
           <span className="font-display text-base font-bold leading-none">{badge.dia}</span>
-          <span className="text-[9px] font-bold uppercase tracking-wider">{badge.mes}</span>
+          <span className="text-[0.5625rem] font-bold uppercase tracking-wider">{badge.mes}</span>
         </div>
       )}
 
@@ -239,7 +239,7 @@ export function LinhaArquivo({ evento }: { evento: Evento }) {
       </div>
 
       <span
-        className={`hidden shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${
+        className={`hidden shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold sm:inline-flex ${
           cancelado
             ? 'bg-red-50 text-red-600  '
             : 'bg-crfal-gray-100 text-crfal-gray-600  '

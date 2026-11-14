@@ -33,9 +33,20 @@ function CardContent({ title, description, image, action, shortAction, external 
         </g>
       </svg>
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden bg-linear-to-r/srgb from-crfal-blue via-crfal-blue/90 to-crfal-blue/30 group-last:from-crfal-blue-light group-last:via-crfal-blue-light/90 md:block md:to-crfal-blue/10 md:group-last:from-crfal-blue md:group-last:via-crfal-blue/90" />
-      <div className="relative flex w-full flex-1 items-center justify-between gap-4 md:h-full md:flex-col md:items-start">
-        <h2 className="min-w-0 max-w-76 text-lg font-bold leading-tight sm:text-2xl sm:leading-8 md:text-2xl">{title}</h2>
-        <p className="mb-5 mt-2 hidden max-w-76 text-sm leading-relaxed text-white/90 md:block">{description}</p>
+      {/* No celular o título e o botão ficam lado a lado. O título cresce até
+          o espaço que o botão deixa (flex-1 com base 0) e nunca fica menor
+          que a palavra mais comprida, porque sem min-w-0 o tamanho mínimo
+          automático é o min-content. Assim, com o texto do sistema escalado
+          (até 200%) a linha não cabe: ela quebra (flex-wrap) e o botão desce
+          para baixo, em vez de espremer o título até 4px de largura.
+          No desktop a coluna é mantida sem quebra (flex-nowrap), para não
+          repartir o card em duas colunas.
+          A largura máxima acompanha o container (min(19rem, 100%)), senão o
+          rem escalado deixaria o título mais largo que o card e o texto
+          seria cortado. */}
+      <div className="relative flex w-full flex-1 flex-wrap items-center justify-between gap-4 md:h-full md:flex-nowrap md:flex-col md:items-start">
+        <h2 className="flex-1 max-w-[min(19rem,100%)] text-lg font-bold leading-tight sm:text-2xl sm:leading-8 md:flex-none md:text-2xl">{title}</h2>
+        <p className="mb-5 mt-2 hidden max-w-[min(19rem,100%)] text-sm leading-relaxed text-white/90 md:block">{description}</p>
         <span className="inline-flex min-h-11 shrink-0 items-center gap-3 rounded-full bg-white px-4 py-2 text-xs font-bold text-crfal-blue transition-colors group-hover:bg-crfal-blue-lighter motion-reduce:transition-none sm:text-sm md:mt-auto md:rounded-lg">
           <span className="md:hidden">{shortAction}</span><span className="hidden md:inline">{action}</span><Arrow className="h-4 w-4" aria-hidden="true" />
         </span>

@@ -21,12 +21,12 @@ export default function CffPublications() {
         <Reveal className="section-panel">
           <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
+              <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
                 <Landmark className="h-3.5 w-3.5" aria-hidden="true" /> Conselho Federal de Farmácia
               </p>
-              <h2 id="cff-publications-title" className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[32px]">Publicações do CFF</h2>
+              <h2 id="cff-publications-title" className="mt-2 text-[1.625rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[2rem]">Publicações do CFF</h2>
               <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
-              <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-crfal-gray-600">Revistas, guias de prática clínica, notas técnicas e relatórios do Conselho Federal.</p>
+              <p className="mt-3 max-w-xl text-[0.9375rem] leading-relaxed text-crfal-gray-600">Revistas, guias de prática clínica, notas técnicas e relatórios do Conselho Federal.</p>
             </div>
             <Link to={CFF_PUBLICATIONS_PATH} className="group inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
               Ver todas <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true" />
@@ -44,7 +44,7 @@ export default function CffPublications() {
             ))}
           </ul>
 
-          <p className="mt-6 border-t border-crfal-gray-100 pt-4 text-[12.5px] text-crfal-gray-600">
+          <p className="mt-6 border-t border-crfal-gray-100 pt-4 text-[0.78125rem] text-crfal-gray-600">
             Os PDFs abrem no{' '}
             <a href={CFF_PUBLICATIONS_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-crfal-blue hover:underline">
               site oficial do CFF<ArrowUpRight className="ml-0.5 inline h-3 w-3 align-[-1px]" aria-hidden="true" /><span className="sr-only"> (abre em uma nova aba)</span>

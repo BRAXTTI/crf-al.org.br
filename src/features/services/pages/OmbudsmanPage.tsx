@@ -32,7 +32,7 @@ const OUVIDORIA_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#ouv/h
 const OUVIDORIA_EMAIL = SETOR_CONTATOS.ouvidoria.email;
 const OUVIDORIA_TELEFONE = SETOR_CONTATOS.ouvidoria.telefone;
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
@@ -68,9 +68,9 @@ function SectionTitle({ id, label, title, text }: { id: string; label: string; t
   return (
     <div className="mb-6 md:mb-8">
       <p className={goldLabel}>{label}</p>
-      <h2 id={id} className="mt-1.5 text-[22px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[26px]">{title}</h2>
+      <h2 id={id} className="mt-1.5 text-[1.375rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[1.625rem]">{title}</h2>
       <span aria-hidden className="mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
-      {text && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-crfal-gray-600">{text}</p>}
+      {text && <p className="mt-3 max-w-2xl text-[0.9375rem] leading-relaxed text-crfal-gray-600">{text}</p>}
     </div>
   );
 }
@@ -134,17 +134,17 @@ export default function OmbudsmanPage() {
               <div>
                 <p className={goldLabel}>Antes de registrar</p>
                 <h2 id="antes-title" className="mt-1 text-lg font-bold text-crfal-blue-dark">A Ouvidoria é um canal de segunda instância.</h2>
-                <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-crfal-gray-700">Se é a primeira vez que você trata do assunto, o setor responsável resolve mais rápido. Pedidos de informação pública vão pelo e-SIC.</p>
+                <p className="mt-1 max-w-2xl text-[0.875rem] leading-relaxed text-crfal-gray-700">Se é a primeira vez que você trata do assunto, o setor responsável resolve mais rápido. Pedidos de informação pública vão pelo e-SIC.</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 lg:shrink-0 lg:justify-end">
-              <Link to="/servicos/requerimentos" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[13px] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}>
+              <Link to="/servicos/requerimentos" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[0.8125rem] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}>
                 <FileText className="h-4 w-4" aria-hidden /> Requerimentos
               </Link>
-              <Link to="/contato" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[13px] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}>
+              <Link to="/contato" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[0.8125rem] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}>
                 <MessagesSquare className="h-4 w-4" aria-hidden /> Fale Conosco
               </Link>
-              <a href={ESIC_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[13px] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}>
+              <a href={ESIC_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[0.8125rem] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}>
                 <FileSearch className="h-4 w-4" aria-hidden /> Pedido de informação (e-SIC) <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
                 <span className="sr-only">(abre em uma nova aba)</span>
               </a>
@@ -162,17 +162,17 @@ export default function OmbudsmanPage() {
                 <li key={step.title} className="relative flex items-start gap-4 bg-white p-4 sm:flex-col sm:gap-0 sm:rounded-xl sm:border sm:border-crfal-gray-200 sm:p-5 sm:shadow-xs">
                   <div className="flex shrink-0 items-center justify-between sm:w-full">
                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crfal-blue text-white ring-2 ring-crfal-gold/30"><Icon className="h-5 w-5" aria-hidden /></span>
-                    <span aria-hidden className="hidden text-[32px] font-bold leading-none tracking-tight text-crfal-gray-200 sm:block">{String(index + 1).padStart(2, '0')}</span>
+                    <span aria-hidden className="hidden text-[2rem] font-bold leading-none tracking-tight text-crfal-gray-200 sm:block">{String(index + 1).padStart(2, '0')}</span>
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-base font-bold text-crfal-blue-dark sm:mt-4"><span className="text-[#8A6A12] sm:hidden">{index + 1}. </span><span className="sr-only">Passo {index + 1}: </span>{step.title}</h3>
-                    <p className="mt-1 text-[14px] leading-relaxed text-crfal-gray-600">{step.text}</p>
+                    <p className="mt-1 text-[0.875rem] leading-relaxed text-crfal-gray-600">{step.text}</p>
                   </div>
                 </li>
               );
             })}
           </ol>
-          <p className="mt-4 flex items-start gap-2 text-[13px] leading-relaxed text-crfal-gray-600">
+          <p className="mt-4 flex items-start gap-2 text-[0.8125rem] leading-relaxed text-crfal-gray-600">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden />
             Se a Ouvidoria pedir informações adicionais e não houver retorno no prazo, a manifestação pode ser encerrada sem resposta conclusiva.
           </p>
@@ -189,8 +189,8 @@ export default function OmbudsmanPage() {
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10"><Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden /></span>
                   <div className="min-w-0 sm:flex sm:flex-1 sm:flex-col">
                     <h3 className="text-base font-bold text-crfal-blue-dark sm:mt-4">{type.label}</h3>
-                    <p className="mt-1 text-[13.5px] leading-relaxed text-crfal-gray-600">{type.when}</p>
-                    {type.badge && <span className="mt-2.5 inline-flex self-start rounded-full bg-[#FBF7EC] px-2.5 py-1 text-[11px] font-semibold text-[#8A6A12] ring-1 ring-crfal-gold/40">{type.badge}</span>}
+                    <p className="mt-1 text-[0.84375rem] leading-relaxed text-crfal-gray-600">{type.when}</p>
+                    {type.badge && <span className="mt-2.5 inline-flex self-start rounded-full bg-[#FBF7EC] px-2.5 py-1 text-[0.6875rem] font-semibold text-[#8A6A12] ring-1 ring-crfal-gold/40">{type.badge}</span>}
                   </div>
                 </li>
               );
@@ -201,7 +201,7 @@ export default function OmbudsmanPage() {
               Registrar no portal <ArrowUpRight className={`h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${motion}`} aria-hidden />
               <span className="sr-only">(abre em uma nova aba)</span>
             </a>
-            <span className="text-[13px] text-crfal-gray-600">Denúncias anônimas: use “Registrar manifestação sem login”.</span>
+            <span className="text-[0.8125rem] text-crfal-gray-600">Denúncias anônimas: use “Registrar manifestação sem login”.</span>
           </div>
         </section>
 
@@ -216,15 +216,15 @@ export default function OmbudsmanPage() {
                   <li key={item.title} className="flex gap-4 p-5">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue ring-1 ring-crfal-blue/10"><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
                     <div>
-                      <h3 className="text-[15px] font-bold text-crfal-blue-dark">{item.title}</h3>
-                      <p className="mt-1 text-[13.5px] leading-relaxed text-crfal-gray-600">{item.text}</p>
+                      <h3 className="text-[0.9375rem] font-bold text-crfal-blue-dark">{item.title}</h3>
+                      <p className="mt-1 text-[0.84375rem] leading-relaxed text-crfal-gray-600">{item.text}</p>
                     </div>
                   </li>
                 );
               })}
             </ul>
             <div className="flex flex-col gap-3 border-t border-crfal-gray-100 bg-crfal-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[13.5px] text-crfal-gray-700">Direitos da LGPD e dúvidas sobre seus dados: <a href={`mailto:${OUVIDORIA_EMAIL}`} className="font-semibold text-crfal-blue hover:underline">{OUVIDORIA_EMAIL}</a></p>
+              <p className="text-[0.84375rem] text-crfal-gray-700">Direitos da LGPD e dúvidas sobre seus dados: <a href={`mailto:${OUVIDORIA_EMAIL}`} className="font-semibold text-crfal-blue hover:underline">{OUVIDORIA_EMAIL}</a></p>
               <CopyEmail />
             </div>
           </div>
@@ -245,7 +245,7 @@ export default function OmbudsmanPage() {
                       onClick={() => setFaqAberta(aberta ? null : index)}
                       aria-expanded={aberta}
                       aria-controls={panelId}
-                      className={`relative flex min-h-14 w-full items-center justify-between gap-3 px-5 py-4 text-left text-[15px] font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${aberta ? 'text-crfal-blue before:absolute before:inset-y-3 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}
+                      className={`relative flex min-h-14 w-full items-center justify-between gap-3 px-5 py-4 text-left text-[0.9375rem] font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue ${aberta ? 'text-crfal-blue before:absolute before:inset-y-3 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}
                     >
                       {faq.q}
                       <ChevronDown className={`h-5 w-5 shrink-0 text-crfal-gray-400 transition-transform duration-300 motion-reduce:transition-none ${aberta ? 'rotate-180 text-crfal-blue' : ''}`} aria-hidden />
@@ -253,7 +253,7 @@ export default function OmbudsmanPage() {
                   </h3>
                   <div id={panelId} role="region" aria-hidden={!aberta} inert={!aberta} className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${aberta ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
                     <div className="overflow-hidden">
-                      <p className="px-5 pb-5 text-[14px] leading-relaxed text-crfal-gray-600">{faq.a}</p>
+                      <p className="px-5 pb-5 text-[0.875rem] leading-relaxed text-crfal-gray-600">{faq.a}</p>
                     </div>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ export default function OmbudsmanPage() {
         <aside className="relative isolate flex flex-col items-start gap-5 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8 lg:flex-row lg:items-center lg:justify-between">
           <MessagesSquare aria-hidden className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 opacity-[0.06]" strokeWidth={1} />
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Pronto para registrar?</p>
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Pronto para registrar?</p>
             <p className="mt-1 text-lg font-bold">Sua manifestação ajuda a melhorar o CRF-AL.</p>
             <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/75">
               <a href={`mailto:${OUVIDORIA_EMAIL}`} className="hover:text-white hover:underline">{OUVIDORIA_EMAIL}</a>

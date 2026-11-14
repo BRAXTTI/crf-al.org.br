@@ -85,7 +85,7 @@ const saibaMais: { href: string; title: string; description: string; Icon: Compo
   { href: '/contato', title: 'Fale Conosco', description: 'Canais e setores de atendimento', Icon: MessageSquare },
 ];
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 
 function SectionHeader({ id, label, title, children }: { id: string; label: string; title: string; children?: ReactNode }) {
@@ -189,7 +189,7 @@ function DirectorCard({ membro }: { membro: Membro }) {
           </div>
         </DialogHeader>
         <div className="min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6">
-          <p className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-700 sm:text-[15px]">{membro.bio}</p>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-700 sm:text-[0.9375rem]">{membro.bio}</p>
         </div>
         {membro.email && (
           <div className="shrink-0 border-t border-crfal-gray-200 px-5 py-2 sm:px-6">
