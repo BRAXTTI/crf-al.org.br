@@ -26,6 +26,47 @@ const banner = () => document.querySelector<HTMLElement>('[data-notification-ban
 const avancar = (ms: number) => act(() => { vi.advanceTimersByTime(ms); });
 const clicar = (seletor: string) => act(() => document.querySelector<HTMLElement>(seletor)!.click());
 
+/**
+ * Nome acessível como o navegador calcula (accname): o aria-label quando existe,
+ * senão o texto dos filhos, separando-os por espaço e pulando o aria-hidden.
+ */
+function nomeAcessivel(el: HTMLElement): string {
+  const rotulo = el.getAttribute('aria-label');
+  if (rotulo) return rotulo;
+  const partes: string[] = [];
+  for (const no of el.childNodes) {
+    if (no.nodeType === Node.TEXT_NODE) partes.push(no.textContent ?? '');
+    else if (no.nodeType === Node.ELEMENT_NODE) {
+      const filho = no as HTMLElement;
+      if (filho.getAttribute('aria-hidden') === 'true') continue;
+      partes.push(nomeAcessivel(filho));
+    }
+  }
+  return partes.join(' ');
+}
+
+/** Palavras do texto, como o ACT Label in Name tokeniza: só letras e números. */
+function palavras(texto: string): string[] {
+  return texto
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+
+}
+
+/**
+ * ACT Label in Name (a regra que o axe aplica na WCAG 2.5.3): as palavras do
+ * texto visível precisam aparecer como uma sequência contígua no nome acessível.
+ */
+function contemRotulo(nome: string, rotulo: string): boolean {
+  const alvo = palavras(rotulo);
+  if (!alvo.length) return true;
+  const fonte = palavras(nome);
+  return fonte.some((_, inicio) => alvo.every((p, j) => fonte[inicio + j] === p));
+}
+
 describe('NotificationBanner', () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -47,6 +88,19 @@ describe('NotificationBanner', () => {
     expect(vivo.textContent).toBe('');
     avancar(200);
     expect(vivo.textContent).toContain('3 não lidas');
+  });
+
+  it('o nome acessível do botão contém o texto visível (WCAG 2.5.3)', () => {
+    montar();
+    const botao = document.querySelector<HTMLElement>('[data-banner-open]')!;
+    // Com aria-label, o nome acessível passaria por cima do texto visível e o axe
+    // reprovaria: o rótulo precisa aparecer no nome como sequência contígua.
+    expect(botao.getAttribute('aria-label')).toBeNull();
+    const nome = nomeAcessivel(botao);
+    expect(contemRotulo(nome, 'Ver 3 não lidas')).toBe(true);
+    expect(contemRotulo(nome, 'Há novidades no site')).toBe(true);
+    // No desktop os dois rótulos aparecem juntos.
+    expect(contemRotulo(nome, 'Há novidades no site Ver 3 não lidas')).toBe(true);
   });
 
   it('ao aparecer, marca as candidatas como avisadas', () => {

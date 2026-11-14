@@ -160,7 +160,11 @@ export default function NotificationBanner({ ids, naoLidas, onFim }: Notificatio
         <button
           type="button"
           data-banner-open
-          aria-label={`Há novidades no site: ${texto}. Abrir notificações`}
+          // Sem aria-label: o nome acessível vem do próprio texto visível, como pede a
+          // WCAG 2.5.3 (Label in Name). O aria-label anterior ("Há novidades no site:
+          // 4 não lidas. Abrir notificações") trocava "Ver" por "Abrir", e o texto
+          // visível precisa aparecer no nome acessível como uma sequência contígua
+          // de palavras (regra ACT Label in Name, que o axe usa no lighthouse).
           onClick={() => {
             setSaindo(true);
             abrirPainel();
@@ -168,8 +172,11 @@ export default function NotificationBanner({ ids, naoLidas, onFim }: Notificatio
           className="group flex min-w-0 flex-1 items-center gap-2 pl-2.5 pr-0.5 text-left whitespace-nowrap transition-colors hover:bg-crfal-blue-lighter/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-crfal-blue"
         >
           <Bell aria-hidden className="hidden size-3.5 shrink-0 text-crfal-blue lg:block" />
-          <span className="hidden text-[13px] font-bold text-crfal-blue-dark lg:inline">Há novidades no site</span>
-          <span className="truncate text-[13px] font-semibold text-crfal-blue tabular-nums group-hover:underline">Ver {texto}</span>
+          <span className="hidden text-[0.8125rem] font-bold text-crfal-blue-dark lg:inline">Há novidades no site</span>
+          <span className="truncate text-[0.8125rem] font-semibold text-crfal-blue tabular-nums group-hover:underline">Ver {texto}</span>
+          {/* Complemento só para leitor de tela: fica fora do texto visível, então não
+              interfere na comparação do rótulo com o nome acessível. */}
+          <span className="sr-only">Abrir notificações</span>
         </button>
         <button
           type="button"
