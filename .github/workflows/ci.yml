@@ -23,3 +23,6 @@ jobs:
       - run: npm run audit:browser
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+      - run: npm run check:scale
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}

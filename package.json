@@ -25,6 +25,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "audit:browser": "node scripts/audit-browser.mjs",
+    "check:scale": "node scripts/check-text-scale.mjs",
     "test:uptime": "node scripts/check-uptime.mjs"
   },
   "dependencies": {
