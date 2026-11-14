@@ -270,7 +270,7 @@ export default function EventoDetailPage() {
               </div>
             ) : conteudo ? (
               <div
-                className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed
+                className="max-w-[68ch] text-base md:text-[1.0625rem] text-crfal-gray-700 leading-relaxed
                   [&_a]:text-crfal-blue [&_a]:underline
                   [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]:mt-6 [&_h2]:mb-3
                   [&_h3]:font-bold [&_h3]:text-neutral-800 [&_h3]:mt-6 [&_h3]:mb-3
@@ -282,7 +282,7 @@ export default function EventoDetailPage() {
                 dangerouslySetInnerHTML={{ __html: conteudo }}
               />
             ) : evento.descricao ? (
-              <p className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed">{evento.descricao}</p>
+              <p className="max-w-[68ch] text-base md:text-[1.0625rem] text-crfal-gray-700 leading-relaxed">{evento.descricao}</p>
             ) : (
               <p className="text-crfal-gray-500 ">
                 A descrição completa deste evento ainda não foi disponibilizada.

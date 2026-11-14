@@ -30,7 +30,7 @@ function ContatoSetor({ className = '' }: { className?: string }) {
       className={`relative isolate overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white ${className}`}
     >
       <ShieldCheck aria-hidden className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-36 w-36 opacity-[0.06]" strokeWidth={1} />
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Fale com o setor</p>
+      <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Fale com o setor</p>
       <h2 id="contato-fiscalizacao" className="mt-1 text-lg font-bold">Departamento de Fiscalização</h2>
       <p className="mt-1 text-sm leading-relaxed text-white/75">
         Comunicações formais, envio de documentos e dúvidas sobre autos, defesas e afastamentos.
@@ -100,7 +100,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, meta, 
             <aside className="hidden lg:col-span-4 lg:block">
               <div className="sticky top-[calc(var(--header-offset)+1.5rem)] space-y-5">
                 <nav aria-labelledby="menu-fiscalizacao" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs">
-                  <h2 id="menu-fiscalizacao" className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
+                  <h2 id="menu-fiscalizacao" className="mb-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
                     Menu da Fiscalização
                   </h2>
                   <ul className="space-y-0.5">

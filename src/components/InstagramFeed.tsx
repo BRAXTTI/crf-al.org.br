@@ -54,7 +54,7 @@ function PostCard({ item }: { item: InstagramItem }) {
         <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" onError={handleImageError} className="absolute inset-0 -z-10 h-full w-full scale-150 object-cover opacity-60 blur-2xl" />
         <img src={item.image} alt="" loading="lazy" decoding="async" onError={handleImageError} className={`h-full w-full object-contain group-hover:scale-[1.03] ${motion}`} />
         {badge && BadgeIcon && (
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 glass-chip rounded-full px-2.5 py-1 text-[11px] font-semibold text-white">
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 glass-chip rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold text-white">
             <BadgeIcon className="h-3 w-3" aria-hidden="true" />{badge.label}
           </span>
         )}
@@ -64,8 +64,8 @@ function PostCard({ item }: { item: InstagramItem }) {
       </div>
       {(date || item.caption) && (
         <div className="flex flex-1 flex-col border-t-2 border-crfal-gold/0 p-4 group-hover:border-crfal-gold/70">
-          {date && <time dateTime={new Date(item.date!).toISOString()} className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8A6A12]">{date}</time>}
-          {item.caption && <p className="mt-1.5 line-clamp-2 text-[13.5px] leading-snug text-crfal-gray-700 group-hover:text-crfal-blue-dark">{item.caption}</p>}
+          {date && <time dateTime={new Date(item.date!).toISOString()} className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#8A6A12]">{date}</time>}
+          {item.caption && <p className="mt-1.5 line-clamp-2 text-[0.84375rem] leading-snug text-crfal-gray-700 group-hover:text-crfal-blue-dark">{item.caption}</p>}
         </div>
       )}
     </a>
@@ -86,10 +86,10 @@ function FollowCard() {
         <Instagram className="h-5 w-5" aria-hidden="true" />
       </span>
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">{HANDLE}</p>
+        <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-crfal-gold">{HANDLE}</p>
         <p className="mt-1.5 text-lg font-bold leading-snug">Siga o CRF-AL no Instagram</p>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-white/75">Eventos, alertas e o dia a dia da profissão.</p>
-        <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[13px] font-bold text-crfal-blue">
+        <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-white/75">Eventos, alertas e o dia a dia da profissão.</p>
+        <span className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[0.8125rem] font-bold text-crfal-blue">
           Seguir <ArrowUpRight className={`h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${motion}`} aria-hidden="true" />
         </span>
       </div>
@@ -115,12 +115,12 @@ export default function InstagramFeed({
         <Reveal className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
+            <p className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
               <Instagram className="h-3.5 w-3.5" aria-hidden="true" /> No Instagram · {HANDLE}
             </p>
-            <h2 id="instagram-title" className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[32px]">{title}</h2>
+            <h2 id="instagram-title" className="mt-2 text-[1.625rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[2rem]">{title}</h2>
             <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
-            <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-crfal-gray-600">{description}</p>
+            <p className="mt-3 max-w-xl text-[0.9375rem] leading-relaxed text-crfal-gray-600">{description}</p>
           </div>
           <a href={INSTAGRAM_PROFILE_URL} target="_blank" rel="noopener noreferrer" className="group inline-flex min-h-11 items-center gap-2 self-start rounded-md text-sm font-semibold text-crfal-blue hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
             Seguir {HANDLE}

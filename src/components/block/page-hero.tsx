@@ -108,13 +108,13 @@ export default function PageHero({
             {breadcrumb && breadcrumb.length > 0 && (
               <>
                 {backLink && (
-                  <Link to={backLink.href!} className="mb-4 inline-flex min-h-8 items-center gap-1.5 rounded text-[13px] font-medium text-white/70 hover:text-white focus-visible:outline-white sm:hidden">
+                  <Link to={backLink.href!} className="mb-4 inline-flex min-h-8 items-center gap-1.5 rounded text-[0.8125rem] font-medium text-white/70 hover:text-white focus-visible:outline-white sm:hidden">
                     <ArrowLeft className="h-3.5 w-3.5 text-crfal-gold" aria-hidden />
                     {backLink.label}
                   </Link>
                 )}
                 <nav aria-label="Breadcrumb" className="mb-5 hidden sm:block">
-                  <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-white/60">
+                  <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.8125rem] text-white/60">
                     {breadcrumb.map((item, index) => (
                       <li key={`${item.label}-${index}`} className="flex items-center gap-2">
                         {index > 0 && <ChevronRight className="h-3.5 w-3.5 text-crfal-gold/70" aria-hidden />}
@@ -132,13 +132,13 @@ export default function PageHero({
 
             <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
               {eyebrowText && (
-                <p className="mb-2.5 flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-crfal-gold">
+                <p className="mb-2.5 flex items-center gap-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.16em] text-crfal-gold">
                   <span aria-hidden className="h-px w-6 bg-crfal-gold/70" />
                   {eyebrowText}
                 </p>
               )}
-              {title && <h1 className="max-w-4xl text-[30px] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-[40px] lg:text-[48px]">{title}</h1>}
-              {summary && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/75 sm:mt-4 sm:text-[17px]">{summary}</p>}
+              {title && <h1 className="max-w-4xl text-[1.875rem] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-[2.5rem] lg:text-[3rem]">{title}</h1>}
+              {summary && <p className="mt-3 max-w-2xl text-[0.9375rem] leading-relaxed text-white/75 sm:mt-4 sm:text-[1.0625rem]">{summary}</p>}
               {meta && meta.length > 0 && <PageHeroMeta items={meta} className="mt-5" />}
               {children && <div className="mt-5">{children}</div>}
               {actions && <div className="mt-6 flex flex-wrap gap-3 lg:hidden">{actions}</div>}
@@ -159,7 +159,7 @@ export default function PageHero({
             <div ref={tabsRef} className="-mx-4 flex gap-1 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
               {sectionNav.links.map((link: SectionNavLink) => {
                 const active = isLinkActive(link, pathname);
-                const cls = `relative inline-flex min-h-12 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-[13px] font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 first:pl-0 sm:text-sm ${
+                const cls = `relative inline-flex min-h-12 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-[0.8125rem] font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 first:pl-0 sm:text-sm ${
                   active
                     ? 'text-white after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-crfal-gold first:after:left-0'
                     : 'text-white/60 hover:text-white'

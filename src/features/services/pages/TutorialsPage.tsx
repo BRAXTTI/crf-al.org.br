@@ -13,7 +13,7 @@ import { combinaBusca, doPerfil, type Filtro } from '../tutorial-busca';
 import { PERFIS } from '../tutorial-profiles';
 
 const PATH = '/servicos/tutoriais';
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 const linkTexto = `rounded font-semibold text-crfal-blue underline decoration-crfal-blue/30 underline-offset-4 hover:decoration-crfal-blue ${focusRing}`;
@@ -35,7 +35,7 @@ function CardProcurado({ tutorial }: { tutorial: Tutorial }) {
         {video ? (
           <>
             <img src={video.poster} alt="" width={960} height={720} loading="lazy" decoding="async" className="h-full w-full object-cover" />
-            <span className="absolute bottom-1 right-1 inline-flex items-center gap-1 rounded-full bg-crfal-blue-dark/85 px-2 py-0.5 text-[11px] font-semibold text-white sm:bottom-2 sm:right-2">
+            <span className="absolute bottom-1 right-1 inline-flex items-center gap-1 rounded-full bg-crfal-blue-dark/85 px-2 py-0.5 text-[0.6875rem] font-semibold text-white sm:bottom-2 sm:right-2">
               <Play className="h-3 w-3 fill-current" aria-hidden />
               <span className="sr-only">Vídeo de </span>{video.duracao}
             </span>
@@ -45,7 +45,7 @@ function CardProcurado({ tutorial }: { tutorial: Tutorial }) {
         )}
       </span>
       <span className="flex min-w-0 flex-1 items-center justify-between gap-2 sm:p-4">
-        <span className="text-[15px] font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue sm:text-base">{tutorial.titulo}</span>
+        <span className="text-[0.9375rem] font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue sm:text-base">{tutorial.titulo}</span>
         <ChevronRight className={`h-5 w-5 shrink-0 text-crfal-gray-400 group-hover:translate-x-0.5 group-hover:text-[#8A6A12] ${motion}`} aria-hidden />
       </span>
     </Link>
@@ -55,7 +55,7 @@ function CardProcurado({ tutorial }: { tutorial: Tutorial }) {
 function LinhaTarefa({ tutorial }: { tutorial: Tutorial }) {
   return (
     <Link to={caminhoDoTutorial(tutorial.id)} className={`group flex min-h-12 items-center gap-3 px-4 py-2.5 hover:bg-crfal-blue-lighter/40 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue`}>
-      <span className="min-w-0 flex-1 text-[15px] font-semibold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">{tutorial.titulo}</span>
+      <span className="min-w-0 flex-1 text-[0.9375rem] font-semibold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">{tutorial.titulo}</span>
       {GUIAS[tutorial.id].video && (
         <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-crfal-gray-600">
           <Play className="h-3.5 w-3.5 text-[#8A6A12]" aria-hidden /> Vídeo
@@ -69,7 +69,7 @@ function LinhaTarefa({ tutorial }: { tutorial: Tutorial }) {
 function GrupoTarefas({ categoria, itens }: { categoria: string; itens: Tutorial[] }) {
   return (
     <section className="mb-6 break-inside-avoid">
-      <h3 className="mb-2 text-[15px] font-bold text-crfal-blue">{categoria}</h3>
+      <h3 className="mb-2 text-[0.9375rem] font-bold text-crfal-blue">{categoria}</h3>
       <ul className="divide-y divide-crfal-gray-200 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white">
         {itens.map((tutorial) => <li key={tutorial.id}><LinhaTarefa tutorial={tutorial} /></li>)}
       </ul>
@@ -82,9 +82,9 @@ function VideosDeOrientacao() {
   if (!SNCR) return null;
   return (
     <section aria-labelledby="videos-orientacao" className="mt-2 max-w-2xl">
-      <h3 id="videos-orientacao" className="mb-2 text-[15px] font-bold text-crfal-blue">Vídeos de orientação</h3>
+      <h3 id="videos-orientacao" className="mb-2 text-[0.9375rem] font-bold text-crfal-blue">Vídeos de orientação</h3>
       <details className="group overflow-hidden rounded-xl border border-crfal-gray-200 bg-white">
-        <summary className={`flex min-h-12 cursor-pointer list-none items-center gap-3 px-4 py-2.5 text-[15px] font-semibold text-crfal-blue-dark [&::-webkit-details-marker]:hidden ${focusRing}`}>
+        <summary className={`flex min-h-12 cursor-pointer list-none items-center gap-3 px-4 py-2.5 text-[0.9375rem] font-semibold text-crfal-blue-dark [&::-webkit-details-marker]:hidden ${focusRing}`}>
           <span className="min-w-0 flex-1">{SNCR.title}: {SNCR.subtitle} ({SNCR.duracao})</span>
           <ChevronDown className={`h-5 w-5 shrink-0 text-crfal-gray-400 group-open:rotate-180 ${motion}`} aria-hidden />
         </summary>
@@ -149,7 +149,7 @@ function Hub() {
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar: boleto, baixa de RT, afastamento..."
-              className="min-h-12 w-full appearance-none rounded-full border border-crfal-gray-300 bg-white py-2.5 pl-12 pr-12 text-[15px] text-crfal-blue-dark shadow-xs placeholder:text-crfal-gray-500 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40 [&::-webkit-search-cancel-button]:appearance-none"
+              className="min-h-12 w-full appearance-none rounded-full border border-crfal-gray-300 bg-white py-2.5 pl-12 pr-12 text-[0.9375rem] text-crfal-blue-dark shadow-xs placeholder:text-crfal-gray-500 focus:border-crfal-blue-light focus:outline-hidden focus:ring-2 focus:ring-crfal-blue-light/40 [&::-webkit-search-cancel-button]:appearance-none"
             />
             {busca && (
               <button type="button" onClick={() => setBusca('')} aria-label="Limpar busca" className={`absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full text-crfal-gray-500 hover:bg-crfal-gray-100 ${focusRing}`}>
@@ -159,7 +159,7 @@ function Hub() {
           </div>
           <div role="group" aria-label="Filtrar por perfil" className="mt-3 flex flex-wrap justify-center gap-2">
             {FILTROS.map(({ id, label, icon: Icon }) => (
-              <button key={id} type="button" onClick={() => alterarFiltro(id)} aria-pressed={filtro === id} className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-semibold ${motion} ${focusRing} ${filtro === id ? 'border-crfal-blue bg-crfal-blue text-white' : 'border-crfal-gray-200 bg-white text-crfal-gray-700 hover:border-crfal-blue/40 hover:text-crfal-blue'}`}>
+              <button key={id} type="button" onClick={() => alterarFiltro(id)} aria-pressed={filtro === id} className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3.5 text-[0.8125rem] font-semibold ${motion} ${focusRing} ${filtro === id ? 'border-crfal-blue bg-crfal-blue text-white' : 'border-crfal-gray-200 bg-white text-crfal-gray-700 hover:border-crfal-blue/40 hover:text-crfal-blue'}`}>
                 <Icon className="hidden h-4 w-4 min-[400px]:block" strokeWidth={1.75} aria-hidden />
                 {label}
               </button>
@@ -199,7 +199,7 @@ function Hub() {
           )}
         </div>
 
-        <p className="mt-8 text-[15px] text-crfal-gray-700">
+        <p className="mt-8 text-[0.9375rem] text-crfal-gray-700">
           Não encontrou?{' '}
           <Link to="/servicos/requerimentos" className={linkTexto}>Central de Requerimentos</Link>
           {' · '}

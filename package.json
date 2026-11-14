@@ -8,7 +8,7 @@
     "build": "node scripts/check-public-assets.mjs && tsc -b && vite build && node scripts/generate-sitemaps.mjs dist && node scripts/generate-routes.mjs dist && node scripts/prerender.mjs dist && node scripts/check-performance.mjs",
     "typecheck": "tsc -b",
     "check": "npm run lint && npm run test && npm run build",
-    "test": "npm run test:unit && npm run test:http && npm run test:news && npm run test:cff && npm run test:seo && npm run test:instagram && npm run test:gallery && npm run test:videos && npm run test:routes && npm run test:prerender && node scripts/test-content-api.mjs && node scripts/test-rss.mjs && node scripts/test-sanitize.mjs && node scripts/test-notificacoes.mjs && node scripts/test-evento.mjs && node scripts/check-links.mjs",
+    "test": "npm run test:unit && node scripts/check-typography.mjs && npm run test:http && npm run test:news && npm run test:cff && npm run test:seo && npm run test:instagram && npm run test:gallery && npm run test:videos && npm run test:routes && npm run test:prerender && node scripts/test-content-api.mjs && node scripts/test-rss.mjs && node scripts/test-sanitize.mjs && node scripts/test-notificacoes.mjs && node scripts/test-evento.mjs && node scripts/check-links.mjs",
     "test:unit": "vitest run",
     "test:http": "node scripts/test-http.mjs",
     "test:instagram": "node scripts/test-instagram.mjs",
@@ -25,6 +25,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "audit:browser": "node scripts/audit-browser.mjs",
+    "check:scale": "node scripts/check-text-scale.mjs",
     "test:uptime": "node scripts/check-uptime.mjs"
   },
   "dependencies": {

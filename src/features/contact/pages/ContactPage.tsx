@@ -80,7 +80,7 @@ const telLink = (numero: string) => `tel:+55${digits(numero)}`;
 const mapsLink = (busca: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(busca)}`;
 const wazeLink = (busca: string) => `https://waze.com/ul?q=${encodeURIComponent(busca)}&navigate=yes`;
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
@@ -127,9 +127,9 @@ function SectionTitle({ label, title, text, id }: { label: string; title: string
   return (
     <div className="mb-5 md:mb-6">
       <p className={goldLabel}>{label}</p>
-      <h2 id={id} className="mt-1.5 text-[22px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[26px]">{title}</h2>
+      <h2 id={id} className="mt-1.5 text-[1.375rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[1.625rem]">{title}</h2>
       <span aria-hidden className="mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
-      {text && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-crfal-gray-600">{text}</p>}
+      {text && <p className="mt-3 max-w-2xl text-[0.9375rem] leading-relaxed text-crfal-gray-600">{text}</p>}
     </div>
   );
 }
@@ -156,7 +156,7 @@ export default function ContactPage() {
         lead={`Fale com o setor certo por telefone, e-mail ou WhatsApp. ${HORARIO_ATENDIMENTO}.`}
         actions={<PageHeroAction href={waLink(ATENDIMENTO.whatsapp)}>WhatsApp do atendimento</PageHeroAction>}
       >
-        <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-[13px] font-medium text-white/90">
+        <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-[0.8125rem] font-medium text-white/90">
           <span aria-hidden className={`relative flex h-2 w-2 ${status.aberto ? '' : 'opacity-70'}`}>
             {status.aberto && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:animate-none" />}
             <span className={`relative inline-flex h-2 w-2 rounded-full ${status.aberto ? 'bg-emerald-400' : 'bg-white/50'}`} />
@@ -173,9 +173,9 @@ export default function ContactPage() {
             <a href={waLink(ATENDIMENTO.whatsapp)} target="_blank" rel="noopener noreferrer" className={`group relative isolate flex flex-col overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white shadow-lg shadow-crfal-blue/10 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:hover:translate-y-0 ${motion} ${focusRing}`}>
               <MessageCircle aria-hidden className="pointer-events-none absolute -bottom-6 -right-6 -z-10 h-32 w-32 opacity-[0.07]" strokeWidth={1} />
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40"><MessageCircle className="h-5 w-5" aria-hidden /></span>
-              <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Mais rápido</p>
+              <p className="mt-4 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Mais rápido</p>
               <p className="mt-1 text-lg font-bold">WhatsApp</p>
-              <p className="mt-1 text-[15px] tabular-nums text-white/80">{ATENDIMENTO.whatsapp}</p>
+              <p className="mt-1 text-[0.9375rem] tabular-nums text-white/80">{ATENDIMENTO.whatsapp}</p>
               <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
                 Iniciar conversa
                 <ArrowUpRight className={`h-4 w-4 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${motion}`} aria-hidden />
@@ -188,7 +188,7 @@ export default function ContactPage() {
               <p className={`mt-4 ${goldLabel}`}>Ligação</p>
               <p className="mt-1 text-lg font-bold text-crfal-blue-dark">Telefone</p>
               <div className="mt-1 flex items-center justify-between gap-2">
-                <span className="text-[15px] tabular-nums text-crfal-gray-700">{ATENDIMENTO.telefone}</span>
+                <span className="text-[0.9375rem] tabular-nums text-crfal-gray-700">{ATENDIMENTO.telefone}</span>
                 <CopyButton value={ATENDIMENTO.telefone} label="Copiar telefone" />
               </div>
               <a href={telLink(ATENDIMENTO.telefone)} className={`group mt-auto inline-flex items-center gap-2 pt-4 text-sm font-bold text-crfal-blue ${focusRing} rounded`}>
@@ -201,7 +201,7 @@ export default function ContactPage() {
               <p className={`mt-4 ${goldLabel}`}>Mensagem</p>
               <p className="mt-1 text-lg font-bold text-crfal-blue-dark">E-mail</p>
               <div className="mt-1 flex items-center justify-between gap-2">
-                <span className="min-w-0 break-all text-[15px] text-crfal-gray-700">{ATENDIMENTO.email}</span>
+                <span className="min-w-0 break-all text-[0.9375rem] text-crfal-gray-700">{ATENDIMENTO.email}</span>
                 <CopyButton value={ATENDIMENTO.email} label="Copiar e-mail" />
               </div>
               <a href={`mailto:${ATENDIMENTO.email}`} className={`group mt-auto inline-flex items-center gap-2 pt-4 text-sm font-bold text-crfal-blue ${focusRing} rounded`}>
@@ -225,8 +225,8 @@ export default function ContactPage() {
                       <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[15px] font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">{atalho.necessidade}</span>
-                      <span className="mt-0.5 block text-[13px] text-crfal-gray-600">{atalho.destino}</span>
+                      <span className="block text-[0.9375rem] font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">{atalho.necessidade}</span>
+                      <span className="mt-0.5 block text-[0.8125rem] text-crfal-gray-600">{atalho.destino}</span>
                     </span>
                     {external ? (
                       <ArrowUpRight className="h-5 w-5 shrink-0 text-crfal-gray-400 group-hover:text-[#8A6A12]" aria-hidden />
@@ -260,7 +260,7 @@ export default function ContactPage() {
                   <div className="min-w-0 flex-1">
                     <p className={goldLabel}>{local.nome}</p>
                     <h3 className="mt-0.5 text-lg font-bold text-crfal-blue-dark">{local.cidade}</h3>
-                    <p className="mt-1.5 text-[15px] leading-relaxed text-crfal-gray-700">{local.endereco}</p>
+                    <p className="mt-1.5 text-[0.9375rem] leading-relaxed text-crfal-gray-700">{local.endereco}</p>
                   </div>
                   <CopyButton value={local.endereco} label={`Copiar endereço de ${local.cidade}`} className="-mr-2 -mt-2" />
                 </div>
@@ -283,7 +283,7 @@ export default function ContactPage() {
         <aside className="relative isolate flex flex-col items-start gap-5 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <HeadphonesIcon aria-hidden className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-40 w-40 opacity-[0.06]" strokeWidth={1} />
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Não resolveu?</p>
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Não resolveu?</p>
             <p className="mt-1 text-lg font-bold">Registre uma manifestação na Ouvidoria.</p>
             <p className="mt-1 max-w-xl text-sm text-white/75">Reclamações, sugestões, elogios e denúncias recebem resposta em até 30 dias.</p>
           </div>
@@ -306,7 +306,7 @@ function ContactGroup({ title, items }: { title: string; items: ContactInfo[] })
       <ul className="divide-y divide-crfal-gray-100 overflow-hidden rounded-xl border border-crfal-gray-200 bg-white shadow-xs">
         {items.map((c) => {
           const Icon = c.icon;
-          const actionClass = `inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold ${motion} ${focusRing}`;
+          const actionClass = `inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border px-3 text-[0.8125rem] font-semibold ${motion} ${focusRing}`;
           return (
             <li key={c.id} id={`setor-${c.id}`} className="scroll-mt-[calc(var(--header-offset)+1.5rem)] p-4 data-alvo:bg-crfal-blue-lighter/40 sm:p-5">
               <div className="flex items-start gap-4">
@@ -315,8 +315,8 @@ function ContactGroup({ title, items }: { title: string; items: ContactInfo[] })
                 </span>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-base font-bold leading-snug text-crfal-blue-dark">{c.setor}</h3>
-                  {(c.responsavel || c.assunto) && <p className="mt-0.5 text-[13px] leading-snug text-crfal-gray-600">{c.responsavel ?? c.assunto}</p>}
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-crfal-gray-700">
+                  {(c.responsavel || c.assunto) && <p className="mt-0.5 text-[0.8125rem] leading-snug text-crfal-gray-600">{c.responsavel ?? c.assunto}</p>}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.8125rem] text-crfal-gray-700">
                     <span className="inline-flex min-w-0 items-center gap-1.5"><Mail className="h-3.5 w-3.5 shrink-0 text-crfal-gray-400" aria-hidden /><span className="break-all">{c.email}</span></span>
                     {c.telefone && <span className="inline-flex items-center gap-1.5 tabular-nums"><Phone className="h-3.5 w-3.5 text-crfal-gray-400" aria-hidden />{c.telefone}</span>}
                   </div>

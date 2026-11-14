@@ -237,7 +237,7 @@ const saibaMais: { href: string; title: string; description: string; Icon: Compo
 
 /* ─── HELPERS ───────────────────────────────────────────────────────── */
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const anchorOffset = 'scroll-mt-[calc(var(--header-offset)+24px)]';
 
@@ -258,7 +258,7 @@ function SectionHeader({
 }) {
   return (
     <div className={`max-w-2xl ${center ? 'mx-auto text-center' : ''}`}>
-      <p className={inverted ? 'text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold' : goldLabel}>{label}</p>
+      <p className={inverted ? 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-crfal-gold' : goldLabel}>{label}</p>
       <h2 id={id} className={`mt-2 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl ${inverted ? 'text-white' : 'text-crfal-blue'}`}>
         {title}
       </h2>
@@ -359,7 +359,7 @@ export default function SobreConselhoPage() {
                         {m.year}
                       </span>
                       {m.highlight && (
-                        <span className="rounded-full bg-crfal-gold/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A6A12] ring-1 ring-crfal-gold/40">
+                        <span className="rounded-full bg-crfal-gold/15 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.14em] text-[#8A6A12] ring-1 ring-crfal-gold/40">
                           Fundação
                         </span>
                       )}
@@ -399,7 +399,7 @@ export default function SobreConselhoPage() {
                       <Icon className="h-5 w-5 text-white" aria-hidden />
                     </span>
                     <h3 className="text-xl font-bold sm:text-2xl">{item.titulo}</h3>
-                    <p className="mb-4 mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">{item.subtitulo}</p>
+                    <p className="mb-4 mt-1 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/70">{item.subtitulo}</p>
                     <p className="text-sm leading-relaxed text-white/85 sm:text-base">{item.descricao}</p>
                   </article>
                 );
@@ -414,7 +414,7 @@ export default function SobreConselhoPage() {
                   <Heart className="h-5 w-5 text-white" aria-hidden />
                 </span>
                 <h3 className="text-xl font-bold sm:text-2xl">Valores</h3>
-                <p className="mb-4 mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Nossos princípios fundamentais</p>
+                <p className="mb-4 mt-1 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/70">Nossos princípios fundamentais</p>
                 <ul className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-1">
                   {valores.map((valor) => (
                     <li key={valor} className="flex items-start gap-2.5 text-sm leading-snug text-white/85 sm:text-base">
