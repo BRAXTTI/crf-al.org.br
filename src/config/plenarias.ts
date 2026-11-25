@@ -40,7 +40,7 @@ export const plenaryYears: PlenaryYear[] = [{
     { id: 'plenaria-2026-08-21', title: '8ª Reunião Plenária Ordinária', date: '2026-08-21', videoUrls: ['https://www.youtube.com/watch?v=6AvO-jaXHFk'], noQuorum: true },
     { id: 'plenaria-2026-09-25', title: '9ª Reunião Plenária Ordinária', date: '2026-09-25', videoUrls: ['https://www.youtube.com/watch?v=XmNtBSm_C7I'] },
     { id: 'plenaria-2026-10-16', title: '10ª Reunião Plenária Ordinária', date: '2026-10-16', agendaUrl: '/documentos/plenarias/2026/2026-10-16-pauta-10a-reuniao-plenaria-ordinaria.pdf' },
-    { id: 'plenaria-2026-11-25', title: '11ª Reunião Plenária Ordinária', date: '2026-11-25', time: '14h30' },
+    { id: 'plenaria-2026-11-25', title: '11ª Reunião Plenária Ordinária', date: '2026-11-25', time: '14h30', videoUrls: ['https://www.youtube.com/watch?v=SQ4DLXXvysU'] },
     { id: 'plenaria-2026-12-18', title: '12ª Reunião Plenária Ordinária', date: '2026-12-18' },
   ],
 }];
