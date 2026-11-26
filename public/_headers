@@ -25,3 +25,10 @@
 
 /images/*.webp
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/ia/*
+  Cache-Control: public, max-age=300
+  X-Robots-Tag: noindex
+
+/ia/base.md
+  Content-Type: text/markdown; charset=utf-8
