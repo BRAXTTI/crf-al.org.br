@@ -172,7 +172,7 @@ export default function NotificationBell({ variant }: { variant: keyof typeof VA
             {/* A chave refaz o "pop" a cada mudança do número. */}
             <span
               key={naoLidas}
-              className={`relative block min-w-[18px] rounded-full bg-crfal-gold px-1 text-center text-[10.5px] font-bold leading-[18px] text-crfal-blue-dark tabular-nums ring-2 motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:duration-300 ${styles.badge}`}
+              className={`relative block min-w-[18px] rounded-full bg-crfal-gold px-1 text-center text-2xs font-medium leading-[18px] text-crfal-blue-dark tabular-nums ring-2 motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:duration-300 ${styles.badge}`}
             >
               {naoLidas > 9 ? '9+' : naoLidas}
             </span>

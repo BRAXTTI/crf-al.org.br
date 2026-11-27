@@ -48,7 +48,7 @@ import TutorialDetail, { BotaoAcao } from '../components/TutorialDetail';
 const focusRing =
   'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12]';
 
 const PRAZO_GENERICO = 'Conforme análise do CRF-AL';
 
@@ -148,7 +148,7 @@ function CopiarLink({ path }: { path: string }) {
     <button
       type="button"
       onClick={copiar}
-      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-4 text-sm font-semibold text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-white"
+      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-4 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-white"
     >
       {copiado ? (
         <Check className="h-4 w-4 text-crfal-gold" aria-hidden="true" />
@@ -185,10 +185,10 @@ function AbaParaQueServe({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-crfal-blue sm:text-2xl">Para que serve</h2>
+        <h2 className="text-xl font-medium text-crfal-blue sm:text-2xl">Para que serve</h2>
         <div className="mt-3 space-y-3">
           {paragrafos.map((paragrafo, idx) => (
-            <p key={idx} className="text-[15px] leading-relaxed text-crfal-gray-700 sm:text-base">
+            <p key={idx} className="text-15 leading-relaxed text-crfal-gray-700 sm:text-base">
               {paragrafo}
             </p>
           ))}
@@ -198,22 +198,22 @@ function AbaParaQueServe({
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50/70 p-4">
           <dt className={goldLabel}>Quem pode solicitar</dt>
-          <dd className="mt-1 text-sm font-semibold text-crfal-blue-dark">{publicoAlvo}</dd>
+          <dd className="mt-1 text-sm font-medium text-crfal-blue-dark">{publicoAlvo}</dd>
         </div>
         <div className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50/70 p-4">
           <dt className={goldLabel}>Onde solicitar</dt>
-          <dd className="mt-1 text-sm font-semibold text-crfal-blue-dark">{canal}</dd>
+          <dd className="mt-1 text-sm font-medium text-crfal-blue-dark">{canal}</dd>
         </div>
         {item.prazo && (
           <div className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50/70 p-4">
             <dt className={goldLabel}>Prazo</dt>
-            <dd className="mt-1 text-sm font-semibold text-crfal-blue-dark">{item.prazo}</dd>
+            <dd className="mt-1 text-sm font-medium text-crfal-blue-dark">{item.prazo}</dd>
           </div>
         )}
         {categoriaTitulo && (
           <div className="rounded-xl border border-crfal-gray-200 bg-crfal-gray-50/70 p-4">
             <dt className={goldLabel}>Categoria</dt>
-            <dd className="mt-1 text-sm font-semibold text-crfal-blue-dark">{categoriaTitulo}</dd>
+            <dd className="mt-1 text-sm font-medium text-crfal-blue-dark">{categoriaTitulo}</dd>
           </div>
         )}
       </dl>
@@ -222,7 +222,7 @@ function AbaParaQueServe({
         <section aria-labelledby="fluxograma-heading" className="space-y-3 pt-2">
           <div className="flex items-center gap-2">
             <Workflow className="h-5 w-5 text-[#8A6A12]" aria-hidden="true" />
-            <h3 id="fluxograma-heading" className="text-lg font-bold text-crfal-blue">
+            <h3 id="fluxograma-heading" className="text-lg font-medium text-crfal-blue">
               Fluxograma do requerimento
             </h3>
           </div>
@@ -263,7 +263,7 @@ function AbaPassoAPasso({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-crfal-blue sm:text-2xl">Passo a passo</h2>
+        <h2 className="text-xl font-medium text-crfal-blue sm:text-2xl">Passo a passo</h2>
         <p className="mt-1 text-sm text-crfal-gray-600">
           Siga as etapas abaixo para enviar sua solicitação pelo sistema do CRF-AL.
         </p>
@@ -287,14 +287,14 @@ function AbaPassoAPasso({
                 <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white/15 ring-2 ring-crfal-gold/70">
                   <Play className="h-6 w-6 translate-x-0.5 text-crfal-gold" aria-hidden="true" />
                 </span>
-                <p className="text-base font-bold sm:text-lg">Tutorial em vídeo: {item.title}</p>
+                <p className="text-base font-medium sm:text-lg">Tutorial em vídeo: {item.title}</p>
                 <p className="mt-1 max-w-md text-xs text-white/75 sm:text-sm">
                   O vídeo do YouTube é carregado apenas quando você clica no botão abaixo.
                 </p>
                 <button
                   type="button"
                   onClick={() => setVideoCarregado(true)}
-                  className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-crfal-blue shadow-xs transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark"
+                  className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-crfal-blue shadow-xs transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark"
                 >
                   <Play className="h-4 w-4" aria-hidden="true" />
                   Assistir vídeo tutorial
@@ -311,7 +311,7 @@ function AbaPassoAPasso({
             <span className="flex flex-col items-center">
               <span
                 aria-hidden="true"
-                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-crfal-blue text-sm font-bold text-white ring-2 ring-crfal-gold/30"
+                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-crfal-blue text-sm font-medium text-white ring-2 ring-crfal-gold/30"
               >
                 {index + 1}
               </span>
@@ -319,7 +319,7 @@ function AbaPassoAPasso({
                 <span aria-hidden="true" className="mt-1 block w-px flex-1 bg-crfal-gray-200" />
               )}
             </span>
-            <p className="min-w-0 pb-5 pt-1 text-[15px] leading-relaxed text-crfal-gray-700">
+            <p className="min-w-0 pb-5 pt-1 text-15 leading-relaxed text-crfal-gray-700">
               {instrucao}
             </p>
           </li>
@@ -330,7 +330,7 @@ function AbaPassoAPasso({
         <div className="flex items-start gap-3">
           <FileClock className="mt-0.5 h-5 w-5 shrink-0 text-crfal-blue" aria-hidden="true" />
           <div>
-            <p className="text-sm font-bold text-crfal-blue-dark">Acompanhe em Protocolos Web</p>
+            <p className="text-sm font-medium text-crfal-blue-dark">Acompanhe em Protocolos Web</p>
             <p className="mt-0.5 text-xs leading-relaxed text-crfal-gray-600 sm:text-sm">
               Depois de enviar, acompanhe o andamento da solicitação pelo número de protocolo.
             </p>
@@ -338,7 +338,7 @@ function AbaPassoAPasso({
         </div>
         <Link
           to="/servicos/tutoriais/situacao-protocolos"
-          className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-crfal-blue/30 bg-white px-4 py-2 text-sm font-semibold text-crfal-blue hover:border-crfal-blue hover:bg-crfal-blue-lighter/50 ${motion} ${focusRing}`}
+          className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-crfal-blue/30 bg-white px-4 py-2 text-sm font-medium text-crfal-blue hover:border-crfal-blue hover:bg-crfal-blue-lighter/50 ${motion} ${focusRing}`}
         >
           Ver como acompanhar
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -347,7 +347,7 @@ function AbaPassoAPasso({
 
       {!videoEmbedUrl && (
         <div className="rounded-xl border border-crfal-gray-200 bg-white p-4 sm:p-5">
-          <p className="text-sm font-semibold text-crfal-blue-dark">
+          <p className="text-sm font-medium text-crfal-blue-dark">
             Ainda não temos vídeo deste requerimento. Ficou com dúvida? Fale com o atendimento.
           </p>
           <p className="mt-0.5 text-xs text-crfal-gray-600">
@@ -358,7 +358,7 @@ function AbaPassoAPasso({
               href={`https://wa.me/55${ATENDIMENTO.whatsapp.replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-sm font-medium text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
             >
               <MessageCircle className="h-4 w-4" aria-hidden="true" />
               WhatsApp
@@ -366,14 +366,14 @@ function AbaPassoAPasso({
             </a>
             <a
               href={telefoneHref(ATENDIMENTO.telefone)}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-sm font-medium text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
             >
               <Phone className="h-4 w-4" aria-hidden="true" />
               {ATENDIMENTO.telefone}
             </a>
             <a
               href={`mailto:${ATENDIMENTO.email}`}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-sm font-medium text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
               {ATENDIMENTO.email}
@@ -401,14 +401,14 @@ function AbaFormularioEDocumentos({
   return (
     <div className="space-y-8">
       <section aria-labelledby="formulario-heading" className="space-y-3">
-        <h2 id="formulario-heading" className="text-xl font-bold text-crfal-blue sm:text-2xl">
+        <h2 id="formulario-heading" className="text-xl font-medium text-crfal-blue sm:text-2xl">
           Formulário
         </h2>
         {item.downloadUrl && nomeArquivo ? (
           <div className="flex flex-col gap-4 rounded-xl border border-crfal-blue/20 bg-crfal-blue-lighter/35 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div className="min-w-0">
               <p className={goldLabel}>Arquivo para preenchimento (.docx)</p>
-              <p className="mt-1 break-all text-sm font-bold text-crfal-blue-dark sm:text-base">
+              <p className="mt-1 break-all text-sm font-medium text-crfal-blue-dark sm:text-base">
                 {nomeArquivo}
               </p>
             </div>
@@ -416,7 +416,7 @@ function AbaFormularioEDocumentos({
               href={item.downloadUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-crfal-blue px-5 py-3 text-sm font-bold text-white shadow-xs hover:bg-crfal-blue-dark ${motion} ${focusRing}`}
+              className={`inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-crfal-blue px-5 py-3 text-sm font-medium text-white shadow-xs hover:bg-crfal-blue-dark ${motion} ${focusRing}`}
             >
               <Download className="h-4 w-4" aria-hidden="true" />
               Baixar formulário (.docx)
@@ -425,14 +425,14 @@ function AbaFormularioEDocumentos({
           </div>
         ) : (
           <div className="flex flex-col gap-4 rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-            <p className="text-sm leading-relaxed text-crfal-gray-700 sm:text-[15px]">
+            <p className="text-sm leading-relaxed text-crfal-gray-700 sm:text-15">
               Este requerimento é feito direto no CRF AL em Casa, sem formulário para baixar.
             </p>
             <a
               href={acessoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border-2 border-crfal-blue bg-white px-5 py-2.5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue hover:text-white ${motion} ${focusRing}`}
+              className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border-2 border-crfal-blue bg-white px-5 py-2.5 text-sm font-medium text-crfal-blue hover:bg-crfal-blue hover:text-white ${motion} ${focusRing}`}
             >
               {acessoLabel}
               <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
@@ -443,7 +443,7 @@ function AbaFormularioEDocumentos({
       </section>
 
       <section aria-labelledby="documentos-heading" className="space-y-3">
-        <h2 id="documentos-heading" className="text-xl font-bold text-crfal-blue sm:text-2xl">
+        <h2 id="documentos-heading" className="text-xl font-medium text-crfal-blue sm:text-2xl">
           Documentos necessários
         </h2>
         <ChecklistDocumentos item={item} observacoes={observacoes} />
@@ -587,15 +587,15 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
         actions={<CopiarLink path={path} />}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
             <PerfilIcon className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" />
             {perfilLabel}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
             {canalLabel}
           </span>
           {prazoEspecifico && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white">
               <Clock className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" />
               Prazo: {prazoEspecifico}
             </span>
@@ -604,7 +604,7 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
             <a
               href="#passo-a-passo"
               onClick={(e) => irParaAba(e, 'passo-a-passo')}
-              className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-white/30 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-white hover:bg-white/15 focus-visible:outline-white"
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-white/30 bg-white/5 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:border-white hover:bg-white/15 focus-visible:outline-white"
             >
               <Play className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" />
               Tutorial em vídeo
@@ -614,7 +614,7 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
             <a
               href="#formulario"
               onClick={(e) => irParaAba(e, 'formulario')}
-              className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-white/30 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:border-white hover:bg-white/15 focus-visible:outline-white"
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-white/30 bg-white/5 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:border-white hover:bg-white/15 focus-visible:outline-white"
             >
               <Download className="h-3.5 w-3.5 text-crfal-gold" aria-hidden="true" />
               Formulário .docx
@@ -634,14 +634,14 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
             <div className="min-w-0 flex-1 space-y-1.5">
               <h2
                 id="leia-antes-heading"
-                className="text-xs font-bold uppercase tracking-[0.12em] text-amber-900"
+                className="text-xs font-medium uppercase tracking-[0.12em] text-amber-900"
               >
                 Leia antes de começar
               </h2>
               {observacoes.map((obs, index) => (
                 <p
                   key={index}
-                  className="whitespace-pre-line text-[13.5px] leading-relaxed text-amber-950"
+                  className="whitespace-pre-line text-13 leading-relaxed text-amber-950"
                 >
                   {obs}
                 </p>
@@ -661,7 +661,7 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
             <p className={goldLabel}>Veja também</p>
             <h2
               id="relacionados-heading"
-              className="mt-1 text-xl font-bold text-crfal-blue sm:text-2xl"
+              className="mt-1 text-xl font-medium text-crfal-blue sm:text-2xl"
             >
               Serviços e requerimentos relacionados
             </h2>
@@ -674,14 +674,14 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
                   >
                     <div>
                       <span className={goldLabel}>{rel.tipo}</span>
-                      <span className="mt-1 block text-base font-bold text-crfal-blue-dark group-hover:text-crfal-blue">
+                      <span className="mt-1 block text-base font-medium text-crfal-blue-dark group-hover:text-crfal-blue">
                         {rel.titulo}
                       </span>
                       <span className="mt-1 line-clamp-2 block text-xs leading-relaxed text-crfal-gray-600">
                         {rel.descricao}
                       </span>
                     </div>
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-crfal-blue">
+                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-crfal-blue">
                       Acessar
                       <ArrowRight
                         className={`h-3.5 w-3.5 group-hover:translate-x-0.5 ${motion}`}

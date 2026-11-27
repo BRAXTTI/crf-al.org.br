@@ -34,9 +34,9 @@ function CardContent({ title, description, image, action, shortAction, external 
       </svg>
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden bg-linear-to-r/srgb from-crfal-blue via-crfal-blue/90 to-crfal-blue/30 group-last:from-crfal-blue-light group-last:via-crfal-blue-light/90 md:block md:to-crfal-blue/10 md:group-last:from-crfal-blue md:group-last:via-crfal-blue/90" />
       <div className="relative flex w-full flex-1 items-center justify-between gap-4 md:h-full md:flex-col md:items-start">
-        <h2 className="min-w-0 max-w-76 text-lg font-bold leading-tight sm:text-2xl sm:leading-8 md:text-2xl">{title}</h2>
+        <h2 className="min-w-0 max-w-76 text-lg font-medium sm:text-2xl">{title}</h2>
         <p className="mb-5 mt-2 hidden max-w-76 text-sm leading-relaxed text-white/90 md:block">{description}</p>
-        <span className="inline-flex min-h-11 shrink-0 items-center gap-3 rounded-full bg-white px-4 py-2 text-xs font-bold text-crfal-blue transition-colors group-hover:bg-crfal-blue-lighter motion-reduce:transition-none sm:text-sm md:mt-auto md:rounded-lg">
+        <span className="inline-flex min-h-11 shrink-0 items-center gap-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-crfal-blue transition-colors group-hover:bg-crfal-blue-lighter motion-reduce:transition-none sm:text-13 md:mt-auto md:rounded-lg">
           <span className="md:hidden">{shortAction}</span><span className="hidden md:inline">{action}</span><Arrow className="h-4 w-4" aria-hidden="true" />
         </span>
         {external && <span className="sr-only">Abre em uma nova aba.</span>}

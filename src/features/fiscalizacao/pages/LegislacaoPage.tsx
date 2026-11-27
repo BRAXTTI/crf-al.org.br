@@ -38,7 +38,7 @@ export default function LegislacaoPage() {
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue  ">
               <ref.icon className="h-5 w-5" />
             </div>
-            <h3 className="mb-1.5 text-sm font-bold text-neutral-800 ">{ref.title}</h3>
+            <h3 className="mb-1.5 text-sm font-medium text-neutral-800 ">{ref.title}</h3>
             <p className="text-xs leading-relaxed text-crfal-gray-600 ">{ref.desc}</p>
           </div>
         ))}
@@ -53,7 +53,7 @@ export default function LegislacaoPage() {
         href="https://www.cff.org.br"
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 inline-flex items-center gap-2 rounded-lg bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
+        className="mt-4 inline-flex items-center gap-2 rounded-lg bg-crfal-blue px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-crfal-blue-dark"
       >
         <ExternalLink className="h-4 w-4" />
         Acessar portal do CFF

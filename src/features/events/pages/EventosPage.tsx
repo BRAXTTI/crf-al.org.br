@@ -135,7 +135,7 @@ export default function EventosPage() {
       />
 
       <div className="container-crfal py-8 md:py-12">
-        <a href="/api/events?format=ics" className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:bg-crfal-blue hover:text-white focus-visible:ring-2 focus-visible:ring-crfal-gold"><CalendarPlus className="h-4 w-4" aria-hidden />Baixar calendário de eventos (.ics)</a>
+        <a href="/api/events?format=ics" className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-blue px-5 py-2.5 text-sm font-medium text-crfal-blue hover:bg-crfal-blue hover:text-white focus-visible:ring-2 focus-visible:ring-crfal-gold"><CalendarPlus className="h-4 w-4" aria-hidden />Baixar calendário de eventos (.ics)</a>
         {isLoading ? (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -150,7 +150,7 @@ export default function EventosPage() {
             </p>
             <button
               onClick={() => refetch()}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-blue px-5 py-2.5 text-sm font-semibold text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-blue px-5 py-2.5 text-sm font-medium text-crfal-blue transition-colors hover:bg-crfal-blue hover:text-white"
             >
               <RefreshCw className="h-4 w-4" />
               Tentar novamente
@@ -161,7 +161,7 @@ export default function EventosPage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-crfal-blue-lighter ">
               <CalendarDays className="h-8 w-8 text-crfal-blue " />
             </div>
-            <h2 className="font-display text-xl font-semibold text-neutral-800 ">
+            <h2 className="font-display text-xl font-medium text-neutral-800 ">
               Nenhum evento cadastrado
             </h2>
             <p className="mt-2 text-crfal-gray-500 ">
@@ -169,7 +169,7 @@ export default function EventosPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-14">
             {/* Destaque: próximo evento */}
             {destaque && (
               <section aria-labelledby="destaque-titulo">
@@ -177,12 +177,12 @@ export default function EventosPage() {
                 <article className="group relative grid overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-card transition-all duration-500 hover:shadow-card-hover   md:grid-cols-2">
                   <div className="relative aspect-16/10 overflow-hidden sm:aspect-16/8 md:aspect-video">
                     <BannerEvento evento={destaque} />
-                    <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-crfal-gold px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+                    <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-crfal-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-white shadow-lg">
                       <Sparkles className="h-3.5 w-3.5" />
                       Destaque
                     </span>
                     {rotuloContagemDestaque && (
-                      <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-bold text-crfal-blue shadow-lg backdrop-blur-xs">
+                      <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 text-sm font-medium text-crfal-blue shadow-lg backdrop-blur-xs">
                         <Clock className="h-4 w-4" />
                         {rotuloContagemDestaque}
                       </span>
@@ -192,11 +192,11 @@ export default function EventosPage() {
                   <div className="relative flex flex-col justify-center gap-4 p-6 md:p-10">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_COLORS[destaque.status].bg} ${STATUS_COLORS[destaque.status].text}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-2xs font-medium ${STATUS_COLORS[destaque.status].bg} ${STATUS_COLORS[destaque.status].text}`}
                       >
                         {STATUS_LABELS[destaque.status]}
                       </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-[11px] font-semibold text-crfal-blue  ">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-2xs font-medium text-crfal-blue  ">
                         {(() => {
                           const MIcon = MODALIDADE_ICONS[destaque.modalidade];
                           return <MIcon className="h-3 w-3" />;
@@ -205,7 +205,7 @@ export default function EventosPage() {
                       </span>
                     </div>
 
-                    <h3 className="font-display text-2xl font-semibold leading-tight text-neutral-800  md:text-3xl">
+                    <h3 className="font-display text-lg font-medium text-neutral-800 md:text-xl">
                       <Link
                         to={`/eventos/${destaque.slug}`}
                         className="after:absolute after:inset-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue-light"
@@ -239,7 +239,7 @@ export default function EventosPage() {
                           href={destaque.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-crfal-blue-dark active:scale-95"
+                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-6 py-2.5 text-sm font-medium text-white transition-all hover:bg-crfal-blue-dark active:scale-95"
                         >
                           Inscreva-se
                           <ExternalLink className="h-4 w-4" />
@@ -247,7 +247,7 @@ export default function EventosPage() {
                       )}
                       <Link
                         to={`/eventos/${destaque.slug}`}
-                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-blue px-6 py-2.5 text-sm font-semibold text-crfal-blue transition-all hover:bg-crfal-blue hover:text-white active:scale-95"
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-blue px-6 py-2.5 text-sm font-medium text-crfal-blue transition-all hover:bg-crfal-blue hover:text-white active:scale-95"
                       >
                         Ver detalhes
                         <ArrowRight className="h-4 w-4" />
@@ -301,7 +301,7 @@ export default function EventosPage() {
                     >
                       {filtro.label}
                       <span
-                        className={`rounded-full px-1.5 text-[11px] font-bold ${
+                        className={`rounded-full px-1.5 text-2xs font-medium ${
                           filtroStatus === filtro.value
                             ? 'bg-white/20 text-white'
                             : 'bg-white text-crfal-gray-500  '
@@ -347,7 +347,7 @@ export default function EventosPage() {
                   {totalResultados !== 1 ? 's' : ''}
                   <button
                     onClick={limparFiltros}
-                    className="ml-auto inline-flex min-h-[32px] items-center gap-1 font-semibold text-crfal-blue transition-colors hover:underline "
+                    className="ml-auto inline-flex min-h-[32px] items-center gap-1 font-medium text-crfal-blue transition-colors hover:underline "
                   >
                     <X className="h-3.5 w-3.5" />
                     Limpar filtros
@@ -359,7 +359,7 @@ export default function EventosPage() {
             {totalResultados === 0 && !destaque ? (
               <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white py-14 text-center  ">
                 <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300 " />
-                <h2 className="font-display text-lg font-semibold text-neutral-800 ">
+                <h2 className="font-display text-lg font-medium text-neutral-800 ">
                   Nenhum evento encontrado
                 </h2>
                 <p className="mt-1 text-sm text-crfal-gray-500 ">
@@ -367,7 +367,7 @@ export default function EventosPage() {
                 </p>
                 <button
                   onClick={limparFiltros}
-                  className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-crfal-blue-dark"
+                  className="mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-crfal-blue-dark"
                 >
                   Limpar filtros
                 </button>
@@ -401,7 +401,7 @@ export default function EventosPage() {
                         <button
                           onClick={() => setMostraArquivo((atual) => !atual)}
                           aria-expanded={mostraArquivo}
-                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-crfal-gray-600 transition-all hover:border-crfal-blue/40 hover:text-crfal-blue    "
+                          className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-crfal-gray-600 transition-all hover:border-crfal-blue/40 hover:text-crfal-blue    "
                         >
                           {mostraArquivo
                             ? 'Mostrar menos'

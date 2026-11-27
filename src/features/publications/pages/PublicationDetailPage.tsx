@@ -29,7 +29,7 @@ export default function PublicationDetailPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-neutral-800 mb-4">Notícia não encontrada</h2>
+        <h2 className="text-2xl font-medium text-neutral-800 mb-4">Notícia não encontrada</h2>
         <p className="text-crfal-gray-500 mb-6">
           A notícia que você procura não existe ou foi removida.
         </p>

@@ -42,16 +42,14 @@ export default function ServiceProfiles() {
     abas.current[destino]?.focus();
   };
   return (
-    <section aria-labelledby="services-by-profile-title" className="py-2 sm:py-3">
+    <section aria-labelledby="services-by-profile-title" className="py-3 sm:py-5">
       <div className="container-crfal">
         <Reveal className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Central de serviços</p>
-            <h2 id="services-by-profile-title" className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[32px]">Como podemos ajudar você?</h2>
-            <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
+            <h2 id="services-by-profile-title" className="text-2xl font-medium text-crfal-blue sm:text-3xl">Como podemos ajudar você?</h2>
           </div>
-          <Link to="/servicos/requerimentos" className="group inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-crfal-blue rounded-md hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
+          <Link to="/servicos/requerimentos" className="group inline-flex min-h-11 items-center gap-2 self-start text-sm font-medium text-crfal-blue rounded-md hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
             Ver todos os requerimentos
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden="true" />
           </Link>
@@ -73,7 +71,7 @@ export default function ServiceProfiles() {
                 tabIndex={ativo ? 0 : -1}
                 onClick={() => escolherPerfil(profile.id)}
                 onKeyDown={event => navegarAbas(event, indice)}
-                className={`min-h-12 rounded-full px-2 text-[13px] font-semibold leading-tight transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none min-[400px]:text-[15px] ${ativo ? 'bg-crfal-blue text-white shadow-sm' : 'text-crfal-blue hover:bg-white/70'}`}
+                className={`min-h-12 rounded-full px-2 text-13 font-medium leading-tight transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none min-[400px]:text-15 ${ativo ? 'bg-crfal-blue text-white shadow-sm' : 'text-crfal-blue hover:bg-white/70'}`}
               >
                 {profile.label}
               </button>
@@ -99,8 +97,7 @@ export default function ServiceProfiles() {
                       <Icon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
                     </span>
                     <div>
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/82">Serviços para</span>
-                      <h3 id={`services-${profile.id}`} className="mt-0.5 text-[26px] font-bold leading-tight tracking-tight sm:text-[28px]">{profile.label}</h3>
+                      <h3 id={`services-${profile.id}`} className="text-xl font-medium sm:text-2xl">{profile.label}</h3>
                     </div>
                   </div>
                   <p className="mt-4 text-sm leading-relaxed text-white/82">{profile.description}</p>
@@ -109,7 +106,7 @@ export default function ServiceProfiles() {
                     {profile.services.map(service => {
                       const external = service.href.startsWith('https:');
                       const Arrow = external ? ArrowUpRight : ChevronRight;
-                      const className = 'group -mx-3 flex min-h-12 items-center justify-between gap-3 rounded-md px-3 py-3 text-[15px] font-medium leading-snug transition-colors hover:bg-white/10 focus-visible:outline-white motion-reduce:transition-none';
+                      const className = 'group -mx-3 flex min-h-12 items-center justify-between gap-3 rounded-md px-3 py-3 text-15 font-medium leading-snug transition-colors hover:bg-white/10 focus-visible:outline-white motion-reduce:transition-none';
                       const content = (
                         <>
                           <span>{service.label}</span>

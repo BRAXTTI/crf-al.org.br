@@ -23,10 +23,10 @@ function CollectionSection({ collection, shaded }: { collection: CffCollection; 
     <section aria-labelledby={`${collection.slug}-title`} className={`py-12 md:py-14 ${shaded ? 'bg-crfal-gray-50' : 'bg-white'}`}>
       <div className="container-crfal">
         <header className="mx-auto mb-6 text-center md:mb-10">
-          <h2 id={`${collection.slug}-title`} className="text-2xl font-bold leading-snug text-crfal-blue-dark sm:text-[27px]">{collection.title}</h2>
+          <h2 id={`${collection.slug}-title`} className="text-xl font-medium text-crfal-blue-dark sm:text-2xl">{collection.title}</h2>
           <span aria-hidden="true" className="mx-auto mt-6 block h-0.5 w-13 rounded-full bg-crfal-gold" />
           {collection.items.length > 1 && (
-            <p className="mt-4 flex items-center justify-center gap-1.5 text-[13px] text-crfal-gray-600 md:hidden">
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-13 text-crfal-gray-600 md:hidden">
               {collection.items.length} publicações · deslize para ver <ChevronsRight className="h-4 w-4 text-crfal-blue" aria-hidden="true" />
             </p>
           )}
@@ -55,7 +55,7 @@ function pageList(page: number, total: number): (number | '…')[] {
 
 function Pagination({ page, total, onChange }: { page: number; total: number; onChange: (page: number) => void }) {
   if (total <= 1) return null;
-  const circle = 'flex h-9 min-w-9 items-center justify-center rounded-full border px-2 text-[15px] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+  const circle = 'flex h-9 min-w-9 items-center justify-center rounded-full border px-2 text-15 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
   const idle = `${circle} border-crfal-gray-300 bg-white text-crfal-gray-600 hover:border-crfal-blue hover:text-crfal-blue disabled:pointer-events-none disabled:opacity-40`;
   return (
     <nav aria-label="Páginas de publicações" className="container-crfal pb-12 pt-2">
@@ -65,7 +65,7 @@ function Pagination({ page, total, onChange }: { page: number; total: number; on
           <li key={`${p}-${i}`}>
             {p === '…'
               ? <span className={`${circle} border-transparent text-crfal-gray-400`} aria-hidden="true">…</span>
-              : <button type="button" onClick={() => onChange(p)} aria-current={p === page ? 'page' : undefined} aria-label={`Página ${p}`} className={p === page ? `${circle} border-crfal-blue bg-crfal-blue font-semibold text-white` : idle}>{p}</button>}
+              : <button type="button" onClick={() => onChange(p)} aria-current={p === page ? 'page' : undefined} aria-label={`Página ${p}`} className={p === page ? `${circle} border-crfal-blue bg-crfal-blue font-medium text-white` : idle}>{p}</button>}
           </li>
         ))}
         <li><button type="button" className={idle} onClick={() => onChange(page + 1)} disabled={page === total} aria-label="Próxima página">»</button></li>
@@ -99,7 +99,6 @@ export default function CffPublicationsPage() {
         breadcrumb={[{ label: 'Início', href: '/' }, { label: 'Imprensa', href: '/imprensa/noticias' }, { label: 'Publicações do CFF' }]}
         title="Publicações do CFF"
         section="imprensa"
-        eyebrow="Conselho Federal de Farmácia"
         lead="Revistas, guias, notas técnicas e relatórios do Conselho Federal. Cada capa abre o PDF oficial no site do CFF."
         actions={<PageHeroAction href={CFF_PUBLICATIONS_URL} variant="secondary">Site do CFF</PageHeroAction>}
       />
@@ -109,11 +108,11 @@ export default function CffPublicationsPage() {
           <div className="container-crfal py-14">
             <div className="rounded-xl border border-dashed border-crfal-gray-300 bg-white px-6 py-14 text-center">
               <Landmark className="mx-auto mb-3 h-9 w-9 text-crfal-blue" aria-hidden="true" />
-              <p role="alert" className="text-lg font-bold text-crfal-blue-dark">Não foi possível carregar as publicações do CFF agora.</p>
+              <p role="alert" className="text-lg font-medium text-crfal-blue-dark">Não foi possível carregar as publicações do CFF agora.</p>
               <p className="mt-1 text-sm text-crfal-gray-600">Tente novamente ou acesse diretamente o site do Conselho Federal.</p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
-                <button type="button" onClick={() => refetch()} className="inline-flex min-h-11 items-center rounded-full border border-crfal-gray-300 px-5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue">Tentar novamente</button>
-                <a href={CFF_PUBLICATIONS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-crfal-blue px-5 text-sm font-semibold text-white hover:bg-crfal-blue-dark">
+                <button type="button" onClick={() => refetch()} className="inline-flex min-h-11 items-center rounded-full border border-crfal-gray-300 px-5 text-sm font-medium text-crfal-blue hover:border-crfal-blue">Tentar novamente</button>
+                <a href={CFF_PUBLICATIONS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-crfal-blue px-5 text-sm font-medium text-white hover:bg-crfal-blue-dark">
                   Abrir site do CFF <ArrowUpRight className="h-4 w-4" aria-hidden="true" />{externalNote}
                 </a>
               </div>
@@ -128,9 +127,9 @@ export default function CffPublicationsPage() {
             {visible.map((collection, i) => <CollectionSection key={collection.slug} collection={collection} shaded={i % 2 === 1} />)}
             <div className="bg-white pt-6">
               <Pagination page={page} total={totalPages} onChange={changePage} />
-              <p className="container-crfal pb-12 text-center text-[12.5px] text-crfal-gray-600">
+              <p className="container-crfal pb-12 text-center text-xs text-crfal-gray-600">
                 Publicações do Conselho Federal de Farmácia. Os arquivos ficam no{' '}
-                <a href={CFF_PUBLICATIONS_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-crfal-blue hover:underline">site oficial do CFF{externalNote}</a>
+                <a href={CFF_PUBLICATIONS_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-crfal-blue hover:underline">site oficial do CFF{externalNote}</a>
                 ; o CRF-AL não hospeda cópias.
               </p>
             </div>

@@ -49,7 +49,7 @@ export default function ProcessoAdministrativoFiscalPage() {
         {fluxo.map((etapa) => (
           <div key={etapa.step} className="flex gap-4">
             <div className="flex flex-col items-center">
-              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br/srgb ${etapa.color} text-sm font-bold text-white shadow-xs`}>
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br/srgb ${etapa.color} text-sm font-medium text-white shadow-xs`}>
                 {etapa.step}
               </span>
               {etapa.step < fluxo.length && (
@@ -57,7 +57,7 @@ export default function ProcessoAdministrativoFiscalPage() {
               )}
             </div>
             <div className="pb-6">
-              <h3 className="mb-1 text-sm font-bold text-neutral-800 ">{etapa.title}</h3>
+              <h3 className="mb-1 text-sm font-medium text-neutral-800 ">{etapa.title}</h3>
               <p className="text-sm leading-relaxed text-crfal-gray-600 ">{etapa.desc}</p>
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function ProcessoAdministrativoFiscalPage() {
         <div className="flex items-start gap-3">
           <Clock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 " />
           <div>
-            <p className="text-sm font-semibold text-neutral-800 ">Atenção aos prazos</p>
+            <p className="text-sm font-medium text-neutral-800 ">Atenção aos prazos</p>
             <ul className="mt-1.5 space-y-1.5">
               <li className="text-sm text-crfal-gray-600 ">Defesa intempestiva não é considerada para fins de julgamento.</li>
               <li className="text-sm text-crfal-gray-600 ">Na ausência de defesa válida, o processo segue o rito regular, podendo resultar em revelia.</li>

@@ -28,7 +28,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-6">
               <AlertTriangle className="w-7 h-7 text-red-500" />
             </div>
-            <h1 className="text-2xl font-bold text-neutral-800 mb-3">Algo deu errado</h1>
+            <h1 className="text-2xl font-medium text-neutral-800 mb-3">Algo deu errado</h1>
             <p className="text-crfal-gray-500 mb-8">
               Ocorreu um erro inesperado ao exibir esta página. Tente novamente ou
               volte para a página inicial.

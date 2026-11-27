@@ -293,7 +293,7 @@ export default function VideoTela({
     return (
       <div className="relative h-full w-full">
         {poster && <img src={poster} alt="" className="block h-full w-full object-contain opacity-40" />}
-        <p className="absolute inset-x-4 top-1/2 -translate-y-1/2 rounded-lg bg-white px-4 py-3 text-center text-sm font-semibold text-crfal-blue-dark shadow-sm">
+        <p className="absolute inset-x-4 top-1/2 -translate-y-1/2 rounded-lg bg-white px-4 py-3 text-center text-sm font-medium text-crfal-blue-dark shadow-sm">
           Não foi possível tocar o vídeo neste aparelho. Siga os passos em texto.
         </p>
       </div>
@@ -354,7 +354,7 @@ export default function VideoTela({
               <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white text-crfal-blue shadow-xl ring-4 ring-crfal-gold/40 transition duration-200 group-hover:scale-105 group-hover:ring-crfal-gold/70 motion-reduce:transition-none">
                 <Play className="ml-0.5 h-7 w-7 fill-current" aria-hidden />
               </span>
-              <span className="rounded-full bg-crfal-blue-dark/85 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-xs">
+              <span className="rounded-full bg-crfal-blue-dark/85 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm backdrop-blur-xs">
                 Assistir com som{duracao ? ` · ${duracao}` : ''}
               </span>
             </span>

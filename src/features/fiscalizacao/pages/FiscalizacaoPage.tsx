@@ -100,7 +100,7 @@ function LinkRow({ icon: Icon, title, desc, href }: { icon?: React.ElementType; 
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block text-[15px] font-semibold leading-snug text-crfal-blue-dark">{title}</span>
+          <span className="block text-15 font-medium leading-snug text-crfal-blue-dark">{title}</span>
           <span className="mt-0.5 block text-sm leading-snug text-crfal-gray-600">{desc}</span>
         </span>
         <ArrowRight className={`h-5 w-5 shrink-0 text-crfal-gray-400 group-hover:translate-x-1 group-hover:text-[#8A6A12] ${motion}`} aria-hidden />
@@ -144,7 +144,7 @@ export default function FiscalizacaoPage() {
                 <fn.icon className="h-5 w-5" aria-hidden />
               </span>
               <div>
-                <h3 className="text-[15px] font-semibold text-crfal-blue-dark">{fn.title}</h3>
+                <h3 className="text-15 font-medium text-crfal-blue-dark">{fn.title}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-crfal-gray-600">{fn.desc}</p>
               </div>
             </li>
@@ -160,7 +160,7 @@ export default function FiscalizacaoPage() {
       <div className="my-5 rounded-xl border border-amber-200 bg-amber-50/70 p-5">
         <div className="mb-3 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-amber-600" aria-hidden />
-          <h3 className="text-sm font-semibold text-amber-800">Principais infrações e como regularizar</h3>
+          <h3 className="text-sm font-medium text-amber-800">Principais infrações e como regularizar</h3>
         </div>
         <ul className="space-y-3">
           {infracoes.map((item) => (
@@ -168,7 +168,7 @@ export default function FiscalizacaoPage() {
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
               <span>
                 {item.text}{' '}
-                <Link to={item.href} className="group inline-flex items-center gap-1 font-semibold text-amber-900 underline decoration-amber-400 underline-offset-2 hover:decoration-amber-700">
+                <Link to={item.href} className="group inline-flex items-center gap-1 font-medium text-amber-900 underline decoration-amber-400 underline-offset-2 hover:decoration-amber-700">
                   {item.action}
                   <ArrowRight className={`h-3.5 w-3.5 group-hover:translate-x-0.5 ${motion}`} aria-hidden />
                 </Link>

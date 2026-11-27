@@ -35,10 +35,10 @@ function diaEMes(data: string): { dia: string; mes: string } | null {
 export function SecaoTitulo({ id, titulo, contador }: { id: string; titulo: string; contador: number }) {
   return (
     <div className="mb-6 flex items-center gap-3">
-      <h2 id={id} className="font-display text-xl font-semibold text-neutral-800  md:text-2xl">
+      <h2 id={id} className="font-display text-xl font-medium text-neutral-800  md:text-2xl">
         {titulo}
       </h2>
-      <span className="rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-xs font-bold text-crfal-blue  ">
+      <span className="rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-xs font-medium text-crfal-blue  ">
         {contador}
       </span>
       <div
@@ -109,17 +109,17 @@ export function EventoCard({ evento, index }: { evento: Evento; index: number })
 
         {badge && (
           <div className="absolute left-4 top-4 flex h-14 w-14 flex-col items-center justify-center rounded-xl border border-black/5 bg-white/95 shadow-lg backdrop-blur-xs">
-            <span className="font-display text-xl font-bold leading-none text-crfal-blue">
+            <span className="font-display text-xl font-medium leading-none text-crfal-blue">
               {badge.dia}
             </span>
-            <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-crfal-gray-600">
+            <span className="mt-0.5 text-2xs font-medium uppercase tracking-wider text-crfal-gray-600">
               {badge.mes}
             </span>
           </div>
         )}
 
         <span
-          className={`absolute right-4 top-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-xs ${statusConfig.bg} ${statusConfig.text}`}
+          className={`absolute right-4 top-4 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-2xs font-medium shadow-xs ${statusConfig.bg} ${statusConfig.text}`}
         >
           <StatusIcon className="h-3 w-3" />
           {STATUS_LABELS[evento.status]}
@@ -133,7 +133,7 @@ export function EventoCard({ evento, index }: { evento: Evento; index: number })
 
       <div className="relative flex flex-1 flex-col p-5">
         <h3
-          className={`font-display text-lg font-semibold leading-snug transition-colors group-hover:text-crfal-blue  ${
+          className={`font-display text-lg font-medium leading-snug transition-colors group-hover:text-crfal-blue  ${
             evento.status === 'cancelado'
               ? 'text-crfal-gray-400 line-through '
               : 'text-neutral-800 '
@@ -178,7 +178,7 @@ export function EventoCard({ evento, index }: { evento: Evento; index: number })
       </div>
 
       <div className="relative flex items-center justify-between gap-3 border-t border-crfal-gray-100 px-5 py-3.5 ">
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-crfal-blue transition-all group-hover:gap-2.5 ">
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-crfal-blue transition-all group-hover:gap-2.5 ">
           Ver detalhes
           <ArrowRight className="h-4 w-4" />
         </span>
@@ -187,7 +187,7 @@ export function EventoCard({ evento, index }: { evento: Evento; index: number })
             href={evento.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative z-10 inline-flex min-h-[36px] items-center rounded-full bg-crfal-blue px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-crfal-blue-dark active:scale-95"
+            className="relative z-10 inline-flex min-h-[36px] items-center rounded-full bg-crfal-blue px-4 py-2 text-xs font-medium text-white transition-all hover:bg-crfal-blue-dark active:scale-95"
           >
             Inscrever-se
             <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
@@ -217,14 +217,14 @@ export function LinhaArquivo({ evento }: { evento: Evento }) {
               : 'border-crfal-gray-200 bg-crfal-gray-50 text-crfal-gray-600  '
           }`}
         >
-          <span className="font-display text-base font-bold leading-none">{badge.dia}</span>
-          <span className="text-[9px] font-bold uppercase tracking-wider">{badge.mes}</span>
+          <span className="font-display text-base font-medium leading-none">{badge.dia}</span>
+          <span className="text-2xs font-medium uppercase tracking-wider">{badge.mes}</span>
         </div>
       )}
 
       <div className="min-w-0 flex-1">
         <p
-          className={`truncate text-sm font-semibold transition-colors group-hover:text-crfal-blue  ${
+          className={`truncate text-sm font-medium transition-colors group-hover:text-crfal-blue  ${
             cancelado
               ? 'text-crfal-gray-400 line-through '
               : 'text-neutral-700 '
@@ -239,7 +239,7 @@ export function LinhaArquivo({ evento }: { evento: Evento }) {
       </div>
 
       <span
-        className={`hidden shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${
+        className={`hidden shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-2xs font-medium sm:inline-flex ${
           cancelado
             ? 'bg-red-50 text-red-600  '
             : 'bg-crfal-gray-100 text-crfal-gray-600  '

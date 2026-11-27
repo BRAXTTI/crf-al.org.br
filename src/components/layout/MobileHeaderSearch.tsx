@@ -39,14 +39,14 @@ export default function MobileHeaderSearch({ open, onOpenChange, items, triggerR
         <ul className="divide-y divide-crfal-gray-200">
           {results.map(item => <li key={`${item.href}|${item.label}`}>
             {item.href.startsWith('/') ? (
-              <Link to={item.href} onClick={() => { onOpenChange(false); setQuery(''); }} className="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-crfal-blue hover:bg-crfal-blue-lighter">{item.label}</Link>
+              <Link to={item.href} onClick={() => { onOpenChange(false); setQuery(''); }} className="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-medium text-crfal-blue hover:bg-crfal-blue-lighter">{item.label}</Link>
             ) : (
-              <a href={item.href} target="_blank" rel="noopener noreferrer" onClick={() => { onOpenChange(false); setQuery(''); }} className="flex min-h-11 items-center justify-between rounded-md px-2 py-3 text-sm font-semibold text-crfal-blue hover:bg-crfal-blue-lighter">{item.label}<ArrowUpRight className="h-4 w-4" aria-hidden="true" /><span className="sr-only">Abre em uma nova aba.</span></a>
+              <a href={item.href} target="_blank" rel="noopener noreferrer" onClick={() => { onOpenChange(false); setQuery(''); }} className="flex min-h-11 items-center justify-between rounded-md px-2 py-3 text-sm font-medium text-crfal-blue hover:bg-crfal-blue-lighter">{item.label}<ArrowUpRight className="h-4 w-4" aria-hidden="true" /><span className="sr-only">Abre em uma nova aba.</span></a>
             )}
           </li>)}
         </ul>
         {term.length >= 3 && <section aria-label="Resultados de notícias">
-          <h2 className="font-semibold text-crfal-blue">Notícias</h2>
+          <h2 className="font-medium text-crfal-blue">Notícias</h2>
           <p role="status">{news.isFetching ? 'Buscando notícias…' : news.isError ? 'Não foi possível buscar notícias. Tente novamente.' : news.data?.length ? `${news.data.length} notícias encontradas` : 'Nenhuma notícia encontrada.'}</p>
           <ul>{news.data?.map(post => <li key={post.slug}><Link className="block py-3 text-crfal-blue underline" to={`/imprensa/noticias/${post.slug}`} onClick={() => { onOpenChange(false); setQuery(''); }}>{stripHTML(post.title.rendered)}</Link></li>)}</ul>
         </section>}

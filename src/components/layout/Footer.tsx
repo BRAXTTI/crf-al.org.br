@@ -106,7 +106,7 @@ export default function Footer() {
             </div>
 
             <div>
-              <h2 className="font-bold text-lg mb-5 flex items-center gap-2">
+              <h2 className="font-medium text-lg mb-5 flex items-center gap-2">
                 <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Links Rápidos
               </h2>
@@ -128,7 +128,7 @@ export default function Footer() {
             </div>
 
             <div>
-              <h2 className="font-bold text-lg mb-5 flex items-center gap-2">
+              <h2 className="font-medium text-lg mb-5 flex items-center gap-2">
                 <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Serviços
               </h2>
@@ -150,7 +150,7 @@ export default function Footer() {
             </div>
 
             <div>
-              <h2 className="font-bold text-lg mb-5 flex items-center gap-2">
+              <h2 className="font-medium text-lg mb-5 flex items-center gap-2">
                 <span className="w-1 h-6 bg-crfal-gold rounded-full" />
                 Redes Sociais
               </h2>

@@ -32,7 +32,7 @@ export default function PapelFiscalizacaoPage() {
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue  ">
               <obj.icon className="h-5 w-5" />
             </div>
-            <h3 className="mb-1.5 text-sm font-bold text-neutral-800 ">{obj.title}</h3>
+            <h3 className="mb-1.5 text-sm font-medium text-neutral-800 ">{obj.title}</h3>
             <p className="text-xs leading-relaxed text-crfal-gray-600 ">{obj.desc}</p>
           </div>
         ))}
@@ -57,7 +57,7 @@ export default function PapelFiscalizacaoPage() {
       <div className="my-5 space-y-3">
         {medidas.map((medida, i) => (
           <div key={i} className="flex items-start gap-3 rounded-lg border border-crfal-gray-200 bg-white p-4  ">
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-crfal-blue text-xs font-bold text-white">{i + 1}</span>
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-crfal-blue text-xs font-medium text-white">{i + 1}</span>
             <p className="text-sm leading-relaxed text-neutral-700 ">{medida}</p>
           </div>
         ))}

@@ -75,9 +75,38 @@
   --shadow-card-hover: 0 20px 40px rgba(0, 33, 64, 0.13);
   --shadow-header: 0 4px 20px rgba(0, 33, 64, 0.09);
 
+  /* Uma única família (Rawline, sans-serif) para texto e títulos. */
   --font-sans: Rawline, Rawline Fallback, ui-sans-serif, system-ui, sans-serif;
   --font-display:
     Rawline, Rawline Fallback, ui-sans-serif, system-ui, sans-serif;
+
+  /* Escala tipográfica única: 11 · 12 · 13 · 14 · 15 · 16 · 18 · 20 · 24 · 30 · 40.
+     Texto: 13/15 são as versões "1px menor" de 14/16, para cards e botões.
+     Títulos: quanto maior a letra, menos entrelinha e mais tracking negativo. */
+  --text-2xs: 0.6875rem; /* 11px: rótulos curtos (datas, categorias) */
+  --text-2xs--line-height: 1.4;
+  --text-13: 0.8125rem; /* 13px: texto pequeno em card / botão ao lado de 14px */
+  --text-13--line-height: 1.5;
+  --text-15: 0.9375rem; /* 15px: texto em card / botão ao lado de 16px */
+  --text-15--line-height: 1.55;
+  --text-lg--line-height: 1.4;
+  /* Até 18px, tracking neutro (anula o tracking de elemento dos títulos). */
+  --text-2xs--letter-spacing: 0;
+  --text-xs--letter-spacing: 0;
+  --text-13--letter-spacing: 0;
+  --text-sm--letter-spacing: 0;
+  --text-15--letter-spacing: 0;
+  --text-base--letter-spacing: 0;
+  --text-lg--letter-spacing: 0;
+  --text-xl--line-height: 1.3;
+  --text-xl--letter-spacing: -0.01em;
+  --text-2xl--line-height: 1.2;
+  --text-2xl--letter-spacing: -0.015em;
+  --text-3xl--line-height: 1.15;
+  --text-3xl--letter-spacing: -0.02em;
+  --text-4xl: 2.5rem; /* 40px: título de página (h1) no desktop */
+  --text-4xl--line-height: 1.1;
+  --text-4xl--letter-spacing: -0.025em;
 
   --animate-slide-up: slide-up 0.5s ease-out;
   --animate-fade-in: fade-in 0.5s ease-out;
@@ -156,7 +185,7 @@
   /* Painel arredondado que delimita as seções da home. O padding lateral
      acompanha o .container-crfal (16/24px) para os carrosséis sangrarem
      até a borda do painel. */
-  @apply overflow-hidden rounded-2xl border border-crfal-gray-200/80 bg-white px-4 py-9 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-12 md:px-8 lg:px-12 lg:py-14;
+  @apply overflow-hidden rounded-2xl border border-crfal-gray-200/80 bg-white px-4 py-12 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-14 md:px-8 lg:px-12 lg:py-20;
 }
 
 @utility site-background {
@@ -177,13 +206,14 @@
 }
 
 @utility btn-primary {
-  @apply bg-crfal-green text-white px-6 py-3 rounded-lg font-medium
+  /* Botões: 15px, 1px abaixo do texto corrido de 16px. */
+  @apply bg-crfal-green text-white px-6 py-3 rounded-lg text-15 font-medium
            transition-all duration-300 hover:bg-[#006b47]
            hover:shadow-lg hover:-translate-y-0.5;
 }
 
 @utility btn-outline {
-  @apply border-2 border-crfal-blue text-crfal-blue px-6 py-3 rounded-lg font-medium
+  @apply border-2 border-crfal-blue text-crfal-blue px-6 py-3 rounded-lg text-15 font-medium
            transition-all duration-300 hover:bg-crfal-blue hover:text-white;
 }
 
@@ -437,11 +467,26 @@
     overflow-x: clip;
   }
 
+  /* Títulos: mesma família, peso 500, sempre retos, entrelinha e tracking
+     mais fechados quanto maior o nível e quebra equilibrada (sem palavra
+     solta na última linha). Classes de tamanho (text-2xl…) ajustam o resto. */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Rawline', 'Rawline Fallback', ui-sans-serif, system-ui, sans-serif;
-    font-weight: 700;
-    line-height: 1.15;
+    font-weight: 500;
+    font-style: normal;
+    line-height: 1.2;
+    text-wrap: balance;
   }
+  h1 { line-height: 1.1; letter-spacing: -0.025em; }
+  h2 { line-height: 1.15; letter-spacing: -0.02em; }
+  h3 { line-height: 1.25; letter-spacing: -0.01em; }
+  :is(h1, h2, h3, h4, h5, h6) :is(em, i) { font-style: normal; }
+
+  /* Texto corrido sem viúvas: o navegador evita uma palavra sozinha na última linha. */
+  p, li, dd, figcaption, blockquote { text-wrap: pretty; }
+
+  /* Ênfase inline continua distinguível do texto 400. */
+  b, strong { font-weight: 600; }
 }
 
 /* Custom scrollbar */

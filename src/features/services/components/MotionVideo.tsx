@@ -105,7 +105,7 @@ export default function MotionVideo({ motion: video, titulo, tarefa }: { motion:
                 className="group absolute inset-[3.5%_5%] flex flex-col items-center justify-center gap-3 rounded-[12%/7%] text-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-gold"
               >
                 {botaoPlay(true)}
-                <span className="rounded-full bg-crfal-blue-dark/80 px-3 py-1 text-xs font-semibold backdrop-blur-xs">{video.duracao}</span>
+                <span className="rounded-full bg-crfal-blue-dark/80 px-3 py-1 text-xs font-medium backdrop-blur-xs">{video.duracao}</span>
               </button>
             )}
           </div>
@@ -124,7 +124,7 @@ export default function MotionVideo({ motion: video, titulo, tarefa }: { motion:
           >
             {botaoPlay(false)}
             <span>
-              <span className="block text-sm font-bold">Assistir ao vídeo</span>
+              <span className="block text-sm font-medium">Assistir ao vídeo</span>
               <span className="mt-0.5 block text-xs text-white/65">{video.duracao} · abre em tela cheia</span>
             </span>
           </button>

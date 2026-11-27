@@ -30,15 +30,15 @@ function ContatoSetor({ className = '' }: { className?: string }) {
       className={`relative isolate overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white ${className}`}
     >
       <ShieldCheck aria-hidden className="pointer-events-none absolute -bottom-8 -right-6 -z-10 h-36 w-36 opacity-[0.06]" strokeWidth={1} />
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Fale com o setor</p>
-      <h2 id="contato-fiscalizacao" className="mt-1 text-lg font-bold">Departamento de Fiscalização</h2>
+      <p className="text-2xs font-medium uppercase tracking-[0.12em] text-crfal-gold">Fale com o setor</p>
+      <h2 id="contato-fiscalizacao" className="mt-1 text-lg font-medium">Departamento de Fiscalização</h2>
       <p className="mt-1 text-sm leading-relaxed text-white/75">
         Comunicações formais, envio de documentos e dúvidas sobre autos, defesas e afastamentos.
       </p>
       <div className="mt-4 flex flex-col gap-2">
         <a
           href={`mailto:${SETOR_EMAIL}`}
-          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-white"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-crfal-blue transition-colors hover:bg-crfal-blue-lighter focus-visible:outline-white"
         >
           <Mail className="h-4 w-4 shrink-0" aria-hidden />
           <span className="truncate">{SETOR_EMAIL}</span>
@@ -47,7 +47,7 @@ function ContatoSetor({ className = '' }: { className?: string }) {
           href={`https://wa.me/55${digits(SETOR_WHATSAPP)}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-white/10 focus-visible:outline-white"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-white/10 focus-visible:outline-white"
         >
           <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
           WhatsApp <span className="tabular-nums text-white/75">{SETOR_WHATSAPP}</span>
@@ -89,7 +89,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, meta, 
         <div className="container-crfal py-6 md:py-10">
           <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
             <div className="space-y-6 lg:col-span-8">
-              <article className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs md:p-8 lg:p-10 [&>h2]:mt-10 [&>h2]:mb-4 [&>h2]:border-t [&>h2]:border-crfal-gray-200 [&>h2]:pt-8 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-crfal-blue [&>h2]:after:mt-2.5 [&>h2]:after:block [&>h2]:after:h-0.5 [&>h2]:after:w-10 [&>h2]:after:rounded-full [&>h2]:after:bg-crfal-gold [&>h2]:after:content-[''] md:[&>h2]:text-2xl [&>h2:first-of-type]:mt-0 [&>h2:first-of-type]:border-0 [&>h2:first-of-type]:pt-0 [&>p]:mb-4 [&>p]:leading-7 [&>p]:text-neutral-700 md:[&>p]:leading-8 [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-neutral-700 [&>li]:leading-7">
+              <article className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs md:p-8 lg:p-10 [&>h2]:mt-10 [&>h2]:mb-4 [&>h2]:border-t [&>h2]:border-crfal-gray-200 [&>h2]:pt-8 [&>h2]:text-xl [&>h2]:font-medium [&>h2]: [&>h2]:text-crfal-blue [&>h2]:after:mt-2.5 [&>h2]:after:block [&>h2]:after:h-0.5 [&>h2]:after:w-10 [&>h2]:after:rounded-full [&>h2]:after:bg-crfal-gold [&>h2]:after:content-[''] md:[&>h2]:text-2xl [&>h2:first-of-type]:mt-0 [&>h2:first-of-type]:border-0 [&>h2:first-of-type]:pt-0 [&>p]:mb-4 [&>p]:leading-7 [&>p]:text-neutral-700 md:[&>p]:leading-8 [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:space-y-2 [&>ul]:pl-5 [&>ul]:text-neutral-700 [&>li]:leading-7">
                 {children}
               </article>
 
@@ -100,7 +100,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, meta, 
             <aside className="hidden lg:col-span-4 lg:block">
               <div className="sticky top-[calc(var(--header-offset)+1.5rem)] space-y-5">
                 <nav aria-labelledby="menu-fiscalizacao" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs">
-                  <h2 id="menu-fiscalizacao" className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">
+                  <h2 id="menu-fiscalizacao" className="mb-3 text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12]">
                     Menu da Fiscalização
                   </h2>
                   <ul className="space-y-0.5">
@@ -108,7 +108,7 @@ export default function FiscalizacaoPageShell({ title, description, lead, meta, 
                       const isActive = !item.external && location.pathname === item.href;
                       const linkClass = `relative flex items-center justify-between gap-3 rounded-lg px-3.5 py-2.5 text-sm transition-colors ${
                         isActive
-                          ? 'bg-crfal-blue-lighter font-semibold text-crfal-blue before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-crfal-gold'
+                          ? 'bg-crfal-blue-lighter font-medium text-crfal-blue before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-crfal-gold'
                           : 'font-medium text-neutral-700 hover:bg-crfal-gray-100 hover:text-crfal-blue'
                       }`;
 
