@@ -65,7 +65,7 @@ export const GUIAS: Record<string, GuiaTutorial> = {
     tempoEstimado: 'cerca de 10 min',
     capaProvisoria: {
       src: '/images/tutoriais/primeira-inscricao-foto-poster.webp',
-      alt: 'Mesa de estudo com jaleco branco dobrado, pasta azul-marinho fechada com documentos, caneta dourada e notebook de costas.',
+      alt: 'Mesa de madeira com frasco âmbar e prancheta com anotações à mão, enquanto uma pessoa escreve.',
     },
     antes: ['Não precisa de login', 'Documentos prontos para anexar'],
     passos: [

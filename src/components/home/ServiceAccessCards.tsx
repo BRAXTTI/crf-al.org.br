@@ -16,9 +16,10 @@ function CardContent({ title, description, image, action, shortAction, external 
   const Arrow = external ? ArrowUpRight : ArrowRight;
   return (
     <>
+      {/* Foto real (créditos em docs/creditos-fotos.md), só a partir de 768px; o véu azul-marinho garante contraste AA. */}
       <picture>
         <source media="(min-width: 768px)" srcSet={image} />
-        <img alt="" width={1672} height={941} decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-cover object-right" />
+        <img alt="" width={1672} height={941} decoding="async" className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
       </picture>
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_85%_35%,rgba(0,102,204,0.38),transparent_55%),linear-gradient(110deg,#0b192c_0%,#003366_65%,#004582_100%)] group-last:bg-[radial-gradient(ellipse_at_85%_35%,rgba(0,102,204,0.55),transparent_55%),linear-gradient(110deg,#003366_0%,#004b95_65%,#0066cc_100%)] md:hidden" />
       <svg aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 h-full w-[60%] md:hidden" viewBox="0 0 240 104" preserveAspectRatio="xMaxYMid slice" fill="none">
@@ -32,7 +33,7 @@ function CardContent({ title, description, image, action, shortAction, external 
           <path d="M157-10l34 20v40l-34 20-34-20V10z M225-10l34 20v40l-34 20-34-20V10z M191 50l34 20v40l-34 20-34-20V70z" />
         </g>
       </svg>
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden bg-linear-to-r/srgb from-crfal-blue via-crfal-blue/90 to-crfal-blue/30 group-last:from-crfal-blue-light group-last:via-crfal-blue-light/90 md:block md:to-crfal-blue/10 md:group-last:from-crfal-blue md:group-last:via-crfal-blue/90" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden bg-linear-to-r/srgb from-crfal-blue via-crfal-blue/90 to-crfal-blue/30 group-last:from-crfal-blue-light group-last:via-crfal-blue-light/90 md:block md:from-crfal-blue-dark/95 md:from-20% md:via-crfal-blue/88 md:via-55% md:to-crfal-blue/45 md:group-last:from-crfal-blue-dark/95 md:group-last:via-crfal-blue/88" />
       <div className="relative flex w-full flex-1 items-center justify-between gap-4 md:h-full md:flex-col md:items-start">
         <h2 className="min-w-0 max-w-76 text-lg font-medium sm:text-2xl">{title}</h2>
         <p className="mb-5 mt-2 hidden max-w-76 text-sm leading-relaxed text-white/90 md:block">{description}</p>
@@ -49,10 +50,10 @@ export default function ServiceAccessCards() {
   return (
     <section aria-label="Acesso aos serviços" className="mb-5 grid rounded-xl md:grid-cols-2 md:gap-5">
       <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className={cardClass}>
-        <CardContent title="CRF AL em Casa" description="Acesse sua área de atendimento online." image="/images/crf-em-casa-card-v3.webp" action="Acessar o sistema" shortAction="Entrar" external />
+        <CardContent title="CRF AL em Casa" description="Acesse sua área de atendimento online." image="/images/crf-em-casa-card-foto.webp" action="Acessar o sistema" shortAction="Entrar" external />
       </a>
       <Link to="/servicos/requerimentos" className={cardClass}>
-        <CardContent title="Serviços e Requerimentos" description="Consulte documentos e orientações para profissionais e estabelecimentos." image="/images/servicos-requerimentos-card-v2.webp" action="Consultar serviços" shortAction="Consultar" />
+        <CardContent title="Serviços e Requerimentos" description="Consulte documentos e orientações para profissionais e estabelecimentos." image="/images/servicos-requerimentos-card-foto.webp" action="Consultar serviços" shortAction="Consultar" />
       </Link>
     </section>
   );

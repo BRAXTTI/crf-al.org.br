@@ -1,11 +1,37 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  FileBadge,
+  FileUp,
+  Lightbulb,
+  ListChecks,
+  MessageSquareWarning,
+  Pause,
+  Play,
+  Receipt,
+  ShieldAlert,
+  type LucideIcon,
+} from 'lucide-react';
 import { ArrowFillButton } from '@/components/block/arrow-fill-button';
 import { REDUCED_MOTION_QUERY, useMediaQuery } from '@/lib/hydration';
-import { banners as defaultBanners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, type Banner } from '@/data/banners';
+import { banners as defaultBanners, bannerMobileSrcSet, BANNER_MOBILE_SIZES, BANNER_MOBILE_MEDIA, type Banner, type BannerIcon } from '@/data/banners';
 
 const AUTOPLAY_MS = 6000;
+
+/** Ícones lineares dos itens dos slides em painel (`Banner.highlights`). */
+const HIGHLIGHT_ICONS: Record<BannerIcon, LucideIcon> = {
+  denuncia: ShieldAlert,
+  reclamacao: MessageSquareWarning,
+  solicitacao: ClipboardList,
+  sugestao: Lightbulb,
+  documento: FileUp,
+  protocolo: ListChecks,
+  boleto: Receipt,
+  certidao: FileBadge,
+};
 
 interface HeroSliderProps {
   /** Lista de banners. Padrão: `src/data/banners.ts`. */
@@ -15,14 +41,18 @@ interface HeroSliderProps {
 /**
  * Carrossel do topo da home.
  *
- * Proporção fixa (no desktop, a arte inteira é preservada):
- *  - < 768px  → 4:5   (arte mobile 1080×1350)
- *  - ≥ 768px  → 16:5 (arte desktop 1920×600)
+ * Dois miolos no mesmo shell:
+ *  - foto com véu: foto real de fundo + texto em HTML (título, frase, nota e botão) sobre véu azul-marinho;
+ *  - painel (`highlights`): painel azul à esquerda com título, bloco de itens com ícones e botão;
+ *    a pessoa da foto fica visível à direita (desktop) ou no topo (celular).
+ * Proporção fixa:
+ *  - < 768px  → 4:5  (foto mobile 1080×1350; texto no terço inferior)
+ *  - ≥ 768px  → 16:5 (foto desktop 2244×701; texto à esquerda)
  *
  * Sem dependência do WordPress: os banners vêm de `src/data/banners.ts`.
  */
 export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) {
-  const slides = useMemo(() => items.filter((banner) => banner.image), [items]);
+  const slides = useMemo(() => items.filter((banner) => banner.image && banner.title), [items]);
 
   const [current, setCurrent] = useState(0);
   // Pausa enquanto o ponteiro ou o foco estão no carrossel (WCAG 2.2.2).
@@ -95,8 +125,22 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
       <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-16/5" aria-live={isRotating ? 'off' : 'polite'}>
       {slides.map((slide, index) => {
         const isActive = index === activeIndex;
-        const hasOverlay = Boolean(slide.title || slide.subtitle || slide.ctaLabel);
         const isExternal = Boolean(slide.href && !slide.href.startsWith('/'));
+        const cta = slide.ctaLabel && slide.href && (
+          <ArrowFillButton
+            {...(isExternal
+              ? { href: slide.href, target: '_blank', rel: 'noopener noreferrer' }
+              : { as: Link, to: slide.href })}
+            className="mt-5 md:mt-4 lg:mt-6"
+            bgColor="#ffffff"
+            textColor="#003366"
+            fillBgColor="#C59B27"
+            fillTextColor="#0B192C"
+          >
+            {slide.ctaLabel}
+            {isExternal && <span className="sr-only"> (abre em nova aba)</span>}
+          </ArrowFillButton>
+        );
 
         return (
           <div
@@ -120,68 +164,43 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                     height={slide.imageMobileHeight ?? 1350}
                   />
                 )}
+                {/* Foto decorativa: todo o conteúdo do banner está no texto ao lado. */}
                 <img
                   src={slide.image}
-                  alt={slide.href ? '' : slide.alt}
-                  width={1920}
-                  height={600}
+                  alt=""
+                  width={2244}
+                  height={701}
                   loading={index === 0 ? 'eager' : 'lazy'}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   decoding={index === 0 ? undefined : 'async'}
-                  className="h-full w-full object-cover md:object-contain"
+                  className="h-full w-full object-cover"
                 />
               </picture>
             )}
 
-            {hasOverlay && (
+            {slide.highlights?.length ? (
+              <PanelSlide slide={slide} cta={cta} />
+            ) : (
               <>
-                <div className="absolute inset-0 bg-linear-to-r/srgb from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
-                <div className="container-crfal relative z-10 flex h-full items-center">
-                  <div className="max-w-2xl">
-                    {slide.title && (
-                      <h2 className="font-display mb-3 text-2xl font-medium text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-3xl lg:text-4xl">
-                        <span className="animate-slide-up inline-block">{slide.title}</span>
-                      </h2>
-                    )}
+                {/* Véu azul-marinho sob o texto (contraste AA): de baixo para cima no celular, da esquerda para a direita a partir de 768px. */}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-linear-to-t/srgb from-crfal-blue-dark from-35% via-crfal-blue/85 via-60% to-crfal-blue/5 md:bg-linear-to-r/srgb md:from-crfal-blue-dark/95 md:from-25% md:via-crfal-blue/85 md:via-50% md:to-crfal-blue/0"
+                />
 
+                <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-7 sm:px-10 sm:pb-10 md:justify-center md:py-6 md:pl-20 md:pr-6 lg:pl-24 xl:pl-28">
+                  <div className="max-w-md lg:max-w-lg xl:max-w-xl">
+                    {slide.label && <p className="mb-2 text-13 font-medium text-white/85 md:text-sm">{slide.label}</p>}
+                    <h2 className="text-3xl font-medium text-white md:text-2xl lg:text-3xl xl:text-4xl">{slide.title}</h2>
                     {slide.subtitle && (
-                      <p className="mb-6 max-w-xl text-sm leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:text-base">
-                        {slide.subtitle}
-                      </p>
+                      <p className="mt-3 text-15 text-white/90 md:mt-2 md:line-clamp-2 md:text-sm lg:mt-3 lg:text-base xl:text-lg">{slide.subtitle}</p>
                     )}
+                    {slide.note && <p className="mt-2 hidden text-13 text-white/75 lg:block">{slide.note}</p>}
 
-                    {slide.ctaLabel && slide.href && (
-                      <ArrowFillButton
-                        {...(slide.href.startsWith('/')
-                          ? { as: Link, to: slide.href }
-                          : {
-                              href: slide.href,
-                              target: isExternal ? '_blank' : undefined,
-                              rel: isExternal ? 'noopener noreferrer' : undefined,
-                            })}
-                        bgColor="#ffffff"
-                        textColor="#003366"
-                        fillBgColor="#C59B27"
-                        fillTextColor="#0B192C"
-                      >
-                        {slide.ctaLabel}
-                        {isExternal && <span className="sr-only"> (abre em nova aba)</span>}
-                      </ArrowFillButton>
-                    )}
+                    {cta}
                   </div>
                 </div>
               </>
-            )}
-
-            {/* Arte sem texto: o banner inteiro vira link. */}
-            {!hasOverlay && slide.href && (
-              <a
-                href={slide.href}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noopener noreferrer' : undefined}
-                aria-label={isExternal ? `${slide.alt} (abre em nova aba)` : slide.alt}
-                className="absolute inset-0 z-10 rounded-xl focus-visible:outline-hidden focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-crfal-gold"
-              />
             )}
           </div>
         );
@@ -243,5 +262,74 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
           </div>
       )}
     </section>
+  );
+}
+
+/**
+ * Miolo em painel (referência de densidade: título + bloco 2×2 de itens + pessoa da foto).
+ *  - < 768px: foto no topo; painel azul sólido no terço inferior com título, itens em 2 colunas e botão.
+ *  - ≥ 768px: painel azul na esquerda (64% da largura), pessoa visível à direita sobre o fundo claro.
+ *    O bloco de itens aparece a partir de 1024px (lista) e vira 2×2 a partir de 1280px.
+ */
+function PanelSlide({ slide, cta }: { slide: Banner; cta: React.ReactNode }) {
+  const items = slide.highlights ?? [];
+  const list = (variant: 'mobile' | 'desktop') => (
+    <ul
+      className={
+        variant === 'mobile'
+          ? 'mt-4 grid grid-cols-2 gap-x-3 gap-y-2.5'
+          : 'mt-2.5 grid gap-y-2 xl:mt-3 xl:grid-cols-2 xl:gap-x-4 xl:gap-y-4'
+      }
+    >
+      {items.map((item) => {
+        const Icon = HIGHLIGHT_ICONS[item.icon];
+        return (
+          <li key={item.title} className="flex items-center gap-2.5 xl:gap-3">
+            <span
+              aria-hidden="true"
+              className={`flex shrink-0 items-center justify-center rounded-full text-crfal-gold ring-1 ring-crfal-gold/60 ${
+                variant === 'mobile' ? 'h-8 w-8' : 'h-8 w-8 xl:h-10 xl:w-10'
+              }`}
+            >
+              <Icon className={variant === 'mobile' ? 'h-4 w-4' : 'h-4 w-4 xl:h-5 xl:w-5'} strokeWidth={1.75} />
+            </span>
+            <span className={`font-medium text-white ${variant === 'mobile' ? 'text-sm leading-tight' : 'text-sm leading-tight xl:text-base xl:leading-snug'}`}>{item.title}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+
+  return (
+    <>
+      {/* Celular: azul sólido sob o texto, abrindo para a foto no topo (contraste AA em todo o bloco de texto). */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-linear-to-t/srgb from-crfal-blue-dark from-52% via-crfal-blue/95 via-60% to-crfal-blue/0 to-70% md:hidden"
+      />
+      {/* Desktop: painel azul de marca à esquerda; a pessoa fica livre à direita. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-y-0 left-0 hidden w-[64%] rounded-r-[2.5rem] bg-linear-to-br/srgb from-crfal-blue from-10% to-crfal-blue-dark md:block"
+      />
+
+      <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-7 sm:px-10 sm:pb-10 md:w-[64%] md:flex-row md:items-center md:justify-start md:gap-7 md:py-6 md:pl-20 md:pr-8 lg:gap-6 xl:gap-7">
+        <div className="md:min-w-0 md:flex-1 lg:max-w-[17rem] lg:flex-none">
+          {slide.label && <p className="mb-2 text-13 font-medium text-white/85 md:text-sm">{slide.label}</p>}
+          <h2 className="text-3xl font-medium text-balance text-white md:text-2xl lg:text-3xl xl:text-4xl">{slide.title}</h2>
+          {slide.subtitle && (
+            <p className="mt-2 hidden text-pretty text-white/90 md:line-clamp-2 md:block md:text-sm lg:mt-3 lg:text-15 xl:line-clamp-3 xl:text-base">{slide.subtitle}</p>
+          )}
+          {/* Celular: os itens substituem a frase. */}
+          <div className="md:hidden">{list('mobile')}</div>
+          {cta}
+        </div>
+
+        <div className="hidden rounded-xl bg-white/[0.06] p-4 ring-1 ring-inset ring-white/15 lg:block lg:min-w-0 lg:flex-1 lg:p-3.5 xl:p-5">
+          {slide.highlightsTitle && <p className="text-13 font-medium text-white/80 xl:text-sm">{slide.highlightsTitle}</p>}
+          {list('desktop')}
+        </div>
+      </div>
+    </>
   );
 }

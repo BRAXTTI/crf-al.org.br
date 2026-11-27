@@ -3,7 +3,13 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronRight } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom';
 import { SECTION_NAV, type SectionKey, type SectionNavLink } from '@/config/section-nav';
 
-/** Cabeçalho editorial das páginas internas: gradiente institucional, sem arte decorativa. */
+/** Foto padrão do fundo (Pexels 8667531, cottonbro studio), recortada a ≈2,8:1. */
+const PAGE_HERO_PHOTO = {
+  src: '/images/page-hero-foto-1280.webp',
+  srcSet: '/images/page-hero-foto-1280.webp 1280w, /images/page-hero-foto-2400.webp 2400w',
+};
+
+/** Cabeçalho editorial das páginas internas: foto real sutil sob véu azul-marinho, sem arte decorativa. */
 export interface PageHeroBreadcrumb {
   label: string;
   /** Se ausente, o item é renderizado como texto (página atual). */
@@ -35,7 +41,7 @@ export interface PageHeroProps {
   actions?: ReactNode;
   /** Seção do site: define as abas na base do cabeçalho. */
   section?: SectionKey;
-  /** Imagem de fundo opcional (desktop). Use só foto real; sem arte decorativa por padrão. */
+  /** Troca a foto de fundo padrão. Use só foto real, nunca arte decorativa. */
   backgroundImage?: string;
   /** Classes extras no elemento raiz. */
   className?: string;
@@ -78,20 +84,20 @@ export default function PageHero({
 
   return (
     <section id={id} className={`relative isolate mt-(--page-header-offset) overflow-hidden rounded-b-2xl bg-crfal-blue-dark text-white sm:rounded-b-3xl ${className ?? ''}`}>
-      {/* Fundo: gradiente institucional (sem textura, brilhos nem ilustração gerada). */}
+      {/* Fundo: foto real sutil (farmácia histórica, créditos em docs/creditos-fotos.md) sob véu azul-marinho #003366 — sem textura, brilhos nem ilustração. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-linear-to-br/srgb from-[#0A2A4F] via-crfal-blue-dark to-[#071222]" />
-        {backgroundImage && (
-          <picture>
-            <source media="(min-width: 1024px)" srcSet={backgroundImage} />
-            <img
-              src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
-              alt=""
-              decoding="async"
-              className="absolute inset-y-0 right-0 hidden h-full w-[52%] object-contain object-right opacity-35 mask-[linear-gradient(to_right,transparent,black_45%)] lg:block"
-            />
-          </picture>
-        )}
+        <img
+          src={backgroundImage ?? PAGE_HERO_PHOTO.src}
+          srcSet={backgroundImage ? undefined : PAGE_HERO_PHOTO.srcSet}
+          sizes={backgroundImage ? undefined : '100vw'}
+          alt=""
+          width={2400}
+          height={857}
+          decoding="async"
+          fetchPriority="low"
+          className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
+        />
+        <div className="absolute inset-0 bg-linear-to-r/srgb from-crfal-blue-dark/95 via-crfal-blue/90 to-crfal-blue/88" />
         <div className="absolute inset-x-10 bottom-0 h-px bg-linear-to-r/srgb from-transparent via-crfal-gold/60 to-transparent" />
       </div>
 

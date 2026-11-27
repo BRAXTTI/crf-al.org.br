@@ -38,8 +38,8 @@ describe('TutorialDetail: capa provisória e vídeo', () => {
     render(id);
     const img = capa(id)!;
     expect(img.alt).toBe(GUIAS[id].capaProvisoria!.alt);
-    expect(img.getAttribute('width')).toBe('960');
-    expect(img.getAttribute('height')).toBe('540');
+    expect(img.getAttribute('width')).toBe('1280');
+    expect(img.getAttribute('height')).toBe('720');
     expect(img.getAttribute('decoding')).toBe('async');
     expect(img.parentElement!.className).toContain('aspect-video');
     expect(host.querySelector('video')).toBeNull();

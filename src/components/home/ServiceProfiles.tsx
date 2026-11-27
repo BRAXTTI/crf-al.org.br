@@ -89,8 +89,9 @@ export default function ServiceProfiles() {
                 id={`services-panel-${profile.id}`}
                 role="tabpanel"
                 aria-labelledby={`services-tab-${profile.id}`}
-                style={{ backgroundImage: `linear-gradient(to top, rgb(11 25 44 / 0.55), rgb(11 25 44 / 0) 32%), url(/images/servicos-card-${profile.id}.webp?v=40)` }}
-                className={`max-[980px]:[--reveal-delay:0ms]! relative isolate grid-rows-[auto_auto_1fr] gap-0 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue-dark bg-cover bg-bottom bg-no-repeat p-6 text-white shadow-lg shadow-crfal-blue/10 sm:p-8 min-[981px]:row-span-3 min-[981px]:grid min-[981px]:grid-rows-subgrid ${profile.id === perfil ? 'grid' : 'hidden'}`}
+                // Foto real sob véu azul-marinho (#003366 → #0B192C): texto branco com contraste AA em todo o painel.
+                style={{ backgroundImage: `linear-gradient(to bottom, rgb(0 51 102 / 0.86), rgb(11 25 44 / 0.8) 55%, rgb(11 25 44 / 0.9)), url(/images/servicos-card-${profile.id}.webp?v=foto1)` }}
+                className={`max-[980px]:[--reveal-delay:0ms]! relative isolate grid-rows-[auto_auto_1fr] gap-0 overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue-dark bg-cover bg-center bg-no-repeat p-6 text-white shadow-lg shadow-crfal-blue/10 sm:p-8 min-[981px]:row-span-3 min-[981px]:grid min-[981px]:grid-rows-subgrid ${profile.id === perfil ? 'grid' : 'hidden'}`}
               >
                 <div className="flex items-center gap-4">
                     <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/5 ring-1 ring-crfal-gold/40">
