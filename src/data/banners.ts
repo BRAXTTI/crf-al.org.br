@@ -19,6 +19,8 @@ import { CRF_EM_CASA_URL, OUVIDORIA_URL } from '../config/site';
  *  - `imageMobileSmall` → a mesma foto mobile em 720×900 px, para celulares
  *  - Desktop: o texto fica à esquerda; deixe o assunto da foto no centro/direita.
  *    Mobile: o texto fica no terço inferior.
+ *  - Slides com `highlights` (layout em painel): a pessoa fica entre 60% e 95% da largura
+ *    da foto desktop, sobre fundo claro de estúdio, e no topo da foto mobile (rosto acima de 40%).
  */
 
 export interface Banner {
@@ -43,19 +45,27 @@ export interface Banner {
   ctaLabel?: string;
   /** Destino do botão. Interno (`/...`) ou externo (`https://...`, abre em nova aba). */
   href?: string;
+  /**
+   * Itens com ícone (3–4) num bloco estruturado. Com eles, o slide usa o layout em painel:
+   * painel azul à esquerda (título + bloco) e a pessoa da foto visível à direita.
+   * Sem eles, o slide usa o layout de foto com véu.
+   */
+  highlights?: BannerHighlight[];
+  /** Título curto do bloco de itens (ex.: “O que você pode registrar”). */
+  highlightsTitle?: string;
+}
+
+/** Ícones disponíveis para os itens (mapeados para lucide-react no `HeroSlider`). */
+export type BannerIcon = 'denuncia' | 'reclamacao' | 'solicitacao' | 'sugestao' | 'documento' | 'protocolo' | 'boleto' | 'certidao';
+
+export interface BannerHighlight {
+  icon: BannerIcon;
+  /** Texto curto (até ~22 caracteres), cabe em 2 colunas no celular. */
+  title: string;
 }
 
 // Ordem: o CRF AL em Casa já está no card logo acima do slider, então fica por último na rotação.
 export const banners: Banner[] = [
-  {
-    image: '/images/banners/foto-60-anos-desktop.webp',
-    imageMobile: '/images/banners/foto-60-anos-mobile.webp',
-    imageMobileSmall: '/images/banners/foto-60-anos-mobile-720.webp',
-    title: 'Há mais de seis décadas',
-    subtitle: 'Na defesa do âmbito profissional dos farmacêuticos alagoanos.',
-    ctaLabel: 'Conheça o CRF/AL',
-    href: '/instituicao/sobre-conselho',
-  },
   {
     image: '/images/banners/foto-golpe-desktop.webp',
     imageMobile: '/images/banners/foto-golpe-mobile.webp',
@@ -68,22 +78,36 @@ export const banners: Banner[] = [
     href: '/imprensa/noticias/crf-al-alerta-farmaceuticos-sobre-golpes-envolvendo-cobrancas-de-anuidades-pelo-whatsapp',
   },
   {
-    image: '/images/banners/foto-ouvidoria-desktop.webp',
-    imageMobile: '/images/banners/foto-ouvidoria-mobile.webp',
-    imageMobileSmall: '/images/banners/foto-ouvidoria-mobile-720.webp',
+    image: '/images/banners/foto-ouvidoria-atendente-desktop.webp',
+    imageMobile: '/images/banners/foto-ouvidoria-atendente-mobile.webp',
+    imageMobileSmall: '/images/banners/foto-ouvidoria-atendente-mobile-720.webp',
     label: 'Ouvidoria do CRF/AL',
     title: 'Sua voz faz parte',
-    subtitle: 'Um canal direto entre você e o Conselho para sugestões, elogios, solicitações, reclamações e denúncias.',
-    note: 'Valorizando a profissão. Protegendo a sociedade.',
+    subtitle: 'Um canal direto entre você e o Conselho. Registre sua manifestação online.',
+    highlightsTitle: 'O que você pode registrar',
+    highlights: [
+      { icon: 'denuncia', title: 'Denúncias' },
+      { icon: 'reclamacao', title: 'Reclamações' },
+      { icon: 'solicitacao', title: 'Solicitações' },
+      { icon: 'sugestao', title: 'Sugestões e elogios' },
+    ],
     ctaLabel: 'Acessar a Ouvidoria',
     href: OUVIDORIA_URL,
   },
   {
-    image: '/images/banners/foto-crf-em-casa-desktop.webp',
-    imageMobile: '/images/banners/foto-crf-em-casa-mobile.webp',
-    imageMobileSmall: '/images/banners/foto-crf-em-casa-mobile-720.webp',
+    image: '/images/banners/foto-crf-em-casa-tablet-desktop.webp',
+    imageMobile: '/images/banners/foto-crf-em-casa-tablet-mobile.webp',
+    imageMobileSmall: '/images/banners/foto-crf-em-casa-tablet-mobile-720.webp',
     title: 'CRF AL em Casa',
     subtitle: 'Seus requerimentos de forma simples, rápida e 100% online.',
+    highlightsTitle: 'Pelo sistema você pode',
+    // Serviços descritos no manual do sistema (`src/data/manual-crf-em-casa.ts`).
+    highlights: [
+      { icon: 'documento', title: 'Enviar requerimentos' },
+      { icon: 'protocolo', title: 'Acompanhar protocolos' },
+      { icon: 'boleto', title: 'Emitir boletos' },
+      { icon: 'certidao', title: 'Imprimir certidão' },
+    ],
     ctaLabel: 'Acessar o CRF AL em Casa',
     href: CRF_EM_CASA_URL,
   },
