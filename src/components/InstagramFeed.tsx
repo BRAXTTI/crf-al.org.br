@@ -80,7 +80,9 @@ function FollowCard() {
       rel="noopener noreferrer"
       className="group relative isolate flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-xl border-t-2 border-crfal-gold bg-crfal-blue p-5 text-white shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2"
     >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-t/srgb from-crfal-blue-dark to-crfal-blue" />
+      {/* Foto real (ampolas sobre madeira, créditos em docs/creditos-fotos.md) sob véu azul-marinho para o texto branco. */}
+      <img src="/images/instagram-card-foto.webp" alt="" aria-hidden="true" width={1080} height={1350} loading="lazy" decoding="async" className="pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-top" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-t/srgb from-crfal-blue-dark/95 from-30% via-crfal-blue/85 via-65% to-crfal-blue/60" />
       <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/50">
         <Instagram className="h-5 w-5" aria-hidden="true" />
       </span>

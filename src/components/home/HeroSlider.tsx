@@ -15,14 +15,15 @@ interface HeroSliderProps {
 /**
  * Carrossel do topo da home.
  *
- * Proporção fixa (no desktop, a arte inteira é preservada):
- *  - < 768px  → 4:5   (arte mobile 1080×1350)
- *  - ≥ 768px  → 16:5 (arte desktop 1920×600)
+ * Foto real de fundo + texto em HTML (título, frase, nota e botão) sobre véu azul-marinho.
+ * Proporção fixa:
+ *  - < 768px  → 4:5  (foto mobile 1080×1350; texto no terço inferior)
+ *  - ≥ 768px  → 16:5 (foto desktop 2244×701; texto à esquerda)
  *
  * Sem dependência do WordPress: os banners vêm de `src/data/banners.ts`.
  */
 export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) {
-  const slides = useMemo(() => items.filter((banner) => banner.image), [items]);
+  const slides = useMemo(() => items.filter((banner) => banner.image && banner.title), [items]);
 
   const [current, setCurrent] = useState(0);
   // Pausa enquanto o ponteiro ou o foco estão no carrossel (WCAG 2.2.2).
@@ -95,7 +96,6 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
       <div className="relative aspect-4/5 overflow-hidden rounded-xl bg-crfal-blue-dark md:aspect-16/5" aria-live={isRotating ? 'off' : 'polite'}>
       {slides.map((slide, index) => {
         const isActive = index === activeIndex;
-        const hasOverlay = Boolean(slide.title || slide.subtitle || slide.ctaLabel);
         const isExternal = Boolean(slide.href && !slide.href.startsWith('/'));
 
         return (
@@ -120,69 +120,52 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                     height={slide.imageMobileHeight ?? 1350}
                   />
                 )}
+                {/* Foto decorativa: todo o conteúdo do banner está no texto ao lado. */}
                 <img
                   src={slide.image}
-                  alt={slide.href ? '' : slide.alt}
-                  width={1920}
-                  height={600}
+                  alt=""
+                  width={2244}
+                  height={701}
                   loading={index === 0 ? 'eager' : 'lazy'}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
                   decoding={index === 0 ? undefined : 'async'}
-                  className="h-full w-full object-cover md:object-contain"
+                  className="h-full w-full object-cover"
                 />
               </picture>
             )}
 
-            {hasOverlay && (
-              <>
-                <div className="absolute inset-0 bg-linear-to-r/srgb from-black/80 via-crfal-blue/65 to-crfal-blue/25" />
-                <div className="container-crfal relative z-10 flex h-full items-center">
-                  <div className="max-w-2xl">
-                    {slide.title && (
-                      <h2 className="font-display mb-3 text-2xl font-medium text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-3xl lg:text-4xl">
-                        <span className="animate-slide-up inline-block">{slide.title}</span>
-                      </h2>
-                    )}
+            {/* Véu azul-marinho sob o texto (contraste AA): de baixo para cima no celular, da esquerda para a direita a partir de 768px. */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-linear-to-t/srgb from-crfal-blue-dark from-35% via-crfal-blue/85 via-60% to-crfal-blue/5 md:bg-linear-to-r/srgb md:from-crfal-blue-dark/95 md:from-25% md:via-crfal-blue/85 md:via-50% md:to-crfal-blue/0"
+            />
 
-                    {slide.subtitle && (
-                      <p className="mb-6 max-w-xl text-sm leading-relaxed text-white/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.35)] sm:text-base">
-                        {slide.subtitle}
-                      </p>
-                    )}
+            <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-7 sm:px-10 sm:pb-10 md:justify-center md:py-6 md:pl-20 md:pr-6 lg:pl-24 xl:pl-28">
+              <div className="max-w-md lg:max-w-lg xl:max-w-xl">
+                {slide.label && <p className="mb-2 text-13 font-medium text-white/85 md:text-sm">{slide.label}</p>}
+                <h2 className="text-3xl font-medium text-white md:text-2xl lg:text-3xl xl:text-4xl">{slide.title}</h2>
+                {slide.subtitle && (
+                  <p className="mt-3 text-15 text-white/90 md:mt-2 md:line-clamp-2 md:text-sm lg:mt-3 lg:text-base xl:text-lg">{slide.subtitle}</p>
+                )}
+                {slide.note && <p className="mt-2 hidden text-13 text-white/75 lg:block">{slide.note}</p>}
 
-                    {slide.ctaLabel && slide.href && (
-                      <ArrowFillButton
-                        {...(slide.href.startsWith('/')
-                          ? { as: Link, to: slide.href }
-                          : {
-                              href: slide.href,
-                              target: isExternal ? '_blank' : undefined,
-                              rel: isExternal ? 'noopener noreferrer' : undefined,
-                            })}
-                        bgColor="#ffffff"
-                        textColor="#003366"
-                        fillBgColor="#C59B27"
-                        fillTextColor="#0B192C"
-                      >
-                        {slide.ctaLabel}
-                        {isExternal && <span className="sr-only"> (abre em nova aba)</span>}
-                      </ArrowFillButton>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Arte sem texto: o banner inteiro vira link. */}
-            {!hasOverlay && slide.href && (
-              <a
-                href={slide.href}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noopener noreferrer' : undefined}
-                aria-label={isExternal ? `${slide.alt} (abre em nova aba)` : slide.alt}
-                className="absolute inset-0 z-10 rounded-xl focus-visible:outline-hidden focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-crfal-gold"
-              />
-            )}
+                {slide.ctaLabel && slide.href && (
+                  <ArrowFillButton
+                    {...(isExternal
+                      ? { href: slide.href, target: '_blank', rel: 'noopener noreferrer' }
+                      : { as: Link, to: slide.href })}
+                    className="mt-5 md:mt-4 lg:mt-6"
+                    bgColor="#ffffff"
+                    textColor="#003366"
+                    fillBgColor="#C59B27"
+                    fillTextColor="#0B192C"
+                  >
+                    {slide.ctaLabel}
+                    {isExternal && <span className="sr-only"> (abre em nova aba)</span>}
+                  </ArrowFillButton>
+                )}
+              </div>
+            </div>
           </div>
         );
       })}

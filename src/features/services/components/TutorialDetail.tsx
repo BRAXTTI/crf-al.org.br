@@ -268,7 +268,7 @@ export default function TutorialDetail({ tutorial, acao, linkDocumentos, onConcl
           <div className="z-20 -mx-1 min-w-0 self-start bg-white px-1 pb-2 pt-2 lg:pb-0 lg:[@media(min-height:700px)]:sticky lg:[@media(min-height:700px)]:top-[calc(var(--header-offset)+16px)]">
             <div className="mb-4 hidden lg:block">{acao(false)}</div>
             <div className={telaDe('16:9')}>
-              <img src={capa.src} alt={capa.alt} width={960} height={540} loading="eager" decoding="async" className="block h-full w-full object-cover" />
+              <img src={capa.src} alt={capa.alt} width={1280} height={720} loading="eager" decoding="async" className="block h-full w-full object-cover" />
             </div>
           </div>
           <div className="min-w-0">
