@@ -246,7 +246,7 @@ export default function Popup({ popup }: PopupProps) {
 
               <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-5 sm:p-7">
                 {active.title ? (
-                  <DialogTitle className="font-display mb-1.5 text-xl font-semibold leading-tight text-white sm:text-2xl">
+                  <DialogTitle className="font-display mb-1.5 text-xl font-medium leading-tight text-white sm:text-2xl">
                     {active.title}
                   </DialogTitle>
                 ) : (

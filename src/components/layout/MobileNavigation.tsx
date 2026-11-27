@@ -6,7 +6,7 @@ import { serviceProfiles } from '@/config/service-profiles';
 import { CRF_EM_CASA_URL, TRANSPARENCIA_URL } from '@/config/site';
 import { isNavItemActive, isNavSubItemActive, type NavItem } from '@/config/navigation';
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-crfal-blue';
 
 export default function MobileNavigation({ open, onOpenChange, triggerRef, items, socialLinks, onOpenSearch }: {
@@ -60,14 +60,14 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
               return (
                 <Link key={profile.id} to={profile.href} onClick={close} className="flex min-h-[76px] flex-col items-center justify-center gap-1.5 rounded-xl border border-crfal-gray-200 bg-white px-1 text-crfal-blue hover:border-crfal-blue/30 hover:bg-crfal-blue-lighter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue">
                   <Icon className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
-                  <span className="text-[11px] font-semibold">{profile.label}</span>
+                  <span className="text-2xs font-medium">{profile.label}</span>
                 </Link>
               );
             })}
           </nav>
 
           <nav aria-label="Navegação principal mobile" className="overflow-hidden rounded-2xl border border-crfal-gray-200 bg-white shadow-xs">
-            <NavLink to="/" end onClick={close} className={({ isActive }) => `flex min-h-14 items-center gap-3 px-5 text-base font-semibold ${focusRing} ${isActive ? 'text-crfal-blue' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}>
+            <NavLink to="/" end onClick={close} className={({ isActive }) => `flex min-h-14 items-center gap-3 px-5 text-base font-medium ${focusRing} ${isActive ? 'text-crfal-blue' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}>
               <Home className="h-5 w-5 text-crfal-blue" aria-hidden="true" />Página inicial
             </NavLink>
 
@@ -79,7 +79,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
 
               if (!item.columns) {
                 const external = item.href.startsWith('http');
-                const rowClass = `flex min-h-14 items-center justify-between gap-3 border-t border-crfal-gray-200 px-5 text-base font-semibold ${focusRing} ${isCurrent ? 'bg-crfal-blue-lighter/60 text-crfal-blue' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`;
+                const rowClass = `flex min-h-14 items-center justify-between gap-3 border-t border-crfal-gray-200 px-5 text-base font-medium ${focusRing} ${isCurrent ? 'bg-crfal-blue-lighter/60 text-crfal-blue' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`;
                 return external ? (
                   <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" onClick={close} className={rowClass}>
                     {item.label}
@@ -102,7 +102,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
                     aria-expanded={isExpanded}
                     aria-controls={panelId}
                     onClick={() => setManualExpanded(isExpanded ? null : item.label)}
-                    className={`flex min-h-14 w-full items-center justify-between gap-3 px-5 text-left text-base font-semibold ${focusRing} ${isExpanded ? 'bg-crfal-gray-50 text-crfal-blue' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}
+                    className={`flex min-h-14 w-full items-center justify-between gap-3 px-5 text-left text-base font-medium ${focusRing} ${isExpanded ? 'bg-crfal-gray-50 text-crfal-blue' : 'text-crfal-blue-dark hover:bg-crfal-gray-50'}`}
                   >
                     <span className="flex items-center gap-2">{item.label}{sectionMark}</span>
                     <ChevronDown aria-hidden="true" className={`h-5 w-5 text-crfal-gray-400 transition-transform duration-200 motion-reduce:transition-none ${isExpanded ? 'rotate-180 text-crfal-blue' : ''}`} />
@@ -117,7 +117,7 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
                               {column.items.map(sub => {
                                 const Icon = sub.icon;
                                 const active = isNavSubItemActive(sub, pathname);
-                                const subClass = `relative flex min-h-12 items-center gap-3 rounded-xl px-3 py-2 text-[15px] font-medium ${focusRing} ${active ? 'bg-white font-semibold text-crfal-blue shadow-xs before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-gray-700 hover:bg-white'}`;
+                                const subClass = `relative flex min-h-12 items-center gap-3 rounded-xl px-3 py-2 text-15 font-medium ${focusRing} ${active ? 'bg-white font-medium text-crfal-blue shadow-xs before:absolute before:inset-y-2.5 before:left-0 before:w-0.5 before:rounded-full before:bg-crfal-gold' : 'text-crfal-gray-700 hover:bg-white'}`;
                                 const icon = (
                                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-1 ${active ? 'bg-crfal-blue text-white ring-crfal-gold/50' : 'bg-white text-crfal-blue ring-crfal-gray-200'}`}>
                                     <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
@@ -154,8 +154,8 @@ export default function MobileNavigation({ open, onOpenChange, triggerRef, items
             <span className="flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/40"><User className="h-5 w-5" aria-hidden="true" /></span>
               <span>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Atendimento online</span>
-                <span className="block text-sm font-bold">CRF AL em Casa</span>
+                <span className="block text-2xs font-medium uppercase tracking-[0.12em] text-crfal-gold">Atendimento online</span>
+                <span className="block text-sm font-medium">CRF AL em Casa</span>
               </span>
             </span>
             <ArrowUpRight className="h-5 w-5" aria-hidden="true" />

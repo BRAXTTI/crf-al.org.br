@@ -90,7 +90,7 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) el.play().catch(() => {});
   };
 
-  const botaoNav = `inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border border-crfal-gray-300 bg-white px-3 text-sm font-semibold text-crfal-blue hover:border-crfal-blue disabled:cursor-not-allowed disabled:opacity-40 ${motion} ${focusRing}`;
+  const botaoNav = `inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full border border-crfal-gray-300 bg-white px-3 text-sm font-medium text-crfal-blue hover:border-crfal-blue disabled:cursor-not-allowed disabled:opacity-40 ${motion} ${focusRing}`;
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-12">
@@ -121,7 +121,7 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
         </div>
         {narrado && <ControlesSom videoRef={videoRef} duracao={video.duracao} className="max-lg:px-4 sm:max-lg:px-6 md:max-lg:px-8" />}
         <div className="mt-2 flex min-h-11 items-center justify-between gap-3 max-lg:px-4 sm:max-lg:px-6 md:max-lg:px-8 lg:mt-4">
-          <p className="line-clamp-2 min-w-0 text-sm font-semibold leading-snug text-crfal-blue-dark">
+          <p className="line-clamp-2 min-w-0 text-sm font-medium leading-snug text-crfal-blue-dark">
             Passo {ativo + 1} de {total}
             <span className="lg:hidden">: {passos[ativo].titulo}</span>
           </p>
@@ -138,8 +138,8 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
 
       <div className="min-w-0">
         {antes}
-        {video.aviso && <p className="mt-4 rounded-lg border border-crfal-gold/40 bg-[#FBF7EC] px-3.5 py-2.5 text-[13.5px] leading-snug text-crfal-gray-700">{video.aviso}</p>}
-        <h2 className="mt-4 text-lg font-bold text-crfal-blue first:mt-0 lg:mt-6">Passos</h2>
+        {video.aviso && <p className="mt-4 rounded-lg border border-crfal-gold/40 bg-[#FBF7EC] px-3.5 py-2.5 text-13 leading-snug text-crfal-gray-700">{video.aviso}</p>}
+        <h2 className="mt-4 text-lg font-medium text-crfal-blue first:mt-0 lg:mt-6">Passos</h2>
         <ol className="mt-3">
           {passos.map((passo, indice) => {
             const atual = indice === ativo;
@@ -147,11 +147,11 @@ export default function PassosComVideo({ tarefa, guia, visivel = true, preload, 
               <li key={passo.titulo} aria-current={atual ? 'step' : undefined}>
                 <button type="button" onClick={() => escolher(indice)} className={`group flex min-h-11 w-full gap-3 rounded-lg px-1.5 text-left ${focusRing}`}>
                   <span className="flex flex-col items-center self-stretch">
-                    <span aria-hidden className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${motion} ${atual ? 'bg-crfal-blue text-white ring-2 ring-crfal-gold' : 'bg-crfal-blue-lighter text-crfal-blue group-hover:bg-crfal-blue group-hover:text-white'}`}>{indice + 1}</span>
+                    <span aria-hidden className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium ${motion} ${atual ? 'bg-crfal-blue text-white ring-2 ring-crfal-gold' : 'bg-crfal-blue-lighter text-crfal-blue group-hover:bg-crfal-blue group-hover:text-white'}`}>{indice + 1}</span>
                     {indice < total - 1 && <span aria-hidden className="mt-1 block w-px flex-1 bg-crfal-gray-200" />}
                   </span>
                   <span className="block min-w-0 pb-4 pt-1.5">
-                    <span className={`block text-[15px] leading-snug ${atual ? 'font-bold text-crfal-blue-dark' : 'font-semibold text-crfal-gray-700 group-hover:text-crfal-blue'}`}>{passo.titulo}</span>
+                    <span className={`block text-15 leading-snug ${atual ? 'font-medium text-crfal-blue-dark' : 'font-medium text-crfal-gray-700 group-hover:text-crfal-blue'}`}>{passo.titulo}</span>
                     {atual && passo.detalhe && <span className="mt-1 block text-sm leading-snug text-crfal-gray-600">{passo.detalhe}</span>}
                   </span>
                 </button>

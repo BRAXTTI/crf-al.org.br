@@ -38,7 +38,7 @@ export default function RelatoriosFiscalizacaoPage() {
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-crfal-blue-lighter text-crfal-blue  ">
               <fn.icon className="h-5 w-5" />
             </div>
-            <h3 className="mb-1.5 text-sm font-bold text-neutral-800 ">{fn.title}</h3>
+            <h3 className="mb-1.5 text-sm font-medium text-neutral-800 ">{fn.title}</h3>
             <p className="text-xs leading-relaxed text-crfal-gray-600 ">{fn.desc}</p>
           </div>
         ))}

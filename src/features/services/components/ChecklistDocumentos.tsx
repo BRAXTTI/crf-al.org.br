@@ -103,7 +103,7 @@ export default function ChecklistDocumentos({
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-crfal-blue-dark">
+          <p className="text-sm font-medium text-crfal-blue-dark">
             {marcados.length} de {totalDocs}{' '}
             {totalDocs === 1 ? 'documento reunido' : 'documentos reunidos'}
           </p>
@@ -127,7 +127,7 @@ export default function ChecklistDocumentos({
             <button
               type="button"
               onClick={limparChecklist}
-              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue sm:min-h-9 ${focusRing}`}
+              className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-crfal-gray-600 hover:bg-crfal-gray-100 hover:text-crfal-blue sm:min-h-9 ${focusRing}`}
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Desmarcar todos
             </button>
@@ -135,7 +135,7 @@ export default function ChecklistDocumentos({
           <button
             type="button"
             onClick={() => setImpressaoBloqueada(!imprimirLista(item, observacoesResolvidas))}
-            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold text-crfal-blue hover:bg-crfal-blue-lighter sm:min-h-9 ${focusRing}`}
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-crfal-blue hover:bg-crfal-blue-lighter sm:min-h-9 ${focusRing}`}
           >
             <Printer className="h-3.5 w-3.5" aria-hidden="true" /> Imprimir lista
           </button>
@@ -182,7 +182,7 @@ export default function ChecklistDocumentos({
       {impressaoBloqueada && (
         <p
           role="alert"
-          className="mt-3 rounded-lg border border-amber-200 bg-amber-50/70 px-4 py-3 text-[13px] leading-relaxed text-amber-900"
+          className="mt-3 rounded-lg border border-amber-200 bg-amber-50/70 px-4 py-3 text-13 leading-relaxed text-amber-900"
         >
           O navegador bloqueou a janela de impressão. Permita pop-ups para este site e toque em
           “Imprimir lista” de novo.

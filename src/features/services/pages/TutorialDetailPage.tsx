@@ -32,7 +32,7 @@ function CopiarLink({ path }: { path: string }) {
   };
 
   return (
-    <button type="button" onClick={copiar} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-4 text-sm font-semibold text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-white">
+    <button type="button" onClick={copiar} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-4 text-sm font-medium text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline-white">
       {copiado ? <Check className="h-4 w-4 text-crfal-gold" aria-hidden /> : <Link2 className="h-4 w-4" aria-hidden />}
       <span aria-live="polite">{copiado ? 'Link copiado' : 'Copiar link'}</span>
     </button>

@@ -72,7 +72,6 @@ const missaoVisao = [
   {
     id: 'missao',
     titulo: 'Missão',
-    subtitulo: 'Nossa razão de existir',
     Icon: Target,
     descricao:
       'Promover a segurança no exercício profissional farmacêutico em toda a sua abrangência, de forma técnica, responsável, ética e legal, garantindo o farmacêutico como agente transformador do acesso aos medicamentos, insumos e serviços de saúde no estado de Alagoas.',
@@ -80,7 +79,6 @@ const missaoVisao = [
   {
     id: 'visao',
     titulo: 'Visão',
-    subtitulo: 'Onde queremos chegar',
     Icon: Eye,
     descricao:
       'Ser uma instituição facilitadora na regularização de serviços administrativos para farmacêuticos, técnicos e empresas, através de processos modernos e com excelência, buscando orientar, capacitar e valorizar a prestação de serviços farmacêuticos no estado de Alagoas.',
@@ -237,20 +235,18 @@ const saibaMais: { href: string; title: string; description: string; Icon: Compo
 
 /* ─── HELPERS ───────────────────────────────────────────────────────── */
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const anchorOffset = 'scroll-mt-[calc(var(--header-offset)+24px)]';
 
 function SectionHeader({
   id,
-  label,
   title,
   children,
   inverted = false,
   center = false,
 }: {
   id: string;
-  label: string;
   title: string;
   children?: ReactNode;
   inverted?: boolean;
@@ -258,11 +254,9 @@ function SectionHeader({
 }) {
   return (
     <div className={`max-w-2xl ${center ? 'mx-auto text-center' : ''}`}>
-      <p className={inverted ? 'text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold' : goldLabel}>{label}</p>
-      <h2 id={id} className={`mt-2 text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl ${inverted ? 'text-white' : 'text-crfal-blue'}`}>
+      <h2 id={id} className={`text-2xl font-medium sm:text-3xl ${inverted ? 'text-white' : 'text-crfal-blue'}`}>
         {title}
       </h2>
-      <span aria-hidden className={`mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold ${center ? 'mx-auto' : ''}`} />
       {children && (
         <p className={`mt-4 text-base leading-relaxed ${inverted ? 'text-white/80' : 'text-crfal-gray-600'}`}>{children}</p>
       )}
@@ -310,7 +304,7 @@ export default function SobreConselhoPage() {
         }
       />
 
-      <div className="container-crfal space-y-3 py-6 sm:py-10">
+      <div className="container-crfal space-y-6 py-8 sm:space-y-10 sm:py-12">
         {/* ── SUMÁRIO ──────────────────────────────────────────────────── */}
         <nav aria-label="Nesta página" className="flex flex-wrap items-center gap-2 pb-3 sm:pb-5">
           <span className={`${goldLabel} mr-1 w-full sm:w-auto`}>Nesta página</span>
@@ -329,9 +323,9 @@ export default function SobreConselhoPage() {
         <section id="historia" aria-labelledby="historia-title" className={`section-panel ${anchorOffset}`}>
           <div ref={histRef} className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
             <div {...histReveal} className="lg:sticky lg:top-[calc(var(--header-offset)+32px)] lg:self-start">
-              <SectionHeader id="historia-title" label="Nossa trajetória" title="História do CRF-AL" />
+              <SectionHeader id="historia-title" title="História do CRF-AL" />
               <p className="mt-5 text-base leading-relaxed text-crfal-gray-700 sm:text-lg">
-                O <strong className="font-semibold text-crfal-blue">Conselho Regional de Farmácia do Estado de Alagoas — CRF-AL</strong> é a autarquia federal responsável pela fiscalização e regulamentação do exercício da profissão farmacêutica em Alagoas.
+                O <strong className="font-medium text-crfal-blue">Conselho Regional de Farmácia do Estado de Alagoas — CRF-AL</strong> é a autarquia federal responsável pela fiscalização e regulamentação do exercício da profissão farmacêutica em Alagoas.
               </p>
               <p className="mt-4 text-base leading-relaxed text-crfal-gray-600">
                 Ao longo de mais de seis décadas, fortaleceu sua presença como defensor da ética, da qualidade técnica e da valorização do farmacêutico alagoano, contribuindo para a saúde pública do estado.
@@ -355,16 +349,16 @@ export default function SobreConselhoPage() {
                   />
                   <article className={`rounded-xl border p-5 sm:p-6 ${m.highlight ? 'border-crfal-gold/40 bg-[#FBF7EC]' : 'border-crfal-gray-200 bg-white'}`}>
                     <div className="mb-2 flex flex-wrap items-center gap-3">
-                      <span className={`text-2xl font-bold leading-none tracking-tight sm:text-3xl ${m.highlight ? 'text-[#8A6A12]' : 'text-crfal-blue'}`}>
+                      <span className={`text-2xl font-medium leading-none sm:text-3xl ${m.highlight ? 'text-[#8A6A12]' : 'text-crfal-blue'}`}>
                         {m.year}
                       </span>
                       {m.highlight && (
-                        <span className="rounded-full bg-crfal-gold/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A6A12] ring-1 ring-crfal-gold/40">
+                        <span className="rounded-full bg-crfal-gold/15 px-2.5 py-0.5 text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12] ring-1 ring-crfal-gold/40">
                           Fundação
                         </span>
                       )}
                     </div>
-                    <h3 className="mb-1.5 text-base font-semibold text-crfal-gray-900 sm:text-lg">{m.title}</h3>
+                    <h3 className="mb-1.5 text-base font-medium text-crfal-gray-900 sm:text-lg">{m.title}</h3>
                     <p className="text-sm leading-relaxed text-crfal-gray-600 sm:text-base">{m.description}</p>
                   </article>
                 </li>
@@ -382,7 +376,7 @@ export default function SobreConselhoPage() {
           <Target className="pointer-events-none absolute -right-10 -top-10 -z-10 h-64 w-64 text-white opacity-[0.05]" aria-hidden />
           <div ref={mvvRef}>
             <div {...mvvReveal}>
-              <SectionHeader id="mvv-title" label="Propósito e direção" title="Missão, Visão e Valores" inverted />
+              <SectionHeader id="mvv-title" title="Missão, Visão e Valores" inverted />
             </div>
 
             <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
@@ -398,9 +392,8 @@ export default function SobreConselhoPage() {
                     <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/60">
                       <Icon className="h-5 w-5 text-white" aria-hidden />
                     </span>
-                    <h3 className="text-xl font-bold sm:text-2xl">{item.titulo}</h3>
-                    <p className="mb-4 mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">{item.subtitulo}</p>
-                    <p className="text-sm leading-relaxed text-white/85 sm:text-base">{item.descricao}</p>
+                    <h3 className="mb-3 text-xl font-medium sm:text-2xl">{item.titulo}</h3>
+                    <p className="text-sm leading-relaxed text-white/85 sm:text-15">{item.descricao}</p>
                   </article>
                 );
               })}
@@ -413,11 +406,10 @@ export default function SobreConselhoPage() {
                 <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 ring-1 ring-crfal-gold/60">
                   <Heart className="h-5 w-5 text-white" aria-hidden />
                 </span>
-                <h3 className="text-xl font-bold sm:text-2xl">Valores</h3>
-                <p className="mb-4 mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">Nossos princípios fundamentais</p>
+                <h3 className="mb-3 text-xl font-medium sm:text-2xl">Valores</h3>
                 <ul className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-1">
                   {valores.map((valor) => (
-                    <li key={valor} className="flex items-start gap-2.5 text-sm leading-snug text-white/85 sm:text-base">
+                    <li key={valor} className="flex items-start gap-2.5 text-sm leading-snug text-white/85 sm:text-15">
                       <Check className="mt-0.5 h-4 w-4 shrink-0 text-crfal-gold" aria-hidden />
                       {valor}
                     </li>
@@ -432,7 +424,7 @@ export default function SobreConselhoPage() {
         <section id="atribuicoes" aria-labelledby="atribuicoes-title" className={`section-panel ${anchorOffset}`}>
           <div ref={atribRef}>
             <div {...atribReveal}>
-              <SectionHeader id="atribuicoes-title" label="Competências legais" title="Atribuições do CRF-AL">
+              <SectionHeader id="atribuicoes-title" title="Atribuições do CRF-AL">
                 Com base na Lei Federal nº 3.820/1960 e legislações complementares, o CRF-AL exerce as seguintes competências em prol da sociedade e da classe farmacêutica alagoana.
               </SectionHeader>
             </div>
@@ -453,9 +445,9 @@ export default function SobreConselhoPage() {
                       <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-crfal-blue-lighter ring-1 ring-crfal-gold/40 transition-colors group-hover:bg-crfal-blue motion-reduce:transition-none">
                         <Icon className="h-5 w-5 text-crfal-blue transition-colors group-hover:text-white motion-reduce:transition-none" aria-hidden />
                       </span>
-                      <h3 className="mb-1.5 text-base font-semibold text-crfal-gray-900">{item.title}</h3>
+                      <h3 className="mb-1.5 text-base font-medium text-crfal-gray-900">{item.title}</h3>
                       <p className="text-sm leading-relaxed text-crfal-gray-600">{item.description}</p>
-                      <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-crfal-blue">
+                      <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-medium text-crfal-blue">
                         {item.cta}
                         <ArrowRight className="h-4 w-4 text-[#8A6A12] transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden />
                       </span>
@@ -471,7 +463,7 @@ export default function SobreConselhoPage() {
         <section id="hino" aria-labelledby="hino-title" className={`section-panel ${anchorOffset}`}>
           <div ref={hinoRef}>
             <div {...hinoReveal}>
-              <SectionHeader id="hino-title" label="Tradição e orgulho" title="Hino Farmacêutico" center>
+              <SectionHeader id="hino-title" title="Hino Farmacêutico" center>
                 Entoado nas solenidades da classe farmacêutica brasileira, o Hino Farmacêutico celebra a missão, os valores e o orgulho de uma profissão dedicada à vida.
               </SectionHeader>
             </div>
@@ -489,7 +481,7 @@ export default function SobreConselhoPage() {
                 {hinoEstrofes.map((estrofe, i) => (
                   <div key={i} className={estrofe.tipo === 'refrao' ? 'border-l-2 border-crfal-gold pl-5' : ''}>
                     {estrofe.tipo === 'refrao' && <p className={`${goldLabel} mb-2`}>Refrão</p>}
-                    <p className={`whitespace-pre-line leading-relaxed ${estrofe.tipo === 'refrao' ? 'text-sm font-semibold italic text-crfal-gray-900 sm:text-base' : 'text-sm text-crfal-gray-700 sm:text-base'}`}>
+                    <p className={`whitespace-pre-line leading-relaxed ${estrofe.tipo === 'refrao' ? 'text-sm font-medium italic text-crfal-gray-900 sm:text-base' : 'text-sm text-crfal-gray-700 sm:text-base'}`}>
                       {estrofe.linhas.join('\n')}
                     </p>
                   </div>
@@ -501,7 +493,7 @@ export default function SobreConselhoPage() {
 
         {/* ── SAIBA MAIS ───────────────────────────────────────────────── */}
         <section aria-labelledby="saiba-mais-title" className="section-panel">
-          <SectionHeader id="saiba-mais-title" label="Continue navegando" title="Conheça mais o CRF-AL" />
+          <SectionHeader id="saiba-mais-title" title="Conheça mais o CRF-AL" />
           <ul className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {saibaMais.map(({ href, title, description, Icon, external }) => {
               const cls = `group flex h-full items-center gap-4 rounded-xl border border-crfal-gray-200 bg-white p-4 transition-colors hover:border-crfal-blue/40 hover:bg-crfal-blue-lighter/50 motion-reduce:transition-none ${focusRing}`;
@@ -511,7 +503,7 @@ export default function SobreConselhoPage() {
                     <Icon className="h-5 w-5 text-crfal-blue" aria-hidden />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-crfal-gray-900 sm:text-base">{title}</span>
+                    <span className="block text-sm font-medium text-crfal-gray-900 sm:text-base">{title}</span>
                     <span className="block text-sm text-crfal-gray-600">{description}</span>
                   </span>
                   {external ? (

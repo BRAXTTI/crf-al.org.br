@@ -215,11 +215,11 @@ export default function NewsDetailPage() {
           <header className="border-b border-crfal-gray-200 bg-white">
             <div className="container-crfal py-6 md:py-8">
               <div className="mx-auto max-w-4xl text-center">
-                <span className="inline-flex items-center rounded-full bg-crfal-gold px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-crfal-blue-dark">
+                <span className="inline-flex items-center rounded-full bg-crfal-gold px-3 py-0.5 text-xs font-medium uppercase tracking-wide text-crfal-blue-dark">
                   {categoria}
                 </span>
                 <h1
-                  className="mt-3 font-display text-2xl font-bold leading-[1.15] text-crfal-blue-dark sm:text-3xl md:text-4xl"
+                  className="mt-3 font-display text-2xl font-medium text-crfal-blue-dark sm:text-3xl md:text-4xl"
                   dangerouslySetInnerHTML={{ __html: sanitizeWP(post.title.rendered) }}
                 />
                 {standfirst && (
@@ -236,7 +236,7 @@ export default function NewsDetailPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   {autor && (
-                    <p className="text-xs font-bold uppercase tracking-wide text-crfal-blue-dark sm:text-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-crfal-blue-dark sm:text-sm">
                       {autor}
                     </p>
                   )}
@@ -268,8 +268,8 @@ export default function NewsDetailPage() {
                     <div
                     className="text-neutral-700  leading-relaxed text-sm sm:text-base
                       [&_p]:mb-4
-                      [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]: [&_h2]:mt-8 [&_h2]:mb-3
-                      [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-neutral-800 [&_h3]: [&_h3]:mt-6 [&_h3]:mb-2
+                      [&_h2]:text-xl [&_h2]:font-medium [&_h2]:text-neutral-800 [&_h2]: [&_h2]:mt-8 [&_h2]:mb-3
+                      [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-neutral-800 [&_h3]: [&_h3]:mt-6 [&_h3]:mb-2
                       [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-4
                       [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-4
                       [&_li]:mb-2
@@ -287,7 +287,7 @@ export default function NewsDetailPage() {
               <div className="space-y-4 lg:sticky lg:top-[calc(var(--header-offset)+1rem)]">
                 {/* Related posts */}
                 <div className="bg-white  rounded-xl border border-crfal-gray-200  p-4">
-                  <h3 className="text-base font-bold text-neutral-800  mb-3">Outras Notícias</h3>
+                  <h3 className="text-base font-medium text-neutral-800  mb-3">Outras Notícias</h3>
                   {related.length === 0 ? (
                     <p className="text-sm text-crfal-gray-500 ">Não há outras matérias para exibir agora.</p>
                   ) : (
@@ -299,7 +299,7 @@ export default function NewsDetailPage() {
                           className="block p-3 rounded-xl border border-crfal-gray-200  hover:border-crfal-blue/40 transition-colors"
                         >
                           <p className="text-xs text-crfal-gray-600  mb-1">{item.date}</p>
-                          <p className="text-sm font-semibold text-neutral-800  line-clamp-2">{item.title}</p>
+                          <p className="text-sm font-medium text-neutral-800  line-clamp-2">{item.title}</p>
                         </Link>
                       ))}
                     </div>

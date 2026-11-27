@@ -45,7 +45,7 @@ function useFullyInView<T extends Element>(enabled: boolean) {
 }
 
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
-const actionClass = `group inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-semibold text-crfal-blue transition-colors hover:text-crfal-blue-light motion-reduce:transition-none ${focusRing}`;
+const actionClass = `group inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-medium text-crfal-blue transition-colors hover:text-crfal-blue-light motion-reduce:transition-none ${focusRing}`;
 
 function Item({ icon: Icon, label, children, actions }: { icon: ElementType; label: ReactNode; children: ReactNode; actions?: ReactNode }) {
   return (
@@ -54,8 +54,8 @@ function Item({ icon: Icon, label, children, actions }: { icon: ElementType; lab
         <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-medium text-crfal-gray-600">{label}</p>
-        <div className="mt-0.5 text-[15px] font-bold leading-snug text-crfal-blue-dark">{children}</div>
+        <p className="text-13 font-medium text-crfal-gray-600">{label}</p>
+        <div className="mt-0.5 text-15 font-medium leading-snug text-crfal-blue-dark">{children}</div>
         {actions && <div className="-mb-2 mt-1 flex flex-wrap gap-x-5">{actions}</div>}
       </div>
     </li>
@@ -181,7 +181,7 @@ export default function AgoraNoConselho() {
     () => typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
   return (
-    <section aria-labelledby="agora-title" className="pb-2 sm:pb-3">
+    <section aria-labelledby="agora-title" className="pb-3 sm:pb-5">
       <div className="container-crfal">
         <div ref={ref} className="relative rounded-2xl border border-crfal-gray-200/80 bg-white px-5 py-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_24px_48px_-32px_rgba(11,25,44,0.18)] sm:rounded-3xl sm:px-6 sm:py-7 md:px-8 lg:grid lg:grid-cols-[11rem_1fr] lg:items-start lg:gap-10 lg:px-12 lg:py-8">
           {hydrated && inView && !beamDone && (
@@ -196,7 +196,7 @@ export default function AgoraNoConselho() {
             />
           )}
           <div className="mb-5 lg:mb-0">
-            <h2 id="agora-title" className="text-xl font-bold tracking-tight text-crfal-blue sm:text-[22px]">Agora no CRF-AL</h2>
+            <h2 id="agora-title" className="text-xl font-medium text-crfal-blue">Agora no CRF-AL</h2>
             <p className="mt-1 text-sm text-crfal-gray-600">
               <time dateTime={today}>{weekday(today)}, {formatDate(today, { day: 'numeric', month: 'long' })}</time>
             </p>

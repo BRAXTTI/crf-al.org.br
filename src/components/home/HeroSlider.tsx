@@ -139,7 +139,7 @@ export default function HeroSlider({ items = defaultBanners }: HeroSliderProps) 
                 <div className="container-crfal relative z-10 flex h-full items-center">
                   <div className="max-w-2xl">
                     {slide.title && (
-                      <h2 className="font-display mb-3 text-2xl font-semibold leading-[1.08] tracking-tight text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-3xl lg:text-[2.5rem]">
+                      <h2 className="font-display mb-3 text-2xl font-medium text-white [text-shadow:0_2px_20px_rgba(0,0,0,0.45)] sm:text-3xl lg:text-4xl">
                         <span className="animate-slide-up inline-block">{slide.title}</span>
                       </h2>
                     )}

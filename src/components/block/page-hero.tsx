@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, ChevronRight } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom';
 import { SECTION_NAV, type SectionKey, type SectionNavLink } from '@/config/section-nav';
 
-/** Cabeçalho editorial das páginas internas; arte decorativa somente no desktop. */
+/** Cabeçalho editorial das páginas internas: gradiente institucional, sem arte decorativa. */
 export interface PageHeroBreadcrumb {
   label: string;
   /** Se ausente, o item é renderizado como texto (página atual). */
@@ -21,7 +21,7 @@ export interface PageHeroProps {
   title?: ReactNode;
   description?: ReactNode;
   breadcrumb?: PageHeroBreadcrumb[];
-  /** Texto curto acima do título (renderizado como "pill"). */
+  /** Texto curto acima do título. Use só quando informa algo que o título e o breadcrumb não dizem (ex.: perfil do requerimento). */
   eyebrow?: ReactNode;
   /** Conteúdo extra em fluxo, abaixo da descrição (ex.: estatísticas). */
   children?: ReactNode;
@@ -33,16 +33,13 @@ export interface PageHeroProps {
   meta?: PageHeroMetaItem[];
   /** Ações principais (use `PageHeroAction`). */
   actions?: ReactNode;
-  /** Seção do site: define o rótulo dourado e as abas na base do cabeçalho. */
+  /** Seção do site: define as abas na base do cabeçalho. */
   section?: SectionKey;
-  /** Imagem de fundo (desktop). */
+  /** Imagem de fundo opcional (desktop). Use só foto real; sem arte decorativa por padrão. */
   backgroundImage?: string;
   /** Classes extras no elemento raiz. */
   className?: string;
 }
-
-const GRID_TEXTURE =
-  'bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-size-[48px_48px]';
 
 function isLinkActive(link: SectionNavLink, pathname: string) {
   if (link.external) return false;
@@ -61,14 +58,13 @@ export default function PageHero({
   actions,
   aside,
   section,
-  backgroundImage = "/images/page-hero-desktop-v3.webp",
+  backgroundImage,
   className,
   children,
 }: PageHeroProps) {
   const { pathname } = useLocation();
   const summary = lead ?? description;
   const sectionNav = section ? SECTION_NAV[section] : undefined;
-  const eyebrowText = eyebrow ?? sectionNav?.label ?? (breadcrumb && breadcrumb.length > 2 ? breadcrumb[1].label : undefined);
   const backLink = breadcrumb ? [...breadcrumb].slice(0, -1).reverse().find((item) => item.href) : undefined;
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -82,12 +78,9 @@ export default function PageHero({
 
   return (
     <section id={id} className={`relative isolate mt-(--page-header-offset) overflow-hidden rounded-b-2xl bg-crfal-blue-dark text-white sm:rounded-b-3xl ${className ?? ''}`}>
-      {/* Fundo: gradiente, textura fina, brilho e arte da taça como assinatura discreta. */}
+      {/* Fundo: gradiente institucional (sem textura, brilhos nem ilustração gerada). */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-linear-to-br/srgb from-[#0A2A4F] via-crfal-blue-dark to-[#071222]" />
-        <div className={`absolute inset-0 ${GRID_TEXTURE} mask-[radial-gradient(ellipse_at_top_right,black_10%,transparent_70%)]`} />
-        <div className="absolute -right-24 -top-32 h-[420px] w-[420px] rounded-full bg-crfal-blue-light/25 blur-[120px]" />
-        <div className="absolute -bottom-40 left-1/4 h-72 w-72 rounded-full bg-crfal-gold/10 blur-[110px]" />
         {backgroundImage && (
           <picture>
             <source media="(min-width: 1024px)" srcSet={backgroundImage} />
@@ -108,13 +101,13 @@ export default function PageHero({
             {breadcrumb && breadcrumb.length > 0 && (
               <>
                 {backLink && (
-                  <Link to={backLink.href!} className="mb-4 inline-flex min-h-8 items-center gap-1.5 rounded text-[13px] font-medium text-white/70 hover:text-white focus-visible:outline-white sm:hidden">
+                  <Link to={backLink.href!} className="mb-4 inline-flex min-h-8 items-center gap-1.5 rounded text-13 font-medium text-white/70 hover:text-white focus-visible:outline-white sm:hidden">
                     <ArrowLeft className="h-3.5 w-3.5 text-crfal-gold" aria-hidden />
                     {backLink.label}
                   </Link>
                 )}
                 <nav aria-label="Breadcrumb" className="mb-5 hidden sm:block">
-                  <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-white/60">
+                  <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-13 text-white/60">
                     {breadcrumb.map((item, index) => (
                       <li key={`${item.label}-${index}`} className="flex items-center gap-2">
                         {index > 0 && <ChevronRight className="h-3.5 w-3.5 text-crfal-gold/70" aria-hidden />}
@@ -131,14 +124,9 @@ export default function PageHero({
             )}
 
             <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
-              {eyebrowText && (
-                <p className="mb-2.5 flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-crfal-gold">
-                  <span aria-hidden className="h-px w-6 bg-crfal-gold/70" />
-                  {eyebrowText}
-                </p>
-              )}
-              {title && <h1 className="max-w-4xl text-[30px] font-bold leading-[1.08] tracking-[-0.02em] text-white sm:text-[40px] lg:text-[48px]">{title}</h1>}
-              {summary && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-white/75 sm:mt-4 sm:text-[17px]">{summary}</p>}
+              {eyebrow && <p className="mb-2.5 text-sm text-white/70">{eyebrow}</p>}
+              {title && <h1 className="max-w-4xl text-3xl font-medium text-white sm:text-4xl">{title}</h1>}
+              {summary && <p className="mt-3 max-w-2xl text-15 leading-relaxed text-white/75 sm:mt-4 sm:text-lg">{summary}</p>}
               {meta && meta.length > 0 && <PageHeroMeta items={meta} className="mt-5" />}
               {children && <div className="mt-5">{children}</div>}
               {actions && <div className="mt-6 flex flex-wrap gap-3 lg:hidden">{actions}</div>}
@@ -159,7 +147,7 @@ export default function PageHero({
             <div ref={tabsRef} className="-mx-4 flex gap-1 overflow-x-auto px-4 scrollbar-none sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
               {sectionNav.links.map((link: SectionNavLink) => {
                 const active = isLinkActive(link, pathname);
-                const cls = `relative inline-flex min-h-12 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-[13px] font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 first:pl-0 sm:text-sm ${
+                const cls = `relative inline-flex min-h-12 shrink-0 items-center gap-1.5 whitespace-nowrap px-3 text-13 font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70 first:pl-0 sm:text-sm ${
                   active
                     ? 'text-white after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-crfal-gold first:after:left-0'
                     : 'text-white/60 hover:text-white'
@@ -191,7 +179,7 @@ function PageHeroMeta({ items, className = '' }: { items: PageHeroMetaItem[]; cl
       {items.map((item, index) => (
         <div key={item.label} className="flex items-baseline gap-1.5">
           {index > 0 && <span aria-hidden className="mr-3.5 hidden h-1 w-1 -translate-y-0.5 self-center rounded-full bg-crfal-gold/70 sm:block" />}
-          <dd className="text-base font-bold tabular-nums text-white">{item.value}</dd>
+          <dd className="text-base font-medium tabular-nums text-white">{item.value}</dd>
           <dt className="text-white/65">{item.label}</dt>
         </div>
       ))}
@@ -214,7 +202,7 @@ export function PageHeroAction({
   icon?: ComponentType<{ className?: string }>;
 }) {
   const isExternal = external ?? /^(https?:|mailto:|tel:)/.test(href);
-  const cls = `group inline-flex min-h-11 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark motion-reduce:transition-none ${
+  const cls = `group inline-flex min-h-11 items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark motion-reduce:transition-none ${
     variant === 'primary' ? 'bg-white text-crfal-blue hover:bg-crfal-blue-lighter' : 'border border-white/30 text-white hover:border-white hover:bg-white/10'
   }`;
   const content = (

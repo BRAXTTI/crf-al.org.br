@@ -184,7 +184,7 @@ export default function NewsPage() {
         ) : publications.length === 0 ? (
           <div className="text-center py-20">
             <Newspaper className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-neutral-700 mb-2">Nenhuma notícia encontrada</h3>
+            <h3 className="text-lg font-medium text-neutral-700 mb-2">Nenhuma notícia encontrada</h3>
             <p className="text-crfal-gray-500 text-sm">Não há notícias publicadas no momento.</p>
           </div>
         ) : (
@@ -203,11 +203,11 @@ export default function NewsPage() {
                       imgClassName="sm:absolute sm:inset-0"
                     />
                     <div className="flex flex-1 flex-col items-start p-5 sm:p-6">
-                      <span className={`mb-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold text-white ${pub.tagColor}`}>
+                      <span className={`mb-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-white ${pub.tagColor}`}>
                         <Tag className="h-3 w-3" aria-hidden="true" />
                         {pub.tag}
                       </span>
-                      <h2 className="mb-3 text-lg font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">
+                      <h2 className="mb-3 text-lg font-medium leading-snug text-crfal-blue-dark group-hover:text-crfal-blue">
                         {pub.title}
                       </h2>
                       <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-crfal-gray-600">{pub.excerpt}</p>
@@ -216,7 +216,7 @@ export default function NewsPage() {
                           <Calendar className="h-4 w-4" aria-hidden="true" />
                           {pub.date}
                         </span>
-                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-crfal-blue">
+                        <span className="inline-flex items-center gap-2 text-sm font-medium text-crfal-blue">
                           Ler notícia <ArrowRight className="h-4 w-4" aria-hidden="true" />
                         </span>
                       </div>

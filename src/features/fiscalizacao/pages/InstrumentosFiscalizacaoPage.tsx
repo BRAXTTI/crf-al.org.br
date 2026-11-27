@@ -40,7 +40,7 @@ export default function InstrumentosFiscalizacaoPage() {
               <span className={`flex h-10 w-10 items-center justify-center rounded-lg ${inst.color}`}>
                 <inst.icon className="h-5 w-5" />
               </span>
-              <h3 className="text-base font-bold text-neutral-800 ">{inst.title}</h3>
+              <h3 className="text-base font-medium text-neutral-800 ">{inst.title}</h3>
             </div>
             <div className="p-4">
               <p className="text-sm leading-relaxed text-crfal-gray-600 ">{inst.desc}</p>
@@ -53,14 +53,14 @@ export default function InstrumentosFiscalizacaoPage() {
         <div className="flex items-center gap-3 rounded-lg border border-crfal-gray-200 bg-crfal-gray-50 p-4  ">
           <FileText className="h-5 w-5 shrink-0 text-crfal-blue " />
           <div>
-            <p className="text-xs font-semibold text-neutral-800 ">Preenchimento</p>
+            <p className="text-xs font-medium text-neutral-800 ">Preenchimento</p>
             <p className="text-xs text-crfal-gray-500 ">Manual ou eletrônico</p>
           </div>
         </div>
         <div className="flex items-center gap-3 rounded-lg border border-crfal-gray-200 bg-crfal-gray-50 p-4  ">
           <CalendarClock className="h-5 w-5 shrink-0 text-crfal-blue " />
           <div>
-            <p className="text-xs font-semibold text-neutral-800 ">Prazo de atendimento</p>
+            <p className="text-xs font-medium text-neutral-800 ">Prazo de atendimento</p>
             <p className="text-xs text-crfal-gray-500 ">Até 5 dias úteis</p>
           </div>
         </div>

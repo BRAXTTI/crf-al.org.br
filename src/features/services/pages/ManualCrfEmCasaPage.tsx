@@ -11,11 +11,11 @@ import VideoTela from '../components/VideoTela';
 import { TELA } from '../tela';
 
 const PATH = '/servicos/manual-crf-em-casa';
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 // Rawline tem itálico real até 600; em 700 o navegador sintetizaria a inclinação.
-const destaque = 'font-semibold italic text-crfal-blue-light';
+const destaque = 'not-italic text-crfal-blue-light';
 // Deslocamento curto: o padrão de 100px do Reveal pesa em blocos altos como estes.
 const entradaCurta = { '--reveal-shift': '24px' } as CSSProperties;
 
@@ -29,7 +29,7 @@ function Demonstracao({ secao }: { secao: ManualSecao }) {
   return (
     <div className={`${TELA} flex flex-col items-center justify-center gap-3 px-6 text-center`}>
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-crfal-blue ring-1 ring-crfal-blue/10"><ImagePlay className="h-6 w-6" aria-hidden /></span>
-      <p className="text-sm font-semibold text-crfal-blue-dark">Demonstração em breve</p>
+      <p className="text-sm font-medium text-crfal-blue-dark">Demonstração em breve</p>
       <p className="sr-only">{secao.videoAlt}</p>
     </div>
   );
@@ -99,15 +99,15 @@ export default function ManualCrfEmCasaPage() {
         }
       />
 
-      <div className="container-crfal py-10 md:py-14">
+      <div className="container-crfal py-12 md:py-16">
         <nav id="manual-sumario" tabIndex={-1} aria-labelledby="sumario-title" className="rounded-xl border border-crfal-gray-200 bg-white p-5 shadow-xs focus:outline-hidden sm:p-6">
           <p className={goldLabel}>Neste manual</p>
-          <h2 id="sumario-title" className="mt-1.5 text-lg font-bold text-crfal-blue">Escolha um tópico</h2>
+          <h2 id="sumario-title" className="mt-1.5 text-lg font-medium text-crfal-blue">Escolha um tópico</h2>
           <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {MANUAL_CRF_EM_CASA.map((secao, index) => (
               <li key={secao.id}>
-                <a href={`#${secao.id}`} className={`group flex min-h-11 items-center gap-3 rounded-lg border border-crfal-gray-200 px-3 py-2 text-[14px] font-semibold text-crfal-blue-dark hover:border-crfal-blue hover:bg-crfal-blue-lighter ${motion} ${focusRing}`}>
-                  <span className="w-6 shrink-0 text-[13px] font-bold tabular-nums text-[#8A6A12]">{String(index + 1).padStart(2, '0')}</span>
+                <a href={`#${secao.id}`} className={`group flex min-h-11 items-center gap-3 rounded-lg border border-crfal-gray-200 px-3 py-2 text-sm font-medium text-crfal-blue-dark hover:border-crfal-blue hover:bg-crfal-blue-lighter ${motion} ${focusRing}`}>
+                  <span className="w-6 shrink-0 text-13 font-medium tabular-nums text-[#8A6A12]">{String(index + 1).padStart(2, '0')}</span>
                   {secao.title}
                 </a>
               </li>
@@ -117,10 +117,9 @@ export default function ManualCrfEmCasaPage() {
 
         {/* overflow visível: a sombra das telas não é cortada e o deslocamento da entrada não torna o painel rolável num salto por âncora. */}
         <section aria-labelledby="manual-por-dentro-title" className="section-panel mt-8 overflow-visible! md:mt-10">
-          <h2 id="manual-por-dentro-title" className="text-balance text-[30px] font-bold leading-[34px] tracking-tight text-crfal-blue sm:text-[36px] sm:leading-[40px] lg:text-[48px] lg:leading-[52px]">
+          <h2 id="manual-por-dentro-title" className="text-2xl font-medium text-crfal-blue sm:text-3xl">
             Veja o sistema por dentro <em className={destaque}>antes de começar.</em>
           </h2>
-          <span aria-hidden className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
 
           <div className="mt-10 space-y-16 lg:mt-14 lg:space-y-24">
             {MANUAL_CRF_EM_CASA.map((secao, index) => {
@@ -130,17 +129,17 @@ export default function ManualCrfEmCasaPage() {
                   <Reveal style={entradaCurta} className={`grid items-center gap-6 lg:gap-14 xl:gap-20 ${midiaEsquerda ? 'lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]' : 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]'}`}>
                     <div className={`min-w-0 ${midiaEsquerda ? 'lg:order-2' : ''}`}>
                       <p className={goldLabel}>Tópico {String(index + 1).padStart(2, '0')}</p>
-                      <h3 id={`${secao.id}-title`} className="mt-2 text-balance text-[26px] font-bold leading-[30px] tracking-tight text-crfal-blue sm:text-[28px] sm:leading-[32px] lg:text-[34px] lg:leading-[38px] xl:text-[40px] xl:leading-[44px]">
+                      <h3 id={`${secao.id}-title`} className="mt-2 text-xl font-medium text-crfal-blue sm:text-2xl">
                         <TituloTopico secao={secao} />
                       </h3>
                       {secao.text.map((paragrafo) => (
-                        <p key={paragrafo} className="mt-3 text-base leading-6 text-crfal-gray-600 lg:mt-4 lg:text-[17px] lg:leading-7">{paragrafo}</p>
+                        <p key={paragrafo} className="mt-3 text-base leading-6 text-crfal-gray-600 lg:mt-4 lg:text-lg lg:leading-7">{paragrafo}</p>
                       ))}
                       {secao.steps && (
                         <ol className="mt-4 space-y-2 lg:mt-5 lg:space-y-2.5">
                           {secao.steps.map((passo, i) => (
-                            <li key={passo} className="flex items-start gap-2.5 text-sm leading-[22px] text-crfal-gray-700 lg:gap-3 lg:text-[15px] lg:leading-6">
-                              <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-[11px] font-bold text-crfal-blue lg:h-6 lg:w-6 lg:text-[12px]">{i + 1}</span>
+                            <li key={passo} className="flex items-start gap-2.5 text-sm leading-[22px] text-crfal-gray-700 lg:gap-3 lg:text-15 lg:leading-6">
+                              <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-2xs font-medium text-crfal-blue lg:h-6 lg:w-6 lg:text-xs">{i + 1}</span>
                               {passo}
                             </li>
                           ))}
@@ -161,14 +160,14 @@ export default function ManualCrfEmCasaPage() {
         <section aria-labelledby="manual-ajuda-title" className="mt-8 overflow-hidden rounded-2xl border-t-2 border-crfal-gold bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:p-8 md:mt-10">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 id="manual-ajuda-title" className="text-xl font-bold">Precisa de um serviço específico?</h2>
-              <p className="mt-1.5 max-w-xl text-[15px] leading-relaxed text-white/80">Os tutoriais mostram o passo a passo de cada serviço, e os requerimentos listam os documentos necessários.</p>
+              <h2 id="manual-ajuda-title" className="text-xl font-medium">Precisa de um serviço específico?</h2>
+              <p className="mt-1.5 max-w-xl text-15 leading-relaxed text-white/80">Os tutoriais mostram o passo a passo de cada serviço, e os requerimentos listam os documentos necessários.</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link to="/servicos/tutoriais" className={`inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-crfal-blue hover:bg-crfal-blue-lighter ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
+              <Link to="/servicos/tutoriais" className={`inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-medium text-crfal-blue hover:bg-crfal-blue-lighter ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
                 <PlayCircle className="h-4 w-4" aria-hidden /> Tutoriais
               </Link>
-              <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-5 text-sm font-bold text-white hover:border-white hover:bg-white/10 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
+              <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-white/30 px-5 text-sm font-medium text-white hover:border-white hover:bg-white/10 ${motion} focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crfal-blue-dark`}>
                 CRF AL em Casa <ArrowUpRight className="h-4 w-4" aria-hidden />
                 <span className="sr-only">(abre em uma nova aba)</span>
               </a>

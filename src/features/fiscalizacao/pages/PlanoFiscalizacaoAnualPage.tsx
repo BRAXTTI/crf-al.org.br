@@ -34,7 +34,7 @@ export default function PlanoFiscalizacaoAnualPage() {
               <etapa.icon className="h-4.5 w-4.5" />
             </span>
             <div>
-              <h3 className="text-sm font-bold text-neutral-800 ">{etapa.title}</h3>
+              <h3 className="text-sm font-medium text-neutral-800 ">{etapa.title}</h3>
               <p className="text-xs leading-relaxed text-crfal-gray-600 ">{etapa.desc}</p>
             </div>
           </div>

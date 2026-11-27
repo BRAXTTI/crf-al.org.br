@@ -36,7 +36,7 @@ export default function AfastamentoProvisorioPage() {
         A comunicação de afastamento provisório do farmacêutico é feita integralmente pelo sistema <strong>CRF AL em Casa</strong>, sem necessidade de baixar requerimento avulso ou enviar pedido por e-mail. Confira o{' '}
         <Link
           to="/servicos/tutoriais/afastamento-provisorio"
-          className="font-semibold text-crfal-blue underline decoration-crfal-gold underline-offset-2 hover:text-crfal-blue-dark"
+          className="font-medium text-crfal-blue underline decoration-crfal-gold underline-offset-2 hover:text-crfal-blue-dark"
         >
           tutorial de comunicado de afastamento provisório
         </Link>
@@ -52,7 +52,7 @@ export default function AfastamentoProvisorioPage() {
             <CalendarOff className="h-5 w-5" aria-hidden />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[15px] font-semibold leading-snug text-crfal-blue-dark">
+            <span className="block text-15 font-medium leading-snug text-crfal-blue-dark">
               Comunicar afastamento provisório (tutorial em vídeo)
             </span>
             <span className="mt-0.5 block text-sm leading-snug text-crfal-gray-600">
@@ -69,7 +69,7 @@ export default function AfastamentoProvisorioPage() {
         {passos.map((passo, i) => (
           <div key={i} className="flex gap-4">
             <div className="flex flex-col items-center">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-sm font-bold text-crfal-blue">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-sm font-medium text-crfal-blue">
                 {i + 1}
               </span>
               {i < passos.length - 1 && (
@@ -77,7 +77,7 @@ export default function AfastamentoProvisorioPage() {
               )}
             </div>
             <div className="pb-5">
-              <h3 className="mb-1 text-sm font-bold text-neutral-800">{passo.title}</h3>
+              <h3 className="mb-1 text-sm font-medium text-neutral-800">{passo.title}</h3>
               <p className="text-sm leading-relaxed text-crfal-gray-600">{passo.desc}</p>
             </div>
           </div>

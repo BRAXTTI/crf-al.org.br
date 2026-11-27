@@ -67,7 +67,7 @@ function InfoRow({ icon: Icon, rotulo, valor, dateTime }: { icon: ElementType; r
         <Icon className="w-4 h-4 text-crfal-blue " aria-hidden />
       </div>
       <div className="min-w-0">
-        <dt className="text-xs font-semibold uppercase tracking-wider text-crfal-gray-600 ">
+        <dt className="text-xs font-medium uppercase tracking-wider text-crfal-gray-600 ">
           {rotulo}
         </dt>
         <dd className="text-sm text-neutral-800 wrap-break-word">{dateTime ? <time dateTime={dateTime}>{valor}</time> : valor}</dd>
@@ -108,7 +108,7 @@ export default function EventoDetailPage() {
           <p className="text-red-600  mb-4">Não foi possível carregar o evento agora.</p>
           <button
             onClick={() => { void recarregarEvento(); }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full border border-crfal-blue text-crfal-blue hover:bg-crfal-blue hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-full border border-crfal-blue text-crfal-blue hover:bg-crfal-blue hover:text-white transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Tentar novamente
@@ -131,13 +131,13 @@ export default function EventoDetailPage() {
           <div className="w-16 h-16 mx-auto mb-4 bg-crfal-gray-100  rounded-full flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-crfal-gray-400 " />
           </div>
-          <h2 className="text-2xl font-bold text-neutral-800  mb-4">Evento não encontrado</h2>
+          <h2 className="text-2xl font-medium text-neutral-800  mb-4">Evento não encontrado</h2>
           <p className="text-crfal-gray-500  mb-6">
             O evento que você procura não existe ou foi removido.
           </p>
           <Link
             to="/eventos"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-crfal-blue text-white text-sm font-semibold rounded-full hover:bg-crfal-blue-dark transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-crfal-blue text-white text-sm font-medium rounded-full hover:bg-crfal-blue-dark transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Voltar para eventos
@@ -180,12 +180,11 @@ export default function EventoDetailPage() {
           { label: evento.titulo },
         ]}
         title={evento.titulo}
-        eyebrow="Evento"
         section="imprensa"
-        actions={<>{acoes.map((acao, i) => <PageHeroAction key={acao.href} href={acao.href} variant={i === 0 ? "primary" : "secondary"}>{acao.label}</PageHeroAction>)}{evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 rounded-full border border-white/30 px-5 py-2.5 text-sm font-bold text-white focus-visible:ring-2 focus-visible:ring-white">Adicionar à agenda</button>}</>}
+        actions={<>{acoes.map((acao, i) => <PageHeroAction key={acao.href} href={acao.href} variant={i === 0 ? "primary" : "secondary"}>{acao.label}</PageHeroAction>)}{evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 rounded-full border border-white/30 px-5 py-2.5 text-sm font-medium text-white focus-visible:ring-2 focus-visible:ring-white">Adicionar à agenda</button>}</>}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
+          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.bg} ${statusConfig.text}`}>
             <StatusIcon className="w-3 h-3" />
             {STATUS_LABELS[evento.status]}
           </span>
@@ -224,7 +223,7 @@ export default function EventoDetailPage() {
           </div>
           <aside className="lg:col-start-9 lg:col-span-4 lg:row-span-2 lg:row-start-1 lg:self-start lg:sticky lg:top-(--header-offset)">
             <div className="bg-white  rounded-xl border border-crfal-gray-200  p-6 shadow-card">
-              <h2 className="font-display text-xl font-semibold text-neutral-800 md:text-2xl mb-6">
+              <h2 className="font-display text-xl font-medium text-neutral-800 md:text-2xl mb-6">
                 Informações do evento
               </h2>
 
@@ -239,15 +238,15 @@ export default function EventoDetailPage() {
               </dl>
 
               {(acoes.length > 0 || (evento.status === 'em-breve' && evento.data)) && <div className="hidden lg:block mt-8 pt-6 border-t border-crfal-gray-200 space-y-3">
-                {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-semibold rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
+                {acoes.map((acao, i) => <a key={acao.href} href={acao.href} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-11 w-full items-center justify-center gap-2 px-5 py-3 text-sm font-medium rounded-full focus-visible:ring-2 focus-visible:ring-crfal-gold ${i === 0 ? 'bg-crfal-blue text-white' : 'border border-crfal-blue text-crfal-blue'}`}>
                   {acao.label}<ExternalLink className="w-4 h-4" aria-hidden /><span className="sr-only"> (abre em uma nova aba)</span>
                 </a>)}
-                {evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 w-full rounded-full border border-crfal-blue px-5 py-3 text-sm font-semibold text-crfal-blue focus-visible:ring-2 focus-visible:ring-crfal-gold">Adicionar à agenda</button>}
+                {evento.status === 'em-breve' && evento.data && <button onClick={baixarAgenda} className="min-h-11 w-full rounded-full border border-crfal-blue px-5 py-3 text-sm font-medium text-crfal-blue focus-visible:ring-2 focus-visible:ring-crfal-gold">Adicionar à agenda</button>}
               </div>}
             </div>
           </aside>
           <div className="lg:col-span-8 min-w-0 rounded-2xl border border-crfal-gray-200 bg-white p-6 md:p-8 shadow-card">
-            <h2 className="font-display text-xl font-semibold text-neutral-800  md:text-2xl mb-6">Sobre o evento</h2>
+            <h2 className="font-display text-xl font-medium text-neutral-800  md:text-2xl mb-6">Sobre o evento</h2>
 
             {erroEvento ? (
               <div className="bg-white  rounded-xl border border-red-200  p-6 text-center">
@@ -256,7 +255,7 @@ export default function EventoDetailPage() {
                 </p>
                 <button
                   onClick={() => recarregarEvento()}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full border border-crfal-blue text-crfal-blue hover:bg-crfal-blue hover:text-white transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full border border-crfal-blue text-crfal-blue hover:bg-crfal-blue hover:text-white transition-colors"
                 >
                   <RefreshCw className="w-4 h-4" />
                   Tentar novamente
@@ -270,10 +269,10 @@ export default function EventoDetailPage() {
               </div>
             ) : conteudo ? (
               <div
-                className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed
+                className="max-w-[68ch] text-base md:text-lg text-crfal-gray-700 leading-relaxed
                   [&_a]:text-crfal-blue [&_a]:underline
-                  [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-neutral-800 [&_h2]:mt-6 [&_h2]:mb-3
-                  [&_h3]:font-bold [&_h3]:text-neutral-800 [&_h3]:mt-6 [&_h3]:mb-3
+                  [&_h2]:text-lg [&_h2]:font-medium [&_h2]:text-neutral-800 [&_h2]:mt-6 [&_h2]:mb-3
+                  [&_h3]:font-medium [&_h3]:text-neutral-800 [&_h3]:mt-6 [&_h3]:mb-3
                   [&_img]:rounded-xl [&_img]:my-4
                   [&_iframe]:my-4 [&_iframe]:aspect-video [&_iframe]:h-auto [&_iframe]:w-full [&_iframe]:rounded-xl
                   [&_p]:mb-4
@@ -282,7 +281,7 @@ export default function EventoDetailPage() {
                 dangerouslySetInnerHTML={{ __html: conteudo }}
               />
             ) : evento.descricao ? (
-              <p className="max-w-[68ch] text-base md:text-[17px] text-crfal-gray-700 leading-relaxed">{evento.descricao}</p>
+              <p className="max-w-[68ch] text-base md:text-lg text-crfal-gray-700 leading-relaxed">{evento.descricao}</p>
             ) : (
               <p className="text-crfal-gray-500 ">
                 A descrição completa deste evento ainda não foi disponibilizada.
@@ -295,7 +294,7 @@ export default function EventoDetailPage() {
         {outrosEventos.length > 0 && (
           <div className="mt-16 pt-10 border-t border-crfal-gray-200 ">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-neutral-800 ">Outros eventos</h2>
+              <h2 className="text-xl font-medium text-neutral-800 ">Outros eventos</h2>
               <Link to="/eventos" className="inline-flex items-center gap-1 text-sm font-medium text-crfal-blue hover:underline">
                 Ver todos
                 <ArrowRight className="w-4 h-4" />

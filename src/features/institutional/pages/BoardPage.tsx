@@ -85,15 +85,13 @@ const saibaMais: { href: string; title: string; description: string; Icon: Compo
   { href: '/contato', title: 'Fale Conosco', description: 'Canais e setores de atendimento', Icon: MessageSquare },
 ];
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 
-function SectionHeader({ id, label, title, children }: { id: string; label: string; title: string; children?: ReactNode }) {
+function SectionHeader({ id, title, children }: { id: string; title: string; children?: ReactNode }) {
   return (
     <div className="max-w-2xl">
-      <p className={goldLabel}>{label}</p>
-      <h2 id={id} className="mt-2 text-2xl font-bold tracking-tight text-crfal-blue sm:text-3xl">{title}</h2>
-      <span aria-hidden className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
+      <h2 id={id} className="text-2xl font-medium text-crfal-blue sm:text-3xl">{title}</h2>
       {children && <p className="mt-4 text-base leading-relaxed text-crfal-gray-600">{children}</p>}
     </div>
   );
@@ -154,7 +152,7 @@ function DirectorCard({ membro }: { membro: Membro }) {
 
         <div className="min-w-0">
           <p className={goldLabel}>{membro.cargo}</p>
-          <h3 className="mt-1.5 text-lg font-bold leading-snug tracking-tight text-crfal-gray-900 sm:text-xl">{membro.nome}</h3>
+          <h3 className="mt-1.5 text-lg font-medium leading-snug text-crfal-gray-900 sm:text-xl">{membro.nome}</h3>
           {membro.bio && (
             <p ref={bioRef} className="mt-2 line-clamp-3 text-sm leading-relaxed text-crfal-gray-600">
               {membro.bio}
@@ -167,7 +165,7 @@ function DirectorCard({ membro }: { membro: Membro }) {
             <DialogTrigger asChild>
               <button
                 type="button"
-                className={`group inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-semibold text-crfal-blue ${focusRing}`}
+                className={`group inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-medium text-crfal-blue ${focusRing}`}
               >
                 Ler minicurrículo
                 <ArrowRight className="h-4 w-4 text-[#8A6A12] transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden />
@@ -184,12 +182,12 @@ function DirectorCard({ membro }: { membro: Membro }) {
           <Foto membro={membro} className="aspect-[209/244] w-16 rounded-lg" />
           <div className="min-w-0">
             <p className={goldLabel}>{membro.cargo}</p>
-            <DialogTitle className="mt-1 text-lg font-bold leading-tight text-crfal-blue sm:text-xl">{membro.nome}</DialogTitle>
+            <DialogTitle className="mt-1 text-lg font-medium leading-tight text-crfal-blue sm:text-xl">{membro.nome}</DialogTitle>
             <DialogDescription className="sr-only">Minicurrículo de {membro.nome}</DialogDescription>
           </div>
         </DialogHeader>
         <div className="min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6">
-          <p className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-700 sm:text-[15px]">{membro.bio}</p>
+          <p className="whitespace-pre-line text-sm leading-relaxed text-crfal-gray-700 sm:text-15">{membro.bio}</p>
         </div>
         {membro.email && (
           <div className="shrink-0 border-t border-crfal-gray-200 px-5 py-2 sm:px-6">
@@ -235,10 +233,10 @@ export default function BoardPage() {
         }
       />
 
-      <div className="container-crfal space-y-3 py-6 sm:py-10">
+      <div className="container-crfal space-y-6 py-8 sm:space-y-10 sm:py-12">
         {/* ── DIRETORIA EXECUTIVA ──────────────────────────────────────── */}
         <section aria-labelledby="diretoria-title" className="section-panel">
-          <SectionHeader id="diretoria-title" label="Gestão atual" title="Diretoria Executiva">
+          <SectionHeader id="diretoria-title" title="Diretoria Executiva">
             Responsável pela gestão e administração do Conselho Regional de Farmácia do Estado de Alagoas.
           </SectionHeader>
           <ul className="mt-8 grid gap-3 sm:gap-4 lg:grid-cols-2">
@@ -252,7 +250,7 @@ export default function BoardPage() {
 
         {/* ── PLENÁRIO ─────────────────────────────────────────────────── */}
         <section aria-labelledby="plenario-title" className="section-panel">
-          <SectionHeader id="plenario-title" label="Plenário" title="Conselheiros">
+          <SectionHeader id="plenario-title" title="Conselheiros">
             Os conselheiros efetivos e suplentes formam o plenário, que delibera e decide sobre os assuntos do Conselho nas reuniões plenárias.
           </SectionHeader>
 
@@ -265,7 +263,7 @@ export default function BoardPage() {
                     {grupo.membros.map((membro) => (
                       <li key={membro.id} className="flex items-center gap-3 p-3 sm:p-4">
                         <Foto membro={membro} className="aspect-square w-11 rounded-full" />
-                        <span className="min-w-0 font-semibold text-crfal-gray-900">{membro.nome}</span>
+                        <span className="min-w-0 font-medium text-crfal-gray-900">{membro.nome}</span>
                       </li>
                     ))}
                   </ul>
@@ -277,12 +275,12 @@ export default function BoardPage() {
               <div className="flex items-start gap-3">
                 <Info className="mt-0.5 h-5 w-5 shrink-0 text-crfal-blue" aria-hidden />
                 <p className="text-sm leading-relaxed text-crfal-blue">
-                  <strong className="font-bold">Composição em atualização.</strong> A lista de conselheiros efetivos e suplentes da gestão atual será publicada em breve.
+                  <strong className="font-medium">Composição em atualização.</strong> A lista de conselheiros efetivos e suplentes da gestão atual será publicada em breve.
                 </p>
               </div>
               <Link
                 to="/instituicao/plenarias"
-                className={`group inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg text-sm font-semibold text-crfal-blue ${focusRing}`}
+                className={`group inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg text-sm font-medium text-crfal-blue ${focusRing}`}
               >
                 Ver reuniões plenárias
                 <ArrowRight className="h-4 w-4 text-[#8A6A12] transition-transform group-hover:translate-x-1 motion-reduce:transition-none" aria-hidden />
@@ -298,7 +296,7 @@ export default function BoardPage() {
 
         {/* ── SAIBA MAIS ───────────────────────────────────────────────── */}
         <section aria-labelledby="saiba-mais-title" className="section-panel">
-          <SectionHeader id="saiba-mais-title" label="Continue navegando" title="Conheça mais o CRF-AL" />
+          <SectionHeader id="saiba-mais-title" title="Conheça mais o CRF-AL" />
           <ul className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {saibaMais.map(({ href, title, description, Icon, external }) => {
               const cls = `group flex h-full items-center gap-4 rounded-xl border border-crfal-gray-200 bg-white p-4 transition-colors hover:border-crfal-blue/40 hover:bg-crfal-blue-lighter/50 motion-reduce:transition-none ${focusRing}`;
@@ -308,7 +306,7 @@ export default function BoardPage() {
                     <Icon className="h-5 w-5 text-crfal-blue" aria-hidden />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-crfal-gray-900 sm:text-base">{title}</span>
+                    <span className="block text-sm font-medium text-crfal-gray-900 sm:text-base">{title}</span>
                     <span className="block text-sm text-crfal-gray-600">{description}</span>
                   </span>
                   {external ? (

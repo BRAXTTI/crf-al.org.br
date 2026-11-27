@@ -41,7 +41,7 @@ const PROFILES = [
   { id: 'corporate', param: 'pessoa-juridica', label: 'Empresas', audience: 'empresas', sublabel: 'Pessoa jurídica', icon: Building2, menu: corporateMenu },
 ] as const;
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-2xs font-medium uppercase tracking-[0.12em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
@@ -67,7 +67,7 @@ function buscarItens(menu: readonly MenuCategory[], termo: string) {
 // Vídeo: YouTube do requerimento ou vídeo do tutorial embutido na aba "Passo a passo".
 const temVideo = (item: RequirementItem) => Boolean(item.videoUrl || (item.tutorialId && GUIAS[item.tutorialId]?.video));
 
-const selo = 'inline-flex items-center gap-1 rounded-full bg-crfal-gray-100 px-2 py-0.5 text-[11px] font-semibold text-crfal-gray-700';
+const selo = 'inline-flex items-center gap-1 rounded-full bg-crfal-gray-100 px-2 py-0.5 text-2xs font-medium text-crfal-gray-700';
 
 /* ---------- Página ---------- */
 
@@ -127,13 +127,13 @@ function RequirementsContent() {
   };
 
   const chipClass = (ativo: boolean) =>
-    `inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-[13px] font-semibold ${motion} ${focusRing} ${
+    `inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-13 font-medium ${motion} ${focusRing} ${
       ativo
         ? 'border-crfal-blue bg-crfal-blue text-white shadow-xs'
         : 'border-crfal-gray-200 bg-white text-crfal-gray-700 hover:border-crfal-blue/40 hover:text-crfal-blue'
     }`;
   const chipCount = (ativo: boolean) =>
-    `rounded-full px-1.5 text-[11px] font-bold ${ativo ? 'bg-white/20 text-white' : 'bg-crfal-gray-100 text-crfal-gray-600'}`;
+    `rounded-full px-1.5 text-2xs font-medium ${ativo ? 'bg-white/20 text-white' : 'bg-crfal-gray-100 text-crfal-gray-600'}`;
 
   const seletorPerfil = (className: string) => (
     <div role="group" aria-label="Selecionar perfil" className={`grid shrink-0 grid-cols-2 gap-1 rounded-2xl border border-crfal-gray-200 bg-crfal-gray-100 p-1 ${className}`}>
@@ -152,8 +152,8 @@ function RequirementsContent() {
           >
             <ProfileIcon className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
             <span className="flex flex-col leading-tight">
-              <span className="text-sm font-bold">{profile.label}</span>
-              <span className={`text-[11px] ${ativo ? 'text-white/75' : 'text-crfal-gray-600'}`}>{profile.sublabel}</span>
+              <span className="text-sm font-medium">{profile.label}</span>
+              <span className={`text-2xs ${ativo ? 'text-white/75' : 'text-crfal-gray-600'}`}>{profile.sublabel}</span>
             </span>
           </button>
         );
@@ -229,7 +229,7 @@ function RequirementsContent() {
               {resultadosOutroPerfil > 0 && (
                 <>
                   {' · '}
-                  <button type="button" onClick={() => handleTypeChange(otherProfile.id, true)} className={`inline-flex items-center gap-1 rounded font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+                  <button type="button" onClick={() => handleTypeChange(otherProfile.id, true)} className={`inline-flex items-center gap-1 rounded font-medium text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
                     ver {resultadosOutroPerfil} em {otherProfile.label}
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
@@ -241,7 +241,7 @@ function RequirementsContent() {
           {totalResultados === 0 ? (
             <div className="rounded-2xl border border-dashed border-crfal-gray-300 bg-white px-6 py-14 text-center">
               <Search className="mx-auto mb-3 h-10 w-10 text-crfal-gray-300" aria-hidden="true" />
-              <h2 className="text-lg font-bold text-crfal-blue-dark">
+              <h2 className="text-lg font-medium text-crfal-blue-dark">
                 {busca.trim() ? <>Nenhum requerimento para “{busca.trim()}” em {activeProfile.label}</> : <>Nenhum requerimento em {activeProfile.label} nesta categoria</>}
               </h2>
               <p className="mx-auto mt-1 max-w-md text-sm text-crfal-gray-600">
@@ -251,33 +251,32 @@ function RequirementsContent() {
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
                 {resultadosOutroPerfil > 0 && (
-                  <button type="button" onClick={() => handleTypeChange(otherProfile.id, true)} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-semibold text-white hover:bg-crfal-blue-dark ${focusRing}`}>
+                  <button type="button" onClick={() => handleTypeChange(otherProfile.id, true)} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full bg-crfal-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-crfal-blue-dark ${focusRing}`}>
                     Ver {resultadosOutroPerfil} em {otherProfile.label} <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </button>
                 )}
                 {categoria !== 'todas' ? (
-                  <button type="button" onClick={() => setCategoria('todas')} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
+                  <button type="button" onClick={() => setCategoria('todas')} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-medium text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
                     Buscar em todas as categorias
                   </button>
                 ) : (
-                  <button type="button" onClick={limparFiltros} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-semibold text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
+                  <button type="button" onClick={limparFiltros} className={`inline-flex min-h-[44px] items-center gap-2 rounded-full border border-crfal-gray-300 px-5 py-2.5 text-sm font-medium text-crfal-blue hover:border-crfal-blue ${focusRing}`}>
                     Limpar busca
                   </button>
                 )}
-                <Link to="/contato" className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
+                <Link to="/contato" className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-crfal-blue underline-offset-4 hover:underline ${focusRing}`}>
                   Falar com o atendimento <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
             </div>
           ) : (
-            <div className="space-y-10 md:space-y-12">
+            <div className="space-y-12 md:space-y-16">
               {itensFiltrados.map((cat) => (
                 <section key={cat.id} aria-labelledby={`cat-${cat.id}`}>
                   <div className="mb-4 flex items-end justify-between gap-4">
                     <div>
                       <p className={goldLabel}>{cat.items.length} {cat.items.length === 1 ? 'requerimento' : 'requerimentos'}</p>
-                      <h2 id={`cat-${cat.id}`} className="mt-1 text-[22px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[26px]">{cat.title}</h2>
-                      <span aria-hidden="true" className="mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
+                      <h2 id={`cat-${cat.id}`} className="mt-1 text-xl font-medium text-crfal-blue sm:text-2xl">{cat.title}</h2>
                     </div>
                   </div>
 
@@ -295,8 +294,8 @@ function RequirementsContent() {
                               <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
                             </span>
                             <span className="min-w-0 flex-1">
-                              <span className="block text-[15px] font-bold leading-snug text-crfal-blue-dark group-hover:text-crfal-blue sm:text-base">{item.title}</span>
-                              <span className="mt-1 line-clamp-2 block text-[13px] leading-relaxed text-crfal-gray-600 sm:line-clamp-1">{item.description}</span>
+                              <span className="block text-15 font-medium leading-snug text-crfal-blue-dark group-hover:text-crfal-blue sm:text-base">{item.title}</span>
+                              <span className="mt-1 line-clamp-2 block text-13 leading-relaxed text-crfal-gray-600 sm:line-clamp-1">{item.description}</span>
                               {(item.prazo || video || item.downloadUrl) && (
                                 <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                                   {item.prazo && (
@@ -337,13 +336,12 @@ function RequirementsContent() {
 
           <aside className="mt-12 flex flex-col items-start gap-4 rounded-xl bg-linear-to-br/srgb from-crfal-blue to-crfal-blue-dark p-6 text-white sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-crfal-gold">Atendimento online</p>
-              <p className="mt-1 text-lg font-bold">Os requerimentos são enviados pelo CRF AL em Casa.</p>
+              <p className="text-lg font-medium">Os requerimentos são enviados pelo CRF AL em Casa.</p>
               <p className="mt-1 text-sm text-white/75">
-                Dúvidas sobre o sistema: <a href={`mailto:${SETOR_CONTATOS.tecnologia.email}`} className="rounded font-semibold text-white underline underline-offset-4 hover:text-crfal-gold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">{SETOR_CONTATOS.tecnologia.email}</a>
+                Dúvidas sobre o sistema: <a href={`mailto:${SETOR_CONTATOS.tecnologia.email}`} className="rounded font-medium text-white underline underline-offset-4 hover:text-crfal-gold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white/60">{SETOR_CONTATOS.tecnologia.email}</a>
               </p>
             </div>
-            <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/30 px-5 py-3 text-sm font-bold transition-colors hover:border-white hover:bg-white hover:text-crfal-blue focus-visible:outline-white">
+            <a href={CRF_EM_CASA_URL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border border-white/30 px-5 py-3 text-sm font-medium transition-colors hover:border-white hover:bg-white hover:text-crfal-blue focus-visible:outline-white">
               Acessar CRF AL em Casa <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
               <span className="sr-only">(abre em uma nova aba)</span>
             </a>

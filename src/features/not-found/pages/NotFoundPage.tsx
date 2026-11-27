@@ -17,8 +17,8 @@ export default function NotFoundPage() {
           <Compass className="h-8 w-8 text-crfal-blue" />
         </div>
 
-        <p className="font-display mb-2 text-5xl font-bold text-crfal-blue">404</p>
-        <h1 className="mb-3 text-2xl font-bold text-neutral-800">Página não encontrada</h1>
+        <p className="font-display mb-2 text-4xl font-medium text-crfal-blue">404</p>
+        <h1 className="mb-3 text-2xl font-medium text-neutral-800">Página não encontrada</h1>
         <p className="mb-8 text-crfal-gray-500">
           O endereço que você acessou não existe, foi removido ou está temporariamente
           indisponível.
