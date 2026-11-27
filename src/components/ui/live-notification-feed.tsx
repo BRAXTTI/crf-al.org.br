@@ -312,11 +312,11 @@ function DateSheet({ day, locale }: { day: Date; locale: string }) {
   return (
     <div className="absolute inset-0 overflow-hidden rounded-lg border border-crfal-gray-200 bg-white shadow-sm" style={{ transformOrigin: "50% 0%", backfaceVisibility: "hidden" }}>
       <div style={{ background: "currentColor" }}>
-        <span className="block text-center text-[9px] font-semibold uppercase leading-[15px] tracking-wide text-white">{shortLabel(day, locale, "month")}</span>
+        <span className="block text-center text-[0.5625rem] font-semibold uppercase leading-[15px] tracking-wide text-white">{shortLabel(day, locale, "month")}</span>
       </div>
       <div className="flex flex-col items-center pt-1">
         <span className="text-lg font-bold leading-none text-crfal-blue-dark tabular-nums">{day.getDate()}</span>
-        <span className="mt-0.5 text-[9px] uppercase leading-none text-crfal-gray-600">{shortLabel(day, locale, "weekday")}</span>
+        <span className="mt-0.5 text-[0.5625rem] uppercase leading-none text-crfal-gray-600">{shortLabel(day, locale, "weekday")}</span>
       </div>
     </div>
   );
@@ -418,7 +418,7 @@ function EventoDetail({ item, play, delay, reduced }: StoryProps & { item: Event
         {tags.length > 0 && (
           <div ref={tagsRef} className="flex min-w-0 flex-wrap gap-1.5">
             {tags.map((tag) => (
-              <span key={tag} className="max-w-full truncate rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ background: TINT }}>
+              <span key={tag} className="max-w-full truncate rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold" style={{ background: TINT }}>
                 <span className="text-crfal-blue-dark">{tag}</span>
               </span>
             ))}
@@ -473,10 +473,10 @@ function NovidadeDetail({ item, play, delay, reduced }: StoryProps & { item: Nov
         <Icon d={ICONS.novidade} className="size-4" />
       </span>
       <span ref={textRef} className="min-w-0 flex-1 leading-tight">
-        <span className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60">Agora no site</span>
-        <span className="mt-0.5 block truncate text-[13px] font-semibold">{item.section ?? "Portal do CRF-AL"}</span>
+        <span className="block text-[0.625rem] font-semibold uppercase tracking-[0.14em] text-white/60">Agora no site</span>
+        <span className="mt-0.5 block truncate text-[0.8125rem] font-semibold">{item.section ?? "Portal do CRF-AL"}</span>
       </span>
-      <span ref={badgeRef} className="shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wide text-crfal-blue-dark" style={{ background: "var(--notif-grad-badge)" }}>
+      <span ref={badgeRef} className="shrink-0 rounded-full px-2 py-0.5 text-[0.59375rem] font-bold uppercase tracking-wide text-crfal-blue-dark" style={{ background: "var(--notif-grad-badge)" }}>
         Nova
       </span>
       <span aria-hidden className="hidden size-6 shrink-0 place-items-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15 @3xs:grid">
@@ -556,7 +556,7 @@ function ServicoDetail({ item, play, delay, reduced }: StoryProps & { item: Serv
               <span className="sr-only">{count.value}</span>
               <RollingNumber value={count.value} rolled={rolled} animate={animate} lag={i * CHECK_STAGGER_MS} />
             </span>
-            <span className="mt-0.5 block text-[10.5px] leading-tight text-crfal-gray-600">{count.label}</span>
+            <span className="mt-0.5 block text-[0.65625rem] leading-tight text-crfal-gray-600">{count.label}</span>
           </span>
         </li>
       ))}
@@ -587,7 +587,7 @@ function NoticiaDetail({ item, play, delay, reduced }: StoryProps & { item: Noti
     <div data-detail="noticia" className="space-y-2.5">
       {item.image && cover && !noCover && <WideCover key={cover} image={item.image} coverRef={coverRef} scanRef={scanRef} onFail={setNoCover} />}
       {meta.length > 0 && (
-        <span ref={metaRef} className="flex min-w-0 flex-wrap items-center gap-1.5 text-[11px]">
+        <span ref={metaRef} className="flex min-w-0 flex-wrap items-center gap-1.5 text-[0.6875rem]">
           {meta.map((part, i) => (
             <span
               key={part}
@@ -695,7 +695,7 @@ function NotificationCard({
               <AppTile kind={item.kind} accent={item.accent} play={entry.play} delay={storyDelay} reduced={reduced} />
               <div className="min-w-0 flex-1">
                 <div className="flex h-4 items-center gap-1.5 pr-7 text-xs leading-4 text-crfal-gray-600 [@media(hover:none)]:pr-10">
-                  <span className="truncate text-[11px] font-semibold uppercase tracking-[0.08em]" style={accentScope}>
+                  <span className="truncate text-[0.6875rem] font-semibold uppercase tracking-[0.08em]" style={accentScope}>
                     <span className={accentClass}>{item.app}</span>
                   </span>
                   <span aria-hidden className="text-crfal-gold">·</span>
@@ -723,7 +723,7 @@ function NotificationCard({
                     {item.title}
                   </button>
                 )}
-                {item.body && <p className="mt-1 line-clamp-3 text-[13px] leading-normal text-crfal-gray-600">{item.body}</p>}
+                {item.body && <p className="mt-1 line-clamp-3 text-[0.8125rem] leading-normal text-crfal-gray-600">{item.body}</p>}
                 <div className={cx("mt-3", accentClass)} style={accentScope}>
                   <Detail item={item} play={entry.play} delay={storyDelay} reduced={reduced} />
                   {item.actions && item.actions.length > 0 && (
@@ -1074,11 +1074,11 @@ export function LiveNotificationFeed({
             <path d={BELL} />
           </svg>
         </span>
-        <h2 className="truncate text-[15px] font-bold leading-5 tracking-tight text-crfal-blue-dark">{title}</h2>
+        <h2 className="truncate text-[0.9375rem] font-bold leading-5 tracking-tight text-crfal-blue-dark">{title}</h2>
         <span
           data-count
           aria-label={`${unread} ${unread === 1 ? "não lida" : "não lidas"}`}
-          className={cx("min-w-5 shrink-0 rounded-full bg-crfal-blue px-1.5 text-center text-[11px] font-bold leading-5 text-white tabular-nums transition-opacity", unread === 0 && "opacity-0")}
+          className={cx("min-w-5 shrink-0 rounded-full bg-crfal-blue px-1.5 text-center text-[0.6875rem] font-bold leading-5 text-white tabular-nums transition-opacity", unread === 0 && "opacity-0")}
         >
           {unread}
         </span>
@@ -1163,7 +1163,7 @@ export function LiveNotificationFeed({
               <Icon d={CHECK} className="size-6" />
             </span>
             <p className="mt-3 text-sm font-bold text-crfal-blue-dark">Tudo em dia</p>
-            <p className="mt-1 text-[13px] leading-normal text-crfal-gray-600">Novas notificações aparecerão aqui.</p>
+            <p className="mt-1 text-[0.8125rem] leading-normal text-crfal-gray-600">Novas notificações aparecerão aqui.</p>
           </div>
         )}
       </div>
@@ -1186,7 +1186,7 @@ export function LiveNotificationFeed({
                 list?.scrollBy({ top: list.clientHeight * 0.75, behavior: reduced ? "auto" : "smooth" });
               }}
               className={cx(
-                "inline-flex h-7 cursor-pointer select-none items-center gap-1 rounded-full bg-white/60 pl-3 pr-2 text-[11px] font-semibold text-crfal-blue ring-1 ring-crfal-gray-200 hover:bg-crfal-blue-lighter motion-safe:transition-[opacity,background-color] motion-safe:duration-200",
+                "inline-flex h-7 cursor-pointer select-none items-center gap-1 rounded-full bg-white/60 pl-3 pr-2 text-[0.6875rem] font-semibold text-crfal-blue ring-1 ring-crfal-gray-200 hover:bg-crfal-blue-lighter motion-safe:transition-[opacity,background-color] motion-safe:duration-200",
                 !scroll.more && "pointer-events-none opacity-0",
               )}
             >

@@ -29,7 +29,7 @@ const OUVIDORIA_EMAIL = 'ouvidoria@crf-al.org.br';
 const ATENDIMENTO_EMAIL = 'atendimento@crf-al.org.br';
 const ESIC_URL = 'https://crf-al.implanta.net.br/portaltransparencia/#sic/home';
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const focusRing = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 const linkClass = `font-semibold text-crfal-blue underline decoration-crfal-blue/30 underline-offset-2 hover:decoration-crfal-blue ${focusRing} rounded-sm`;
@@ -104,14 +104,14 @@ interface Secao {
 }
 
 function Paragrafo({ children }: { children: ReactNode }) {
-  return <p className="mt-4 text-[15px] leading-relaxed text-crfal-gray-700">{children}</p>;
+  return <p className="mt-4 text-[0.9375rem] leading-relaxed text-crfal-gray-700">{children}</p>;
 }
 
 function Lista({ items }: { items: ReactNode[] }) {
   return (
     <ul className="mt-4 space-y-2.5">
       {items.map((item, index) => (
-        <li key={index} className="flex items-start gap-3 text-[15px] leading-relaxed text-crfal-gray-700">
+        <li key={index} className="flex items-start gap-3 text-[0.9375rem] leading-relaxed text-crfal-gray-700">
           <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-crfal-gold" />
           <span>{item}</span>
         </li>
@@ -139,7 +139,7 @@ function CopyEmail({ email }: { email: string }) {
         try { await navigator.clipboard.writeText(email); setCopiado(true); } catch { window.prompt('Copie o e-mail:', email); }
         window.setTimeout(() => setCopiado(false), 2000);
       }}
-      className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[13px] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
+      className={`inline-flex min-h-11 items-center gap-2 rounded-full border border-crfal-gray-300 bg-white px-4 text-[0.8125rem] font-semibold text-crfal-blue hover:border-crfal-blue ${motion} ${focusRing}`}
     >
       {copiado ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
       <span aria-live="polite">{copiado ? 'E-mail copiado' : 'Copiar e-mail'}</span>
@@ -203,13 +203,13 @@ const SECOES: Secao[] = [
                 <div className="flex items-start gap-3">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-crfal-blue-lighter text-crfal-blue"><Icon className="h-[18px] w-[18px]" aria-hidden /></span>
                   <div>
-                    <p className="text-[15px] font-bold text-crfal-blue-dark">{tipo}</p>
-                    <p className="mt-1 text-[14px] leading-relaxed text-crfal-gray-700">{finalidade}</p>
+                    <p className="text-[0.9375rem] font-bold text-crfal-blue-dark">{tipo}</p>
+                    <p className="mt-1 text-[0.875rem] leading-relaxed text-crfal-gray-700">{finalidade}</p>
                   </div>
                 </div>
                 <div className="pl-12 sm:pl-0">
                   <p className={goldLabel}>Duração</p>
-                  <p className="mt-1 text-[14px] font-semibold text-crfal-blue-dark">{duracao}</p>
+                  <p className="mt-1 text-[0.875rem] font-semibold text-crfal-blue-dark">{duracao}</p>
                 </div>
               </li>
             ))}
@@ -282,7 +282,7 @@ const SECOES: Secao[] = [
         <Paragrafo>Pela LGPD (art. 18), você pode, a qualquer momento e sem custo:</Paragrafo>
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {DIREITOS.map((direito) => (
-            <li key={direito} className="flex items-start gap-3 rounded-lg border border-crfal-gray-200 bg-crfal-gray-50/60 px-3.5 py-3 text-[14.5px] leading-snug text-crfal-gray-700">
+            <li key={direito} className="flex items-start gap-3 rounded-lg border border-crfal-gray-200 bg-crfal-gray-50/60 px-3.5 py-3 text-[0.90625rem] leading-snug text-crfal-gray-700">
               <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#8A6A12]" aria-hidden />
               {direito}
             </li>
@@ -304,8 +304,8 @@ const SECOES: Secao[] = [
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#8A6A12] ring-1 ring-crfal-gold/40"><Mail className="h-5 w-5" aria-hidden /></span>
             <div>
               <p className={goldLabel}>Encarregado de dados (LGPD)</p>
-              <p className="mt-0.5 text-[15px] font-semibold text-crfal-blue-dark">{ENCARREGADO.nome}</p>
-              <a href={`mailto:${ENCARREGADO.email}`} className={`inline-block text-[17px] font-bold text-crfal-blue hover:underline ${focusRing} rounded-sm`}>{ENCARREGADO.email}</a>
+              <p className="mt-0.5 text-[0.9375rem] font-semibold text-crfal-blue-dark">{ENCARREGADO.nome}</p>
+              <a href={`mailto:${ENCARREGADO.email}`} className={`inline-block text-[1.0625rem] font-bold text-crfal-blue hover:underline ${focusRing} rounded-sm`}>{ENCARREGADO.email}</a>
             </div>
           </div>
           <CopyEmail email={ENCARREGADO.email} />
@@ -383,7 +383,7 @@ export default function PrivacyPolicyPage() {
       <div className="container-crfal py-10 md:py-14">
         <section aria-labelledby="avisos-title">
           <p className={goldLabel}>Em resumo</p>
-          <h2 id="avisos-title" className="mt-1.5 text-[22px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[26px]">O essencial sobre sua privacidade</h2>
+          <h2 id="avisos-title" className="mt-1.5 text-[1.375rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[1.625rem]">O essencial sobre sua privacidade</h2>
           <span aria-hidden className="mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
             {AVISOS.map(({ icon: Icon, title, text }, index) => (
@@ -400,8 +400,8 @@ export default function PrivacyPolicyPage() {
                 <span className={`flex h-10 w-10 items-center justify-center rounded-full ${index === 0 ? 'bg-white/10 text-crfal-gold ring-1 ring-crfal-gold/50' : 'bg-crfal-blue-lighter text-crfal-blue'}`}>
                   <Icon className="h-5 w-5" aria-hidden />
                 </span>
-                <h3 className={`mt-4 text-[16px] font-bold leading-snug ${index === 0 ? 'text-white' : 'text-crfal-blue-dark'}`}>{title}</h3>
-                <p className={`mt-1.5 text-[14px] leading-relaxed ${index === 0 ? 'text-white/80' : 'text-crfal-gray-700'}`}>{text}</p>
+                <h3 className={`mt-4 text-[1rem] font-bold leading-snug ${index === 0 ? 'text-white' : 'text-crfal-blue-dark'}`}>{title}</h3>
+                <p className={`mt-1.5 text-[0.875rem] leading-relaxed ${index === 0 ? 'text-white/80' : 'text-crfal-gray-700'}`}>{text}</p>
               </li>
             ))}
           </ul>
@@ -418,13 +418,13 @@ export default function PrivacyPolicyPage() {
                     <a
                       href={`#${secao.id}`}
                       aria-current={atual ? 'location' : undefined}
-                      className={`flex min-h-10 items-center gap-3 rounded-lg border-l-2 px-3 py-1.5 text-[13.5px] leading-snug ${motion} ${focusRing} ${
+                      className={`flex min-h-10 items-center gap-3 rounded-lg border-l-2 px-3 py-1.5 text-[0.84375rem] leading-snug ${motion} ${focusRing} ${
                         atual
                           ? 'border-transparent text-crfal-gray-700 hover:bg-crfal-gray-50 hover:text-crfal-blue lg:border-crfal-gold lg:bg-crfal-blue-lighter lg:font-semibold lg:text-crfal-blue'
                           : 'border-transparent text-crfal-gray-700 hover:bg-crfal-gray-50 hover:text-crfal-blue'
                       }`}
                     >
-                      <span className="w-5 shrink-0 text-[12px] font-bold tabular-nums text-[#8A6A12]">{String(index + 1).padStart(2, '0')}</span>
+                      <span className="w-5 shrink-0 text-[0.75rem] font-bold tabular-nums text-[#8A6A12]">{String(index + 1).padStart(2, '0')}</span>
                       {secao.title}
                     </a>
                   </li>
@@ -442,13 +442,13 @@ export default function PrivacyPolicyPage() {
                 className="scroll-mt-[calc(var(--header-offset)+24px)] rounded-2xl border border-crfal-gray-200 bg-white p-5 shadow-xs sm:p-8"
               >
                 <p className={goldLabel}>{String(index + 1).padStart(2, '0')}</p>
-                <h2 id={`${secao.id}-title`} className="mt-1 text-[20px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[22px]">{secao.title}</h2>
+                <h2 id={`${secao.id}-title`} className="mt-1 text-[1.25rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[1.375rem]">{secao.title}</h2>
                 <span aria-hidden className="mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
                 {secao.content}
               </section>
             ))}
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-crfal-gray-200 bg-white px-5 py-4 text-[13px] text-crfal-gray-600">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-crfal-gray-200 bg-white px-5 py-4 text-[0.8125rem] text-crfal-gray-600">
               <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-[#8A6A12]" aria-hidden />Última atualização: {ATUALIZACAO}</span>
               <span className="inline-flex items-center gap-2"><MonitorSmartphone className="h-4 w-4 text-[#8A6A12]" aria-hidden />Vale para {new URL(SITE_URL).hostname}</span>
               <span className="inline-flex items-center gap-2"><FileSearch className="h-4 w-4 text-[#8A6A12]" aria-hidden /><Link to="/termos-de-uso" className={linkClass}>Termos de Uso</Link></span>

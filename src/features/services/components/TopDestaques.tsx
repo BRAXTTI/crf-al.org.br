@@ -5,7 +5,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, ListChecks, Pause, Play, Volume2
 import { REELS_DESTAQUE, type ReelDestaque } from '@/data/tutoriais-destaque';
 import { medidorDeVideo } from '@/lib/medir';
 
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 const motion = 'transition duration-200 motion-reduce:transition-none';
 
 /** Faixa “Top 5 destaques”: cards verticais com prévia e um visualizador estilo reels. */
@@ -32,7 +32,7 @@ export default function TopDestaques({ onVerTutorial }: { onVerTutorial: (tutori
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className={goldLabel}>Top 5 destaques</p>
-          <h2 id="top-destaques" className="mt-1 text-[22px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[24px]">
+          <h2 id="top-destaques" className="mt-1 text-[1.375rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[1.5rem]">
             Tutoriais em menos de 1 minuto
           </h2>
           <span aria-hidden="true" className="mt-2.5 block h-0.5 w-10 rounded-full bg-crfal-gold" />
@@ -109,10 +109,10 @@ function ReelCard({ reel, posicao, onAbrir }: { reel: ReelDestaque; posicao: num
 
       <span aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(to_top,rgba(11,25,44,0.98)_0%,rgba(11,25,44,0.85)_28%,rgba(11,25,44,0)_55%,rgba(11,25,44,0)_80%,rgba(11,25,44,0.35)_100%)]" />
 
-      <span aria-hidden="true" className="absolute left-3 top-2 text-[40px] font-black leading-none text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] [-webkit-text-stroke:1.5px_#C59B27] sm:text-[48px]">
+      <span aria-hidden="true" className="absolute left-3 top-2 text-[2.5rem] font-black leading-none text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] [-webkit-text-stroke:1.5px_#C59B27] sm:text-[3rem]">
         {posicao}
       </span>
-      <span aria-hidden="true" className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur-xs">
+      <span aria-hidden="true" className="absolute right-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[0.6875rem] font-semibold text-white backdrop-blur-xs">
         <Play className="h-3 w-3 fill-current" /> {reel.duracao}
       </span>
 
@@ -121,8 +121,8 @@ function ReelCard({ reel, posicao, onAbrir }: { reel: ReelDestaque; posicao: num
       </span>
 
       <span aria-hidden="true" className="absolute inset-x-0 bottom-0 p-3">
-        <span className="block text-[14px] font-bold leading-snug text-white sm:text-[15px]">{reel.title}</span>
-        <span className="mt-0.5 block text-[12px] text-white/70">{reel.subtitle}</span>
+        <span className="block text-[0.875rem] font-bold leading-snug text-white sm:text-[0.9375rem]">{reel.title}</span>
+        <span className="mt-0.5 block text-[0.75rem] text-white/70">{reel.subtitle}</span>
       </span>
     </button>
   );

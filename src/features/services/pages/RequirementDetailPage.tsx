@@ -48,7 +48,7 @@ import TutorialDetail, { BotaoAcao } from '../components/TutorialDetail';
 const focusRing =
   'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
 const motion = 'transition duration-200 motion-reduce:transition-none';
-const goldLabel = 'text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
+const goldLabel = 'text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]';
 
 const PRAZO_GENERICO = 'Conforme análise do CRF-AL';
 
@@ -188,7 +188,7 @@ function AbaParaQueServe({
         <h2 className="text-xl font-bold text-crfal-blue sm:text-2xl">Para que serve</h2>
         <div className="mt-3 space-y-3">
           {paragrafos.map((paragrafo, idx) => (
-            <p key={idx} className="text-[15px] leading-relaxed text-crfal-gray-700 sm:text-base">
+            <p key={idx} className="text-[0.9375rem] leading-relaxed text-crfal-gray-700 sm:text-base">
               {paragrafo}
             </p>
           ))}
@@ -319,7 +319,7 @@ function AbaPassoAPasso({
                 <span aria-hidden="true" className="mt-1 block w-px flex-1 bg-crfal-gray-200" />
               )}
             </span>
-            <p className="min-w-0 pb-5 pt-1 text-[15px] leading-relaxed text-crfal-gray-700">
+            <p className="min-w-0 pb-5 pt-1 text-[0.9375rem] leading-relaxed text-crfal-gray-700">
               {instrucao}
             </p>
           </li>
@@ -425,7 +425,7 @@ function AbaFormularioEDocumentos({
           </div>
         ) : (
           <div className="flex flex-col gap-4 rounded-xl border border-crfal-gray-200 bg-crfal-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-            <p className="text-sm leading-relaxed text-crfal-gray-700 sm:text-[15px]">
+            <p className="text-sm leading-relaxed text-crfal-gray-700 sm:text-[0.9375rem]">
               Este requerimento é feito direto no CRF AL em Casa, sem formulário para baixar.
             </p>
             <a
@@ -641,7 +641,7 @@ function ConteudoRequerimento({ item }: { item: RequirementItem }) {
               {observacoes.map((obs, index) => (
                 <p
                   key={index}
-                  className="whitespace-pre-line text-[13.5px] leading-relaxed text-amber-950"
+                  className="whitespace-pre-line text-[0.84375rem] leading-relaxed text-amber-950"
                 >
                   {obs}
                 </p>

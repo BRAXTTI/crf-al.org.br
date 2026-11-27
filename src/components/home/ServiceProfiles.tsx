@@ -47,8 +47,8 @@ export default function ServiceProfiles() {
         <Reveal className="section-panel">
         <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Central de serviços</p>
-            <h2 id="services-by-profile-title" className="mt-2 text-[26px] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[32px]">Como podemos ajudar você?</h2>
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#8A6A12]">Central de serviços</p>
+            <h2 id="services-by-profile-title" className="mt-2 text-[1.625rem] font-bold leading-tight tracking-tight text-crfal-blue sm:text-[2rem]">Como podemos ajudar você?</h2>
             <span aria-hidden="true" className="mt-3 block h-0.5 w-10 rounded-full bg-crfal-gold" />
           </div>
           <Link to="/servicos/requerimentos" className="group inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-crfal-blue rounded-md hover:text-crfal-blue-light focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-4 sm:self-auto">
@@ -73,7 +73,7 @@ export default function ServiceProfiles() {
                 tabIndex={ativo ? 0 : -1}
                 onClick={() => escolherPerfil(profile.id)}
                 onKeyDown={event => navegarAbas(event, indice)}
-                className={`min-h-12 rounded-full px-2 text-[13px] font-semibold leading-tight transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none min-[400px]:text-[15px] ${ativo ? 'bg-crfal-blue text-white shadow-sm' : 'text-crfal-blue hover:bg-white/70'}`}
+                className={`min-h-12 rounded-full px-2 text-[0.8125rem] font-semibold leading-tight transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2 motion-reduce:transition-none min-[400px]:text-[0.9375rem] ${ativo ? 'bg-crfal-blue text-white shadow-sm' : 'text-crfal-blue hover:bg-white/70'}`}
               >
                 {profile.label}
               </button>
@@ -99,8 +99,8 @@ export default function ServiceProfiles() {
                       <Icon className="h-7 w-7" strokeWidth={1.5} aria-hidden="true" />
                     </span>
                     <div>
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/82">Serviços para</span>
-                      <h3 id={`services-${profile.id}`} className="mt-0.5 text-[26px] font-bold leading-tight tracking-tight sm:text-[28px]">{profile.label}</h3>
+                      <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/82">Serviços para</span>
+                      <h3 id={`services-${profile.id}`} className="mt-0.5 text-[1.625rem] font-bold leading-tight tracking-tight sm:text-[1.75rem]">{profile.label}</h3>
                     </div>
                   </div>
                   <p className="mt-4 text-sm leading-relaxed text-white/82">{profile.description}</p>
@@ -109,7 +109,7 @@ export default function ServiceProfiles() {
                     {profile.services.map(service => {
                       const external = service.href.startsWith('https:');
                       const Arrow = external ? ArrowUpRight : ChevronRight;
-                      const className = 'group -mx-3 flex min-h-12 items-center justify-between gap-3 rounded-md px-3 py-3 text-[15px] font-medium leading-snug transition-colors hover:bg-white/10 focus-visible:outline-white motion-reduce:transition-none';
+                      const className = 'group -mx-3 flex min-h-12 items-center justify-between gap-3 rounded-md px-3 py-3 text-[0.9375rem] font-medium leading-snug transition-colors hover:bg-white/10 focus-visible:outline-white motion-reduce:transition-none';
                       const content = (
                         <>
                           <span>{service.label}</span>

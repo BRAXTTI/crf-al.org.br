@@ -100,7 +100,7 @@ function LinkRow({ icon: Icon, title, desc, href }: { icon?: React.ElementType; 
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block text-[15px] font-semibold leading-snug text-crfal-blue-dark">{title}</span>
+          <span className="block text-[0.9375rem] font-semibold leading-snug text-crfal-blue-dark">{title}</span>
           <span className="mt-0.5 block text-sm leading-snug text-crfal-gray-600">{desc}</span>
         </span>
         <ArrowRight className={`h-5 w-5 shrink-0 text-crfal-gray-400 group-hover:translate-x-1 group-hover:text-[#8A6A12] ${motion}`} aria-hidden />
@@ -144,7 +144,7 @@ export default function FiscalizacaoPage() {
                 <fn.icon className="h-5 w-5" aria-hidden />
               </span>
               <div>
-                <h3 className="text-[15px] font-semibold text-crfal-blue-dark">{fn.title}</h3>
+                <h3 className="text-[0.9375rem] font-semibold text-crfal-blue-dark">{fn.title}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-crfal-gray-600">{fn.desc}</p>
               </div>
             </li>

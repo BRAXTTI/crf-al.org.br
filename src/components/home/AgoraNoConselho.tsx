@@ -54,8 +54,8 @@ function Item({ icon: Icon, label, children, actions }: { icon: ElementType; lab
         <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-medium text-crfal-gray-600">{label}</p>
-        <div className="mt-0.5 text-[15px] font-bold leading-snug text-crfal-blue-dark">{children}</div>
+        <p className="text-[0.8125rem] font-medium text-crfal-gray-600">{label}</p>
+        <div className="mt-0.5 text-[0.9375rem] font-bold leading-snug text-crfal-blue-dark">{children}</div>
         {actions && <div className="-mb-2 mt-1 flex flex-wrap gap-x-5">{actions}</div>}
       </div>
     </li>
@@ -196,7 +196,7 @@ export default function AgoraNoConselho() {
             />
           )}
           <div className="mb-5 lg:mb-0">
-            <h2 id="agora-title" className="text-xl font-bold tracking-tight text-crfal-blue sm:text-[22px]">Agora no CRF-AL</h2>
+            <h2 id="agora-title" className="text-xl font-bold tracking-tight text-crfal-blue sm:text-[1.375rem]">Agora no CRF-AL</h2>
             <p className="mt-1 text-sm text-crfal-gray-600">
               <time dateTime={today}>{weekday(today)}, {formatDate(today, { day: 'numeric', month: 'long' })}</time>
             </p>

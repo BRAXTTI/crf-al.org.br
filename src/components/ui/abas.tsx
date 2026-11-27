@@ -183,7 +183,7 @@ export default function Abas<Id extends string = string>({
                 tabIndex={selecionada ? 0 : -1}
                 onClick={() => selecionarAba(aba.id, false)}
                 onKeyDown={(e) => handleKeyDown(e, indice)}
-                className={`-mb-px flex min-h-12 flex-1 items-center justify-center gap-1.5 whitespace-nowrap border-b-2 px-2 py-3 text-[13px] font-semibold sm:gap-2 sm:px-4 sm:text-sm ${motion} ${focusRing} ${
+                className={`-mb-px flex min-h-12 flex-1 items-center justify-center gap-1.5 whitespace-nowrap border-b-2 px-2 py-3 text-[0.8125rem] font-semibold sm:gap-2 sm:px-4 sm:text-sm ${motion} ${focusRing} ${
                   selecionada
                     ? 'border-crfal-gold text-crfal-blue'
                     : 'border-transparent text-crfal-gray-600 hover:border-crfal-gray-300 hover:text-crfal-blue'
@@ -193,7 +193,7 @@ export default function Abas<Id extends string = string>({
                 <span>{aba.rotulo}</span>
                 {aba.contador !== undefined && (
                   <span
-                    className={`rounded-full px-1.5 py-0.5 text-[11px] font-bold ${
+                    className={`rounded-full px-1.5 py-0.5 text-[0.6875rem] font-bold ${
                       selecionada
                         ? 'bg-crfal-blue-lighter text-crfal-blue'
                         : 'bg-crfal-gray-100 text-crfal-gray-600'

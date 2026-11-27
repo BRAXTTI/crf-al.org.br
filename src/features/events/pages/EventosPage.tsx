@@ -192,11 +192,11 @@ export default function EventosPage() {
                   <div className="relative flex flex-col justify-center gap-4 p-6 md:p-10">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${STATUS_COLORS[destaque.status].bg} ${STATUS_COLORS[destaque.status].text}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold ${STATUS_COLORS[destaque.status].bg} ${STATUS_COLORS[destaque.status].text}`}
                       >
                         {STATUS_LABELS[destaque.status]}
                       </span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-[11px] font-semibold text-crfal-blue  ">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-crfal-blue-lighter px-2.5 py-1 text-[0.6875rem] font-semibold text-crfal-blue  ">
                         {(() => {
                           const MIcon = MODALIDADE_ICONS[destaque.modalidade];
                           return <MIcon className="h-3 w-3" />;
@@ -301,7 +301,7 @@ export default function EventosPage() {
                     >
                       {filtro.label}
                       <span
-                        className={`rounded-full px-1.5 text-[11px] font-bold ${
+                        className={`rounded-full px-1.5 text-[0.6875rem] font-bold ${
                           filtroStatus === filtro.value
                             ? 'bg-white/20 text-white'
                             : 'bg-white text-crfal-gray-500  '

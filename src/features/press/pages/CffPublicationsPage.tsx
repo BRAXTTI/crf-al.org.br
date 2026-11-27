@@ -23,10 +23,10 @@ function CollectionSection({ collection, shaded }: { collection: CffCollection; 
     <section aria-labelledby={`${collection.slug}-title`} className={`py-12 md:py-14 ${shaded ? 'bg-crfal-gray-50' : 'bg-white'}`}>
       <div className="container-crfal">
         <header className="mx-auto mb-6 text-center md:mb-10">
-          <h2 id={`${collection.slug}-title`} className="text-2xl font-bold leading-snug text-crfal-blue-dark sm:text-[27px]">{collection.title}</h2>
+          <h2 id={`${collection.slug}-title`} className="text-2xl font-bold leading-snug text-crfal-blue-dark sm:text-[1.6875rem]">{collection.title}</h2>
           <span aria-hidden="true" className="mx-auto mt-6 block h-0.5 w-13 rounded-full bg-crfal-gold" />
           {collection.items.length > 1 && (
-            <p className="mt-4 flex items-center justify-center gap-1.5 text-[13px] text-crfal-gray-600 md:hidden">
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-[0.8125rem] text-crfal-gray-600 md:hidden">
               {collection.items.length} publicações · deslize para ver <ChevronsRight className="h-4 w-4 text-crfal-blue" aria-hidden="true" />
             </p>
           )}
@@ -55,7 +55,7 @@ function pageList(page: number, total: number): (number | '…')[] {
 
 function Pagination({ page, total, onChange }: { page: number; total: number; onChange: (page: number) => void }) {
   if (total <= 1) return null;
-  const circle = 'flex h-9 min-w-9 items-center justify-center rounded-full border px-2 text-[15px] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
+  const circle = 'flex h-9 min-w-9 items-center justify-center rounded-full border px-2 text-[0.9375rem] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-crfal-blue focus-visible:ring-offset-2';
   const idle = `${circle} border-crfal-gray-300 bg-white text-crfal-gray-600 hover:border-crfal-blue hover:text-crfal-blue disabled:pointer-events-none disabled:opacity-40`;
   return (
     <nav aria-label="Páginas de publicações" className="container-crfal pb-12 pt-2">
@@ -128,7 +128,7 @@ export default function CffPublicationsPage() {
             {visible.map((collection, i) => <CollectionSection key={collection.slug} collection={collection} shaded={i % 2 === 1} />)}
             <div className="bg-white pt-6">
               <Pagination page={page} total={totalPages} onChange={changePage} />
-              <p className="container-crfal pb-12 text-center text-[12.5px] text-crfal-gray-600">
+              <p className="container-crfal pb-12 text-center text-[0.78125rem] text-crfal-gray-600">
                 Publicações do Conselho Federal de Farmácia. Os arquivos ficam no{' '}
                 <a href={CFF_PUBLICATIONS_URL} target="_blank" rel="noopener noreferrer" className="font-semibold text-crfal-blue hover:underline">site oficial do CFF{externalNote}</a>
                 ; o CRF-AL não hospeda cópias.
